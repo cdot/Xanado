@@ -41,37 +41,48 @@ Currently only [double challenge](https://en.wikipedia.org/wiki/Challenge_(Scrab
 
 ## Flow of Control
 
-A game is joined by opening a server URI which identifies the game
-and player (`GET /game/gameKey/playerKey`) that this Ui will play. 
+Players access the `/index.html` at the root of the distribution. This will
+load the `games` interface, which is used to view available games and create
+new games.
 
-The response to this request includes a cookie that identifies the
-gameKey and playerKey for future requests, and redirects to
-`/game/gameKey`. The handler for this request recognises that the
-browser is asking for HTML and serves up `/html/game.html`, which
+A game is joined by opening a URL which identifies the game
+and player (`GET /join/gameKey/playerKey`). The server adds the
+player to the game and responds with the gameKey and playerKey. The 
+`games` interface then opens a new window on `html/game.html`, which
 loads the UI. When the document is ready, it executes `/js/game.js`,
-which instantiates an object of the `Ui` class after URL parameters
-have been analysed by the helper `js/browser/browserApp.js`.
+which instantiates an object of the `Ui` class.
 
 Construction of the Ui object asks the server for the state of the
 game using a `GET /game/gameKey` URI. The server recognises this as a
 request for JSON, and serves up the game, as serialised by
 `js/game/Freeze.js`.  The UI thaws this data and loads the game, then
 manually connects the `WebSocket`, attaching handlers for managing the
-socket (see Ui.attachSocketListeners).  These include handlers
-for custom events `turn`, `tick`, `gameOverConfimed`, `nextGame`,
-`message`, and `connections`, that the server will send. With the
-exception of `message` these are all broadcast events, sent to all
-players.
+socket (see Ui.attachSocketListeners).
  
 Once construction is complete, the Ui will listen for events coming
-from the server and modify the Ui accordingly. It will also listen
-for events coming from the user. At points it will POST messages to the
-server to reflect user actions: `makeMove`, `challenge`,
-`swap`, `takeBack`, and `pass`. The server will pass these on to
-`js/game/Game.js` for handling.
+over the socket from the server and modify the Ui accordingly. These
+are `turn`, `tick`, `gameOverConfimed`, `nextGame`, `message`, and
+`connections`, that the server will send. With the exception of
+`message` these are all broadcast events, sent to all players. It will
+also listen for events coming from the user, and will POST messages
+using the `/command` route to reflect user actions: `makeMove`,
+`challenge`, `swap`, `takeBack`, `pass`, `confirmGameOver`, `pause`
+and `unpause`. The server will pass these on to `js/game/Game.js` for
+handling.
+
+Information about a play is passed to the server in a `Move` object,
+and results are broadcast asynchronously as `turn` events
+parameterised by `Turn` objects. A single play will usually result in
+a single `Turn` object being broadcast, but there is no theoretical
+limit on the number of `Turn` objects that might be broadcast for a
+single interactive play. For example, a following robot play will
+result in a sequence of turns. `Turn` objects are recorded in the game
+history, allowing a full replay of game events at a later date
+(e.g. when refreshing the Ui.)
 
 ## Testing
-The `test` subdirectoy contains a number of simple tests. They are all run in that directory using `node`.
+The `test` subdirectory contains a number of simple tests, written using the
+`Mocha` testing framework. They are all run in that directory using `node`.
 * `Game.js` is a set of unit tests for the game logic
 * `findBestMove.js` is unit tests for the robot player
 * `firstPlay.js` is unit tests for the first play by a robot player

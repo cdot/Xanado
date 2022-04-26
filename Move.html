@@ -28,7 +28,7 @@
 
 <header>
     
-        <h2><span class="attribs"><span class="type-signature"></span></span>Move<span class="signature">(spec)</span><span class="type-signature"></span></h2>
+        <h2><span class="attribs"><span class="type-signature"></span></span>Move<span class="signature">(params<span class="signature-attributes">nullable</span>)</span><span class="type-signature"></span></h2>
         
             <div class="class-description"><p>A Move is a collection of tile placements, and the delta score
 achieved for the move. We also record the words created by the
@@ -48,7 +48,7 @@ which then sends a matching <a href="Turn.html">Turn</a> to every player.</p></d
     
 
     
-    <h4 class="name" id="Move"><span class="type-signature"></span>new Move<span class="signature">(spec)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="Move"><span class="type-signature"></span>new Move<span class="signature">(params<span class="signature-attributes">nullable</span>)</span><span class="type-signature"></span></h4>
     
 
     
@@ -76,6 +76,8 @@ which then sends a matching <a href="Turn.html">Turn</a> to every player.</p></d
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
         
 
@@ -88,7 +90,7 @@ which then sends a matching <a href="Turn.html">Turn</a> to every player.</p></d
 
         <tr>
             
-                <td class="name"><code>spec</code></td>
+                <td class="name"><code>params</code></td>
             
 
             <td class="type">
@@ -104,224 +106,22 @@ which then sends a matching <a href="Turn.html">Turn</a> to every player.</p></d
             </td>
 
             
-
-            
-
-            <td class="description last"><p>Move to copy, or spec, or undefined</p>
-                <h6>Properties</h6>
+                <td class="attributes">
                 
 
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>placements</code></td>
-            
-
-            <td class="type">
-            
                 
-<span class="param-type">Array.&lt;<a href="Tile.html">Tile</a>></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>list of tiles.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>replacements</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array.&lt;<a href="Tile.html">Tile</a>></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>list of tiles replacing
-played tiles.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>words</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array.&lt;object></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>words created</p>
-                <h6>Properties</h6>
+                    &lt;nullable><br>
                 
 
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>score</code></td>
-            
-
-            <td class="type">
-            
                 
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
+                </td>
             
 
             
 
-            <td class="description last"><p>score for the word</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>word</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>the word</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-            </td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>score</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>total score for play</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>bonus</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>bonus for the play (included in score)</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-            </td>
+            <td class="description last"><p>Move to copy, or params, or undefined
+Any member can be initialised by a corresponding field in
+params.</p></td>
         </tr>
 
     
@@ -466,156 +266,7 @@ played tiles.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Move.js.html">game/Move.js</a>, <a href="game_Move.js.html#line47">line 47</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="placements"><span class="type-signature"></span>placements<span class="type-signature"> :Array.&lt;<a href="Tile.html">Tile</a>></span></h4>
-
-
-
-
-<div class="description">
-    <p>List of tiles placed in this move. Tiles are required
-to carry col, row positions where they were placed.
-In a Turn, for type=<code>move</code> it indicates the
-move. For <code>took-back</code> and <code>challenge-won</code> it is the
-move just taken back/challenged.</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">Array.&lt;<a href="Tile.html">Tile</a>></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Move.js.html">game/Move.js</a>, <a href="game_Move.js.html#line57">line 57</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="replacements"><span class="type-signature"></span>replacements<span class="type-signature"> :Array.&lt;<a href="Tile.html">Tile</a>></span></h4>
-
-
-
-
-<div class="description">
-    <p>List of tiles drawn from the bag to replace the tiles played
-in this move. These tiles will not have positions.</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">Array.&lt;<a href="Tile.html">Tile</a>></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Move.js.html">game/Move.js</a>, <a href="game_Move.js.html#line64">line 64</a>
+        <a href="game_Move.js.html">game/Move.js</a>, <a href="game_Move.js.html#line42">line 42</a>
     </li></ul></dd>
     
 
@@ -694,79 +345,7 @@ in Turn.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Move.js.html">game/Move.js</a>, <a href="game_Move.js.html#line41">line 41</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="words"><span class="type-signature"></span>words<span class="type-signature"> :Array.&lt;object></span></h4>
-
-
-
-
-<div class="description">
-    <p>List of words created by the play {word: string, score: number}</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">Array.&lt;object></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Move.js.html">game/Move.js</a>, <a href="game_Move.js.html#line31">line 31</a>
+        <a href="game_Move.js.html">game/Move.js</a>, <a href="game_Move.js.html#line36">line 36</a>
     </li></ul></dd>
     
 
@@ -895,7 +474,7 @@ in Turn.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Move.js.html">game/Move.js</a>, <a href="game_Move.js.html#line87">line 87</a>
+        <a href="game_Move.js.html">game/Move.js</a>, <a href="game_Move.js.html#line70">line 70</a>
     </li></ul></dd>
     
 
@@ -1032,7 +611,7 @@ in Turn.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Move.js.html">game/Move.js</a>, <a href="game_Move.js.html#line95">line 95</a>
+        <a href="game_Move.js.html">game/Move.js</a>, <a href="game_Move.js.html#line81">line 81</a>
     </li></ul></dd>
     
 
@@ -1084,7 +663,7 @@ in Turn.</p>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Apr 26 2022 07:55:57 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Apr 26 2022 16:51:06 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

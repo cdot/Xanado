@@ -28,7 +28,7 @@
 
 <header>
     
-        <h2><span class="attribs"><span class="type-signature"></span></span>Rack<span class="signature">(size)</span><span class="type-signature"></span></h2>
+        <h2><span class="attribs"><span class="type-signature"></span></span>Rack<span class="signature">(id, size)</span><span class="type-signature"></span></h2>
         
             <div class="class-description"><p>A Rack is a 1-column <a href="Surface.html">Surface</a></p></div>
         
@@ -45,7 +45,7 @@
     
 
     
-    <h4 class="name" id="Rack"><span class="type-signature"></span>new Rack<span class="signature">(size)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="Rack"><span class="type-signature"></span>new Rack<span class="signature">(id, size)</span><span class="type-signature"></span></h4>
     
 
     
@@ -81,6 +81,29 @@
     </thead>
 
     <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>unique id for this rack</p></td>
+        </tr>
+
     
 
         <tr>
@@ -202,6 +225,162 @@ of Tile (for tests)</p></td>
     
 
     
+    <h4 class="name" id="$ui"><span class="type-signature"></span>$ui<span class="signature">(underlay)</span><span class="type-signature"> &rarr; {jQuery}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Create the jquery representation for the Rack.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>underlay</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>a string of letters to use as background of
+the rack squares.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line140">line 140</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">jQuery</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
     <h4 class="name" id="addTile"><span class="type-signature"></span>addTile<span class="signature">(tile)</span><span class="type-signature"> &rarr; {number}</span></h4>
     
 
@@ -303,7 +482,7 @@ of Tile (for tests)</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line49">line 49</a>
+        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line50">line 50</a>
     </li></ul></dd>
     
 
@@ -414,7 +593,7 @@ if it couldn't be placed)</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line39">line 39</a>
+        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line40">line 40</a>
     </li></ul></dd>
     
 
@@ -439,185 +618,6 @@ if it couldn't be placed)</p>
 
 
 
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="createDOM"><span class="type-signature"></span>createDOM<span class="signature">(idbase, underlay)</span><span class="type-signature"> &rarr; {jQuery}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Create the DOM for the Rack.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>idbase</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>base of id's to uniquely identify this rack</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>underlay</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>a string of letters to use as background of
-the rack squares. This is in place of a label.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line137">line 137</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">jQuery</span>
-
-
-    </dd>
-</dl>
-
-    
 
 
 
@@ -733,7 +733,7 @@ is one.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line75">line 75</a>
+        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line78">line 78</a>
     </li></ul></dd>
     
 
@@ -799,7 +799,7 @@ is one.</p>
 
 
 <div class="description">
-    <p>Get an array of the letters currently on the rack</p>
+    <p>Get an unsorted list of the letters currently on the rack</p>
 </div>
 
 
@@ -843,7 +843,7 @@ is one.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line63">line 63</a>
+        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line66">line 66</a>
     </li></ul></dd>
     
 
@@ -949,7 +949,7 @@ is one.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line125">line 125</a>
+        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line129">line 129</a>
     </li></ul></dd>
     
 
@@ -993,8 +993,7 @@ is one.</p>
 
 
 <div class="description">
-    <p>Find and remove a tile from the rack. Will match the requested
-tile within the Rack and return it.</p>
+    <p>Find and remove a tile from the rack.</p>
 </div>
 
 
@@ -1046,7 +1045,7 @@ tile within the Rack and return it.</p>
 
             
 
-            <td class="description last"><p>the Tile to remove, or null to remove any tile</p></td>
+            <td class="description last"><p>the Tile to remove</p></td>
         </tr>
 
     
@@ -1087,7 +1086,7 @@ tile within the Rack and return it.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line92">line 92</a>
+        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line94">line 94</a>
     </li></ul></dd>
     
 
@@ -1197,7 +1196,7 @@ tile within the Rack and return it.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line107">line 107</a>
+        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line111">line 111</a>
     </li></ul></dd>
     
 
@@ -1307,7 +1306,7 @@ tile within the Rack and return it.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line31">line 31</a>
+        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line32">line 32</a>
     </li></ul></dd>
     
 
@@ -1359,7 +1358,7 @@ tile within the Rack and return it.</p>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Apr 26 2022 07:55:58 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Apr 26 2022 16:51:06 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

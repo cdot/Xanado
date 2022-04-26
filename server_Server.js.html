@@ -47,26 +47,6 @@ define('server/Server', [
 	const Fs = fs.promises;
 
 	/**
-	 * Generic catch for response handlers
-	 * @param {Error} e the error
-	 * @param {Request} req the request object
-	 * @param {Response} res the response object
-	 * @param {string?} context context of the failure
-	 * @private
-	 */
-	function trap(e, req, res) {
-		if (typeof e === 'object' &amp;&amp; e.code === 'ENOENT') {
-			// Special case of a database file load failure
-			console.debug(`&lt;-- 404 ${req.url}`);
-			res.status(404).send([
-				/*i18n*/"Load failed", req.url]);
-		} else {
-			console.debug("&lt;-- 500 ", e);
-			res.status(500).send(e);
-		}
-	}
-
-	/**
 	 * Web server for crossword game.
 	 */
 	class Server {
@@ -76,7 +56,7 @@ define('server/Server', [
 		 */
 		constructor(config) {
 			this.config = config;
-			this.db = new Platform.Database('games', 'game');
+			this.db = new Platform.Database(config.games || 'games', 'game');
 			// Live games; map from game key to Game
 			this.games = {};
 			// Status-monitoring sockets (game pages)
@@ -105,7 +85,8 @@ define('server/Server', [
 			express.use(Express.static(requirejs.toUrl('')));
 
 			express.use((req, res, next) => {
-				console.debug(`--> ${req.method} ${req.url}`);
+				if (this.config.debug_comms)
+					console.debug(`--> ${req.method} ${req.url}`);
 				next();
 			});
 
@@ -173,13 +154,13 @@ define('server/Server', [
 						this.userManager.checkLoggedIn(req, res, next),
 					   (req, res) => this.request_bestPlay(req, res));
 
-			// Construct a new game. games.js
+			// Construct a new game. Invoked from games.js
 			cmdRouter.post('/createGame',
 						   (req, res, next) =>
 						   this.userManager.checkLoggedIn(req, res, next),
 						   (req, res) => this.request_createGame(req, res));
 
-			// Invite players by email
+			// Invite players by email. Invoked from games.js
 			cmdRouter.post('/invitePlayers',
 						   (req, res, next) =>
 						   this.userManager.checkLoggedIn(req, res, next),
@@ -223,6 +204,12 @@ define('server/Server', [
 					   this.userManager.checkLoggedIn(req, res, next),
 					   (req, res) => this.request_addRobot(req, res));
 
+			// Handler for adding a robot to a game
+			cmdRouter.post('/removeRobot/:gameKey',
+					   (req, res, next) =>
+					   this.userManager.checkLoggedIn(req, res, next),
+					   (req, res) => this.request_removeRobot(req, res));
+
 			// Request handler for a turn (or other game command)
 			cmdRouter.post('/command/:command/:gameKey/:playerKey',
 						(req, res, next) =>
@@ -232,12 +219,11 @@ define('server/Server', [
 			express.use(cmdRouter);
 
 			express.use((err, req, res, next) => {
-				if (res.headersSent) {
+				if (res.headersSent)
 					return next(err);
-				}
-				console.debug("&lt;-- 500 (unhandled)", err);
-				res.status(500).send(err);
-				return res.status(err.status || 500);
+				if (this.config.debug_comms)
+					console.debug("&lt;-- 500 (unhandled)", err);
+				return res.status(500).send(err);
 			});
 
 			express.use(ErrorHandler({
@@ -257,31 +243,55 @@ define('server/Server', [
 		}
 
 		/**
+		 * Generic catch for response handlers
+		 * @param {Error} e the error
+		 * @param {Request} req the request object
+		 * @param {Response} res the response object
+		 * @param {string?} context context of the failure
+		 * @private
+		 */
+		trap(e, req, res) {
+			if (typeof e === 'object' &amp;&amp; e.code === 'ENOENT') {
+				// Special case of a database file load failure
+				if (this.config.debug_comms)
+					console.error(`&lt;-- 404 ${req.url}`);
+				return res.status(404).send([
+					"Database file load failed", req.url, e]);
+			} else {
+				console.error("&lt;-- 500 ", e);
+				return res.status(500).send(['Error', e]);
+			}
+		}
+
+		/**
 		 * Load the game from the DB, if not already in server memory
 		 * @param {string} key game key
 		 * @return {Promise} Promise that resolves to a {@link Game}
 		 */
 		loadGame(key) {
+			if (typeof key === 'undefined')
+				return Promise.reject('Game key is undefined');
 			if (this.games[key])
 				return Promise.resolve(this.games[key]);
 
 			return this.db.get(key, Game.classes)
 			.then(game => game.onLoad(this.db))
-			.then(game => game.checkTimeout())
+			.then(game => game.checkAge())
 			.then(game => {
 				Events.EventEmitter.call(game);
 
 				Object.defineProperty(
 					// makes connections non-persistent
 					game, 'connections', { enumerable: false });
+
 				this.games[key] = game;
+				game._debug = this.config.debug_game;
 
 				if (game.hasEnded())
 					return game;
 
-				const player = game.getPlayer();
-				if (player)
-					game.playIfReady();
+				game.playIfReady();
+
 				return game;
 			});
 		}
@@ -295,48 +305,60 @@ define('server/Server', [
 
 			.on('monitor', () => {
 				// Games monitor has joined
-				console.debug('-S-> monitor');
+				if (this.config.debug_comms)
+					console.debug('-S-> monitor');
 				this.monitors.push(socket);
 			})
 
 			.on('connect', sk => {
-				console.debug('-S-> connect');
-				this.updateMonitors();
+				// Player or monitor connecting
+				if (this.config.debug_comms)
+					console.debug('-S-> connect');
+				this.updateObservers();
 			})
 
 			.on('disconnect', sk => {
-				console.debug('-S-> disconnect');
+				if (this.config.debug_comms)
+					console.debug('-S-> disconnect');
 
-				// Don't need to find the Game using this socket, because
+				// Don't need to refresh players using this socket, because
 				// each Game has a 'disconnect' listener on each of the
-				// sockets being used. However monitors don't.
+				// sockets being used by players of that game. However
+				// monitors don't.
 
 				// Remove any monitor using this socket
 				const i = this.monitors.indexOf(socket);
 				if (i >= 0) {
 					// Game monitor has disconnected
-					console.debug('Monitor disconnected');
+					if (this.config.debug_comms)
+						console.debug('\tmonitor disconnected');
 					this.monitors.slice(i, 1);
 				} else {
-					console.debug('Anonymous disconnect');
-					this.updateMonitors();
+					if (this.config.debug_comms)
+						console.debug('\tanonymous disconnect');
 				}
+				this.updateObservers();
 			})
 
 			.on('join', params => {
 				// Player joining
-				console.debug(`-S-> join ${params.playerKey} joining ${params.gameKey}`);
+				if (this.config.debug_comms)
+					console.debug(`-S-> join ${params.playerKey} joining ${params.gameKey}`);
 				this.loadGame(params.gameKey)
 				.then(game => {
-					game.connect(socket, params.playerKey);
-					this.updateMonitors();
+					return game.connect(socket, params.playerKey)
+					.then(() => this.updateObservers(game));
+				})
+				.catch(e => {
+					console.error("socket join error:", e);
 				});
 			})
 
 			.on('message', message => {
 
 				// Chat message
-				console.debug(`-S-> ${message}`);
+				if (this.config.debug_comms)
+					console.debug(`-S-> message ${message}`);
 				if (message.text === 'hint')
 					socket.game.hint(socket.player);
 				else if (message.text === 'advise')
@@ -347,30 +369,16 @@ define('server/Server', [
 		}
 
 		/**
-		 * Notify monitors that something has changed.
-		 * The monitors will issue requests to determine what changed.
+		 * Notify games and monitors that something about the game.
+		 * @param {Game?} game if undefined, will simply send 'update'
+		 * to montors.
 		 */
-		updateMonitors() {
+		updateObservers(game) {
+			if (this.config.debug_comms)
+				console.debug("&lt;-S- update", game ? game.key : '*');
 			this.monitors.forEach(socket => socket.emit('update'));
-		}
-
-		/**
-		 * Before processing a Move instruction (pass or play) check that
-		 * the game is ready to accept a Turn from the given player.
-		 * @param {Player} player - Player to check
-		 * @param {Game} game - Game to check
-		 */
-		checkTurn(player, game) {
-			if (game.hasEnded()) {
-				console.error(`Game ${game.key} has ended ${game.state}`);
-				throw new Error(/*i18n*/'Game has ended');
-			}
-
-			// determine if it is this player's turn
-			if (player.key !== game.whosTurnKey) {
-				console.error(`not ${player.name}'s turn`);
-				throw new Error(/*i18n*/'Not your turn');
-			}
+			if (game)
+				game.updateConnections();
 		}
 
 		/**
@@ -401,12 +409,14 @@ define('server/Server', [
 								: a.lastActivity > b.lastActivity ? -1 : 0))
 			// Finally send the result
 			.then(data => {
-				console.debug(`&lt;-- 200 simple ${send}`);
-				res.status(200).send(data);
+				if (this.config.debug_comms)
+					console.debug("&lt;-- 200 simple", send);
+				return res.status(200).send(data);
 			})
 			.catch(e => {
-				console.debug("&lt;-- 500", e);
-				res.status(500).send([
+				if (this.config.debug_comms)
+					console.debug("&lt;-- 500", e);
+				return res.status(500).send([
 					/*i18n*/"Game load failed", e.toString()]);
 			});
 		}
@@ -456,7 +466,7 @@ define('server/Server', [
 			.then(list => list.sort((a, b) => a.score &lt; b.score ? 1
 									: (a.score > b.score ? -1 : 0)))
 			.then(list => res.status(200).send(list))
-			.catch(e => trap(e, req, res));
+			.catch(e => this.trap(e, req, res));
 		}
 
 		/**
@@ -468,10 +478,8 @@ define('server/Server', [
 		request_locales(req, res) {
 			const db = new Platform.Database('i18n', 'json');
 			return db.keys()
-			.then(keys => {
-				res.status(200).send(keys);
-			})
-			.catch(e => trap(e, req, res));
+			.then(keys => res.status(200).send(keys))
+			.catch(e => this.trap(e, req, res));
 		}
 
 		/**
@@ -485,7 +493,7 @@ define('server/Server', [
 			.then(editions => res.status(200).send(
 				editions
 				.filter(e => !/^_/.test(e))))
-			.catch(e => trap(e, req, res));
+			.catch(e => this.trap(e, req, res));
 		}
 
 		/**
@@ -496,7 +504,7 @@ define('server/Server', [
 			const db = new Platform.Database('dictionaries', 'dict');
 			return db.keys()
 			.then(keys => res.status(200).send(keys))
-			.catch(e => trap(e, req, res));
+			.catch(e => this.trap(e, req, res));
 		}
 
 		/**
@@ -511,12 +519,11 @@ define('server/Server', [
 			.then(edition => new Game(req.body).create())
 			.then(game => game.onLoad(this.db))
 			.then(game => {
-				console.log(game.toString());
-
-				// Save the game when everything has been initialised
+				game._debug = this.config.debug_game;
 				return game.save();
 			})
-			.then(game => res.status(200).send(game.key));
+			.then(game => res.status(200).send(game.key))
+			.then(() => this.updateObservers());
 		}
 
 		/**
@@ -552,10 +559,11 @@ define('server/Server', [
 						return Promise.resolve(
 							Platform.i18n('($1 has no email address)',
 										  uo.name || uo.key));
-					console.debug(
-						subject,
-						`${uo.name}&lt;${uo.email}> from `,
-						sender);
+					if (this.config.debug_comms)
+						console.debug(
+							subject,
+							`${uo.name}&lt;${uo.email}> from `,
+							sender);
 					return this.config.mail.transport.sendMail({
 						from: sender,
 						to: uo.email,
@@ -604,13 +612,12 @@ define('server/Server', [
 					textBody,
 					htmlBody)))
 			.then(list => {
-				console.log("Invited", list);
 				const names = list.filter(uo => uo);
-				console.debug("&lt;-- 200 ", names);
-				res.status(200).send([
-					/*i18n*/"Invited $1", names.join(", ")]);
+				if (this.config.debug_comms)
+					console.debug("&lt;-- 200 ", names);
+				return res.status(200).send(names);
 			})
-			.catch(e => trap(e, req, res));
+			.catch(e => this.trap(e, req, res));
 		}
 
 		/**
@@ -630,11 +637,13 @@ define('server/Server', [
 				key => (Promise.resolve(this.games[key])
 						|| this.db.get(key, Game.classes))
 				.then(game => {
-					const pr = game.checkTimeout();
-					if (game.state !== 'playing')
+					const pr = game.checkAge();
+					if (game.hasEnded())
 						return undefined;
 
 					const player = game.getPlayer();
+					if (!player)
+						return undefined;
 					console.log(`Sending reminder mail to ${player.key}/${player.name}`);
 
 					return this.sendMail(
@@ -649,12 +658,12 @@ define('server/Server', [
 							gameURL));
 				}))))
 			.then(reminders => reminders.filter(e => typeof e !== 'undefined'))
-			.then(reminders=> {
-				console.debug("Reminded ", reminders);
-				return res.status(200).send(
-					[/*i18n*/'Reminded $1', reminders.join(', ')]);
+			.then(names=> {
+				if (this.config.debug_comms)
+					console.debug("&lt;-- 200", names);
+				return res.status(200).send(names);
 			})
-			.catch(e => trap(e, req, res));
+			.catch(e => this.trap(e, req, res));
 		}
 
 		/**
@@ -667,7 +676,8 @@ define('server/Server', [
 			.then(game => {
 				// Player is either joining or connecting
 				const playerKey = req.user.key;
-				let player = game.getPlayerWithKey(playerKey), prom;
+				let player = game.getPlayerWithKey(playerKey);
+				let prom;
 				if (player) {
 					console.log(`Player ${playerKey} opening ${gameKey}`);
 					prom = Promise.resolve(game);
@@ -685,23 +695,23 @@ define('server/Server', [
 				// The game may now be ready to start
 				return prom.then(game => game.playIfReady());
 			})
-			.then(() => res.status(200).send({
-				gameKey: gameKey,
-				playerKey: req.user.key
-			}))
-			.catch(e => trap(e, req, res));
+			.then(() => res.status(200).send("OK"))
+			// Don't need to updateObservers, that will be done
+			// in the connect event handler
+			.catch(e => this.trap(e, req, res));
 		}
 
 		/**
-		 * Handle /addRobot/:gameKey to add a robot to the game
+		 * Handle /addRobot to add a robot to the game
 		 * It's an error to add a robot to a game that already has a robot.
+		 * Note the gameKey is passed in the request body, this is because it
+		 * comes from a dialog.
 		 * @return {Promise}
 		 */
 		request_addRobot(req, res) {
 			const gameKey = req.body.gameKey;
 			const dic = req.body.dictionary;
 			const canChallenge = req.body.canChallenge;
-			console.debug("Add robot",req.body);
 			return this.loadGame(gameKey)
 			.then(game => {
 				if (game.hasRobot())
@@ -718,13 +728,39 @@ define('server/Server', [
 				if (dic &amp;&amp; dic !== 'none')
 					robot.dictionary = dic;
 				game.addPlayer(robot);
-				return game.save()
-				// Game may now be ready to start
-				.then(game => game.playIfReady())
-				.then(mess => res.status(200)
-					  .send(mess || 'Robot'));
+				return game.save();
 			})
-			.catch(e => trap(e, req, res));
+			// Game may now be ready to start
+			.then(game => {
+				return game.playIfReady()
+				.then(() => this.updateObservers(game));
+			})
+			.then(() => res.status(200).send('OK'))
+			.catch(e => this.trap(e, req, res));
+		}
+
+		/**
+		 * Handle /removeRobot/:gameKey to remove the robot from a game
+		 * @return {Promise}
+		 */
+		request_removeRobot(req, res) {
+			const gameKey = req.params.gameKey;
+			return this.loadGame(gameKey)
+			.then(game => {
+				const robot = game.hasRobot();
+				if (!robot)
+					return res.status(500).send("Game doesn't have a robot");
+				console.log(`Robot leaving ${gameKey}`);
+				game.removePlayer(robot);
+				return game.save();
+			})
+			// Game may now be ready to start
+			.then(game => {
+				return game.playIfReady()
+				.then(() => this.updateObservers(game));
+			})
+			.then(() => res.status(200).send('OK'))
+			.catch(e => this.trap(e, req, res));
 		}
 
 		/**
@@ -739,19 +775,21 @@ define('server/Server', [
 				console.log(`Player ${playerKey} leaving ${gameKey}`);
 				const player = game.getPlayerWithKey(playerKey);
 				if (player) {
+					// Note that if the player leaving dips the number
+					// of players below minPlayers for the game, the
+					// game state is reset to WAITING
 					game.removePlayer(player);
+					if (game.players.length &lt; game.minPlayers)
+						game.state = Game.STATE_WAITING;
 					return game.save()
-					.then(() => {
-						this.updateMonitors();
-						return res.status(200).send(
-							{ gameKey: gameKey, playerKey: playerKey });
-					});
+					.then(() => res.status(200).send("OK"))
+					.then(() => this.updateObservers());
 				}
 				return res.status(500).send([
 					/*i18n*/"Player $1 is not in game $2", playerKey, gameKey
 				]);
 			})
-			.catch(e => trap(e, req, res));
+			.catch(e => this.trap(e, req, res));
 		}
 
 		/**
@@ -764,7 +802,7 @@ define('server/Server', [
 			const gameKey = req.params.gameKey;
 			return this.db.get(gameKey, Game.classes)
 			.then(game => res.status(200).send(Fridge.freeze(game)))
-			.catch(e => trap(e, req, res));
+			.catch(e => this.trap(e, req, res));
 		}
 
 		/**
@@ -786,7 +824,7 @@ define('server/Server', [
 				]);
 			})
 			.then(play => res.status(200).send(Fridge.freeze(play)))
-			.catch(e => trap(e, req, res));
+			.catch(e => this.trap(e, req, res));
 		}
 
 		/**
@@ -800,8 +838,9 @@ define('server/Server', [
 			return this.loadGame(gameKey)
 			.then(game => game.stopTimers())
 			.then(() => this.db.rm(gameKey))
-			.then(() => res.status(200).send(`${gameKey} deleted`))
-			.catch(e => trap(e, req, res));
+			.then(() => res.status(200).send("OK"))
+			.then(() => this.updateObservers())
+			.catch(e => this.trap(e, req, res));
 		}
 
 		/**
@@ -814,12 +853,12 @@ define('server/Server', [
 				return game.anotherGame()
 				.then(() => res.status(200).send(game.nextGameKey));
 			})
-			.catch(e => trap(e, req, res));
+			.catch(e => this.trap(e, req, res));
 		}
 
 		/**
-		 * Result is always a Turn object, though the actual content
-		 * varies according to the command sent.
+		 * A good result is a 200, a bad result has a explanatory string.
+		 * Command results are broadcast in Turn objects.
 		 * @return {Promise}
 		 */
 		request_command(req, res) {
@@ -830,6 +869,7 @@ define('server/Server', [
 			return this.loadGame(gameKey)
 			.then(game => {
 				if (game.hasEnded())
+					// Ignore the command
 					return Promise.resolve();
 
 				const player = game.getPlayerWithKey(playerKey);
@@ -841,61 +881,58 @@ define('server/Server', [
 				// The command name and arguments
 				const args = req.body.args ? JSON.parse(req.body.args) : null;
 				
-				console.debug(`COMMAND ${command} player ${player.name} game ${game.key}`);
+				if (this.config.debug_comms)
+					console.debug(`COMMAND ${command} player ${player.name} game ${game.key}`);
 
 				let promise;
 				switch (command) {
 
 				case 'makeMove':
-					this.checkTurn(player, game);
-					promise = game.makeMove(args);
+					promise = game.makeMove(player, args);
 					break;
 
 				case 'pass':
-					this.checkTurn(player, game);
-					promise = game.pass('pass');
+					promise = game.pass(player);
 					break;
 
 				case 'swap':
-					this.checkTurn(player, game);
-					promise = game.swap(args);
+					promise = game.swap(player, args);
 					break;
 
 				case 'challenge':
-					this.checkTurn(player, game);
-					promise = game.challenge();
+					promise = game.challenge(player);
 					break;
 
 				case 'takeBack':
-					promise = game.takeBack('took-back');
+					// Check that it was our turn
+					promise = game.takeBack(player, 'took-back');
 					break;
 
 				case 'confirmGameOver':
-					promise = game.confirmGameOver('Game over');
+					promise = game.confirmGameOver();
 					break;
 
-				case 'pause': case 'unpause':
-					promise = game.togglePause(player);
+				case 'pause':
+					promise = game.pause(player);
+					break;
+
+				case 'unpause':
+					promise = game.unpause(player);
 					break;
 
 				default:
 					throw Error(`unrecognized command: ${command}`);
 				}
 
-				return promise.then(
-					turn =>	{
-						if (turn)
-							return game.finishTurn(turn); // turn taken
-						return game.save(); // simple state change
-					})
+				return promise
 				.then(() => {
 					//console.debug(`${command} command handled`);
 					// Notify non-game monitors (games pages)
-					this.updateMonitors();
-					res.status(200).send("OK");
+					this.updateObservers();
+					return res.status(200).send("OK");
 				});
 			})
-			.catch(e => trap(e, req, res));
+			.catch(e => this.trap(e, req, res));
 		}
 	}
 		
@@ -904,6 +941,8 @@ define('server/Server', [
 		// Command-line arguments
 		const cliopt = Getopt.create([
 			['h', 'help', 'Show this help'],
+			['C', 'debug_comms', 'output communications debug messages'],
+			['G', 'debug_game', 'output game logic messages'],
 			['c', 'config=ARG', 'Path to config file (default config.json)']
 		])
 			.bindHelp()
@@ -918,6 +957,10 @@ define('server/Server', [
 		// Configure email
 		.then(config => {
 
+			if (cliopt.debug_comms)
+				config.debug_comms = true;
+			if (cliopt.debug_game)
+				config.debug_game = true;
 			if (config.mail) {
 				let transport;
 				if (config.mail.transport === "mailgun") {
@@ -977,7 +1020,7 @@ define('server/Server', [
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Apr 26 2022 07:55:57 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Apr 26 2022 16:51:06 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

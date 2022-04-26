@@ -228,7 +228,31 @@ can challenge if it's a robot</p></td>
 
         <tr>
             
-                <td class="name"><code>debug</code></td>
+                <td class="name"><code>dictionary</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>dictionary to use to find moves
+if this is a robot</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>missNextTurn</code></td>
             
 
             <td class="type">
@@ -244,7 +268,31 @@ can challenge if it's a robot</p></td>
 
             
 
-            <td class="description last"><p>true for debug messages</p></td>
+            <td class="description last"><p>true if this player
+has to miss their next turn due to a failed challenge</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>_debug</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>true to enable debug messages</p></td>
         </tr>
 
     
@@ -396,7 +444,7 @@ can challenge if it's a robot</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line50">line 50</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line61">line 61</a>
     </li></ul></dd>
     
 
@@ -471,7 +519,7 @@ only be used for findBestPlay for robot players.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line97">line 97</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line108">line 108</a>
     </li></ul></dd>
     
 
@@ -543,7 +591,7 @@ only be used for findBestPlay for robot players.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line44">line 44</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line55">line 55</a>
     </li></ul></dd>
     
 
@@ -615,7 +663,80 @@ only be used for findBestPlay for robot players.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line38">line 38</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line49">line 49</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="missNextTurn"><span class="type-signature">(nullable) </span>missNextTurn<span class="type-signature"> :boolean</span></h4>
+
+
+
+
+<div class="description">
+    <p>True if this player is due to miss their next play due
+to a failed challenge</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">boolean</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line115">line 115</a>
     </li></ul></dd>
     
 
@@ -687,7 +808,7 @@ only be used for findBestPlay for robot players.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line56">line 56</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line67">line 67</a>
     </li></ul></dd>
     
 
@@ -759,7 +880,7 @@ only be used for findBestPlay for robot players.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line69">line 69</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line80">line 80</a>
     </li></ul></dd>
     
 
@@ -832,7 +953,7 @@ it's only then we know how big it has to be.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line63">line 63</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line74">line 74</a>
     </li></ul></dd>
     
 
@@ -904,7 +1025,7 @@ it's only then we know how big it has to be.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line82">line 82</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line93">line 93</a>
     </li></ul></dd>
     
 
@@ -976,7 +1097,7 @@ it's only then we know how big it has to be.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line88">line 88</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line99">line 99</a>
     </li></ul></dd>
     
 
@@ -1049,7 +1170,7 @@ they used</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line76">line 76</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line87">line 87</a>
     </li></ul></dd>
     
 
@@ -1077,7 +1198,7 @@ they used</p>
     
 
     
-    <h4 class="name" id="createScoreDOM"><span class="type-signature"></span>createScoreDOM<span class="signature">(curPlayer<span class="signature-attributes">nullable</span>, showConnect)</span><span class="type-signature"> &rarr; {jQuery}</span></h4>
+    <h4 class="name" id="$refresh"><span class="type-signature"></span>$refresh<span class="signature">()</span><span class="type-signature"></span></h4>
     
 
     
@@ -1085,9 +1206,98 @@ they used</p>
 
 
 <div class="description">
-    <p>Create score table representation of the player on the browser
-side only. This is intended to work both on a full Player
-object, but also on a Player.simple of the player.</p>
+    <p>Refresh score table representation of the player on the browser
+side only.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line317">line 317</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="$ui"><span class="type-signature"></span>$ui<span class="signature">(curPlayer<span class="signature-attributes">nullable</span>)</span><span class="type-signature"> &rarr; {jQuery}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Create score table row for the player. This must work both
+on a full Player object, and also when called statically on
+a Player.simple</p>
 </div>
 
 
@@ -1151,39 +1361,7 @@ object, but also on a Player.simple of the player.</p>
 
             
 
-            <td class="description last"><p>the player for whom the DOM is
-being generated</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>showConnect</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>show the connection status of the player</p></td>
+            <td class="description last"><p>the current player in the UI</p></td>
         </tr>
 
     
@@ -1224,7 +1402,7 @@ being generated</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line244">line 244</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line285">line 285</a>
     </li></ul></dd>
     
 
@@ -1253,7 +1431,7 @@ being generated</p></td>
 
         
 <div class="param-desc">
-    <p>DOM object for the score table</p>
+    <p>jQuery object for the score table</p>
 </div>
 
 
@@ -1290,7 +1468,7 @@ being generated</p></td>
 
 
 <div class="description">
-    <p>Draw an initial rack from the letter bag.</p>
+    <p>Draw an initial rack from the letter bag. Server side only.</p>
 </div>
 
 
@@ -1406,7 +1584,7 @@ being generated</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line147">line 147</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line182">line 182</a>
     </li></ul></dd>
     
 
@@ -1544,96 +1722,7 @@ side only.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line280">line 280</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="refreshDOM"><span class="type-signature"></span>refreshDOM<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Refresh score table representation of the player on the browser
-side only.</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line271">line 271</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line326">line 326</a>
     </li></ul></dd>
     
 
@@ -1721,7 +1810,7 @@ side only.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line158">line 158</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line195">line 195</a>
     </li></ul></dd>
     
 
@@ -1902,7 +1991,7 @@ state</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line107">line 107</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line133">line 133</a>
     </li></ul></dd>
     
 
@@ -1960,7 +2049,7 @@ state</p>
     
 
     
-    <h4 class="name" id="startTimer"><span class="type-signature"></span>startTimer<span class="signature">(time, onTimeout)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="startTimer"><span class="type-signature"></span>startTimer<span class="signature">(time<span class="signature-attributes">nullable</span>, onTimeout<span class="signature-attributes">nullable</span>)</span><span class="type-signature"></span></h4>
     
 
     
@@ -1968,7 +2057,7 @@ state</p>
 
 
 <div class="description">
-    <p>Set a play timeout for the player</p>
+    <p>Set a play timeout for the player. If the</p>
 </div>
 
 
@@ -1991,6 +2080,8 @@ state</p>
 
         <th>Type</th>
 
+        
+        <th>Attributes</th>
         
 
         
@@ -2017,6 +2108,16 @@ state</p>
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
 
             
 
@@ -2042,11 +2143,21 @@ the time remaining to the player.</p></td>
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
 
             
 
             <td class="description last"><p>a function() invoked if the
-timer expires</p></td>
+timer expires, ignored if time undefined</p></td>
         </tr>
 
     
@@ -2087,7 +2198,7 @@ timer expires</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line171">line 171</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line208">line 208</a>
     </li></ul></dd>
     
 
@@ -2175,7 +2286,7 @@ timer expires</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line206">line 206</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line248">line 248</a>
     </li></ul></dd>
     
 
@@ -2263,7 +2374,7 @@ timer expires</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line231">line 231</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line274">line 274</a>
     </li></ul></dd>
     
 
@@ -2351,7 +2462,7 @@ timer expires</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line219">line 219</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line262">line 262</a>
     </li></ul></dd>
     
 
@@ -2403,7 +2514,7 @@ timer expires</p></td>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Apr 26 2022 07:55:57 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Apr 26 2022 16:51:06 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -28,9 +28,12 @@
 
 <header>
     
-        <h2><span class="attribs"><span class="type-signature"></span></span>Turn<span class="signature">(game, members)</span><span class="type-signature"></span></h2>
+        <h2><span class="attribs"><span class="type-signature"></span></span>Turn<span class="signature">(game, params)</span><span class="type-signature"></span></h2>
         
-            <div class="class-description"><p>Communicating the result of a move from server back to client</p></div>
+            <div class="class-description"><p>Communicating the result of a command from server back to client,
+and in a game history. Despite the name, a Turn is used not just
+for a player's turn (such as a play or a swap) but also for other
+results from commands sent to the server, such as challenges.</p></div>
         
     
 </header>
@@ -45,7 +48,7 @@
     
 
     
-    <h4 class="name" id="Turn"><span class="type-signature"></span>new Turn<span class="signature">(game, members)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="Turn"><span class="type-signature"></span>new Turn<span class="signature">(game, params)</span><span class="type-signature"></span></h4>
     
 
     
@@ -108,13 +111,13 @@
 
         <tr>
             
-                <td class="name"><code>members</code></td>
+                <td class="name"><code>params</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Object</span>
+<span class="param-type">object</span>
 
 
             
@@ -124,7 +127,9 @@
 
             
 
-            <td class="description last"><p>object fields (members)</p></td>
+            <td class="description last"><p>parameters. Any field with the same name
+as a member (or a member of <a href="Move.html">Move</a>) will initialise
+that member.</p></td>
         </tr>
 
     
@@ -165,7 +170,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line10">line 10</a>
+        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line13">line 13</a>
     </li></ul></dd>
     
 
@@ -212,143 +217,6 @@
 
     
         <h3 class="subsection-title">Members</h3>
-
-        
-            
-<h4 class="name" id="challengerKey"><span class="type-signature"></span>challengerKey<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <p>For 'took-back', 'challenge-won',
-key of the player who initiated the action</p>
-</div>
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line60">line 60</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="emptyPlayerKey"><span class="type-signature"></span>emptyPlayerKey<span class="type-signature"> :number</span></h4>
-
-
-
-
-<div class="description">
-    <p>At the (possible) end of game, this will be the key of
-the player who has no tiles on their rack (and there are no
-more in the bag), or -1 if no player has an empty rack.</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">number</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line54">line 54</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
 
         
             
@@ -406,7 +274,7 @@ more in the bag), or -1 if no player has an empty rack.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line34">line 34</a>
+        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line27">line 27</a>
     </li></ul></dd>
     
 
@@ -478,7 +346,7 @@ more in the bag), or -1 if no player has an empty rack.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line46">line 46</a>
+        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line54">line 54</a>
     </li></ul></dd>
     
 
@@ -502,7 +370,10 @@ more in the bag), or -1 if no player has an empty rack.</p>
 
 
 <div class="description">
-    <p>Key of the player who's turn it was</p>
+    <p>Key of the player who has been affected by the turn. Normally
+this is the player who made the Move that resulted in the Turn,
+but in the case of a challenge it is the player who was
+challenged.</p>
 </div>
 
 
@@ -550,7 +421,7 @@ more in the bag), or -1 if no player has an empty rack.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line40">line 40</a>
+        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line48">line 48</a>
     </li></ul></dd>
     
 
@@ -630,7 +501,7 @@ more in the bag), or -1 if no player has an empty rack.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line28">line 28</a>
+        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line39">line 39</a>
     </li></ul></dd>
     
 
@@ -670,7 +541,7 @@ more in the bag), or -1 if no player has an empty rack.</p>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Apr 26 2022 07:55:58 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Apr 26 2022 16:51:06 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

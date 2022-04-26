@@ -28,7 +28,7 @@
 
 <header>
     
-        <h2><span class="attribs"><span class="type-signature"></span></span>Square<span class="signature">(type, owner, col, row)</span><span class="type-signature"></span></h2>
+        <h2><span class="attribs"><span class="type-signature"></span></span>Square<span class="signature">(type, owner, col, row<span class="signature-attributes">nullable</span>)</span><span class="type-signature"></span></h2>
         
             <div class="class-description"><p>A square on the game board or rack. A Tile holder with some
 underlying attributes; a position, an owner, and a type that
@@ -48,7 +48,7 @@ subclass of <a href="Surface.html">Surface</a> (a <a href="Rack.html">Rack</a> o
     
 
     
-    <h4 class="name" id="Square"><span class="type-signature"></span>new Square<span class="signature">(type, owner, col, row)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="Square"><span class="type-signature"></span>new Square<span class="signature">(type, owner, col, row<span class="signature-attributes">nullable</span>)</span><span class="type-signature"></span></h4>
     
 
     
@@ -76,6 +76,8 @@ subclass of <a href="Surface.html">Surface</a> (a <a href="Rack.html">Rack</a> o
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
         
 
@@ -101,6 +103,14 @@ subclass of <a href="Surface.html">Surface</a> (a <a href="Rack.html">Rack</a> o
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
@@ -123,6 +133,14 @@ subclass of <a href="Surface.html">Surface</a> (a <a href="Rack.html">Rack</a> o
             
             </td>
 
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
             
 
             
@@ -147,6 +165,14 @@ subclass of <a href="Surface.html">Surface</a> (a <a href="Rack.html">Rack</a> o
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
@@ -170,10 +196,21 @@ subclass of <a href="Surface.html">Surface</a> (a <a href="Rack.html">Rack</a> o
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
 
             
 
-            <td class="description last"><p>0-based row where the square is (undefined on a rack)</p></td>
+            <td class="description last"><p>0-based row where the square is
+(undefined on a rack)</p></td>
         </tr>
 
     
@@ -260,6 +297,588 @@ subclass of <a href="Surface.html">Surface</a> (a <a href="Rack.html">Rack</a> o
     
 
     
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+<h4 class="name" id="col"><span class="type-signature"></span>col<span class="type-signature"> :number</span></h4>
+
+
+
+
+<div class="description">
+    <p>0-based row where the square is (undefined on a 1D surface)</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">number</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line50">line 50</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="id"><span class="type-signature"></span>id<span class="type-signature"> :string</span></h4>
+
+
+
+
+<div class="description">
+    <p>Unique id for this square</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">string</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line67">line 67</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="letterScoreMultiplier"><span class="type-signature"></span>letterScoreMultiplier<span class="type-signature"> :number</span></h4>
+
+
+
+
+<div class="description">
+    <p>Multiplier for letters using this square</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">number</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line73">line 73</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="owner"><span class="type-signature">(nullable) </span>owner<span class="type-signature"> :<a href="Surface.html">Surface</a></span></h4>
+
+
+
+
+<div class="description">
+    <p>Rack or Board</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="Surface.html">Surface</a></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line44">line 44</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="tile"><span class="type-signature">(nullable) </span>tile<span class="type-signature"> :<a href="Tile.html">Tile</a></span></h4>
+
+
+
+
+<div class="description">
+    <p>Tile placed on this square</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="Tile.html">Tile</a></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line85">line 85</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="tileLocked"><span class="type-signature"></span>tileLocked<span class="type-signature"> :boolean</span></h4>
+
+
+
+
+<div class="description">
+    <p>True if the tile cannot be moved i.e. it was
+placed in a prior move. Locked tiles don't gather
+bonuses.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">boolean</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line93">line 93</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="type"><span class="type-signature"></span>type<span class="type-signature"> :string</span></h4>
+
+
+
+
+<div class="description">
+    <p>/^[QqTtSs_]$/ see <a href="Board.html">Board</a></p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">string</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line38">line 38</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="wordScoreMultiplier"><span class="type-signature"></span>wordScoreMultiplier<span class="type-signature"> :number</span></h4>
+
+
+
+
+<div class="description">
+    <p>Multiplier for wordss using this square</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">number</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line79">line 79</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+    
 
     
         <h3 class="subsection-title">Methods</h3>
@@ -270,7 +889,7 @@ subclass of <a href="Surface.html">Surface</a> (a <a href="Rack.html">Rack</a> o
     
 
     
-    <h4 class="name" id="createDOM"><span class="type-signature"></span>createDOM<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="$ui"><span class="type-signature"></span>$ui<span class="signature">(base)</span><span class="type-signature"></span></h4>
     
 
     
@@ -278,7 +897,7 @@ subclass of <a href="Surface.html">Surface</a> (a <a href="Rack.html">Rack</a> o
 
 
 <div class="description">
-    <p>Create the DOM representation</p>
+    <p>Create the jquery representation</p>
 </div>
 
 
@@ -287,6 +906,55 @@ subclass of <a href="Surface.html">Surface</a> (a <a href="Rack.html">Rack</a> o
 
 
 
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>base</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>for id='s</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -322,7 +990,7 @@ subclass of <a href="Surface.html">Surface</a> (a <a href="Rack.html">Rack</a> o
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line114">line 114</a>
+        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line163">line 163</a>
     </li></ul></dd>
     
 
@@ -410,7 +1078,7 @@ subclass of <a href="Surface.html">Surface</a> (a <a href="Rack.html">Rack</a> o
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line62">line 62</a>
+        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line110">line 110</a>
     </li></ul></dd>
     
 
@@ -571,7 +1239,7 @@ subclass of <a href="Surface.html">Surface</a> (a <a href="Rack.html">Rack</a> o
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line72">line 72</a>
+        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line120">line 120</a>
     </li></ul></dd>
     
 
@@ -708,7 +1376,7 @@ subclass of <a href="Surface.html">Surface</a> (a <a href="Rack.html">Rack</a> o
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line145">line 145</a>
+        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line197">line 197</a>
     </li></ul></dd>
     
 
@@ -796,7 +1464,7 @@ subclass of <a href="Surface.html">Surface</a> (a <a href="Rack.html">Rack</a> o
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line96">line 96</a>
+        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line144">line 144</a>
     </li></ul></dd>
     
 
@@ -848,7 +1516,7 @@ subclass of <a href="Surface.html">Surface</a> (a <a href="Rack.html">Rack</a> o
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Apr 26 2022 07:55:58 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Apr 26 2022 16:51:06 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>
