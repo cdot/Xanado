@@ -1633,7 +1633,7 @@ define('browser/Ui', [
 				  .text($.i18n('Take back'))
 				  .button()
 				  .on('click', () => this.takeBackMove());
-			addToLog($button, 'turn-control');
+			addToLog(true, $button, 'turn-control');
 		}
 
 		/**
