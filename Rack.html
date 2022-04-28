@@ -28,7 +28,7 @@
 
 <header>
     
-        <h2><span class="attribs"><span class="type-signature"></span></span>Rack<span class="signature">(id, size, underlay)</span><span class="type-signature"></span></h2>
+        <h2><span class="attribs"><span class="type-signature"></span></span>Rack<span class="signature">(id, size, underlay<span class="signature-attributes">nullable</span>)</span><span class="type-signature"></span></h2>
         
             <div class="class-description"><p>A Rack is a 1-column <a href="Surface.html">Surface</a></p></div>
         
@@ -45,7 +45,7 @@
     
 
     
-    <h4 class="name" id="Rack"><span class="type-signature"></span>new Rack<span class="signature">(id, size, underlay)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="Rack"><span class="type-signature"></span>new Rack<span class="signature">(id, size, underlay<span class="signature-attributes">nullable</span>)</span><span class="type-signature"></span></h4>
     
 
     
@@ -73,6 +73,8 @@
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
         
 
@@ -98,10 +100,18 @@
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
-            <td class="description last"><p>unique id for this rack</p></td>
+            <td class="description last"><p>unique id for this rack.</p></td>
         </tr>
 
     
@@ -115,20 +125,24 @@
             
                 
 <span class="param-type">number</span>
-|
-
-<span class="param-type">Array.&lt;<a href="Tile.html">Tile</a>></span>
 
 
             
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
-            <td class="description last"><p>a rack size, or an array
-of Tile (for tests)</p></td>
+            <td class="description last"><p>rack size</p></td>
         </tr>
 
     
@@ -148,10 +162,22 @@ of Tile (for tests)</p></td>
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
 
             
 
-            <td class="description last"><p>text string with one character for each cell in the rack</p></td>
+            <td class="description last"><p>text string with one character for
+each cell in UI of the rack. This is the SWAP string that
+underlies the swap rack.</p></td>
         </tr>
 
     
@@ -350,7 +376,7 @@ the rack squares.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line148">line 148</a>
+        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line153">line 153</a>
     </li></ul></dd>
     
 
@@ -505,7 +531,7 @@ the rack squares.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line58">line 58</a>
+        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line63">line 63</a>
     </li></ul></dd>
     
 
@@ -616,7 +642,7 @@ if it couldn't be placed)</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line48">line 48</a>
+        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line53">line 53</a>
     </li></ul></dd>
     
 
@@ -756,7 +782,7 @@ is one.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line86">line 86</a>
+        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line91">line 91</a>
     </li></ul></dd>
     
 
@@ -866,7 +892,7 @@ is one.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line74">line 74</a>
+        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line79">line 79</a>
     </li></ul></dd>
     
 
@@ -972,7 +998,7 @@ is one.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line137">line 137</a>
+        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line142">line 142</a>
     </li></ul></dd>
     
 
@@ -1109,7 +1135,7 @@ is one.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line102">line 102</a>
+        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line107">line 107</a>
     </li></ul></dd>
     
 
@@ -1219,7 +1245,7 @@ is one.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line119">line 119</a>
+        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line124">line 124</a>
     </li></ul></dd>
     
 
@@ -1329,7 +1355,7 @@ is one.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line40">line 40</a>
+        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line45">line 45</a>
     </li></ul></dd>
     
 
@@ -1381,7 +1407,7 @@ is one.</p>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed Apr 27 2022 05:28:17 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Thu Apr 28 2022 09:28:35 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

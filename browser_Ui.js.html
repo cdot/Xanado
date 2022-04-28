@@ -105,20 +105,23 @@ define('browser/Ui', [
 	/**
 	 * Append to the log pane. Messages are wrapped in a div, which
 	 * may have the optional css class.
+	 * @param {boolean} interactive false if we are replaying messages into
+	 * the log, true if this is an interactive response to a player action.
 	 * @param {(jQuery|string)} mess thing to add
 	 * @param {string?} optional css class name
 	 * @return {jQuery} the div created
 	 */
-	function addToLog(mess, css) {
+	function addToLog(interactive, mess, css) {
 		const $div = $('&lt;div class="logEntry">&lt;/div>');
 		if (css)
 			$div.addClass(css);
 		$div.append(mess);
-		$('#logMessages')
-		.append($div)
-		.animate({
-			scrollTop: $('#logMessages').prop('scrollHeight')
-		}, 300);
+		const $lm = $('#logMessages');
+		$lm.append($div);
+		if (interactive)
+			$lm.animate({
+				scrollTop: $('#logMessages').prop('scrollHeight')
+			}, 300);
 		return $div;
 	}
 
@@ -252,6 +255,8 @@ define('browser/Ui', [
 		 */
 		sendCommand(command, args) {
 			console.debug(`POST /command/${command}`);
+			this.lockBoard(true);
+			this.enableTurnButton(false);
 			this.cancelNotification();
 			$.post(
 				`/command/${command}/${this.game.key}/${this.player.key}`,
@@ -284,7 +289,7 @@ define('browser/Ui', [
 			if (!player)
 				player = new Player({name: "Unknown player"});
 
-			addToLog($.i18n(
+			addToLog(interactive, $.i18n(
 				"$1's turn", `&lt;span class='playerName'>${player.name}&lt;/span>`),
 					 'turn-player');
 
@@ -345,7 +350,7 @@ define('browser/Ui', [
 				throw Error(`Unknown move type ${turn.type}`);
 			}
 
-			addToLog(turnText, 'turn-detail');
+			addToLog(interactive, turnText, 'turn-detail');
 
 			if (isLatestTurn
 				&amp;&amp; turn.emptyPlayerKey
@@ -353,11 +358,11 @@ define('browser/Ui', [
 				&amp;&amp; turn.type !== 'challenge-failed'
 				&amp;&amp; turn.type !== 'Game over') {
 				if (this.isThisPlayer(turn.emptyPlayerKey)) {
-					addToLog($.i18n(
+					addToLog(interactive, $.i18n(
 						"You have no more tiles, game will be over if your play isn't challenged"),
 						'turn-narrative');
 				} else
-					addToLog($.i18n(
+					addToLog(interactive, $.i18n(
 						"$1 has no more tiles, game will be over unless you challenge",
 						this.game.getPlayer(turn.emptyPlayerKey).name),
 							 'turn-narrative');
@@ -367,10 +372,11 @@ define('browser/Ui', [
 		/**
 		 * Append a formatted 'end of game' message to the log
 		 * @param {Turn} turn a 'Game over' Turn
-		 * @param {boolean} cheer true if a cheer is to be played
+		 * @param {boolean} interactive false if we are replaying messages into
+		 * the log, true if this is an interactive response to a player action.
 		 * @private
 		 */
-		describeGameOver(turn, cheer) {
+		describeGameOver(turn, interactive) {
 			const game = this.game;
 			const adjustments = [];
 			const winningScore = game.winningScore();
@@ -385,7 +391,7 @@ define('browser/Ui', [
 			// we just need to present the results.
 			const unplayed = game.players.reduce(
 				(sum, player) => sum + player.rack.score(), 0);
-			addToLog($.i18n(turn.endState||'Game over'), 'game-state');
+			addToLog(interactive, $.i18n(turn.endState||'Game over'), 'game-state');
 			const $narrative = $('&lt;div class="game-outcome">&lt;/div>');
 			game.players.forEach(player => {
 				const isMe = this.isThisPlayer(player.key);
@@ -395,11 +401,11 @@ define('browser/Ui', [
 				if (player.score === winningScore) {
 					if (isMe) {
 						iWon = true;
-						if (cheer)
+						if (interactive &amp;&amp; this.settings.cheers)
 							playAudio('endCheer');
 					}
 					winners.push(name);
-				} else if (isMe &amp;&amp; cheer)
+				} else if (isMe &amp;&amp; interactive &amp;&amp; this.settings.cheers)
 					playAudio('lost');
 
 				if (player.rack.isEmpty()) {
@@ -434,8 +440,9 @@ define('browser/Ui', [
 				who = $.i18n('You');
 			else
 				nWinners = winners.length;
-			addToLog($.i18n("$1 {{PLURAL:$2|has|have}} won", who, nWinners));
-			addToLog($narrative);
+			addToLog(interactive, $.i18n("$1 {{PLURAL:$2|has|have}} won",
+										 who, nWinners));
+			addToLog(interactive, $narrative);
 		}
 
 		/**
@@ -472,7 +479,7 @@ define('browser/Ui', [
 			$msg.text($.i18n.apply(null, args));
 			$mess.append($msg);
 
-			addToLog($mess);
+			addToLog(true, $mess);
 
 			// Special handling for Hint, highlight square
 			if (message.sender === 'Advisor'
@@ -532,6 +539,28 @@ define('browser/Ui', [
 			console.debug("--> nextGame", key);
 			this.game.nextGameKey = key;
 			this.setMoveAction('nextGame', /*i18n*/'Next game');
+		}
+
+		/**
+		 * In a game where words are checked before the play is accepted,
+		 * the server may reject a bad word with a 'reject' message.
+		 * @param {object} rejection the rejection object
+		 * @param {string} rejection.playerKey the rejected player
+		 * @param {string[]} rejection.words the rejected words
+		 */
+		handle_reject(rejection) {
+			console.debug("--> reject", rejection);
+			// The tiles are only locked down when a corresponding
+			// turn is received, so all we need to do is restore the
+			// pre-sendCommand state and issues a message.
+			this.lockBoard(false);
+			this.enableTurnButton(true);
+			if (this.settings.warnings)
+				playAudio('oops');
+			addToLog(true, $.i18n(
+				"The word{{PLURAL:$1||s}} $2 {{PLURAL:$1|was|were}} not found in the dictionary",
+				rejection.words.length,
+				rejection.words.join(", ")), 'turn-narrative');
 		}
 
 		/**
@@ -728,7 +757,8 @@ define('browser/Ui', [
 			this.placedCount = 0;
 
 			// Can swap up to swapCount tiles
-			this.swapRack = new Rack('Swap', this.game.board.swapCount, $.i18n('SWAP'));
+			this.swapRack = new Rack(
+				'Swap', this.game.board.swapCount, $.i18n('SWAP'));
 
 			this.updatePlayerTable();
 
@@ -744,7 +774,7 @@ define('browser/Ui', [
 			const $board = this.game.board.$ui();
 			$('#board').append($board);
 
-			addToLog($.i18n("Game started"), 'game-state');
+			addToLog(true, $.i18n("Game started"), 'game-state');
 
 			if (game.secondsPerPlay > 0)
 				$("#timeout").show();
@@ -754,6 +784,7 @@ define('browser/Ui', [
 			game.turns.forEach(
 				(turn, i) => this.describeTurn(
 					turn, i === game.turns.length - 1), false);
+			addToLog(true, ""); // Force scroll to end of log
 
 			if (game.hasEnded()) {
 				if (this.game.nextGameKey)
@@ -899,6 +930,9 @@ define('browser/Ui', [
 
 			// A message has been sent
 			.on('message', message => this.handle_message(message))
+
+			// Attempted play has been rejected
+			.on('reject', params => this.handle_reject(params))
 
 			// Game has been paused
 			.on('pause', params => this.handle_pause(params))
@@ -1428,6 +1462,9 @@ define('browser/Ui', [
 
 			this.describeTurn(turn, true, true);
 
+			// Was the play intiated by, or primarily affecting, us
+			const wasUs = this.isThisPlayer(turn.playerKey);
+
 			switch (turn.type) {
 			case 'challenge-won':
 			case 'took-back':
@@ -1451,7 +1488,7 @@ define('browser/Ui', [
 					}
 
 				// Was it us?
-				if (this.isThisPlayer(turn.playerKey)) {
+				if (wasUs) {
 					player.rack.$refresh();
 
 					if (turn.type === 'challenge-won') {
@@ -1473,7 +1510,7 @@ define('browser/Ui', [
 				break;
 
 			case 'challenge-failed':
-				if (this.isThisPlayer(turn.playerKey)) {
+				if (wasUs) {
 					// Our challenge failed
 					if (this.settings.warnings)
 						playAudio('oops');
@@ -1483,26 +1520,31 @@ define('browser/Ui', [
 					if (this.settings.warnings)
 						playAudio('oops');
 					/*.i18n('ui-notify-title-they-failed')*/
-					this.notify(/*i18n ui-notify-body-*/'they-failed', player.name);
+					this.notify(/*i18n ui-notify-body-*/'they-failed',
+						player.name);
 				}
 				break;
 
 			case 'move':
-				if (!this.isThisPlayer(turn.playerKey)) {
-					// Put the tiles placed in a turn into place on
-					// the board for a player who is not this player (they
-					// are already there for this player)
-					for (let placement of turn.placements) {
-						const square = this.game.at(placement.col, placement.row);
-						// Take the tile (any tile would do) off the player's rack. It's just
-						// to keep the counts correct.
-						player.rack.removeTile(placement);
-						// Lock the placement down on the board
-						square.placeTile(placement, true);
-						// Highlight it as 'just placed'
-						const $div = $(`#Board_${placement.col}x${placement.row}`);
-						$div.addClass('last-placement');
-					}
+				if (wasUs) {
+					if (turn.bonus > 0 &amp;&amp; this.settings.cheers)
+						playAudio('bonusCheer');
+					this.placedCount = 0;
+				}
+
+				// Take the placed tiles out of the players rack and
+				// lock them onto the board.
+				for (let i = 0; i &lt; turn.placements.length; i++) {
+					const placement = turn.placements[i];
+					const square = this.game.at(
+						placement.col, placement.row);
+					player.rack.removeTile(placement);
+					square.placeTile(placement, true);
+					if (wasUs)
+						square.$refresh();
+					else
+						// Highlight the tile as 'just placed'
+						$(`#${square.id}`).addClass('last-placement');
 				}
 
 				// Shrink the bag by the number of new
@@ -1547,9 +1589,10 @@ define('browser/Ui', [
 			if (turn.nextToGoKey &amp;&amp; turn.type !== 'challenge-won') {
 
 				if (turn.type == 'move'
-					&amp;&amp; this.game.allowTakeBack
-					&amp;&amp; this.isThisPlayer(turn.playerKey))
+					&amp;&amp; wasUs
+					&amp;&amp; this.game.allowTakeBack) {
 					this.addTakeBackPreviousButton(turn);
+				}
 
 				if (this.isThisPlayer(turn.nextToGoKey)
 					&amp;&amp; turn.type !== 'took-back') {
@@ -1587,17 +1630,6 @@ define('browser/Ui', [
 		}
 
 		/**
-		 * After a move, remove the move information and lock the board
-		 * until it's our turn again
-		 */
-		afterMove() {
-			this.removeMoveActionButtons();
-			$('#yourMove').empty();
-			this.lockBoard(true);
-			this.enableTurnButton(false);
-		}
-
-		/**
 		 * Add a 'Challenge' button to the log pane to challenge the last
 		 * player's move (if it wasn't us)
 		 * @param {Turn} turn the current turn
@@ -1615,7 +1647,7 @@ define('browser/Ui', [
 				  .addClass('moveAction')
 				  .button()
 				  .on('click', () => this.challenge());
-			addToLog($button, 'turn-control');
+			addToLog(true, $button, 'turn-control');
 		}
 
 		/**
@@ -1646,12 +1678,13 @@ define('browser/Ui', [
 			// Take back any tiles we placed
 			this.takeBackTiles();
 			// Remove action buttons and lock board
-			this.afterMove();
 			this.sendCommand('challenge');
 		}
 
 		/**
 		 * Handler for the 'Make Move' button. Invoked via 'click_turnButton'.
+		 * Response will be turn type 'move' (or 'took-back' if the play
+		 * is rejected).
 		 */
 		commitMove() {
 			$('.hint-placement').removeClass('hint-placement');
@@ -1662,29 +1695,17 @@ define('browser/Ui', [
 				report(move);
 				return;
 			}
-			this.afterMove();
-			if (move.bonus > 0 &amp;&amp; this.settings.cheers)
-				playAudio('bonusCheer');
-
-			for (let i = 0; i &lt; move.placements.length; i++) {
-				const tilePlaced = move.placements[i];
-				const square = this.game.at(tilePlaced.col, tilePlaced.row);
-				square.tileLocked = true;
-				square.$refresh();
-			}
-			this.placedCount = 0;
-
 			move.playerKey = this.player.key;
 
 			this.sendCommand('makeMove', move);
 		}
 
 		/**
-		 * Handler for the 'Take back' button clicked. Invoked via 'click_turnButton'.
+		 * Handler for the 'Take back' button clicked. Invoked via
+		 * 'click_turnButton'. Response will be a turn type 'took-back'.
 		 */
 		takeBackMove() {
 			this.takeBackTiles();
-			this.afterMove();
 			this.sendCommand('takeBack');
 		}
 
@@ -1693,7 +1714,6 @@ define('browser/Ui', [
 		 */
 		pass() {
 			this.takeBackTiles();
-			this.afterMove();
 			this.sendCommand('pass');
 		}
 
@@ -1703,7 +1723,6 @@ define('browser/Ui', [
 		 */
 		confirmGameOver() {
 			this.takeBackTiles();
-			this.afterMove();
 			this.sendCommand('confirmGameOver');
 		}
 
@@ -1738,7 +1757,6 @@ define('browser/Ui', [
 		 * Handler for the 'Swap' button clicked. Invoked via 'click_turnButton'.
 		 */
 		swap() {
-			this.afterMove();
 			const tiles = this.swapRack.tiles();
 			this.swapRack.empty();
 			this.sendCommand('swap', tiles);
@@ -1842,7 +1860,7 @@ define('browser/Ui', [
 			const body = $.i18n.call(args);
 			this.canNotify()
 			.then(() => {
-			this.cancelNotification();
+				this.cancelNotification();
 				const notification = new Notification(
 					title,
 					{
@@ -1917,7 +1935,7 @@ define('browser/Ui', [
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed Apr 27 2022 05:28:17 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Thu Apr 28 2022 09:28:35 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>
