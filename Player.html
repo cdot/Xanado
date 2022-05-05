@@ -31,7 +31,14 @@
         <h2><span class="attribs"><span class="type-signature"></span></span>Player<span class="signature">(params)</span><span class="type-signature"></span></h2>
         
             <div class="class-description"><p>A player in a <a href="Game.html">Game</a>. Player objects are specific to
-a single game, and are used on both browser and server sides.</p></div>
+a single game, and are used on both browser and server sides.</p>
+<p>Player supports two different types of timed game; TIMER_TURN and
+TIMER_GAME. In a game configured for TIMER_TURN, each player has
+a turn timer, implemented in Player as a timeout that invokes
+a callback when the timer decays - see <code>startTurnTimeout</code> /
+<code>stopTurnTimeout</code>. For a TIMER_GAME, the player has a chess clock
+that runs while it is the player's turn, that is stopped when
+they are not making a play.</p></div>
         
     
 </header>
@@ -340,7 +347,7 @@ has to miss their next turn due to a failed challenge</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line18">line 18</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line26">line 26</a>
     </li></ul></dd>
     
 
@@ -444,7 +451,82 @@ has to miss their next turn due to a failed challenge</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line61">line 61</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line69">line 69</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="clock"><span class="type-signature">(nullable) </span>clock<span class="type-signature"> :number</span></h4>
+
+
+
+
+<div class="description">
+    <p>Player coutdown clock. In games with <code>timerType</code> <code>TIMER_TURN</code>,
+this is the number of seconds before the player's turn times
+out (if they are the current player). For <code>TIMER_GAME</code> it's
+the number of seconds before the chess clock runs out.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">number</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line110">line 110</a>
     </li></ul></dd>
     
 
@@ -519,7 +601,7 @@ only be used for findBestPlay for robot players.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line108">line 108</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line119">line 119</a>
     </li></ul></dd>
     
 
@@ -591,7 +673,7 @@ only be used for findBestPlay for robot players.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line55">line 55</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line63">line 63</a>
     </li></ul></dd>
     
 
@@ -663,7 +745,7 @@ only be used for findBestPlay for robot players.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line49">line 49</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line57">line 57</a>
     </li></ul></dd>
     
 
@@ -736,7 +818,7 @@ to a failed challenge</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line115">line 115</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line126">line 126</a>
     </li></ul></dd>
     
 
@@ -808,7 +890,7 @@ to a failed challenge</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line67">line 67</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line75">line 75</a>
     </li></ul></dd>
     
 
@@ -880,7 +962,7 @@ to a failed challenge</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line80">line 80</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line88">line 88</a>
     </li></ul></dd>
     
 
@@ -953,7 +1035,7 @@ it's only then we know how big it has to be.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line74">line 74</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line82">line 82</a>
     </li></ul></dd>
     
 
@@ -1025,79 +1107,7 @@ it's only then we know how big it has to be.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line93">line 93</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="secondsToPlay"><span class="type-signature"></span>secondsToPlay<span class="type-signature"> :number</span></h4>
-
-
-
-
-<div class="description">
-    <p>Seconds remaining before play times out</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">number</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line99">line 99</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line101">line 101</a>
     </li></ul></dd>
     
 
@@ -1170,7 +1180,7 @@ they used</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line87">line 87</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line95">line 95</a>
     </li></ul></dd>
     
 
@@ -1251,7 +1261,7 @@ side only.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line317">line 317</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line302">line 302</a>
     </li></ul></dd>
     
 
@@ -1402,7 +1412,7 @@ a Player.simple</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line285">line 285</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line269">line 269</a>
     </li></ul></dd>
     
 
@@ -1584,7 +1594,7 @@ a Player.simple</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line182">line 182</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line193">line 193</a>
     </li></ul></dd>
     
 
@@ -1722,7 +1732,7 @@ side only.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line326">line 326</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line311">line 311</a>
     </li></ul></dd>
     
 
@@ -1810,7 +1820,171 @@ side only.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line195">line 195</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line206">line 206</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="setTimeout"><span class="type-signature"></span>setTimeout<span class="signature">(time, onTimeout)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Set a timeout for the player, which will be triggered when the
+clock reaches exactly 0. The timeout is only triggered once for
+a call to setTimeout, resetting the clock will not invoke it
+again.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>time</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>number of seconds before timeout</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onTimeout</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>a function() invoked if the
+timer expires, ignored if time undefined</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line236">line 236</a>
     </li></ul></dd>
     
 
@@ -1991,7 +2165,7 @@ state</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line133">line 133</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line144">line 144</a>
     </li></ul></dd>
     
 
@@ -2049,7 +2223,7 @@ state</p>
     
 
     
-    <h4 class="name" id="startTimer"><span class="type-signature"></span>startTimer<span class="signature">(time<span class="signature-attributes">nullable</span>, onTimeout<span class="signature-attributes">nullable</span>)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="tick"><span class="type-signature"></span>tick<span class="signature">()</span><span class="type-signature"></span></h4>
     
 
     
@@ -2057,192 +2231,7 @@ state</p>
 
 
 <div class="description">
-    <p>Set a play timeout for the player. If the</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>time</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-                    &lt;nullable><br>
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>number of seconds before elapse, or
-0 to cancel any timeout. If undefined, will restart the timer with
-the time remaining to the player.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>onTimeout</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-                    &lt;nullable><br>
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>a function() invoked if the
-timer expires, ignored if time undefined</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line208">line 208</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="stopTimer"><span class="type-signature"></span>stopTimer<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Cancel current play timeout</p>
+    <p>Handle a tick of the server clock.</p>
 </div>
 
 
@@ -2286,7 +2275,7 @@ timer expires, ignored if time undefined</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line248">line 248</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line214">line 214</a>
     </li></ul></dd>
     
 
@@ -2374,7 +2363,7 @@ timer expires, ignored if time undefined</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line274">line 274</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line258">line 258</a>
     </li></ul></dd>
     
 
@@ -2462,7 +2451,7 @@ timer expires, ignored if time undefined</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line262">line 262</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line246">line 246</a>
     </li></ul></dd>
     
 
@@ -2514,7 +2503,7 @@ timer expires, ignored if time undefined</p></td>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed May 04 2022 10:34:27 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Thu May 05 2022 10:07:04 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

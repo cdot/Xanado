@@ -177,13 +177,29 @@ define('game/Game', [
 			this.whosTurnKey = undefined;
 
 			/**
-			 * Time limit for a play in this game.
-			 * Default 0 means never time out.
+			 * Timer type, one of:
+			 * * `Player.TIMER_NONE` - untimed game
+			 * * `Player.TIMER_GAME` - game timer
+			 * * `Player.TIMER_TURN` - turn timer
+			 */
+			this.timerType = params.timerType || Player.TIMER_NONE;
+
+			/**
+			 * Time limit for this game.
 			 * @member {number}
 			 */
-			this.secondsPerPlay =
-			intParam(params.secondsPerPlay)
-			|| (intParam(params.minutesPerPlay) || 0) * 60;
+			if (this.timerType !== Player.TIMER_NONE)
+				this.timeLimit = intParam(
+					params.timeLimit,
+					intParam(params.timeLimitMinutes, 1) * 60);
+
+			/**
+			 * Time penalty for this game. Points lost per minute over
+			 * timeLimit.
+			 * @member {number}
+			 */
+			if (this.timerType === Player.TIMER_GAME)
+				this.timePenalty = intParam(params.timePenalty, 0);
 
 			/**
 			 * Pointer to Board object
@@ -252,18 +268,15 @@ define('game/Game', [
 			this.allowTakeBack = boolParam(params.allowTakeBack, false);
 
 			/**
-			 * Whether or not to check plays against the dictionary.
+			 * Whether or not to check plays against the dictionary. One
+			 * of:
+			 * * `Game.WORD_CHECK_NONE` for no checks
+			 * * `Game.WORD_CHECK_AFTER` for checks after play
+			 * * `Game.WORD_CHECK_REJECT` to reject bad plays
 			 * A bad play in this case does not result in a penalty, it
 			 * just forces the player to take the move back.
 			 */
-			this.rejectBadPlays =  boolParam(params.rejectBadPlays, false);
-
-			/**
-			 * Whether or not to check the dictionary to report on the
-			 * validity of the just player move.
-			 * @member {boolean}
-			 */
-			this.checkDictionary = boolParam(params.checkDictionary, false);
+			this.wordCheck = params.wordCheck || Game.WORD_CHECK_NONE;
 
 			/**
 			 * The type of penalty to apply for a failed challenge,
@@ -342,13 +355,13 @@ define('game/Game', [
 			if (this.maxPlayers > 1 &amp;&amp; this.players.length === this.maxPlayers)
 				throw Error('Cannot addPlayer() to a full game');			
 			this.players.push(player);
-			player.fillRack(
-				this.letterBag,
-				this.rackSize);
+			player.fillRack(this.letterBag, this.rackSize);
 			if (this._debug) {
 				console.debug("Added", player);
 				player.debug = true;
 			}
+			if (this.timerType !== Player.TIMER_NONE)
+				player.clock = this.timeLimit;
 		}
 
 		/**
@@ -519,7 +532,8 @@ define('game/Game', [
 		toString() {
 			const options = [];
 			if (this.predictScore) options.push("P");
-			if (this.checkDictionary) options.push("C");
+			if (this.wordCheck === Game.WORD_CHECK_AFTER) options.push("A");
+			if (this.wordCheck === Game.WORD_CHECK_REJECT) options.push("R");
 			if (this.allowTakeBack) options.push("T");
 			const ps = this.players.map(p => p.toString()).join(', ');
 			return `Game ${options.join('')} ${this.key} edition "${this.edition}" dictionary "${this.dictionary}" players [ ${ps} ] player ${this.whosTurnKey}`;
@@ -585,18 +599,19 @@ define('game/Game', [
 				}
 
 				const player = this.players[0];
-				this.whosTurnKey = player.key;
+				this.whosTurnKey = player.key; // assign before save()
 
 				this.state = Game.STATE_PLAYING;
 
 				return this.save()
 				// startTurn will autoplay if the first player is
-				// a robot
+				// a robot. It will also start the clock.
 				.then(() => this.startTurn(player));
 			}
 
-			if (this.getPlayer().isRobot)
-				return this.startTurn();
+			const nextPlayer = this.getPlayer();
+			if (nextPlayer.isRobot)
+				return this.startTurn(nextPlayer);
 
 			if (this._debug)
 				console.debug(`\twaiting for ${this.getPlayer().name} to play`);
@@ -632,7 +647,7 @@ define('game/Game', [
 		 * @param {Object} data to send with message
 		 */
 		notifyPlayers(message, data) {
-			if (this._debug)
+			if (this._debug &amp;&amp; message !== 'connections')
 				console.debug(`&lt;-S- * ${message}`, data);
 			this._connections.forEach(socket => socket.emit(message, data));
 		}
@@ -697,9 +712,6 @@ define('game/Game', [
 				console.debug('Game timed out:',
 						this.players.map(({ name }) => name));
 
-			// probably won't be running, as the chances are the game
-			// hasn't been loaded yet, but stop them anyway just in case
-			this.stopTimers();
 			this.state = Game.STATE_TIMED_OUT;
 			return this.save();
 		}
@@ -735,16 +747,16 @@ define('game/Game', [
 		}
 
 		/**
-		 * Start the turn of the given player.
-		 * @param {Player?} player the the player to get the turn. If
-		 * undefined, plays the current player
-		 * @param {number?} timeout timeout for this turn, if undefined, use
-		 * this.secondsPerPlay
+		 * Start (or restart) the turn of the given player.
+		 * @param {Player?} player the the player to get the turn.
+		 * @param {number?} timeout Only relevant when `timerType` is
+		 * `Player.TIMER_TURN`. Turn timeout for this turn. Set if
+		 * this is a restart of an unfinished turn, defaults to
+		 * this.timeLimit if undefined.
 		 * @return {Promise} a promise that resolves to undefined
+		 * @private
 		 */
 		startTurn(player, timeout) {
-			if (!player)
-				player = this.getPlayer();
 			if (!player)
 				throw Error("No player");
 
@@ -763,7 +775,7 @@ define('game/Game', [
 				return this.autoplay();
 			}
 
-			if (this.secondsPerPlay &lt;= 0) {
+			if (this.timeLimit &lt;= 0) {
 				if (this._debug)
 					console.debug(
 						`\tuntimed game, wait for ${player.name} to play`);
@@ -773,12 +785,14 @@ define('game/Game', [
 			// For a timed game, make sure the clock is running and
 			// start the player's timer.
 			if (this._debug)
-				console.debug(`\ttimed game, ${player.name} has ${timeout || this.secondsPerPlay}s left to play`);
+				console.debug(`\ttimed game, ${player.name} has ${timeout || this.timeLimit}s left to play`);
 			this.startTheClock(); // does nothing if already started
 
-			player.startTimer(
-				timeout || this.secondsPerPlay,
-				() => this.pass(player, 'timeout'));
+			if (this.timerType === Player.TIMER_TURN)
+				// Make the player pass when their clock reaches 0
+				player.setTimeout(
+					timeout || this.timeLimit,
+					() => this.pass(player, 'timeout'));
 
 			return Promise.resolve(this);
 		}
@@ -800,14 +814,15 @@ define('game/Game', [
 					edition: this.edition,
 					dictionary: this.dictionary,
 					predictScore: this.predictScore,
-					checkDictionary: this.checkDictionary,
-					rejectBadPlays: this.rejectBadPlays,
+					wordCheck: this.wordCheck,
 					allowTakeBack: this.allowTakeBack,
 					state: this.state,
 					players: ps,					
 					turns: this.turns.length, // just the length
 					whosTurnKey: this.whosTurnKey,
-					secondsPerPlay: this.secondsPerPlay,
+					timerType: this.timerType,
+					timeLimit: this.timeLimit,
+					timePenalty: this.timePenalty,
 					// this.board is not sent
 					// this.rackSize not sent
 					pausedBy: this.pausedBy,
@@ -872,19 +887,7 @@ define('game/Game', [
 				this.updateConnections();
 			});
 
-			if (player) {
-				return this.playIfReady()
-				.then(() => {
-					// if player is the current player, and this is a timed
-					// game, make sure their timer is running
-					if (this.whosTurnKey === player.key
-						&amp;&amp; this.secondsPerPlay > 0) {
-						this.startTheClock(); // does nothing if already started
-						player.startTimer(); // does nothing if already started
-					}
-				});
-			}
-			return Promise.resolve();
+			return this.playIfReady();
 		}
 
 		/**
@@ -913,7 +916,7 @@ define('game/Game', [
 			}
 			this.players = newOrder;
 		}
-		
+
 		/**
 		 * Server side, tell all clients a tick has happened (or
 		 * remind them of the current number of seconds to play)
@@ -921,38 +924,34 @@ define('game/Game', [
 		 */
 		tick() {
 			const player = this.getPlayer();
-			//if (this._debug) console.debug(`Tick ${this.getPlayer().name} ${player.secondsToPlay}`);
 			if (!player)
 				return;
-			player.secondsToPlay--;
-			// TODO: really should save(), otherwise the player timeout won't
-			// survive a restart
+
+			player.tick();
+
+			// Really should save(), otherwise the ticks won't
+			// survive a server restart. However it's expensive, and server
+			// restarts are rare, so let's not.
 			this.notifyPlayers(
 				'tick',
 				{
 					gameKey: this.key,
 					playerKey: player.key,
-					secondsToPlay: player.secondsToPlay
+					clock: player.clock,
+					timestamp: Date.now()
 				});
 		}
 
 		/**
-		 * If the game has a time limit, start an interval timer to
-		 * notify players of the remaining time for the player
-		 * who's turn it is.
+		 * If the game has a time limit, start an interval timer.
 		 * @private
 		 */
 		startTheClock() {
-			if (this.secondsPerPlay > 0 &amp;&amp; !this._intervalTimer) {
-				const rem = this.getPlayer().secondsToPlay;
+			if (!this._intervalTimer &amp;&amp; this.timerType !== Player.TIMER_NONE) {
 				if (this._debug)
-					console.debug(`Started tick timer with ${rem} on the clock`);
+					console.debug(`Started the clock`);
 				// Broadcast a ping every second
-				this._intervalTimer = setInterval(() => {
-					const pnext = this.getPlayer();
-					if (pnext &amp;&amp; pnext.secondsToPlay > 0)
-						this.tick();
-				}, 1000);
+				this._intervalTimer = setInterval(() => this.tick(), 1000);
 			}
 		}
 
@@ -963,31 +962,10 @@ define('game/Game', [
 		stopTheClock() {
 			if (this._intervalTimer) {
 				if (this._debug)
-					console.debug('Stopping tick timer');
+					console.debug('Stopped the clock');
 				clearInterval(this._intervalTimer);
 				this._intervalTimer = null;
 			}
-		}
-
-		/**
-		 * Stop player and game timeout timers
-		 */
-		stopTimers() {
-			if (this._debug)
-				console.debug("Stopping timers");
-			this.stopTheClock();
-			this.players.forEach(player => player.stopTimer());
-		}
-
-		/**
-		 * Restart timers (game timeout timer and player timers) stopped in
-		 * stopTimers()
-		 */
-		restartTimers() {
-			if (this._debug)
-				console.debug("Restarting timers");
-			this.startTheClock();
-			this.players.forEach(player => player.startTimer());
 		}
 
 		/**
@@ -1035,14 +1013,17 @@ define('game/Game', [
 					sender: /*i18n*/"Advisor",
 					text: /*i18n*/"$1 asked for a hint",
 					classes: 'warning',
-					args: [ player.name ]
+					args: [ player.name ],
+					timestamp: Date.now()
 				});
 			})
 			.catch(e => {
 				console.error('Error', e);
 				this.notifyPlayers('message', {
 					sender: /*i18n*/"Advisor",
-					text: e.toString() });
+					text: e.toString(),
+					timestamp: Date.now()
+				});
 			});
 		}
 
@@ -1065,7 +1046,8 @@ define('game/Game', [
 					sender: /*i18n*/"Advisor",
 					text: /*i18n*/"$1 has asked for advice from the robot",
 					classes: 'warning',
-					args: [ player.name ]
+					args: [ player.name ],
+					timestamp: Date.now()
 				});
 		}
 
@@ -1106,7 +1088,8 @@ define('game/Game', [
 						sender: /*i18n*/"Advisor",
 						text: /*i18n*/"$1 has received advice from the robot",
 						classes: 'warning',
-						args: [ player.name ]
+						args: [ player.name ],
+						timestamp: Date.now()
 					});
 				} else
 					if (this._debug)
@@ -1127,8 +1110,6 @@ define('game/Game', [
 			if (player.key !== this.whosTurnKey)
 				return Promise.reject('Not your turn');
 
-			player.stopTimer();
-
 			if (!(move instanceof Move))
 				move = new Move(move);
 
@@ -1138,7 +1119,7 @@ define('game/Game', [
 
 			if (this.dictionary
 				&amp;&amp; !this.isRobot
-				&amp;&amp; this.rejectBadPlays) {
+				&amp;&amp; this.wordCheck === Game.WORD_CHECK_REJECT) {
 
 				if (this._debug)
 					console.debug("Validating play");
@@ -1205,9 +1186,8 @@ define('game/Game', [
 			//console.debug('words ', move.words);
 
 			if (this.dictionary
-				&amp;&amp; this.checkDictionary
-				&amp;&amp; !player.isRobot
-				&amp;&amp; !this.rejectBadPlays) {
+				&amp;&amp; this.wordCheck === Game.WORD_CHECK_AFTER
+				&amp;&amp; !player.isRobot) {
 				// Asynchronously check word and notify player if it
 				// isn't found.
 				this.getDictionary()
@@ -1339,13 +1319,14 @@ define('game/Game', [
 		pause(player) {
 			if (this.pausedBy)
 				return Promise.resolve(this); // already paused
+			this.stopTheClock();
 			this.pausedBy = player.name;
 			if (this._debug)
 				console.debug(`${this.pausedBy} has paused game`);
-			this.stopTimers();
 			this.notifyPlayers('pause', {
 				key: this.key,
-				name: player.name
+				name: player.name,
+				timestamp: Date.now()
 			});
 			return this.save();
 		}
@@ -1360,12 +1341,13 @@ define('game/Game', [
 				return Promise.resolve(this); // not paused
 			if (this._debug)
 				console.debug(`${player.name} has unpaused game`);
-			this.restartTimers();
 			this.notifyPlayers('unpause', {
 				key: this.key,
-				name: player.name
+				name: player.name,
+				timestamp: Date.now()
 			});
 			this.pausedBy = undefined;
+			this.startTheClock();
 			return this.save();
 		}
 
@@ -1384,7 +1366,7 @@ define('game/Game', [
 
 			if (this._debug)
 				console.debug(`Confirming game over because ${endState}`);
-			this.stopTimers();
+			this.stopTheClock();
 
 			// When the game ends, each player's score is reduced by
 			// the sum of their unplayed letters. If a player has used
@@ -1394,7 +1376,7 @@ define('game/Game', [
 			let pointsRemainingOnRacks = 0;
 			const deltas = {};
 			this.players.forEach(player => {
-				deltas[player.key] = 0;
+				deltas[player.key] = { tiles: 0 };
 				if (player.rack.isEmpty()) {
 					if (playerWithNoTiles)
 						throw Error('Found more than one player with no tiles when finishing game');
@@ -1403,16 +1385,24 @@ define('game/Game', [
 				else {
 					const rackScore = player.rack.score();
 					player.score -= rackScore;
-					deltas[player.key] -= rackScore;
+					deltas[player.key].tiles -= rackScore;
 					pointsRemainingOnRacks += rackScore;
 					if (this._debug)
 						console.debug(`${player.name} has ${rackScore} left`);
 				} 
+				if (this.timerType === Player.TIMER_GAME &amp;&amp; player.clock &lt; 0) {
+					const points = Math.round(
+						player.clock * this.timePenalty / 60);
+					if (this._debug)
+						console.debug(player.name, "over by", player.clock, "time penalty", player.clock * this.timePenalty / 60, "=", points);
+					if (Math.abs(points) > 0)
+						deltas[player.key].time = points;
+				}
 			});
 
 			if (playerWithNoTiles) {
 				playerWithNoTiles.score += pointsRemainingOnRacks;
-				deltas[playerWithNoTiles.key] = pointsRemainingOnRacks;
+				deltas[playerWithNoTiles.key].tiles = pointsRemainingOnRacks;
 				if (this._debug)
 					console.debug(`${playerWithNoTiles.name} gains ${pointsRemainingOnRacks}`);
 			}
@@ -1478,9 +1468,6 @@ define('game/Game', [
 				// A takeBack, not a challenge.
 				turn.playerKey = previousMove.playerKey;
 
-				// Cancel any outstanding timer for the current player
-				this.getPlayer().stopTimer();
-
 			} else {
 				// else a successful challenge, does not move the player on.
 				turn.challengerKey = player.key;
@@ -1490,10 +1477,11 @@ define('game/Game', [
 			this.whosTurnKey = player.key;
 			return this.finishTurn(turn)
 			.then(() => {
-				if (type === 'took-back')
+				if (type === 'took-back') {
 					// Let the taking-back player go again,
 					// but with just the remaining time from their move.
 					return this.startTurn(player, previousMove.remainingTime);
+				}
 				// Otherwise this is a challenge-won, and the current player
 				// continues where they left off, but with the timer
 				// reset
@@ -1514,7 +1502,6 @@ define('game/Game', [
 			if (player.key !== this.whosTurnKey)
 				return Promise.reject('Not your turn');
 
-			player.stopTimer();
 			delete this.previousMove;
 
 			const turn = new Turn(
@@ -1572,7 +1559,6 @@ define('game/Game', [
 
 					// Current player issued the challenge, they lose the
 					// rest of this turn
-					challenger.stopTimer();
 
 					// Special case; if the challenged play would be the
 					// last play (challenged player has no more tiles) and
@@ -1643,8 +1629,6 @@ define('game/Game', [
 		swap(player, tiles) {
 			if (player.key !== this.whosTurnKey)
 				return Promise.reject('Not your turn');
-
-			player.stopTimer();
 
 			if (this.letterBag.remainingTileCount() &lt; tiles.length)
 				// Terminal, no point in translating
@@ -1723,7 +1707,10 @@ define('game/Game', [
 					console.debug(`Created follow-on game ${newGame.key}`);
 				return newGame.save()
 				.then(() => newGame.playIfReady()) // trigger robot
-				.then(() => this.notifyPlayers('nextGame', newGame.key))
+				.then(() => this.notifyPlayers('nextGame', {
+					gameKey: newGame.key,
+					timestamp: Date.now()
+				}))
 				.then(() => newGame);
 			});
 		}
@@ -1742,6 +1729,23 @@ define('game/Game', [
 		}
 	}
 
+	/**
+	 * Format a time interval in seconds for display in a string e.g
+	 * `formatTimeInterval(601)` -> `"10:01"`
+	 * @param {number} t time period in seconds
+	 */
+	Game.formatTimeInterval = t => {
+		const neg = (t &lt; 0) ? "-" : "";
+		t = Math.abs(t);
+		const s = `0${t % 60}`.slice(-2);
+		t = Math.floor(t / 60);
+		const m = `0${t % 60}`.slice(-2);
+		t = Math.floor(t / 60);
+		const h = `0${t}`.slice(-2);
+		return (h !== "00") ? `${neg}${h}:${m}:${s}`
+		: `${neg}${m}:${s}`;
+		
+	};
 	// Valid values for 'state'. Values are used in UI
 	Game.STATE_WAITING          = /*i18n*/"Waiting for players";
 	Game.STATE_PLAYING          = /*i18n*/"Playing";
@@ -1766,6 +1770,17 @@ define('game/Game', [
 	Game.PENALTY_TYPE   = Game.PENALTY_PER_WORD;
 	Game.PENALTY_POINTS = 5; // points per correct word challenged
 
+	// Timer types
+	Game.TIMERS = [ Player.TIMER_NONE, Player.TIMER_TURN, Player.TIMER_GAME ];
+
+	// Word check types
+	Game.WORD_CHECK_NONE   = /*i18n*/"Don't check words";
+	Game.WORD_CHECK_AFTER  = /*i18n*/"Check words after play";
+	Game.WORD_CHECK_REJECT = /*i18n*/"Reject unknown words";
+	Game.WORD_CHECKS = [
+		Game.WORD_CHECK_NONE, Game.WORD_CHECK_AFTER, Game.WORD_CHECK_REJECT
+	];
+	
 	// Classes used in Freeze/Thaw
 	Game.classes = [ LetterBag, Square, Board, Tile, Rack,
 					 Game, Player, Move, Turn ];
@@ -1789,7 +1804,7 @@ define('game/Game', [
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed May 04 2022 10:34:27 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Thu May 05 2022 10:07:03 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

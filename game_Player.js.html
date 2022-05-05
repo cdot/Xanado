@@ -42,6 +42,14 @@ define('game/Player', [
 	/**
 	 * A player in a {@link Game}. Player objects are specific to
 	 * a single game, and are used on both browser and server sides.
+	 *
+	 * Player supports two different types of timed game; TIMER_TURN and
+	 * TIMER_GAME. In a game configured for TIMER_TURN, each player has
+	 * a turn timer, implemented in Player as a timeout that invokes
+	 * a callback when the timer decays - see `startTurnTimeout` /
+	 * `stopTurnTimeout`. For a TIMER_GAME, the player has a chess clock
+	 * that runs while it is the player's turn, that is stopped when
+	 * they are not making a play.
 	 */
 	class Player {
 
@@ -121,10 +129,13 @@ define('game/Player', [
 			this.score = 0;
 
 			/**
-			 * Seconds remaining before play times out
-			 * @member {number}
+			 * Player coutdown clock. In games with `timerType` `TIMER_TURN`,
+			 * this is the number of seconds before the player's turn times
+			 * out (if they are the current player). For `TIMER_GAME` it's
+			 * the number of seconds before the chess clock runs out.
+			 * @member {number?}
 			 */
-			this.secondsToPlay = 0;
+			this.clock = undefined;
 
 			/**
 			 * We don't keep a pointer to the dictionary objects so we can
@@ -169,7 +180,7 @@ define('game/Player', [
 					dictionary: this.dictionary,
 					key: this.key,
 					score: this.score,
-					secondsToPlay: this.secondsToPlay,
+					clock: this.clock,
 					
 					// Can they be emailed?
 					email: ump.email ? true : false,
@@ -193,7 +204,7 @@ define('game/Player', [
 					dictionary: this.dictionary,
 					key: this.key,
 					score: this.score,
-					secondsToPlay: this.secondsToPlay,
+					clock: this.clock,
 					isConnected: this.isRobot
 					|| (game.getConnection(this) !== null)
 					// A robot never misses its next turn, because its
@@ -226,62 +237,35 @@ define('game/Player', [
 		}
 
 		/**
-		 * Set a play timeout for the player. If the 
-		 * @param {number?} time number of seconds before elapse, or
-		 * 0 to cancel any timeout. If undefined, will restart the timer with
-		 * the time remaining to the player.
-		 * @param {function?} onTimeout a function() invoked if the
-		 * timer expires, ignored if time undefined
+		 * Handle a tick of the server clock.
 		 */
-		startTimer(time, onTimeout) {
-			if (typeof time !== 'undefined') {
-				this.stopTimer();
-				// Timer is being reset
-				if (time === 0)
-					// No timeout, nothing to do
-					return;
-				this._onTimeout = onTimeout;
-			} else if (!this._timeoutTimer &amp;&amp; this.secondsToPlay > 0) {
-				// Timer was never started of was previously stopped in
-				// stopTimer, and there is time remaining. Restart the
-				// timer with the outstanding seconds.
-				time = this.secondsToPlay;
-			} else {
-				// Timer is running
-				if (this.secondsToPlay &lt;= 0)
-					this.stopTimer();
-				// Otherwise let the timer run on
-				return;
-			}
-
-			if (this.debug)
-				console.debug(`${this.name}'s go will time out in ${time}s`);
-
-			// Set an overriding timeout
-			this.secondsToPlay = time;
-			this._timeoutAt = Date.now() + time * 1000;
-			this._timeoutTimer = setTimeout(() => {
-				this._timeoutTimer = null;
-				if (this.debug)
+		tick() {
+			this.clock--;
+			if (this._debug)
+				console.debug("Tick", this.name, this.clock);
+			if (this.clock &lt;= 0 &amp;&amp; typeof this._onTimeout === 'function') {
+				if (this._debug)
 					console.debug(`${this.name} has timed out at ${Date.now()}`);
-				// Invoke the timeout function
-				if (typeof this._onTimeout === 'function')
-					this._onTimeout();
-			}, time * 1000);
+				this._onTimeout();
+				// Timeout only happens once!
+				delete this._onTimeout;
+			}
 		}
 
 		/**
-		 * Cancel current play timeout
+		 * Set a timeout for the player, which will be triggered when the
+		 * clock reaches exactly 0. The timeout is only triggered once for
+		 * a call to setTimeout, resetting the clock will not invoke it
+		 * again.
+		 * @param {number} time number of seconds before timeout
+		 * @param {function} onTimeout a function() invoked if the
+		 * timer expires, ignored if time undefined
 		 */
-		stopTimer() {
-			if (this._timeoutTimer) {
-				this.secondsToPlay = Math.ceil(
-					(this._timeoutAt - Date.now()) / 1000);
-				if (this.debug)
-					console.debug(`${this.name} stopped timer with ${this.secondsToPlay}s remaining`);
-				clearTimeout(this._timeoutTimer);
-				this._timeoutTimer = null;
-			}
+		setTimeout(time, onTimeout) {
+			if (this._debug)
+				console.debug(`${this.name} turn timeout in ${time}s`);
+			this.clock = time;
+			this._onTimeout = onTimeout;
 		}
 
 		/**
@@ -334,6 +318,7 @@ define('game/Player', [
 			$tr.append($status);
 			
 			$tr.append(`&lt;td class='score'>${this.score}&lt;/td>`);
+			$tr.append(`&lt;td class='player-clock'>&lt;/td>`);
 
 			return $tr;
 		}
@@ -361,6 +346,11 @@ define('game/Player', [
 		}
 	}
 
+	// Timer types
+	Player.TIMER_NONE = /*i18n*/"No timer";
+	Player.TIMER_TURN = /*i18n*/'Turn timer';
+	Player.TIMER_GAME = /*i18n*/'Game timer';
+
 	return Player;
 });
 </code></pre>
@@ -379,7 +369,7 @@ define('game/Player', [
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed May 04 2022 10:34:27 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Thu May 05 2022 10:07:04 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>
