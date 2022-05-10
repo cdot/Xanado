@@ -57,6 +57,25 @@ define('server/Server', [
 		 */
 		constructor(config) {
 			this.config = config;
+
+			if (!config.defaults) {
+				config.defaults = {
+					edition: config.defaultEdition || 'English_Scrabble',
+					dictionary: config.defaultDictionary
+					|| 'CSW2019_English',
+					theme: "default",
+					warnings: true,
+					cheers: true,
+					tile_click: true,
+					turn_alert: true,
+					notification: true
+				};
+			}
+			config.defaults.canEmail = (typeof config.mail !== 'undefined');
+
+			config.defaults.notification = config.defaults.notification &amp;&amp;
+			(typeof config.https !== 'undefined');
+
 			this.db = new Platform.Database(config.games || 'games', 'game');
 			// Live games; map from game key to Game
 			this.games = {};
@@ -141,13 +160,10 @@ define('server/Server', [
 			cmdRouter.get('/theme/:css',
 					 (req, res) => this.request_theme(req, res));
 
-			// Get a description of defaults for new games
-			cmdRouter.get('/defaults', (req, res) =>
-					 res.send({
-						 edition: config.defaultEdition,
-						 dictionary: config.defaultDictionary,
-						 canEmail: typeof config.mail !== 'undefined'
-					 }));
+			// Defaults for user session settings.
+			// Some of these can be overridden by a user.
+			cmdRouter.get('/defaults',
+						  (req, res) => res.send(config.defaults));
 
 			// Get Game. This is a full description of the game, including
 			// the Board. c.f. /simple which provides a cut-down version
@@ -534,8 +550,8 @@ define('server/Server', [
 		 */
 		request_theme(req, res, next) {
 			let theme = "default";
-			if (req.user &amp;&amp; req.user.prefs &amp;&amp; req.user.prefs.theme)
-				theme = req.user.prefs.theme;
+			if (req.user &amp;&amp; req.user.settings &amp;&amp; req.user.settings.theme)
+				theme = req.user.settings.theme;
 			let file = requirejs.toUrl(`css/${theme}/${req.params.css}`);
 			console.log(file);
 			return Fs.readFile(file)
@@ -744,7 +760,7 @@ define('server/Server', [
 		request_addRobot(req, res) {
 			const gameKey = req.body.gameKey;
 			const dic = req.body.dictionary;
-			const canChallenge = req.body.canChallenge;
+			const canChallenge = req.body.canChallenge || false;
 			return this.loadGame(gameKey)
 			.then(game => {
 				if (game.hasRobot())
@@ -911,7 +927,7 @@ define('server/Server', [
 					]);
 
 				// The command name and arguments
-				const args = req.body.args ? JSON.parse(req.body.args) : null;
+				const args = req.body;
 				
 				if (this.config.debug_comms)
 					console.debug(`COMMAND ${command} player ${player.name} game ${game.key}`);
@@ -1046,13 +1062,13 @@ define('server/Server', [
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="I18N.html">I18N</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="Ui.html">Ui</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="I18N.html">I18N</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Mon May 09 2022 17:48:42 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue May 10 2022 18:07:07 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

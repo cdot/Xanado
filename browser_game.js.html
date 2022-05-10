@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: browser/Ui.js</title>
+    <title>JSDoc: Source: browser/game.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: browser/Ui.js</h1>
+    <h1 class="page-title">Source: browser/game.js</h1>
 
     
 
@@ -31,54 +31,18 @@ License MIT. See README.md at the root of this distribution for full copyright
 and license information*/
 /* eslint-env browser, jquery */
 
-define('browser/Ui', [
-	'socket.io',
+define('browser/game', [
 	'game/Fridge',
 	'game/Tile', 'game/Rack', 'game/Board',
 	'game/Game', 'game/Player',
-	'browser/Dialog',
+	'browser/UI', 'browser/Dialog',
 	'jquery', 'jqueryui', 'cookie', 'browser/icon_button'
 ], (
-	Socket,
 	Fridge,
 	Tile, Rack, Board,
 	Game, Player,
-	Dialog
+	UI, Dialog
 ) => {
-
-	/**
-	 * Report an error returned from an ajax request.
-	 * @param {string|Error|array|jqXHR} args This will either be a
-	 * simple i18n string ID, or an array containing an i18n ID and a
-	 * series of arguments, or a jqXHR.
-	 * @private
-	 */
-	function report(args) {
-		// Handle a jqXHR
-		if (typeof args === 'object') {
-			if (args.responseJSON)
-				args = args.responseJSON;
-			else if (args.responsetext)
-				args = args.responseJSON;
-		}
-
-		let message;
-		if (typeof(args) === 'string') // simpe string
-			message = $.i18n(args);
-		else if (args instanceof Error) // Error object
-			message = args.toString();
-		else if (args instanceof Array) { // First element i18n code
-			message = $.i18n.apply($.i18n, args);
-		} else // something else
-			message = args.toString();
-
-		$('#alertDialog')
-		.text(message)
-		.dialog({
-			modal: true,
-			title: $.i18n("XANADO problem")
-		});
-	}
 
 	/**
 	 * Format a move score summary.
@@ -131,75 +95,15 @@ define('browser/Ui', [
 		return $div;
 	}
 
-	/**
-	 * Play an audio clip, identified by #id. Clips must be
-	 * pre-loaded in the HTML. Note that most (all?) browsers require
-	 * some sort of user interaction before they will play audio
-	 * embedded in the page.
-	 * @private
-	 */
-	function playAudio(id) {
-		const audio = document.getElementById(id);
-
-		if (audio.playing)
-			audio.pause();
-
-		audio.defaultPlaybackRate = 1;
-		audio.volume = 1;
-
-		try {
-			audio.currentTime = 0;
-			audio.play();
-		}
-		catch(e) {
-			const currentTime = () => {
-				audio.currentTime = 0;
-				audio.removeEventListener('canplay', currentTime, true);
-				audio.play();
-			};
-			audio.addEventListener('canplay', currentTime, true);
-		}
-	}
 
 	/**
 	 * User interface to a game in a browser. The Ui reflects the game state as
 	 * communicated from the server, through the exchange of various messages.
 	 */
-	class Ui {
+	class GameUI extends UI {
 
 		constructor() {
-
-			console.log("Starting game UI");
-
-			/**
-			 * Are we using https?
-			 * @member {boolean}
-			 */
-			this.usingHttps = document.URL.indexOf('https:') === 0;
-
-			/**
-			 * Current user preference settings. Will be updated when
-			 * session is known.
-			 * @member {object}
-			 */
-			this.settings = {
-				turn_alert: true,
-				cheers: true,
-				tile_click: true,
-				warnings: true,
-				// Notification requires https
-				notification: this.usingHttps,
-				theme: "default"
-			};
-
-
-			let m = document.URL.match(/[?;&amp;]game=([^;&amp;]+)/);
-			if (!m) {
-				const mess = `no game in ${document.URL}`;
-				console.error(mess);
-				throw new Error(mess);
-			}
-			const gameKey = m[1];
+			super();
 
 			/**
 			 * Currently selected Square
@@ -224,37 +128,39 @@ define('browser/Ui', [
 			 * lateinit in loadGame
 			 * @member {Player}
 			 */
-			this.player = null;
+			this.player = undefined;
 
 			/**
 			 * Board lock status, private
 			 * @member {boolean}
 			 */
 			this.boardLocked = false;
+		}
+
+		// @Override
+		decorate() {
+			let m = document.URL.match(/[?;&amp;]game=([^;&amp;]+)/);
+			if (!m) {
+				const mess = `no game in ${document.URL}`;
+				console.error(mess);
+				throw new Error(mess);
+			}
+			const gameKey = m[1];
 
 			this.attachHandlers();
 
-			$("button").button();
-
-			$(document)
-			.tooltip({
-				items: '[data-i18n-tooltip]',
-				content: function() {
-					return $.i18n($(this).data('i18n-tooltip'));
-				}
-			});
-
 			console.debug(`GET /game/${gameKey}`);
-			$.get(`/game/${gameKey}`)
+			return $.get(`/game/${gameKey}`)
 			.then(frozen => {
-				$(".user-interface").show();
 				console.debug(`--> Game ${gameKey}`);
-				const game = Fridge.thaw(frozen, Game.classes);
-				return this.identifyPlayer(game)
-				.then (playerKey => this.loadGame(game))
-				.then(() => this.attachSocketListeners());
+				return Fridge.thaw(frozen, Game.classes);
 			})
-			.catch(report);
+			.then(game => {
+				return this.identifyPlayer(game)
+				.then (playerKey => this.loadGame(game));
+			})
+			.then(() => super.decorate())
+			.catch(UI.report);
 		}
 
 		/**
@@ -277,12 +183,12 @@ define('browser/Ui', [
 			this.lockBoard(true);
 			this.enableTurnButton(false);
 			this.cancelNotification();
-			$.post(
-				`/command/${command}/${this.game.key}/${this.player.key}`,
-				// Pass data as a JSON string. If given an object,
-				// jQuery will serialise it using $.param, which will
-				// convert all numbers to strings. Which is a PITA.
-				{ args: JSON.stringify(args) })
+			$.ajax({
+				url: `/command/${command}/${this.game.key}/${this.player.key}`,
+				type: "POST",
+				contentType: "application/json",
+				data: JSON.stringify(args)
+			})
 			.then(r => console.debug(`${command} OK`, r))
 			.catch(console.error);
 		}
@@ -450,12 +356,12 @@ define('browser/Ui', [
 				if (player.score === winningScore) {
 					if (isMe) {
 						iWon = true;
-						if (interactive &amp;&amp; this.settings.cheers)
-							playAudio('endCheer');
+						if (interactive &amp;&amp; this.getSetting('cheers'))
+							this.playAudio('endCheer');
 					}
 					winners.push(name);
-				} else if (isMe &amp;&amp; interactive &amp;&amp; this.settings.cheers)
-					playAudio('lost');
+				} else if (isMe &amp;&amp; interactive &amp;&amp; this.getSetting('cheers'))
+					this.playAudio('lost');
 
 				if (player.rack.isEmpty()) {
 					if (unplayed > 0) {
@@ -575,8 +481,8 @@ define('browser/Ui', [
 			if (ticked === this.player
 				&amp;&amp; this.game.timerType === Player.TIMER_TURN
 				&amp;&amp; remains &lt;= 10
-				&amp;&amp; this.settings.warnings)
-				playAudio('tick');
+				&amp;&amp; this.getSetting('warnings'))
+				this.playAudio('tick');
 
 			const $to = $(`#player${ticked.key} .player-clock`);
 			if (remains &lt; this.game.timeLimit / 6) {
@@ -614,8 +520,8 @@ define('browser/Ui', [
 			// pre-sendCommand state and issues a message.
 			this.lockBoard(false);
 			this.enableTurnButton(true);
-			if (this.settings.warnings)
-				playAudio('oops');
+			if (this.getSetting('warnings'))
+				this.playAudio('oops');
 			addToLog(true, $.i18n(
 				"The word{{PLURAL:$1||s}} $2 {{PLURAL:$1|was|were}} not found in the dictionary",
 				rejection.words.length,
@@ -764,44 +670,28 @@ define('browser/Ui', [
 		 * or undefined if the player is not logged in or is not in the game
 		 */
 		identifyPlayer(game) {
-			$(".logged-in,.not-logged-in,.bad-user").hide();
-			return $.get("/session")
+			$(".bad-user").hide();
+			return this.getSession()
 			.then(session => {
-				console.debug("Signed in as", session.name);
-				// Apply user preferences
-				this.settings = $.extend(this.settings, session.prefs);
-				// Find if they are a player
-				this.player = game.players.find(p => p.key === session.key);
-				if (this.player) {
-					$(".logged-in")
+				if (session) {
+					// Find if they are a player
+					this.player = game.players.find(
+						p => p.key === session.key);
+					if (this.player)
+						return this.player.key;
+					$("#bad-user>span")
+					.text($.i18n(
+						"You ($1) are not playing in this game",
+						this.session.name));
+					$("#bad-user")
 					.show()
-					.find("#whoami")
-					.text($.i18n('um-logged-in-as', session.name));
-					return session.key;
+					.find("button")
+					.on("click", () => {
+						$.post("/logout")
+						.then(() => location.replace(location));
+					});
 				}
-				$("#bad-user>span")
-				.text($.i18n(
-					"You ($1) are not playing in this game", session.name));
-				$("#bad-user")
-				.show()
-				.find("button")
-				.on("click", () => {
-					$.post("/logout")
-					.then(() => location.replace(location));
-				});
 				return undefined;
-			})
-			.catch(e => {
-				console.debug(e);
-				this.player = undefined;
-				$(".not-logged-in")
-				.show()
-				.find("button")
-				.on("click", () => Dialog.open("LoginDialog", {
-					postResult: () => location.replace(location),
-					error: report
-				}));
-				return Promise.resolve();
 			});
 		}
 
@@ -911,57 +801,21 @@ define('browser/Ui', [
 			return Promise.resolve();
 		}
 
-		/**
-		 * Attach socket communications listeners
-		 */
-		attachSocketListeners() {
+		// @Override
+		connectToServer() {
+			const playerKey = this.player ? this.player.key : undefined;
+			// Confirm to the server that we're ready to play
+			console.debug('&lt;-- join');
+			this.socket.emit('join', {
+				gameKey: this.game.key,
+				playerKey: playerKey
+			});
+			return Promise.resolve();
+		}
 
-			this.socket = Socket.connect(null);
-
-			let $reconnectDialog = null;
-
-			this.socket
-
-			.on('connect', skt => {
-				// Note: 'connect' is synonymous with 'connection'
-				// Socket has connected to the server
-				console.debug('--> connect');
-				if ($reconnectDialog) {
-					$reconnectDialog.dialog('close');
-					$reconnectDialog = null;
-				}
-				if (this.wasConnected) {
-					this.cancelNotification();
-				} else {
-					this.wasConnected = true;
-					const playerKey = this.player ? this.player.key : undefined;
-					// Confirm to the server that we're ready to play
-					console.debug('&lt;-- join');
-					this.socket.emit('join', {
-						gameKey: this.game.key,
-						playerKey: playerKey
-					});
-				}
-			})
-
-			.on('disconnect', skt => {
-				// Socket has disconnected for some reason
-				// (server died, maybe?) Back off and try to reconnect.
-				console.debug(`--> disconnect`);
-				$reconnectDialog = $('#alertDialog')
-				.text($.i18n('ui-server-disconnected'))
-				.dialog({ modal: true });
-				const ui = this;
-				setTimeout(() => {
-					// Try and rejoin after a 3s timeout
-					console.debug('&lt;-- join (after timeout)');
-					ui.socket.emit('join', {
-						gameKey: this.game.key,
-						playerKey: this.player ? this.player.key : undefined
-					});
-				}, 3000);
-
-			})
+		// @Override
+		attachSocketListeners(socket) {
+			socket
 
 			// socket.io events 'new_namespace', 'disconnecting',
 			// 'initial_headers', 'headers', 'connection_error' are not handled
@@ -1076,33 +930,10 @@ define('browser/Ui', [
 					$("body").focus();
 			});
 
-			// gear button
-			$('#settingsButton')
-			.on('click', () => {
-				const curTheme = this.settings.theme;
-				Dialog.open("SettingsDialog", {
-				settings: this.settings,
-				postAction: "/session-prefs",
-					postResult: prefs => {
-						if (prefs.theme === curTheme)
-							this.settings = prefs;
-						else
-							window.location.reload();
-					},
-					error: report
-				});
-			});
-
 			// clock button
 			$("#pauseButton")
 			.on('click', () => this.sendCommand("pause"));
 
-			if (!this.usingHttps) {
-				// Notification requires https
-				$("input.setting[data-set='notification']")
-				.prop('disabled', true);
-			}
-			
 			// Events raised by game components
 			$(document)
 			.on('SquareChanged',
@@ -1142,8 +973,8 @@ define('browser/Ui', [
 			if (rackSquare) {
 				// moveTile will use a blank if the letter isn't found
 				this.moveTile(rackSquare, this.selectedSquare, letter);
-				if (this.settings.tile_click)
-					playAudio('tiledown');
+				if (this.getSetting('tile_click'))
+					this.playAudio('tiledown');
 				if (this.typeAcross)
 					this.moveTypingCursor(1, 0);
 				else
@@ -1274,8 +1105,8 @@ define('browser/Ui', [
 			if (fromSource.tile) {
 				this.moveTile(fromSource, toSquare);
 				this.selectSquare(null);
-				if (this.settings.tile_click)
-					playAudio('tiledown');
+				if (this.getSetting('tile_click'))
+					this.playAudio('tiledown');
 			}
 		}
 
@@ -1544,8 +1375,8 @@ define('browser/Ui', [
 					player.rack.$refresh();
 
 					if (turn.type === 'challenge-won') {
-						if (this.settings.warnings)
-							playAudio('oops');
+						if (this.getSetting('warnings'))
+							this.playAudio('oops');
 						this.notify(
 							/*.i18n('ui-notify-title-succeeded')*/
 							/*i18n ui-notify-body-*/'succeeded',
@@ -1562,8 +1393,8 @@ define('browser/Ui', [
 				break;
 
 			case 'challenge-failed':
-				if (this.settings.warnings)
-					playAudio('oops');
+				if (this.getSetting('warnings'))
+					this.playAudio('oops');
 				if (challenger === this.player) {
 					// Our challenge failed
 					/*.i18n('ui-notify-title-you-failed')*/
@@ -1577,8 +1408,8 @@ define('browser/Ui', [
 
 			case 'move':
 				if (wasUs) {
-					if (turn.bonus > 0 &amp;&amp; this.settings.cheers)
-						playAudio('bonusCheer');
+					if (turn.bonus > 0 &amp;&amp; this.getSetting('cheers'))
+						this.playAudio('bonusCheer');
 					this.placedCount = 0;
 				}
 
@@ -1627,8 +1458,8 @@ define('browser/Ui', [
 			}
 
 			if (this.isThisPlayer(turn.nextToGoKey)) {
-				if (this.settings.turn_alert)
-					playAudio('yourturn');
+				if (this.getSetting('turn_alert'))
+					this.playAudio('yourturn');
 				this.lockBoard(false);
 				this.enableTurnButton(true);
 			} else {
@@ -1744,7 +1575,7 @@ define('browser/Ui', [
 			const move = this.game.board.analyseMove();
 			if (typeof move === 'string') {
 				// fatal - should never get here
-				report(move);
+				UI.report(move);
 				return;
 			}
 			move.playerKey = this.player.key;
@@ -1898,80 +1729,9 @@ define('browser/Ui', [
 		shuffleRack() {
 			this.player.rack.shuffle().$refresh();
 		}
-
-		/**
-		 * Generate a notification using the HTML5 notifications API
-		 * @param {string} id notification id
-		 */
-		notify() {
-			const args = Array.from(arguments);
-			const id = args[0];
-			args[0] = `ui-notify-title-${id}`;
-			const title = $.i18n.call(args);
-			args[0] = `ui-notify-body-${id}`;
-			const body = $.i18n.call(args);
-			this.canNotify()
-			.then(() => {
-				this.cancelNotification();
-				const notification = new Notification(
-					title,
-					{
-						icon: '/images/favicon.ico',
-						body: body
-					});
-				this.notification = notification;
-				$(notification)
-				.on('click', function () {
-					this.cancel();
-				})
-				.on('close', () => {
-					delete this.notification;
-				});
-			})
-			.catch(() => {});
-		}
-
-		/**
-		 * Promise to check if we have been granted permission to
-		 * create Notifications.
-		 * @return {Promise} Promise that resolves to undefined if we can notify
-		 */
-		canNotify() {
-			if (!(this.usingHttps
-				  &amp;&amp; this.settings.notification
-				  &amp;&amp; 'Notification' in window))
-				return Promise.reject();
-
-			switch (Notification.permission) {
-			case 'denied':
-				return Promise.reject();
-			case 'granted':
-				return Promise.resolve();
-			default:
-				return new Promise((resolve, reject) => {
-					return Notification.requestPermission()
-					.then(result => {
-						if (result === 'granted')
-							resolve();
-						else
-							reject();
-					});
-				});
-			}
-		}
-
-		/**
-		 * Cancel any outstanding Notification
-		 */
-		cancelNotification() {
-			if (this.notification) {
-				this.notification.close();
-				delete this.notification;
-			}
-		}
 	}
 
-	return Ui;
+	new GameUI().build();
 });
 </code></pre>
         </article>
@@ -1983,13 +1743,13 @@ define('browser/Ui', [
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="I18N.html">I18N</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="Ui.html">Ui</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="I18N.html">I18N</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Mon May 09 2022 17:48:42 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue May 10 2022 18:07:07 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>
