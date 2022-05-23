@@ -33,6 +33,14 @@ $ node js/dawg/explore.js SOWPODS_English --anagrams scrabble
 ```
 Run it with no parameters for help.
 
+If you are extending an existing dictionary with new words, you don't
+need to run the compressor. If there is a file in the `dictionaries`
+folder with the same name as the dictionary and the extension `.white`
+it will be read and the words in it loaded into the dictionary when
+the server starts. It will affect the performance of the dictionary,
+so you are recommended to run the compressor every so often to
+incorporate those words.
+
 ## Internationalisation
 The UI uses the [Wikimedia jQuery.i18n framework](https://github.com/wikimedia/jquery.i18n) to support translations. Currently translation files are provided for English, (une très mauvaise traduction en) French, and (eine schlechte Übersetzung ins) German. To generate your own translation (or improve on Google's), copy `/i18n/en.json` to a file using your language code (e.g. `it` for Italian) and edit the new file to provide the translation. You can use the `bin/checkStrings.pl` Perl program to check the completeness of your translations.
 

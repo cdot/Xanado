@@ -250,7 +250,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Board.js.html">game/Board.js</a>, <a href="game_Board.js.html#line372">line 372</a>
+        <a href="game_Board.js.html">game/Board.js</a>, <a href="game_Board.js.html#line373">line 373</a>
     </li></ul></dd>
     
 
@@ -304,7 +304,7 @@
     
 
     
-    <h4 class="name" id="analyseMove"><span class="type-signature"></span>analyseMove<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="Move.html">Move</a>|string}</span></h4>
+    <h4 class="name" id="analysePlay"><span class="type-signature"></span>analysePlay<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="Move.html">Move</a>|string}</span></h4>
     
 
     
@@ -312,7 +312,13 @@
 
 
 <div class="description">
-    <p>UI-side move calculation. Constructs a <a href="Move.html">Move</a></p>
+    <p>UI-side move calculation. Constructs a <a href="Move.html">Move</a>.
+<code>analysePlay</code> and <code>scorePlay</code> do essentially the same job; given a board with
+tiles placed but not locked, calculate the score and the words formed. They
+differ in respect of their application; analysePlay is intended to
+be used client-side to calculate a move made by a human, whereas scorePlay
+is used to calculate the score for a play being constructed on the server
+side by a robot.</p>
 </div>
 
 
@@ -356,7 +362,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Board.js.html">game/Board.js</a>, <a href="game_Board.js.html#line277">line 277</a>
+        <a href="game_Board.js.html">game/Board.js</a>, <a href="game_Board.js.html#line282">line 282</a>
     </li></ul></dd>
     
 
@@ -520,7 +526,7 @@ not sent to the client.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Board.js.html">game/Board.js</a>, <a href="game_Board.js.html#line267">line 267</a>
+        <a href="game_Board.js.html">game/Board.js</a>, <a href="game_Board.js.html#line266">line 266</a>
     </li></ul></dd>
     
 
@@ -1253,13 +1259,13 @@ a tile that was placed in a previous move</p>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="I18N.html">I18N</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Command.html">Command</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Notify.html">Notify</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri May 13 2022 17:17:21 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Mon May 23 2022 14:43:45 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

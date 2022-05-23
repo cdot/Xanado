@@ -32,71 +32,19 @@ and license information*/
 /* eslint-env browser, jquery */
 
 define("browser/game", [
-	"game/Fridge",
+	"common/Fridge", "common/Utils",
 	"game/Tile", "game/Rack", "game/Board",
 	"game/Game", "game/Player", "game/Turn",
 	"game/Command", "game/Notify",
 	"browser/UI", "browser/Dialog",
 	"jquery", "jqueryui", "cookie", "browser/icon_button"
 ], (
-	Fridge,
+	Fridge, Utils,
 	Tile, Rack, Board,
 	Game, Player, Turn,
 	Command, Notify,
 	UI, Dialog
 ) => {
-
-	/**
-	 * Format a move score summary.
-	 * @param turn {Move|Turn} the turn or move being scored.
-	 * @param {boolean} hideScore true to elide the score
-	 * @private
-	 */
-	function formatScore(turn, hideScore) {
-		let sum = 0;
-		const $span = $("&lt;span>&lt;/span>");
-		for (let word of turn.words) {
-			$span
-			.append(` &lt;span class="word">${word.word}&lt;/span>`);
-			if (!hideScore) {
-				$span
-				.append(` (&lt;span class="word-score">${word.score}&lt;/span>)`);
-			}
-			sum += word.score;
-		}
-		// .score will always be a number after a move
-		if (!hideScore &amp;&amp; turn.words.length > 1 || turn.score > sum) {
-			$span
-			.append(" ")
-			.append($.i18n("total $1", turn.score));
-		}
-		return $span;
-	}
-
-	/**
-	 * Append to the log pane. Messages are wrapped in a div, which
-	 * may have the optional css class.
-	 * @param {boolean} interactive false if we are replaying messages into
-	 * the log, true if this is an interactive response to a player action.
-	 * @param {(jQuery|string)} mess thing to add
-	 * @param {string?} optional css class name
-	 * @return {jQuery} the div created
-	 * @private
-	 */
-	function addToLog(interactive, mess, css) {
-		const $div = $("&lt;div>&lt;/div>").addClass("logEntry");
-		if (css)
-			$div.addClass(css);
-		$div.append(mess);
-		const $lm = $("#logMessages");
-		$lm.append($div);
-		if (interactive)
-			$lm.animate({
-				scrollTop: $("#logMessages").prop("scrollHeight")
-			}, 300);
-		return $div;
-	}
-
 
 	/**
 	 * User interface to a game in a browser. The Ui reflects the game state as
@@ -166,6 +114,58 @@ define("browser/game", [
 		}
 
 		/**
+		 * Format a move score summary.
+		 * @param turn {Move|Turn} the turn or move being scored.
+		 * @param {boolean} hideScore true to elide the score
+		 * @return {jquery} the span containing the score
+		 * @private
+		 */
+		static $score(turn, hideScore) {
+			let sum = 0;
+			const $span = $("&lt;span>&lt;/span>");
+			for (let word of turn.words) {
+				$span
+				.append(` &lt;span class="word">${word.word}&lt;/span>`);
+				if (!hideScore) {
+					$span
+					.append(` (&lt;span class="word-score">${word.score}&lt;/span>)`);
+				}
+				sum += word.score;
+			}
+			// .score will always be a number after a move
+			if (!hideScore &amp;&amp; turn.words.length > 1 || turn.score > sum) {
+				$span
+				.append(" ")
+				.append($.i18n("total $1", turn.score));
+			}
+			return $span;
+		}
+
+		/**
+		 * Append to the log pane. Messages are wrapped in a div, which
+		 * may have the optional css class.
+		 * @param {boolean} interactive false if we are replaying messages into
+		 * the log, true if this is an interactive response to a player action.
+		 * @param {(jQuery|string)} mess thing to add
+		 * @param {string?} optional css class name
+		 * @return {jQuery} the div created
+		 * @private
+		 */
+		static $log(interactive, mess, css) {
+			const $div = $("&lt;div>&lt;/div>").addClass("logEntry");
+			if (css)
+				$div.addClass(css);
+			$div.append(mess);
+			const $lm = $("#logMessages");
+			$lm.append($div);
+			if (interactive)
+				$lm.animate({
+					scrollTop: $("#logMessages").prop("scrollHeight")
+				}, 300);
+			return $div;
+		}
+
+		/**
 		 * True if the key is this current player key
 		 * @param {string} key the player key to check
 		 * @return {boolean} true if we are that player
@@ -185,7 +185,7 @@ define("browser/game", [
 			this.enableTurnButton(false);
 			this.cancelNotification();
 			$.ajax({
-				url: `/command/${command}/${this.game.key}/${this.player.key}`,
+				url: `/command/${command}/${this.game.key}`,
 				type: "POST",
 				contentType: "application/json",
 				data: JSON.stringify(args)
@@ -231,7 +231,7 @@ define("browser/game", [
 				else
 					who = $.i18n("$1's", player.name);
 			}
-			addToLog(interactive, $.i18n(
+			GameUI.$log(interactive, $.i18n(
 				"&lt;span class='player-name'>$1&lt;/span> $2", who, what),
 					 "turn-player");
 
@@ -261,7 +261,7 @@ define("browser/game", [
 			switch (turn.type) {
 
 			case Turn.PLAY:
-				turnText = formatScore(turn, false);
+				turnText = GameUI.$score(turn, false);
 				break;
 
 			case Turn.SWAP:
@@ -311,7 +311,7 @@ define("browser/game", [
 				throw Error(`Unknown move type ${turn.type}`);
 			}
 
-			addToLog(interactive, turnText, "turn-detail");
+			GameUI.$log(interactive, turnText, "turn-detail");
 
 			if (isLatestTurn
 				&amp;&amp; turn.emptyPlayerKey
@@ -319,11 +319,11 @@ define("browser/game", [
 				&amp;&amp; turn.type !== Turn.CHALLENGE_LOST
 				&amp;&amp; turn.type !== Turn.GAME_OVER) {
 				if (this.isThisPlayer(turn.emptyPlayerKey)) {
-					addToLog(interactive, $.i18n(
+					GameUI.$log(interactive, $.i18n(
 						"You have no more tiles, game will be over if your play isn't challenged"),
 						"turn-narrative");
 				} else
-					addToLog(interactive, $.i18n(
+					GameUI.$log(interactive, $.i18n(
 						"$1 has no more tiles, game will be over unless you challenge",
 						this.game.getPlayer(turn.emptyPlayerKey).name),
 							 "turn-narrative");
@@ -352,7 +352,7 @@ define("browser/game", [
 			// we just need to present the results.
 			const unplayed = game.players.reduce(
 				(sum, player) => sum + player.rack.score(), 0);
-			addToLog(interactive, $.i18n(turn.endState || Game.STATE_GAME_OVER),
+			GameUI.$log(interactive, $.i18n(turn.endState || Game.STATE_GAME_OVER),
 					 "game-state");
 			const $narrative = $("&lt;div>&lt;/div>").addClass("game-outcome");
 			game.players.forEach(player => {
@@ -396,24 +396,15 @@ define("browser/game", [
 				}
 			});
 
-			let who;
-			if (winners.length == 0)
-				who = "";
-			else if (winners.length == 1)
-				who = winners[0];
-			else
-				who = $.i18n("$1 and $2",
-							 winners.slice(0, winners.length - 1).join(", "),
-							 winners[winners.length - 1]);
-
+			let who = Utils.andList(winners);
 			let nWinners = 0;
 			if (iWon &amp;&amp; winners.length === 1)
 				who = $.i18n("You");
 			else
 				nWinners = winners.length;
-			addToLog(interactive, $.i18n("$1 {{PLURAL:$2|has|have}} won",
+			GameUI.$log(interactive, $.i18n("$1 {{PLURAL:$2|has|have}} won",
 										 who, nWinners));
-			addToLog(interactive, $narrative);
+			GameUI.$log(interactive, $narrative);
 		}
 
 		/**
@@ -428,7 +419,7 @@ define("browser/game", [
 		 * message
 		 * @param {object[]} args i18n arguments
 		 */
-		handle_message(message) {
+		static handle_message(message) {
 			console.debug("--> message");
 			let args = [ message.text ];
 			if (typeof message.args === "string")
@@ -450,7 +441,7 @@ define("browser/game", [
 			$msg.text($.i18n.apply(null, args));
 			$mess.append($msg);
 
-			addToLog(true, $mess);
+			GameUI.$log(true, $mess);
 
 			// Special handling for Hint, highlight square
 			if (message.sender === "Advisor"
@@ -476,7 +467,7 @@ define("browser/game", [
 			let remains = params.clock;
 			ticked.clock = remains;
 
-			const clocks = Game.formatTimeInterval(remains);
+			const clocks = Utils.formatTimeInterval(remains);
 			if (this.game.timerType === Player.TIMER_TURN) {
 				$(`.player-clock`)
 				.empty()
@@ -529,7 +520,7 @@ define("browser/game", [
 			this.enableTurnButton(true);
 			if (this.getSetting("warnings"))
 				this.playAudio("oops");
-			addToLog(true, $.i18n(
+			GameUI.$log(true, $.i18n(
 				"The word{{PLURAL:$1||s}} $2 {{PLURAL:$1|was|were}} not found in the dictionary",
 				rejection.words.length,
 				rejection.words.join(", ")), "turn-narrative");
@@ -538,7 +529,7 @@ define("browser/game", [
 		/**
 		 * Handle a keydown. These are captured in the root of the UI and dispatched here.
 		 */
-		handleKeydown(event) {
+		handle_keydown(event) {
 			// Only handle events targeted when the board is not
 			// locked, and ignore events targeting the chatInput.
 			// Checks for selection status are performed in
@@ -733,12 +724,12 @@ define("browser/game", [
 			const $board = game.board.$ui();
 			$("#board").append($board);
 
-			addToLog(true, $.i18n("Game started"), "game-state");
+			GameUI.$log(true, $.i18n("Game started"), "game-state");
 
 			game.turns.forEach(
 				(turn, i) => this.describeTurn(
 					turn, i === game.turns.length - 1), false);
-			addToLog(true, ""); // Force scroll to end of log
+			GameUI.$log(true, ""); // Force scroll to end of log
 
 			if (game.hasEnded()) {
 				if (game.nextGameKey)
@@ -847,7 +838,7 @@ define("browser/game", [
 			.on(Notify.NEXT_GAME,	params => this.handle_nextGame(params))
 
 			// A message has been sent
-			.on(Notify.MESSAGE, message => this.handle_message(message))
+			.on(Notify.MESSAGE, message => GameUI.handle_message(message))
 
 			// Attempted play has been rejected
 			.on(Notify.REJECT, params => this.handle_reject(params))
@@ -856,7 +847,7 @@ define("browser/game", [
 			.on(Notify.PAUSE, params => this.handle_pause(params))
 
 			// Game has been unpaused
-			.on(Notify.UNPAUSE, params => this.handle_unpause(params))
+			.on(Notify.UNPAUSE, params => GameUI.handle_unpause(params))
 
 			.on(Notify.JOIN, () => console.debug("--> join"));
 		}
@@ -899,10 +890,8 @@ define("browser/game", [
 		 * @param {string} params.key game key
 		 * @param {string} params.name name of player who paused/released
 		 */
-		handle_unpause(params) {
+		static handle_unpause(params) {
 			console.debug(`--> unpause ${params.name}`);
-			if (params.key !== this.game.key)
-				console.error(`key mismatch ${this.game.key}`);
 			$(".Surface .letter").removeClass("hidden");
 			$(".Surface .score").removeClass("hidden");
 			$("#pauseDialog")
@@ -942,11 +931,7 @@ define("browser/game", [
 			// Events raised by game components
 			$(document)
 			.on("SquareChanged",
-				(e, square) => {
-					if (!square.id)
-						debugger;
-					square.$refresh();
-				})
+				(e, square) => square.$refresh())
 
 			.on("SelectSquare",
 				(e, square) => this.selectSquare(square))
@@ -955,7 +940,7 @@ define("browser/game", [
 				(e, source, square) => this.dropSquare(source, square))
 
 			// Keydown anywhere in the document
-			.on("keydown", event => this.handleKeydown(event));
+			.on("keydown", event => this.handle_keydown(event));
 		}
 
 		/**
@@ -985,7 +970,7 @@ define("browser/game", [
 				else
 					this.moveTypingCursor(0, 1);
 			} else
-				addToLog($.i18n("'$1' is not on the rack", letter));
+				GameUI.$log($.i18n("'$1' is not on the rack", letter));
 		}
 
 		/**
@@ -1254,7 +1239,7 @@ define("browser/game", [
 				// move action is to make the move
 				this.setAction("action_commitMove", /*i18n*/"Finished Turn");
 				// Check that the play is legal
-				const move = this.game.board.analyseMove();
+				const move = this.game.board.analysePlay();
 				const $move = $("#yourMove");
 				if (typeof move === "string") {
 					// Play is bad
@@ -1262,7 +1247,7 @@ define("browser/game", [
 					this.enableTurnButton(false);
 				} else {
 					// Play is legal
-					$move.append(formatScore(move, !this.game.predictScore));
+					$move.append(GameUI.$score(move, !this.game.predictScore));
 					this.enableTurnButton(true);
 				}
 
@@ -1532,7 +1517,7 @@ define("browser/game", [
 				  .addClass("moveAction")
 				  .button()
 				  .on("click", () => this.challenge());
-			addToLog(true, $button, "turn-control");
+			GameUI.$log(true, $button, "turn-control");
 		}
 
 		/**
@@ -1546,7 +1531,7 @@ define("browser/game", [
 				  .text($.i18n("Take back"))
 				  .button()
 				  .on("click", () => this.takeBackMove());
-			addToLog($button, "turn-control");
+			GameUI.$log($button, "turn-control");
 		}
 
 		/**
@@ -1574,7 +1559,7 @@ define("browser/game", [
 		action_commitMove() {
 			$(".hint-placement").removeClass("hint-placement");
 
-			const move = this.game.board.analyseMove();
+			const move = this.game.board.analysePlay();
 			if (typeof move === "string") {
 				// fatal - should never get here
 				UI.report(move);
@@ -1630,7 +1615,7 @@ define("browser/game", [
 		 */
 		action_nextGame() {
 			const key = this.game.nextGameKey;
-			$.post(`/join/${key}/${this.player.key}`)
+			$.post(`/join/${key}`)
 			.then(info => {
                 location.replace(
                     `/html/game.html?game=${key}&amp;player=${this.player.key}`);
@@ -1745,13 +1730,13 @@ define("browser/game", [
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="I18N.html">I18N</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Command.html">Command</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Notify.html">Notify</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri May 13 2022 17:17:21 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Mon May 23 2022 14:43:45 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

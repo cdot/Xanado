@@ -32,9 +32,9 @@ and license information*/
 /* eslint-env amd, jquery */
 
 define("game/Player", [
-	"platform", "game/GenKey", "game/Rack",
+	"platform", "game/Rack",
 ], (
-	Platform, GenKey, Rack
+	Platform, Rack
 ) => {
 
 	// Unicode characters
@@ -55,6 +55,95 @@ define("game/Player", [
 	class Player {
 
 		/**
+		 * Player unique key
+		 * @member {string}
+		 */
+		key = undefined;
+
+		/**
+		 * Is player a robot?
+		 * @member {boolean}
+		 */
+		isRobot = undefined;
+
+		/**
+		 * If isRobot, can it challenge?
+		 * @member {boolean}
+		 */
+		canChallenge = undefined;
+
+		/**
+		 * Player name
+		 * @member {string}
+		 */
+		name = undefined;
+
+		/**
+		 * Player doesn't have a rack until they join a game, as
+		 * it's only then we know how big it has to be.
+		 * @member {Rack}
+		 */
+		rack = undefined;
+
+		/**
+		 * Number of times this player has passed (or swapped)
+		 * since the last non-pass/swap play.
+		 * @member {number}
+		 */
+		passes = 0;
+
+		/**
+		 * Set true to advise player of better plays than the one
+		 * they used
+		 * @member {boolean}
+		 */
+		wantsAdvice = undefined;
+
+		/**
+		 * Player's current score
+		 * @member {number}
+		 */
+		score = 0;
+
+		/**
+		 * Player coutdown clock. In games with `timerType` `TIMER_TURN`,
+		 * this is the number of seconds before the player's turn times
+		 * out (if they are the current player). For `TIMER_GAME` it's
+		 * the number of seconds before the chess clock runs out.
+		 * @member {number?}
+		 */
+		clock = 0;
+
+		/**
+		 * We don't keep a pointer to the dictionary objects so we can
+		 * cheaply serialise and send to the games interface. We just
+		 * keep the name of the relevant object. This dictionary will
+		 * only be used for findBestPlay for robot players.
+		 * @member {string}
+		 */
+		dictionary = undefined;
+
+		/**
+		 * True if this player is due to miss their next play due
+		 * to a failed challenge
+		 * @member {boolean?}
+		 */
+		missNextTurn = undefined;
+
+		/**
+		 * The connected flag is set when the player is created
+		 * from a Player.simple structure. It is not used server-side.
+		 * @member {boolean?}
+		 */
+		isConnected = false;
+
+        /**
+		 * Debug function
+		 * @member {function}
+		 */
+        _debug = () => {};
+
+		/**
 		 * @param {object} params named parameters, or other layer or simple
 		 *  object to copy
 		 * @param {(string|Player)} params.name name of the player, or
@@ -69,97 +158,18 @@ define("game/Player", [
 		 * if this is a robot
 		 * @param {boolean} params.missNextTurn true if this player
 		 * has to miss their next turn due to a failed challenge
-		 * @param {boolean} params._debug true to enable debug messages
+		 * @param {function} params.debug pass console.debug to enable debug messages
 		 */
 		constructor(params) {
-			/**
-			 * Debug log messages on/off
-			 * @member {boolean}
-			 * @private
-			 */
-			this._debug = params.debug;
-
-			/**
-			 * Player unique key
-			 * @member {string}
-			 */
+			if (typeof params.debug === "function")
+				this._debug = params.debug;
 			this.key = params.key;
-
-			/**
-			 * Is player a robot?
-			 * @member {boolean}
-			 */
 			this.isRobot = params.isRobot;
-
-			/**
-			 * If isRobot, can it challenge?
-			 * @member {boolean}
-			 */
 			this.canChallenge = params.canChallenge;
-
-			/**
-			 * Player name
-			 * @member {string}
-			 */
 			this.name = params.name;
-
-			/**
-			 * Player doesn't have a rack until they join a game, as
-			 * it's only then we know how big it has to be.
-			 * @member {Rack}
-			 */
-			this.rack = null;
-
-			/**
-			 * Number of times this player has passed (or swapped)
-			 * since the last non-pass/swap play.
-			 * @member {number}
-			 */
-			this.passes = 0;
-
-			/**
-			 * Set true to advise player of better plays than the one
-			 * they used
-			 * @member {boolean}
-			 */
 			this.wantsAdvice = params.wantsAdvice;
-
-			/**
-			 * Player's current score
-			 * @member {number}
-			 */
-			this.score = 0;
-
-			/**
-			 * Player coutdown clock. In games with `timerType` `TIMER_TURN`,
-			 * this is the number of seconds before the player's turn times
-			 * out (if they are the current player). For `TIMER_GAME` it's
-			 * the number of seconds before the chess clock runs out.
-			 * @member {number?}
-			 */
-			this.clock = undefined;
-
-			/**
-			 * We don't keep a pointer to the dictionary objects so we can
-			 * cheaply serialise and send to the games interface. We just
-			 * keep the name of the relevant object. This dictionary will
-			 * only be used for findBestPlay for robot players.
-			 * @member {string}
-			 */
 			this.dictionary = params.dictionary;
-
-			/**
-			 * True if this player is due to miss their next play due
-			 * to a failed challenge
-			 * @member {boolean?}
-			 */
 			this.missNextTurn = params.missNextTurn;
-
-			/**
-			 * The connected flag is set when the player is created
-			 * from a Player.simple structure. It is not used server-side.
-			 * @member {boolean?}
-			 */
 			if (params.isConnected)
 				this.isConnected = true;
 		}
@@ -243,11 +253,9 @@ define("game/Player", [
 		 */
 		tick() {
 			this.clock--;
-			if (this._debug)
-				console.debug("Tick", this.name, this.clock);
+			this._debug("Tick", this.name, this.clock);
 			if (this.clock &lt;= 0 &amp;&amp; typeof this._onTimeout === "function") {
-				if (this._debug)
-					console.debug(`${this.name} has timed out at ${Date.now()}`);
+				this._debug(`${this.name} has timed out at ${Date.now()}`);
 				this._onTimeout();
 				// Timeout only happens once!
 				delete this._onTimeout;
@@ -264,8 +272,7 @@ define("game/Player", [
 		 * timer expires, ignored if time undefined
 		 */
 		setTimeout(time, onTimeout) {
-			if (this._debug)
-				console.debug(`${this.name} turn timeout in ${time}s`);
+			this._debug(`${this.name} turn timeout in ${time}s`);
 			this.clock = time;
 			this._onTimeout = onTimeout;
 		}
@@ -306,8 +313,7 @@ define("game/Player", [
 			$icon.addClass(this.isRobot ? "icon-robot" : "icon-person");
 			$tr.append($("&lt;td>&lt;/td>").append($icon));
 			const who = curPlayer &amp;&amp; this.key === curPlayer.key
-				? Platform.i18n("You")
-				  : this.name;
+				? Platform.i18n("You") : this.name;
 			const $name = $(`&lt;td class="player-name">${who}&lt;/td>`);
 			if (this.missNextTurn)
 				$name.addClass("miss-turn");
@@ -365,13 +371,13 @@ define("game/Player", [
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="I18N.html">I18N</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Command.html">Command</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Notify.html">Notify</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri May 13 2022 17:17:21 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Mon May 23 2022 14:43:45 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

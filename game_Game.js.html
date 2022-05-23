@@ -32,15 +32,17 @@ and license information*/
 /* eslint-env amd */
 
 define("game/Game", [
+	"common/Utils",
 	"platform",
 	"dawg/Dictionary",
-	"game/GenKey", "game/Board", "game/LetterBag", "game/Edition",
+	"game/Board", "game/LetterBag", "game/Edition",
 	"game/Player", "game/Square", "game/Tile", "game/Rack", "game/Move",
 	"game/Turn", "game/Notify"
 ], (
+	Utils,
 	Platform,
 	Dictionary,
-	GenKey, Board, LetterBag, Edition,
+	Board, LetterBag, Edition,
 	Player, Square, Tile, Rack, Move,
 	Turn, Notify
 ) => {
@@ -49,15 +51,268 @@ define("game/Game", [
 	 * The Game object may be used server or browser side.
 	 */
 	class Game {
+		static STATE_WAITING          = /*i18n*/"Waiting for players";
+		static STATE_PLAYING          = /*i18n*/"Playing";
+		static STATE_GAME_OVER        = /*i18n*/"Game over";
+		static STATE_2_PASSES         = /*i18n*/"All players passed twice";
+		static STATE_CHALLENGE_FAILED = /*i18n*/"Challenge failed";
+		static STATE_TIMED_OUT        = /*i18n*/"Timed out";
+
+		// Valid values for 'penaltyType'. Values are used in UI
+		static PENALTY_NONE     = /*i18n*/"No penalty";
+		static PENALTY_MISS     = /*i18n*/"Miss next turn";
+		static PENALTY_PER_TURN = /*i18n*/"Lose points";
+		static PENALTY_PER_WORD = /*i18n*/"Lose points per word";
+
+		// Failed challenge penalty options for UI
+		static PENALTIES = [
+			Game.PENALTY_PER_WORD, Game.PENALTY_PER_TURN,
+			Game.PENALTY_MISS, Game.PENALTY_NONE
+		];
+
+		// defaults
+		static PENALTY_TYPE   = Game.PENALTY_PER_WORD;
+		static PENALTY_POINTS = 5; // points per correct word challenged
+
+		// Timer types
+		static TIMERS = [
+			Player.TIMER_NONE, Player.TIMER_TURN, Player.TIMER_GAME
+		];
+
+		// Word check types
+		static WORD_CHECK_NONE   = /*i18n*/"Don't check words";
+		static WORD_CHECK_AFTER  = /*i18n*/"Check words after play";
+		static WORD_CHECK_REJECT = /*i18n*/"Reject unknown words";
+		static WORD_CHECKS = [
+			Game.WORD_CHECK_NONE, Game.WORD_CHECK_AFTER, Game.WORD_CHECK_REJECT
+		];
+	
+		// Classes used in Freeze/Thaw
+		static classes = [ LetterBag, Square, Board, Tile, Rack,
+						   Game, Player, Move, Turn ];
+
+		/**
+		 * An i18n message identifier indicating the game state, one of
+		 * * `Game.STATE_WAITING` - until `playIfReady` starts the game
+		 * * `Game.STATE_PLAYING` - until the game is over, then
+		 * * `Game.STATE_GAME_OVER` - game was played to end, or
+		 * * `Game.STATE_2_PASSES` - all players passed twice, or
+		 * * `Game.STATE_CHALLENGE_FAILED` - a challenge on the final
+		 * play failed
+		 * @member {string}
+		 */
+        state = Game.STATE_WAITING;
+ 
+		/**
+		 * Key that uniquely identifies this game - generated
+		 * @member {string}
+		 */
+		key = undefined;
+
+        /**
+		 * The name of the edition.
+		 * We don't keep a pointer to the Edition object so we can
+		 * cheaply serialise and send to the games interface. 
+		 * @member {string}
+		 */
+		edition = undefined;
+
+        /**
+		 * Optional override of the path used by {@link Dictionary}
+		 * to load dictionaries
+		 * @member {string?}
+		 */
+		dictpath = undefined;
+
+		/**
+		 * We don't keep a pointer to dictionary objects so we can
+		 * cheaply serialise the game and send to the UI. We just
+		 * keep the name of the dictionary.
+		 * @member {string?}
+		 */
+        dictionary = undefined;
+
+		/**
+		 * Epoch ms when this game was created
+		 * @member {number}
+		 */
+		creationTimestamp = undefined;
+
+		/**
+		 * List of Player
+		 * @member {Player[]}
+		 */
+		players = [];
+
+		/**
+		 * Complete list of the turn history of this game
+		 * List of Turn objects.
+		 * @member {Turn[]}
+		 */
+		turns = [];
+
+		/**
+		 * Key of next player to play in this game. This is undefined
+		 * until playIfReady sets it.
+		 * @member {string}
+		 */
+		whosTurnKey = undefined;
+
+		/**
+		 * Pointer to Board object
+		 * @member {Board}
+		 */
+		board = null;
+
+		/**
+		 * Size of rack. Always the same as Edition.rackCount,
+		 * because we don't hold a pointer to the Edition. Note this
+		 * is saved with the game.
+		 * @member {number}
+		 */
+		rackSize = 0;
+
+		/**
+		 * LetterBag object
+		 * @member {LetterBag}
+		 */
+		letterBag = undefined;
+
+		/**
+		 * Timer type, one of:
+		 * * `Player.TIMER_NONE` - untimed game
+		 * * `Player.TIMER_GAME` - game timer
+		 * * `Player.TIMER_TURN` - turn timer
+		 */
+		timerType = Player.TIMER_NONE;
+
+		/**
+		 * Time limit for this game. Only valid if timerType is not
+         * TIMER_NONE
+		 * @member {number}
+		 */
+		timeLimit = 0;
+
+		/**
+		 * Time penalty for this game. Points lost per minute over
+		 * timeLimit.
+		 * @member {number}
+		 */
+		timePenalty = 0;
+
+		/**
+		 * Who paused the game (if it's paused)
+		 * @member {string?}
+		 */
+		pausedBy = undefined;
+
+		/**
+		 * Least number of players must have joined before this game
+		 * can start. Must be at least 2.
+		 * @member {number}
+		 */
+		minPlayers = 2;
+
+		/**
+		 * Most number of players who can join this game. 0 means no limit.
+		 * @member {number}
+		 */
+		maxPlayers = 0;
+
+		/**
+		 * When a game is ended, nextGameKey is the key for the
+		 * continuation game
+		 * @member {string}
+		 */
+		nextGameKey = undefined;
+
+		/**
+		 * Whether or not to show the predicted score from tiles
+		 * placed during the game. This should be false in tournament
+		 * play, true otherwise.
+		 * @member {boolean}
+		 */
+		predictScore = false;
+
+		/**
+		 * Whether or not to allow players to take back their most recent
+		 * move without penalty, so long as the next player hasn't
+		 * challenged or played.
+		 * @member {boolean}
+		 */
+		allowTakeBack = false;
+
+		/**
+		 * Whether or not to check plays against the dictionary. One
+		 * of:
+		 * * `Game.WORD_CHECK_NONE` for no checks
+		 * * `Game.WORD_CHECK_AFTER` for checks after play
+		 * * `Game.WORD_CHECK_REJECT` to reject bad plays
+		 * A bad play in this case does not result in a penalty, it
+		 * just forces the player to take the move back.
+		 */
+		wordCheck = Game.WORD_CHECK_NONE;
+
+		/**
+		 * The type of penalty to apply for a failed challenge,
+		 * one of:
+		 * * `Game.PENALTY_NONE` - no penalty
+		 * * `Game.PENALTY_MISS` - miss next turn
+		 * * `Game.PENALTY_PER_TURN` - simple points penalty
+		 * * `Game.PENALTY_PER_WORD` - points penalty per correct word
+		 * @member {string}
+		 */
+		penaltyType = Game.PENALTY_TYPE;
+
+		/**
+		 * The type of penalty to apply for a failed challenge
+		 * @member {number}
+		 */
+		penaltyPoints = Game.PENALTY_POINTS;
+
+        /**
+		 * Strictly internal, for debug
+		 * @member {boolean}
+         * @private
+		 */
+        _noPlayerShuffle = false;
+
+		/**
+		 * Timer object for ticking
+		 * @member {object}
+         * @private
+		 */
+        _intervalTimer = undefined;
+
+        /**
+		 * List of decorated sockets. Only available server-side, and
+         * not serialised
+		 * @member {WebSocket[]}
+         * @private
+		 */
+        _connections = [];
+
+        /**
+		 * Database containing this game. Only available server-side,
+         * and not serialised.
+		 * @member {Platform.Database}
+		 */
+        _db = undefined;
+
+        /**
+		 * Debug function
+		 * @member {function}
+		 */
+		_debug = () => {};
 
 		/**
 		 * A new game is constructed from scratch by
 		 * ```
-		 * new Game(...).create().then(game => { game.onLoad(db)...
+		 * new Game(...).create().then(game => game.onLoad(db)...
 		 * ```
 		 * A game identified by key is loaded from a db by
 		 * ```
-		 * db.get(key, Game.classes).then(game => { game.onLoad(db)...
+		 * db.get(key, Game.classes).then(game => game.onLoad(db)...
 		 * ```
 		 * (may be null)
 		 * @param {object} params Parameter object. This can be another
@@ -65,228 +320,47 @@ define("game/Game", [
 		 * or a generic object with fields the same name as Game fields.
 		 */
 		constructor(params) {
-			/**
-			 * Strictly internal, for debug
-			 * @member {boolean}
-			 * @private
-			 */
-			this._debug = params.debug || false;
+			/* istanbul ignore if */
+			if (typeof params.debug === "function")
+				this._debug = params.debug;
 
-			/**
-			 * Strictly internal, for debug
-			 * @member {boolean}
-			 * @private
-			 */
-			this._noPlayerShuffle = params.noPlayerShuffle || false;
+			this._debug("Constructing new game", params);
 
-			if (this._debug)
-				console.debug("Constructing new game", params);
-
-			/**
-			 * Key that uniquely identifies this game - generated
-			 * @member {string}
-			 */
-			this.key = GenKey();
-
-			/**
-			 * Epoch ms when this game was created
-			 * @member {number}
-			 * @private
-			 */
-			this.creationTimestamp = Date.now();
-
-			/**
-			 * The name of the edition.
-			 * We don't keep a pointer to the Edition object so we can
-			 * cheaply serialise and send to the games interface. 
-			 * @member {string}
-			 */
+            this.key = Utils.genKey();
+            this.creationTimestamp = Date.now();
 			this.edition = params.edition;
-			if (!this.edition)
-				throw new Error("Game must have an edition");
-
-			/**
-			 * We don't keep a pointer to the dictionary objects so we can
-			 * cheaply serialise and send to the games interface. We just
-			 * keep the name of the relevant object.
-			 * @member {string?}
-			 */
-			this.dictionary =
-			(params.dictionary &amp;&amp; params.dictionary != "none") ?
-			params.dictionary : null;
-
-			/**
-			 * An i18n message identifier indicating the game state, one of
-			 * * `Game.STATE_WAITING` - until `playIfReady` starts the game
-			 * * `Game.STATE_PLAYING` - until the game is over, then
-			 * * `Game.STATE_GAME_OVER` - game was played to end, or
-			 * * `Game.STATE_2_PASSES` - all players passed twice, or
-			 * * `Game.STATE_CHALLENGE_FAILED` - a challenge on the final
-			 * play failed
-			 * @member {string}
-			 */
-			this.state = Game.STATE_WAITING;
-
-			/**
-			 * List of Player
-			 * @member {Player[]}
-			 * @private
-			 */
-			this.players = [];
-
-			/**
-			 * Complete list of the turn history of this game
-			 * List of Turn objects.
-			 * @member {Turn[]}
-			 */
-			this.turns = [];
-
-			/**
-			 * Key of next player to play in this game. This is undefined
-			 * until playIfReady sets it.
-			 * @member {string}
-			 */
-			this.whosTurnKey = undefined;
-
-			/**
-			 * Timer type, one of:
-			 * * `Player.TIMER_NONE` - untimed game
-			 * * `Player.TIMER_GAME` - game timer
-			 * * `Player.TIMER_TURN` - turn timer
-			 */
+			this.dictpath = params.dictpath;
+			if (params.dictionary &amp;&amp; params.dictionary != "none")
+			    this.dictionary = params.dictionary;
 			this.timerType = params.timerType || Player.TIMER_NONE;
-
-			/**
-			 * Time limit for this game.
-			 * @member {number}
-			 */
 			if (this.timerType !== Player.TIMER_NONE) {
 				this.timeLimit = params.timeLimit ||
 				(params.timeLimitMinutes || 0) * 60;
 			}
-
-			/**
-			 * Time penalty for this game. Points lost per minute over
-			 * timeLimit.
-			 * @member {number}
-			 */
 			if (this.timerType === Player.TIMER_GAME)
 				this.timePenalty = params.timePenalty || 0;
-
-			/**
-			 * Pointer to Board object
-			 * @member {Board}
-			 */
-			this.board = null;
-
-			/**
-			 * Size of rack. Always the same as Edition.rackCount,
-			 * because we don't hold a pointer to the Edition. Note this
-			 * is saved with the game.
-			 * @member {number}
-			 * @private
-			 */
-			this.rackSize = 0;
-
-			/**
-			 * LetterBag object
-			 * @member {LetterBag}
-			 */
-			this.letterBag = undefined;
-
-			/**
-			 * Who paused the game (if it's paused)
-			 * @member {string?}
-			 */
 			if (params.pausedBy)
 				this.pausedBy = params.pausedBy;
-
-			/**
-			 * Least number of players must have joined before this game
-			 * can start. Must be at least 2.
-			 * @member {number}
-			 */
 			this.minPlayers = Math.max(params.minPlayers || 0, 2);
-
-			/**
-			 * Most number of players who can join this game. 0 means no limit.
-			 * @member {number}
-			 */
 			this.maxPlayers = Math.max(params.maxPlayers || 0, 0);
 			if (this.maxPlayers &lt; this.minPlayers)
 				this.maxPlayers = 0;
-
-			/**
-			 * When a game is ended, nextGameKey is the key for the
-			 * continuation game
-			 * @member {string}
-			 */
 			this.nextGameKey = undefined;
-
-			/**
-			 * Whether or not to show the predicted score from tiles
-			 * placed during the game. This should be false in tournament
-			 * play, true otherwise.
-			 * @member {boolean}
-			 */
 			this.predictScore = params.predictScore;
-
-			/**
-			 * Whether or not to allow players to take back their most recent
-			 * move without penalty, so long as the next player hasn't
-			 * challenged or played.
-			 * @member {boolean}
-			 */
 			this.allowTakeBack = params.allowTakeBack ||  false;
-
-			/**
-			 * Whether or not to check plays against the dictionary. One
-			 * of:
-			 * * `Game.WORD_CHECK_NONE` for no checks
-			 * * `Game.WORD_CHECK_AFTER` for checks after play
-			 * * `Game.WORD_CHECK_REJECT` to reject bad plays
-			 * A bad play in this case does not result in a penalty, it
-			 * just forces the player to take the move back.
-			 */
 			this.wordCheck = params.wordCheck || Game.WORD_CHECK_NONE;
-
-			/**
-			 * The type of penalty to apply for a failed challenge,
-			 * one of:
-			 * * `Game.PENALTY_NONE` - no penalty
-			 * * `Game.PENALTY_MISS` - miss next turn
-			 * * `Game.PENALTY_PER_TURN` - simple points penalty
-			 * * `Game.PENALTY_PER_WORD` - points penalty per correct word
-			 * @member {string}
-			 */
 			this.penaltyType = params.penaltyType || Game.PENALTY_TYPE;
-
-			/**
-			 * The type of penalty to apply for a failed challenge
-			 * @member {number}
-			 */
 			this.penaltyPoints = params.penaltyPoints || Game.PENALTY_POINTS;
-
-			/**
-			 * List of decorated sockets. Only available server-side.
-			 * @member {WebSocket[]}
-			 * @private
-			 */
-			this._connections = [];
-
-			/**
-			 * Database containing this game. Only available server-side.
-			 * @member {Platform.Database}
-			 * @private
-			 */
-			this._db = undefined;
+            if (params.noPlayerShuffle)
+                this._noPlayerShuffle = true;
 		}
 
 		/**
 		 * Promise to finish construction of a new Game.
 		 * Load the edition and create the board and letter bag.
 		 * Not done in the constructor because we need to return
-		 * a Promise.
+		 * a Promise. Must be followed by onLoad to connect a
+		 * DB and complete initialisation of private fields.
 		 * @return {Promise} that resolves to this
 		 */
 		create() {
@@ -303,16 +377,21 @@ define("game/Game", [
 		}
 
 		/**
-		 * A game loaded by deserialisation has to know what DB it was
-		 * loaded from so it knows where to save the game. The
+		 * Promise to finish the construction or load from serialisation
+		 * of a game.
+		 * A game has to know what DB  so it knows where to save. The
 		 * database and connections are not serialised, and must be
 		 * reset. Only available server-side.
-		 * @param {Platform.Database} db the db to use
+		 * @param {Platform.Database} db the db to use to store games
 		 * @return {Promise} Promise that resolves to the game
 		 */
 		onLoad(db) {
-			this._connections = [];
+			// if this onLoad follows a load from serialisation, which
+            // does not invoke the constructor.
+			// We always set the _db
 			this._db = db;
+            this._connections = [];
+            this._debug = () => {};
 			return Promise.resolve(this);
 		}
 
@@ -321,16 +400,16 @@ define("game/Game", [
 		 * @param {Player} player
 		 */
 		addPlayer(player) {
+			/* istanbul ignore if */
 			if (!this.letterBag)
 				throw Error("Cannot addPlayer() before create()");
+			/* istanbul ignore next */
 			if (this.maxPlayers > 1 &amp;&amp; this.players.length === this.maxPlayers)
 				throw Error("Cannot addPlayer() to a full game");			
 			this.players.push(player);
 			player.fillRack(this.letterBag, this.rackSize);
-			if (this._debug) {
-				console.debug("Added", player);
-				player.debug = true;
-			}
+			this._debug("Added", player);
+			player.debug = this._debug;
 			if (this.timerType !== Player.TIMER_NONE)
 				player.clock = this.timeLimit;
 		}
@@ -343,11 +422,11 @@ define("game/Game", [
 		removePlayer(player) {
 			player.returnTiles(this.letterBag);
 			const index = this.players.findIndex(p => p.key === player.key);
+			/* istanbul ignore if */
 			if (index &lt; 0)
 				throw Error(`No such player ${player.key} in ${this.key}`);
 			this.players.splice(index, 1);
-			if (this._debug)
-				console.debug(`${player.key} left ${this.key}`);
+			this._debug(`${player.key} left ${this.key}`);
 		}
 
 		/**
@@ -373,9 +452,8 @@ define("game/Game", [
 				player = this.getPlayer(this.whosTurnKey);
 			else if (typeof player === "string")
 				player = this.getPlayer(player);
-			if (!player)
-				return undefined;
 			const index = this.players.findIndex(p => p.key === player.key);
+			/* istanbul ignore if */
 			if (index &lt; 0)
 				throw new Error(`${player.key} not found in ${this.key}`);
 			return this.players[
@@ -396,6 +474,7 @@ define("game/Game", [
 			else if (typeof player === "string")
 				player = this.getPlayer(player);
 			let index = this.players.findIndex(p => p.key === player.key);
+			/* istanbul ignore if */
 			if (index &lt; 0)
 				throw new Error(`${player.key} not found in ${this.key}`);
 			for (let i = 0; i &lt; this.players.length; i++) {
@@ -406,6 +485,7 @@ define("game/Game", [
 				} else
 					return nextPlayer;
 			}
+			/* istanbul ignore next */
 			throw new Error(
 				`Unable to determine next player after ${player.key}`);
 		}
@@ -444,9 +524,10 @@ define("game/Game", [
 		 */
 		getDictionary() {
 			if (this.dictionary)
-				return Dictionary.load(this.dictionary);
+				return Dictionary.load(this.dictionary, this.dictpath);
 
 			// Terminal, no point in translating
+			/* istanbul ignore next */
 			return Promise.reject("Game has no dictionary");
 		}
 
@@ -539,7 +620,9 @@ define("game/Game", [
 		 * Get the board square at [col][row]
 		 * @return {Square} at col,row
 		 */
+		/* istanbul ignore next */
 		at(col, row) {
+			// Only used client-side
 			return this.board.at(col, row);
 		}
 
@@ -547,6 +630,7 @@ define("game/Game", [
 		 * Simple summary of the game, for console output
 		 * @return {string} debug description
 		 */
+		/* istanbul ignore next */
 		toString() {
 			const options = [];
 			if (this.predictScore) options.push("P");
@@ -563,8 +647,7 @@ define("game/Game", [
 		 */
 		save() {
 			if (!this._db) return Promise.resolve(this);
-			if (this._debug)
-				console.debug(`Saving game ${this.key}`);
+			this._debug(`Saving game ${this.key}`);
 			return this._db.set(this.key, this)
 			.then(() => this);
 		}
@@ -582,13 +665,16 @@ define("game/Game", [
 		 * @return {Promise} promise that resolves to the game
 		 */
 		playIfReady() {
-			if (this._debug)
-				console.debug(`playIfReady game=${this.key} state=${this.state}`);
+			this._debug(`playIfReady game=${this.key} state=${this.state}`);
+
+			if (this.hasEnded()) {
+				this._debug("\tgame is over");
+				return Promise.resolve(this);
+			}
 
 			// Check preconditions for starting the game
 			if (this.players.length &lt; this.minPlayers) {
-				if (this._debug)
-					console.debug("\tnot enough players");
+				this._debug("\tnot enough players");
 				// Result is not used
 				return Promise.resolve(this);
 			}
@@ -597,12 +683,10 @@ define("game/Game", [
 			// shuffle the players, and pick a random tile from the bag.
 			// The shuffle can be suppressed for unit testing.
 			if (this.state === Game.STATE_WAITING) {
-				if (this._debug)
-					console.debug("\tpreconditions met");
+				this._debug("\tpreconditions met");
 
 				if (this.players.length > 1 &amp;&amp; !this._noPlayerShuffle) {
-					if (this._debug)
-						console.debug("\tshuffling player order");
+					this._debug("\tshuffling player order");
 					for (let i = this.players.length - 1; i > 0; i--) {
 						const j = Math.floor(Math.random() * (i + 1));
 						// i = 1, j = 0,1
@@ -613,6 +697,7 @@ define("game/Game", [
 						this.players[j] = temp;
 					}
 					// Notify all connections of the order change
+					// (asynchronously)
 					this.updateConnections();
 				}
 
@@ -631,8 +716,7 @@ define("game/Game", [
 			if (nextPlayer.isRobot)
 				return this.startTurn(nextPlayer);
 
-			if (this._debug)
-				console.debug(`\twaiting for ${this.getPlayer().name} to play`);
+			this._debug(`\twaiting for ${this.getPlayer().name} to play`);
 
 			return Promise.resolve(this);
 		}
@@ -646,8 +730,7 @@ define("game/Game", [
 		 * @param {Object} data to send with message
 		 */
 		notifyPlayer(player, message, data) {
-			if (this._debug)
-				console.debug(`&lt;-S- ${player.key} ${message}`, data);
+			this._debug(`&lt;-S- ${player.key} ${message}`, data);
 			// Player may be connected several times
 			this._connections.forEach(
 				socket => {
@@ -664,9 +747,8 @@ define("game/Game", [
 		 * @param {string} message to send
 		 * @param {Object} data to send with message
 		 */
-		notifyPlayers(message, data) {
-			if (this._debug &amp;&amp; message !== Notify.CONNECTIONS)
-				console.debug(`&lt;-S- * ${message}`, data);
+		notifyAllPlayers(message, data) {
+			this._debug(`&lt;-S- * ${message}`, data);
 			this._connections.forEach(socket => socket.emit(message, data));
 		}
 
@@ -678,8 +760,7 @@ define("game/Game", [
 		 * @param {Object} data to send with message
 		 */
 		notifyOtherPlayers(player, message, data) {
-			if (this._debug)
-				console.debug(`&lt;-S- !${player.key} ${message}`, data);
+			this._debug(`&lt;-S- !${player.key} ${message}`, data);
 			// Player may be connected several times
 			this._connections.forEach(
 				socket => {
@@ -708,7 +789,7 @@ define("game/Game", [
 			// one turn broadcast, and a different turn sent to the
 			// playing player.
 			return this.save()
-			.then(() => this.notifyPlayers(Notify.TURN, turn))
+			.then(() => this.notifyAllPlayers(Notify.TURN, turn))
 			.then(() => this);
 		}
 
@@ -726,8 +807,8 @@ define("game/Game", [
 			if (ageInDays &lt;= 14)
 				return Promise.resolve(this); // still active
 
-			if (this._debug)
-				console.debug("Game timed out:",
+			/* istanbul ignore next */
+			this._debug("Game timed out:",
 						this.players.map(({ name }) => name));
 
 			this.state = Game.STATE_TIMED_OUT;
@@ -761,7 +842,7 @@ define("game/Game", [
 							 cat.nextToGo = true;
 						 return cat;
 					 })))
-			.then(res => this.notifyPlayers(Notify.CONNECTIONS, res));
+			.then(res => this.notifyAllPlayers(Notify.CONNECTIONS, res));
 		}
 
 		/**
@@ -772,17 +853,17 @@ define("game/Game", [
 		 * this is a restart of an unfinished turn, defaults to
 		 * this.timeLimit if undefined.
 		 * @return {Promise} a promise that resolves to undefined
-		 * @private
+         * @private
 		 */
 		startTurn(player, timeout) {
+			/* istanbul ignore if */
 			if (!player)
 				throw Error("No player");
 
 			if (!this.players.find(p => p.passes &lt; 2))
 				return this.confirmGameOver(Game.STATE_2_PASSES);
 
-			if (this._debug)
-				console.debug(`startTurn ${player.name}'s turn`);
+			this._debug(`startTurn ${player.name}'s turn`);
 
 			this.whosTurnKey = player.key;
 
@@ -794,16 +875,15 @@ define("game/Game", [
 			}
 
 			if (this.timeLimit &lt;= 0) {
-				if (this._debug)
-					console.debug(
+				/* istanbul ignore next */
+				this._debug(
 						`\tuntimed game, wait for ${player.name} to play`);
 				return Promise.resolve(this);
 			}
 
 			// For a timed game, make sure the clock is running and
 			// start the player's timer.
-			if (this._debug)
-				console.debug(`\ttimed game, ${player.name} has ${timeout || this.timeLimit}s left to play`);
+			this._debug(`\ttimed game, ${player.name} has ${timeout || this.timeLimit}s left to play`);
 			this.startTheClock(); // does nothing if already started
 
 			if (this.timerType === Player.TIMER_TURN)
@@ -866,17 +946,19 @@ define("game/Game", [
 
 			// Make sure this is a valid (known) player
 			const player = this.players.find(p => p.key === playerKey);
+			/* istanbul ignore if */
 			if (!player) {
 				console.error(`WARNING: player key ${playerKey} not found in game ${this.key}`);
 			}
 
 			const knownSocket = this.getConnection(player);
+			/* istanbul ignore if */
 			if (knownSocket !== null) {
 				console.error("WARNING:", player.key, "already connected to",
 							this.key);
-			} else if (this._debug &amp;&amp; player) {
+			} else if (player) {
 				// This player is just connecting, perhaps for the first time.
-				console.debug(`${player.name} connected to ${this.key}`);
+				this._debug(`${player.name} connected to ${this.key}`);
 			}
 
 			// Player is connected. Decorate the socket. It may seem
@@ -886,22 +968,18 @@ define("game/Game", [
 			socket.player = player;
 
 			this._connections.push(socket);
-			if (this._debug)
-				console.debug(player
-							  ? `${player} connected`
-							  : "'Anonymous' connected");
+			this._debug(player ? `${player} connected` : "'Anonymous' connected");
 
 			// Tell players that the player is connected
 			this.updateConnections();
 
 			// Add disconnect listener
+			/* istanbul ignore next */
 			socket.on("disconnect", () => {
-				if (this._debug)
-					console.debug(socket.player
+				this._debug(socket.player
 							? `${socket.player.toString()} disconnected`
 							: "'Anonymous' disconnected");
-				this._connections = this._connections.filter(
-					sock => sock !== socket);
+				this._connections.splice(this._connections.indexOf(socket), 1);
 				this.updateConnections();
 			});
 
@@ -914,6 +992,7 @@ define("game/Game", [
 		 * Only used client-side.
 		 * @param {object[]} simpleList list of Player.simple
 		 */
+		/* istanbul ignore next */
 		updatePlayerList(simpleList) {
 			for (let player of this.players)
 				player.online(false);
@@ -938,7 +1017,7 @@ define("game/Game", [
 		/**
 		 * Server side, tell all clients a tick has happened (or
 		 * remind them of the current number of seconds to play)
-		 * @private
+         * @private
 		 */
 		tick() {
 			const player = this.getPlayer();
@@ -950,7 +1029,7 @@ define("game/Game", [
 			// Really should save(), otherwise the ticks won't
 			// survive a server restart. However it's expensive, and server
 			// restarts are rare, so let's not.
-			this.notifyPlayers(
+			this.notifyAllPlayers(
 				Notify.TICK,
 				{
 					gameKey: this.key,
@@ -966,8 +1045,7 @@ define("game/Game", [
 		 */
 		startTheClock() {
 			if (!this._intervalTimer &amp;&amp; this.timerType !== Player.TIMER_NONE) {
-				if (this._debug)
-					console.debug(`Started the clock`);
+				this._debug(`Started the clock`);
 				// Broadcast a ping every second
 				this._intervalTimer = setInterval(() => this.tick(), 1000);
 			}
@@ -979,8 +1057,7 @@ define("game/Game", [
 		 */
 		stopTheClock() {
 			if (this._intervalTimer) {
-				if (this._debug)
-					console.debug("Stopped the clock");
+				this._debug("Stopped the clock");
 				clearInterval(this._intervalTimer);
 				this._intervalTimer = null;
 			}
@@ -993,16 +1070,13 @@ define("game/Game", [
 		 * @param {Player} player to get a hint for
 		 */
 		hint(player) {
-			if (this._debug)
-				console.debug(`Player ${player.name} asked for a hint`);
+			this._debug(`Player ${player.name} asked for a hint`);
 
 			let bestPlay = null;
 			Platform.findBestPlay(
 				this, player.rack.tiles(), data => {
-					if (typeof data === "string") {
-						if (this._debug)
-							console.debug(data);
-					}
+					if (typeof data === "string")
+						this._debug(data);
 					else
 						bestPlay = data;
 				})
@@ -1013,8 +1087,7 @@ define("game/Game", [
 				if (!bestPlay)
 					hint.text = /*i18n*/"Can't find a play";
 				else {
-					if (this._debug)
-						console.debug(bestPlay);
+					this._debug(bestPlay);
 					const start = bestPlay.placements[0];
 					hint.text = /*i18n*/"Hint";
 					const words = bestPlay.words.map(w => w.word).join(",");
@@ -1027,7 +1100,7 @@ define("game/Game", [
 				this.notifyPlayer(player, Notify.MESSAGE, hint);
 				
 				// Tell *everyone* that they asked for a hint
-				this.notifyPlayers(Notify.MESSAGE, {
+				this.notifyAllPlayers(Notify.MESSAGE, {
 					sender: /*i18n*/"Advisor",
 					text: /*i18n*/"$1 asked for a hint",
 					classes: "warning",
@@ -1036,8 +1109,8 @@ define("game/Game", [
 				});
 			})
 			.catch(e => {
-				console.error("Error", e);
-				this.notifyPlayers(Notify.MESSAGE, {
+				/* istanbul ignore next */
+				this.notifyAllPlayers(Notify.MESSAGE, {
 					sender: /*i18n*/"Advisor",
 					text: e.toString(),
 					timestamp: Date.now()
@@ -1060,7 +1133,7 @@ define("game/Game", [
 						   : /*i18n*/"Disabled")
 				});
 			if (player.wantsAdvice)
-				this.notifyPlayers(Notify.MESSAGE, {
+				this.notifyAllPlayers(Notify.MESSAGE, {
 					sender: /*i18n*/"Advisor",
 					text: /*i18n*/"$1 has asked for advice from the robot",
 					classes: "warning",
@@ -1070,29 +1143,28 @@ define("game/Game", [
 		}
 
 		/**
-		 * Advise player as to what better play they might have been
-		 * able to make.
+		 * Asynchronously advise player as to what better play they
+		 * might have been able to make.
 		 * @param {Player} player a Player
 		 * @param {number} theirScore score they got from their play
-		 * @return {Promise} resolving to a {@link Turn}
 		 */
 		advise(player, theirScore) {
-			if (this._debug)
-				console.debug(`Computing advice for ${player.name} > ${theirScore}`);
+			this._debug(`Computing advice for ${player.name} > ${theirScore}`,
+						player.rack.tiles().map(t => t.letter),
+						this.board.toString());
 
 			let bestPlay = null;
-			return Platform.findBestPlay(
+			Platform.findBestPlay(
 				this, player.rack.tiles(), data => {
-					if (typeof data === "string") {
-						if (this._debug)
-							console.debug(data);
-					} else
+					if (typeof data === "string")
+						this._debug(data);
+					else
 						bestPlay = data;
-				})
+				}, this.dictpath, this.dictionary)
 			.then(() => {
+				//console.log("Incoming",bestPlay);
 				if (bestPlay &amp;&amp; bestPlay.score > theirScore) {
-					if (this._debug)
-						console.debug(`Better play found for ${player.name}`);
+					this._debug(`Better play found for ${player.name}`);
 					const start = bestPlay.placements[0];
 					const words = bestPlay.words.map(w => w.word).join(",");
 					const advice = {
@@ -1102,7 +1174,7 @@ define("game/Game", [
 								bestPlay.score ]
 					};
 					this.notifyPlayer(player, Notify.MESSAGE, advice);
-					this.notifyPlayers(Notify.MESSAGE, {
+					this.notifyOtherPlayers(player, Notify.MESSAGE, {
 						sender: /*i18n*/"Advisor",
 						text: /*i18n*/"$1 has received advice from the robot",
 						classes: "warning",
@@ -1110,10 +1182,11 @@ define("game/Game", [
 						timestamp: Date.now()
 					});
 				} else
-					if (this._debug)
-						console.debug(`No better plays found for ${player.name}`);
+					/* istanbul ignore next */
+					this._debug(`No better plays found for ${player.name}`);
 			})
 			.catch(e => {
+				/* istanbul ignore next */
 				console.error("Error", e);
 			});
 		}
@@ -1125,22 +1198,20 @@ define("game/Game", [
 		 * @return {Promise} resolving to a the game
 		 */
 		async play(player, move) {
+            if (!(move instanceof Move))
+                move = new Move(move);
+			/* istanbul ignore if */
 			if (player.key !== this.whosTurnKey)
 				return Promise.reject("Not your turn");
 
-			if (!(move instanceof Move))
-				move = new Move(move);
-
-			if (this._debug)
-				console.debug(move);
+			this._debug(move);
 			//console.log(`Player's rack is ${player.rack}`);
 
 			if (this.dictionary
 				&amp;&amp; !this.isRobot
 				&amp;&amp; this.wordCheck === Game.WORD_CHECK_REJECT) {
 
-				if (this._debug)
-					console.debug("Validating play");
+				this._debug("Validating play");
 
 				// Check the play in the dictionary, and generate a
 				// 'reject' if it's bad. This has to be done
@@ -1155,8 +1226,7 @@ define("game/Game", [
 					}
 				});
 				if (badWords.length > 0) {
-					if (this._debug)
-						console.debug("\trejecting", badWords);
+					this._debug("\trejecting", badWords);
 					// Reject the play. Nothing has been done to the
 					// game state yet, so we can just ping the
 					// player back and let the UI sort it out.
@@ -1172,10 +1242,10 @@ define("game/Game", [
 
 			if (player.wantsAdvice) {
 				// 'Post-move' alternatives analysis.
-				// We can't do this asynchronously because the advice
-				// depends on the board state, which the move might
-				// update while the advice was still being computed.
-				await this.advise(player, move.score);
+				// Do this before we place the tiles
+				// on the board, so that the game and tiles get frozen
+				// and passed to the findBestPlayWorker.
+				this.advise(player, move.score);
 			}
 
 			const game = this;
@@ -1198,8 +1268,7 @@ define("game/Game", [
 				}
 			}
 
-			if (this._debug)
-				console.debug("New rack", player.rack.toString());
+			this._debug("New rack", player.rack.toString());
 
 			//console.debug("words ", move.words);
 
@@ -1211,8 +1280,7 @@ define("game/Game", [
 				this.getDictionary()
 				.then(dict => {
 					for (let w of move.words) {
-						if (this._debug)
-							console.debug("Checking ",w);
+						this._debug("Checking ",w);
 						if (!dict.hasWord(w.word)) {
 							// Only want to notify the player
 							this.notifyPlayer(
@@ -1250,14 +1318,13 @@ define("game/Game", [
 		 */
 		autoplay() {
 			const player = this.getPlayer();
-			if (this._debug)
-				console.debug(`Autoplaying ${player.name}`);
+			this._debug(`Autoplaying ${player.name}`);
 
 			// Before making a robot move, consider challenging the last
 			// player.
-			// challenge is a Promise that will resolve to a Turn if a
-			// challenge is made, or undefined otherwise.
-			let challenge = Promise.resolve(undefined);
+			// challenge is a Promise that will resolve to true if a
+			// challenge is made, or false otherwise.
+			let challenge = Promise.resolve(false);
 			if (this.lastPlay()
 				&amp;&amp; this.dictionary
 				&amp;&amp; player.canChallenge) {
@@ -1273,14 +1340,12 @@ define("game/Game", [
 							  .filter(word => !dict.hasWord(word.word));
 						if (bad.length > 0) {
 							// Challenge succeeded
-							if (this._debug) {
-								console.debug(`Challenging ${lastPlayer.name}`);
-								console.debug(`Bad Words: `, bad);
-							}
+							this._debug(`Challenging ${lastPlayer.name}`);
+							this._debug(`Bad Words: `, bad);
 							return this.takeBack(player, Turn.CHALLENGE_WON)
 							.then(() => true);
 						}
-						return false;
+						return false; // no challenge made
 					});
 				}
 			}
@@ -1304,21 +1369,18 @@ define("game/Game", [
 				return Platform.findBestPlay(
 					this, player.rack.tiles(),
 					data => {
-						if (typeof data === "string") {
-							if (this._debug)
-								console.debug(data);
-						} else {
+						if (typeof data === "string")
+							this._debug(data);
+						else {
 							bestPlay = data;
-							if (this._debug)
-								console.debug("Best", bestPlay);
+							this._debug("Best", bestPlay);
 						}
-					}, player.dictionary)
+					}, this.dictpath, player.dictionary)
 				.then(() => {
 					if (bestPlay)
 						return this.play(player, bestPlay);
 
-					if (this._debug)
-						console.debug(`${player.name} can't play, passing`);
+					this._debug(`${player.name} can't play, passing`);
 					return this.pass(player);
 				});
 			});
@@ -1334,9 +1396,8 @@ define("game/Game", [
 				return Promise.resolve(this); // already paused
 			this.stopTheClock();
 			this.pausedBy = player.name;
-			if (this._debug)
-				console.debug(`${this.pausedBy} has paused game`);
-			this.notifyPlayers(Notify.PAUSE, {
+			this._debug(`${this.pausedBy} has paused game`);
+			this.notifyAllPlayers(Notify.PAUSE, {
 				key: this.key,
 				name: player.name,
 				timestamp: Date.now()
@@ -1350,11 +1411,11 @@ define("game/Game", [
 		 * @return {Promise} resolving to the game
 		 */
 		unpause(player) {
+			/* istanbul ignore if */
 			if (!this.pausedBy)
 				return Promise.resolve(this); // not paused
-			if (this._debug)
-				console.debug(`${player.name} has unpaused game`);
-			this.notifyPlayers(Notify.UNPAUSE, {
+			this._debug(`${player.name} has unpaused game`);
+			this.notifyAllPlayers(Notify.UNPAUSE, {
 				key: this.key,
 				name: player.name,
 				timestamp: Date.now()
@@ -1377,8 +1438,7 @@ define("game/Game", [
 		confirmGameOver(endState) {
 			this.state = endState || Game.STATE_GAME_OVER;
 
-			if (this._debug)
-				console.debug(`Confirming game over because ${endState}`);
+			this._debug(`Confirming game over because ${endState}`);
 			this.stopTheClock();
 
 			// When the game ends, each player's score is reduced by
@@ -1391,6 +1451,7 @@ define("game/Game", [
 			this.players.forEach(player => {
 				deltas[player.key] = { tiles: 0 };
 				if (player.rack.isEmpty()) {
+					/* istanbul ignore if */
 					if (playerWithNoTiles)
 						throw Error("Found more than one player with no tiles when finishing game");
 					playerWithNoTiles = player;
@@ -1400,14 +1461,13 @@ define("game/Game", [
 					player.score -= rackScore;
 					deltas[player.key].tiles -= rackScore;
 					pointsRemainingOnRacks += rackScore;
-					if (this._debug)
-						console.debug(`${player.name} has ${rackScore} left`);
+					this._debug(`${player.name} has ${rackScore} left`);
 				} 
 				if (this.timerType === Player.TIMER_GAME &amp;&amp; player.clock &lt; 0) {
 					const points = Math.round(
 						player.clock * this.timePenalty / 60);
-					if (this._debug)
-						console.debug(player.name, "over by", player.clock, "time penalty", player.clock * this.timePenalty / 60, "=", points);
+					this._debug(player.name, "over by", player.clock,
+							   "time penalty", player.clock * this.timePenalty / 60, "=", points);
 					if (Math.abs(points) > 0)
 						deltas[player.key].time = points;
 				}
@@ -1416,8 +1476,7 @@ define("game/Game", [
 			if (playerWithNoTiles) {
 				playerWithNoTiles.score += pointsRemainingOnRacks;
 				deltas[playerWithNoTiles.key].tiles = pointsRemainingOnRacks;
-				if (this._debug)
-					console.debug(`${playerWithNoTiles.name} gains ${pointsRemainingOnRacks}`);
+				this._debug(`${playerWithNoTiles.name} gains ${pointsRemainingOnRacks}`);
 			}
 			const turn = new Turn(this, {
 				type: Turn.GAME_OVER,
@@ -1509,6 +1568,7 @@ define("game/Game", [
 		 * @return {Promise} resolving to the game
 		 */
 		pass(player, type) {
+			/* istanbul ignore if */
 			if (player.key !== this.whosTurnKey)
 				return Promise.reject("Not your turn");
 
@@ -1542,8 +1602,9 @@ define("game/Game", [
 
 			return this.getDictionary()
 			.catch(() => {
-				if (this._debug)
-					console.debug("No dictionary, so challenge always succeeds");
+				/* istanbul ignore next */
+				this._debug("No dictionary, so challenge always succeeds");
+				/* istanbul ignore next */
 				return this.takeBack(challenger, Turn.CHALLENGE_WON);
 			})
 			.then(dict => {
@@ -1552,8 +1613,7 @@ define("game/Game", [
 
 				if (bad.length > 0) {
 					// Challenge succeeded
-					if (this._debug)
-						console.debug("Bad Words: ", bad);
+					this._debug("Bad Words: ", bad);
 
 					// Take back the challenged play. Irrespective of
 					// whether the challenger is the current player or
@@ -1643,9 +1703,11 @@ define("game/Game", [
 		 * @return {Promise} resolving to the game
 		 */
 		swap(player, tiles) {
+			/* istanbul ignore if */
 			if (player.key !== this.whosTurnKey)
 				return Promise.reject("Not your turn");
 
+			/* istanbul ignore if */
 			if (this.letterBag.remainingTileCount() &lt; tiles.length)
 				// Terminal, no point in translating
 				throw Error(`Cannot swap, bag only has ${this.letterBag.remainingTileCount()} tiles`);
@@ -1658,7 +1720,7 @@ define("game/Game", [
 			const move = new Move();
 
 			// First get some new tiles
-			// Scrabble Rule #7: You may use a turn to exchange all,
+			// Scrabble Rule 7: You may use a turn to exchange all,
 			// some, or none of the letters. To do this, place your
 			// discarded letter(s) facedown. Draw the same number of
 			// letters from the pool, then mix your discarded
@@ -1670,6 +1732,7 @@ define("game/Game", [
 			// Return discarded tiles to the letter bag
 			for (tile of tiles) {
 				const removed = player.rack.removeTile(tile);
+				/* istanbul ignore if */
 				if (!removed)
 					// Terminal, no point in translating
 					throw Error(`Cannot swap, player rack does not contain letter ${tile.letter}`);
@@ -1697,13 +1760,10 @@ define("game/Game", [
 		 * @return {Promise} resolving to the new game
 		 */
 		anotherGame() {
-			if (this.nextGameKey) {
-				console.error(`another game already created: old ${this.key} new ${this.nextGameKey}`);
+			if (this.nextGameKey)
 				return Promise.reject("Next game already exists");
-			}
 
-			if (this._debug)
-				console.debug(`Create game to follow ${this.key}`);
+			this._debug(`Create game to follow ${this.key}`);
 			const newGame = new Game(this);
 
 			return newGame.create()
@@ -1714,17 +1774,16 @@ define("game/Game", [
 				// Copy players
 				this.players.forEach(p => newGame.addPlayer(new Player(p)));
 
-				if (this._noPlayerShuffle) // for unit tests
-					newGame._noPlayerShuffle = true;
+				// for unit tests
+				newGame._noPlayerShuffle = this._noPlayerShuffle;
 
 				// Players will be shuffled in playIfReady
 				newGame.whosTurnKey = undefined;
 
-				if (this._debug)
-					console.debug(`Created follow-on game ${newGame.key}`);
+				this._debug(`Created follow-on game ${newGame.key}`);
 				return newGame.save()
 				.then(() => newGame.playIfReady()) // trigger robot
-				.then(() => this.notifyPlayers(Notify.NEXT_GAME, {
+				.then(() => this.notifyAllPlayers(Notify.NEXT_GAME, {
 					gameKey: newGame.key,
 					timestamp: Date.now()
 				}))
@@ -1746,62 +1805,6 @@ define("game/Game", [
 		}
 	}
 
-	/**
-	 * Format a time interval in seconds for display in a string e.g
-	 * `formatTimeInterval(601)` -> `"10:01"`
-	 * @param {number} t time period in seconds
-	 */
-	Game.formatTimeInterval = t => {
-		const neg = (t &lt; 0) ? "-" : "";
-		t = Math.abs(t);
-		const s = `0${t % 60}`.slice(-2);
-		t = Math.floor(t / 60);
-		const m = `0${t % 60}`.slice(-2);
-		t = Math.floor(t / 60);
-		const h = `0${t}`.slice(-2);
-		return (h !== "00") ? `${neg}${h}:${m}:${s}`
-		: `${neg}${m}:${s}`;
-		
-	};
-	// Valid values for 'state'. Values are used in UI
-	Game.STATE_WAITING          = /*i18n*/"Waiting for players";
-	Game.STATE_PLAYING          = /*i18n*/"Playing";
-	Game.STATE_GAME_OVER        = /*i18n*/"Game over";
-	Game.STATE_2_PASSES         = /*i18n*/"All players passed twice";
-	Game.STATE_CHALLENGE_FAILED = /*i18n*/"Challenge failed";
-	Game.STATE_TIMED_OUT        = /*i18n*/"Timed out";
-
-	// Valid values for 'penaltyType'. Values are used in UI
-	Game.PENALTY_NONE     = /*i18n*/"No penalty";
-	Game.PENALTY_MISS     = /*i18n*/"Miss next turn";
-	Game.PENALTY_PER_TURN = /*i18n*/"Lose points";
-	Game.PENALTY_PER_WORD = /*i18n*/"Lose points per word";
-
-	// Failed challenge penalty options for UI
-	Game.PENALTIES = [
-		Game.PENALTY_PER_WORD, Game.PENALTY_PER_TURN,
-		Game.PENALTY_MISS, Game.PENALTY_NONE
-	];
-
-	// defaults
-	Game.PENALTY_TYPE   = Game.PENALTY_PER_WORD;
-	Game.PENALTY_POINTS = 5; // points per correct word challenged
-
-	// Timer types
-	Game.TIMERS = [ Player.TIMER_NONE, Player.TIMER_TURN, Player.TIMER_GAME ];
-
-	// Word check types
-	Game.WORD_CHECK_NONE   = /*i18n*/"Don't check words";
-	Game.WORD_CHECK_AFTER  = /*i18n*/"Check words after play";
-	Game.WORD_CHECK_REJECT = /*i18n*/"Reject unknown words";
-	Game.WORD_CHECKS = [
-		Game.WORD_CHECK_NONE, Game.WORD_CHECK_AFTER, Game.WORD_CHECK_REJECT
-	];
-	
-	// Classes used in Freeze/Thaw
-	Game.classes = [ LetterBag, Square, Board, Tile, Rack,
-					 Game, Player, Move, Turn ];
-
 	return Game;
 });
 
@@ -1815,13 +1818,13 @@ define("game/Game", [
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="I18N.html">I18N</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Command.html">Command</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Notify.html">Notify</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri May 13 2022 17:17:21 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Mon May 23 2022 14:43:45 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

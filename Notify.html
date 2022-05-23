@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: browser/BrowserPlatform.js</title>
+    <title>JSDoc: Class: Notify</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,44 +17,137 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: browser/BrowserPlatform.js</h1>
+    <h1 class="page-title">Class: Notify</h1>
 
     
 
 
 
+
+<section>
+
+<header>
     
-    <section>
-        <article>
-            <pre class="prettyprint source linenums"><code>/*Copyright (C) 2019-2022 The Xanado Project https://github.com/cdot/Xanado
-License MIT. See README.md at the root of this distribution for full copyright
-and license information*/
-/* eslint-env browser, jquery */
+        <h2><span class="attribs"><span class="type-signature"></span></span>Notify<span class="signature">()</span><span class="type-signature"></span></h2>
+        
+            <div class="class-description"><p>Socket messgaes sent by the server and UI</p></div>
+        
+    
+</header>
 
-define("platform", [ "common/Platform" ], Platform => {
+<article>
+    <div class="container-overview">
+    
+        
 
-	/**
-	 * Browser implementation of {@link Platform}
-	 * for the abstract base class.  Note there is no Platform.Database
-	 * implementation for the browser.
-	 */
-	class BrowserPlatform extends Platform {
-		/** See {@link Platform#trigger} for documentation */
-		static trigger(e, args) {
-			// Pass events straight to the document
-			return $(document).trigger(e, args);
-		}
+    
+    <h2>Constructor</h2>
+    
 
-		static i18n() {
-			return $.i18n.apply($.i18n, arguments);
-		}
-	}
+    
+    <h4 class="name" id="Notify"><span class="type-signature"></span>new Notify<span class="signature">()</span><span class="type-signature"></span></h4>
+    
 
-	return BrowserPlatform;
-});
-</code></pre>
-        </article>
-    </section>
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Notify.js.html">game/Notify.js</a>, <a href="game_Notify.js.html#line11">line 11</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
 
 
 

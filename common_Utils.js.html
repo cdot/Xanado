@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: browser/BrowserPlatform.js</title>
+    <title>JSDoc: Source: common/Utils.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: browser/BrowserPlatform.js</h1>
+    <h1 class="page-title">Source: common/Utils.js</h1>
 
     
 
@@ -29,28 +29,73 @@
             <pre class="prettyprint source linenums"><code>/*Copyright (C) 2019-2022 The Xanado Project https://github.com/cdot/Xanado
 License MIT. See README.md at the root of this distribution for full copyright
 and license information*/
-/* eslint-env browser, jquery */
+/* eslint-env amd */
 
-define("platform", [ "common/Platform" ], Platform => {
+/**
+ * Common utilities used on browser and server side
+ * @return {string}
+ */
+define("common/Utils", [ "platform" ], Platform => {
 
-	/**
-	 * Browser implementation of {@link Platform}
-	 * for the abstract base class.  Note there is no Platform.Database
-	 * implementation for the browser.
-	 */
-	class BrowserPlatform extends Platform {
-		/** See {@link Platform#trigger} for documentation */
-		static trigger(e, args) {
-			// Pass events straight to the document
-			return $(document).trigger(e, args);
+	class Utils {
+
+		/**
+		 * Generate a unique 16-character key using a-z0-9
+		 * @param {string[]?} miss optional array of pregenerated keys to miss
+		 * @return {string} a key not already in miss
+		 */
+		static genKey(miss) {
+			const chs = "0123456789abcdef".split("");
+			if (miss) {
+				let key;
+				do {
+					key = Utils.genKey();
+				} while (key in miss);
+				return key;
+			}
+			const s = [];
+			for (let i = 0; i &lt; 16; i++)
+				s.push(chs[Math.floor(Math.random() * 16)]);
+			return s.join("");
 		}
 
-		static i18n() {
-			return $.i18n.apply($.i18n, arguments);
+		/**
+		 * Format a time interval in seconds for display in a string e.g
+		 * `formatTimeInterval(601)` -> `"10:01"`
+		 * Maximum ordinal is days.
+		 * @param {number} t time period in seconds
+		 */
+		static formatTimeInterval(t) {
+			const neg = (t &lt; 0) ? "-" : "";
+			t = Math.abs(t);
+			const s = `0${t % 60}`.slice(-2);
+			t = Math.floor(t / 60);
+			const m = `0${t % 60}`.slice(-2);
+			t = Math.floor(t / 60);
+			if (t === 0) return `${neg}${m}:${s}`;
+			const h = `0${t % 24}`.slice(-2);
+			t = Math.floor(t / 24);
+			if (t === 0) return `${neg}${h}:${m}:${s}`;
+			return `${neg}${t}:${h}:${m}:${s}`;
+		}
+
+		/**
+		 * Construct a test string giving a friendly description of a list
+		 * of "things" e.g. `andList(["A","B","C"])` will return `A, B and C`
+		 */
+		static andList(list) {
+			if (list.length == 0)
+				return "";
+			if (list.length == 1)
+				return list[0];
+
+			return Platform.i18n("$1 and $2",
+							 list.slice(0, list.length - 1).join(", "),
+							 list[list.length - 1]);
 		}
 	}
 
-	return BrowserPlatform;
+	return Utils;
 });
 </code></pre>
         </article>

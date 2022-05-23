@@ -156,6 +156,7 @@ define("game/Square", ["platform"], (Platform) => {
 		 * the square (fixed on the board).
 		 */
 		placeTile(tile, locked) {
+			/* istanbul ignore if */
 			if (tile &amp;&amp; this.tile &amp;&amp; tile !== this.tile) {
 				console.error("Tile ", tile, " over ", this.tile);
 				throw Error(`Square already occupied: ${this}`);
@@ -185,6 +186,7 @@ define("game/Square", ["platform"], (Platform) => {
 		/**
 		 * Debug
 		 */
+		/* istanbul ignore next */
 		toString() {
 			// All squares have a col
 			let string = `${this.type} square @ ${this.col}`;
@@ -217,6 +219,7 @@ define("game/Square", ["platform"], (Platform) => {
 		$refresh() {
 			const $div = $(`#${this.id}`);
 
+			/* istanbul ignore if */
 			if ($div.length === 0)
 				// No visual representation for this square - for
 				// example, a square in another player's rack
@@ -245,6 +248,7 @@ define("game/Square", ["platform"], (Platform) => {
 		 * @param {boolean} sel 
 		 */
 		setSelected(sel) {
+			/* istanbul ignore if */
 			if (sel &amp;&amp; this.tile) {
 				if (this.tileLocked)
 					throw Error("Attempt to select locked tile");
@@ -256,10 +260,11 @@ define("game/Square", ["platform"], (Platform) => {
 		/**
 		 * Update a square that has a Tile dropped on it
 		 * @param {jQuery} $div the &lt;div> for the square
-		 * @private
+         * @private
 		 */
 		refreshOccupied($div) {
 			if ($div.hasClass("ui-droppable"))
+				/* istanbul ignore next */
 				$div.droppable("destroy");
 
 			$div
@@ -274,14 +279,17 @@ define("game/Square", ["platform"], (Platform) => {
 			if (this.tileLocked) {
 				$div.addClass("Locked");
 				if ($div.hasClass("ui-draggable"))
+					/* istanbul ignore next */
 					$div.draggable("destroy");
 			} else {
 				// tile isn't locked, valid drag source
 				$div.removeClass("Locked");
+				/* istanbul ignore next */
 				$div
 				.addClass("temporary")
 				.on("click", () => Platform.trigger("SelectSquare", [ this ]));
 
+				/* istanbul ignore next */
 				$div.draggable({
 					revert: "invalid",
 					opacity: 1,
@@ -314,12 +322,13 @@ define("game/Square", ["platform"], (Platform) => {
 		/**
 		 * Update a square that doesn't have a Tile dropped on it
 		 * @param {jQuery} $div the &lt;div> for the square
-		 * @private
+         * @private
 		 */
 		refreshEmpty($div) {
 
 			// Not draggable
 			if ($div.hasClass("ui-draggable"))
+				/* istanbul ignore next */
 				$div.draggable("destroy");
 
 			// no tile on the square, valid drop target
@@ -329,6 +338,7 @@ define("game/Square", ["platform"], (Platform) => {
 			.removeClass("Locked")
 			.addClass("empty-square");
 
+			/* istanbul ignore next */
 			$div.on("click", () => Platform.trigger("SelectSquare", [ this ]))
 			// Handle something dropping on us
 			.droppable({
@@ -340,7 +350,7 @@ define("game/Square", ["platform"], (Platform) => {
 				}
 			});
 
-			const text = $.i18n(`square-${this.type}`);
+			const text = Platform.i18n(`square-${this.type}`);
 			$div.empty().append($("&lt;a>&lt;/a>").text(text));
 
 			if (typeof this.underlay !== "undefined")
@@ -360,13 +370,13 @@ define("game/Square", ["platform"], (Platform) => {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="I18N.html">I18N</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Command.html">Command</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Notify.html">Notify</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri May 13 2022 17:17:21 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Mon May 23 2022 14:43:45 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -249,8 +249,6 @@ define("game/findBestPlay", [
 					score: score
 				}));
 			}
-			else if (col == 5 &amp;&amp; row == 6)
-				report(`Reject "${pack(wordSoFar)}" at ${col},${row} ${score}`);
 		}
 
 		let available; // list of letters that can be extended with
@@ -288,7 +286,7 @@ define("game/findBestPlay", [
 			} else
 				wordSoFar.push(board.at(ecol, erow).tile);
 
-			for (let post of dNode.post) {
+			for (let post of dNode.postNodes) {
 				if (post.letter === letter) {
 					forward(ecol, erow,
 							dcol, drow,
@@ -378,7 +376,7 @@ define("game/findBestPlay", [
 				// Letter already on the board
 				wordSoFar.unshift(board.at(ecol, erow).tile);
 
-			for (let pre of dNode.pre) {
+			for (let pre of dNode.preNodes) {
 				if (pre.letter === letter) {
 					back(ecol, erow,
 						 dcol, drow,
@@ -394,7 +392,7 @@ define("game/findBestPlay", [
 		// If this is the start of a word in the dictionary, and
 		// we're at the edge of the board or the prior cell is
 		// empty, then we have a valid word start.
-		if (dNode.pre.length == 0
+		if (dNode.preNodes.length == 0
 			&amp;&amp; (erow &lt; 0 || ecol &lt; 0 || board.at(ecol, erow).isEmpty())) {
 			//console.log(`back word start ${ecol}:${dcol},${erow}:${drow}`);
 			// try extending down beyond the anchor, with the letters
@@ -476,19 +474,21 @@ define("game/findBestPlay", [
 	 * @function game/findBestPlay
 	 * @param {Game} game the Game
 	 * @param {Tile[]} rack rack in the form of a simple list of Tile
-	 * @param {string} dictionary name of dictionary to use
 	 * @param {function} listener Function that is called with a Move each time
 	 * a new best play is found, or a string containing a progress or error
 	 * message.
+	 * @param {string?} dictpath path to dictionaries, to override default
+	 * @param {string?} dictionary name of dictionary to use, defaults to
+	 * game dictionary
 	 * @return {Promise} Promise that resolves when all best moves have been
 	 * identified
      * @alias module:game/findBestPlay
 	 */
-    function findBestPlay(game, rack, listener, dictionary) {
+    function findBestPlay(game, rack, listener, dictpath, dictionary) {
 		report = listener;
 
 		if (!game.edition) {
-			report("Error: Game has no edition", game);
+			report("Error: Game has no edition " + game);
 			// Terminal, no point in translating
 			return Promise.reject("Game has no edition");
 		}
@@ -501,13 +501,15 @@ define("game/findBestPlay", [
 			return a.letter &lt; b.letter ? -1	: a.score > b.score ? 1 : 0;
 		}).reverse();
 
-		report("Finding best play for rack", rackTiles);
+		report("Finding best play for rack " + rack.toString());
 
 		board = game.board;
+		report(`with dictionary ${dictionary || game.dictionary}`);
+		report(`in edition ${game.edition}`);
 		report(`on ${board}`);
 
 		const preamble = [
-			Dictionary.load(dictionary || game.dictionary),
+			Dictionary.load(dictionary || game.dictionary, dictpath),
 			Edition.load(game.edition)
 		];
 
@@ -516,7 +518,11 @@ define("game/findBestPlay", [
 			dict = de[0];
 			edition = de[1];
 
-			report("Starting computation", rackTiles);
+			/* istanbul ignore if */
+			if (!dict || !edition)
+				throw new Error("Setup failure");
+
+			report("Starting findBestPlay computation", rackTiles);
 			bestScore = 0;
 
 			// Has at least one anchor been explored? If there are
@@ -583,13 +589,13 @@ define("game/findBestPlay", [
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="I18N.html">I18N</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Command.html">Command</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Notify.html">Notify</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri May 13 2022 17:17:21 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Mon May 23 2022 14:43:45 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

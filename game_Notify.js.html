@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: browser/BrowserPlatform.js</title>
+    <title>JSDoc: Source: game/Notify.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: browser/BrowserPlatform.js</h1>
+    <h1 class="page-title">Source: game/Notify.js</h1>
 
     
 
@@ -29,28 +29,32 @@
             <pre class="prettyprint source linenums"><code>/*Copyright (C) 2019-2022 The Xanado Project https://github.com/cdot/Xanado
 License MIT. See README.md at the root of this distribution for full copyright
 and license information*/
-/* eslint-env browser, jquery */
+/* eslint-env amd */
 
-define("platform", [ "common/Platform" ], Platform => {
+define("game/Notify", () => {
 
 	/**
-	 * Browser implementation of {@link Platform}
-	 * for the abstract base class.  Note there is no Platform.Database
-	 * implementation for the browser.
+	 * Socket messgaes sent by the server and UI
 	 */
-	class BrowserPlatform extends Platform {
-		/** See {@link Platform#trigger} for documentation */
-		static trigger(e, args) {
-			// Pass events straight to the document
-			return $(document).trigger(e, args);
-		}
+	class Notify {
+		/* Notifications intended for all listeners */
+		static UNPAUSE      = "unpause";
+		static PAUSE        = "pause";
+		static JOIN         = "join";
+		static REJECT       = "reject";
+		static MESSAGE      = "message";
+		static NEXT_GAME    = "nextGame";
+		static ANOTHER_GAME = "anotherGame";
+		static TICK         = "tick";
+		static TURN         = "turn";
+		static CONNECTIONS  = "connections";
 
-		static i18n() {
-			return $.i18n.apply($.i18n, arguments);
-		}
+		/* Notifications sent to monitors (games pages) */
+		static UPDATE       = "update";
+		static MONITOR      = "monitor";
 	}
 
-	return BrowserPlatform;
+	return Notify;
 });
 </code></pre>
         </article>

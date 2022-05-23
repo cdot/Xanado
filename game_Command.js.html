@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: browser/BrowserPlatform.js</title>
+    <title>JSDoc: Source: game/Command.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: browser/BrowserPlatform.js</h1>
+    <h1 class="page-title">Source: game/Command.js</h1>
 
     
 
@@ -29,28 +29,25 @@
             <pre class="prettyprint source linenums"><code>/*Copyright (C) 2019-2022 The Xanado Project https://github.com/cdot/Xanado
 License MIT. See README.md at the root of this distribution for full copyright
 and license information*/
-/* eslint-env browser, jquery */
+/* eslint-env amd */
 
-define("platform", [ "common/Platform" ], Platform => {
+define("game/Command", () => {
 
 	/**
-	 * Browser implementation of {@link Platform}
-	 * for the abstract base class.  Note there is no Platform.Database
-	 * implementation for the browser.
+	 * Commands recognised by the /command route in {@link Server}
 	 */
-	class BrowserPlatform extends Platform {
-		/** See {@link Platform#trigger} for documentation */
-		static trigger(e, args) {
-			// Pass events straight to the document
-			return $(document).trigger(e, args);
-		}
+	class Command {
+		static UNPAUSE   = "unpause";
+		static PAUSE     = "pause";
+		static CHALLENGE = "challenge";
+		static PLAY      = "play";
+		static TAKE_BACK = "takeBack";
+		static PASS      = "pass";
+		static GAME_OVER = "confirmGameOver";
+		static SWAP      = "swap";
+	};
 
-		static i18n() {
-			return $.i18n.apply($.i18n, arguments);
-		}
-	}
-
-	return BrowserPlatform;
+	return Command;
 });
 </code></pre>
         </article>

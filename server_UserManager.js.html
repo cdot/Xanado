@@ -35,12 +35,12 @@ define("server/UserManager", [
 	"fs", "proper-lockfile", "bcrypt",
 	"express-session",
 	"passport", "passport-strategy",
-	"platform"
+	"platform", "common/Utils"
 ], (
 	fs, Lock, BCrypt,
 	ExpressSession,
 	Passport, Strategy,
-	Platform
+	Platform, Utils
 ) => {
 
 	const Fs = fs.promises;
@@ -65,18 +65,27 @@ define("server/UserManager", [
 	 * and we specifically want to support this.
 	 */
 	class XanadoPass extends Strategy {
-		constructor(verify) {
+
+		constructor(checkUserPass, checkToken) {
 			super();
 			this.name = "xanado";
-			this._verify = verify;
+			this._checkUserPass = checkUserPass;
+			this._checkToken = checkToken;
 		}
 
 		authenticate(req) {
+			let promise;
 			const user = req.body.login_username;
-			const pass = req.body.login_password;
-			return this._verify(user, pass)
-			.then(uo => this.success(uo))
-			.catch (e => this.error([ e.message, user ]));
+			if (req.body.login_username)
+				promise = this._checkUserPass(
+					req.body.login_username, req.body.login_password);
+			else
+				promise = this._checkToken(req.params.token);
+			return promise.then(uo => this.success(uo))
+			.catch (e => {
+				//console.debug(user, e.message);
+				this.fail(e.message);
+			});
 		}
 	}
 
@@ -93,10 +102,16 @@ define("server/UserManager", [
 	 * POST /logout
 	 * POST /reset-password
 	 * POST /change-password (pass)
-	 * GET /reset-password/:token
+	 * GET /password-reset/:token
 	 * GET /session get the redacted user object for the logged-in player
 	 */
 	class UserManager {
+
+		/**
+		 * Standard key for the robot user
+		 * @constant {string}
+		 */
+		static ROBOT_KEY = "babefacebabeface";
 
 		/**
 		 * Construct, adding relevant routes to the given Express application
@@ -113,8 +128,12 @@ define("server/UserManager", [
 		constructor(config, app) {
 			this.config = config;
 			this.db = undefined;
-			this._debug = config.debug_comms;
 
+			/* istanbul ignore if */
+			if (config.debug_server)
+				this._debug = console.debug;
+			else
+				this._debug = () => {};
 			// Passport requires ExpressSession to be configured
 			app.use(ExpressSession({
 				secret: this.config.auth.sessionSecret,
@@ -131,22 +150,24 @@ define("server/UserManager", [
 				// Decide what info from the user object loaded from
 				// the DB needs to be shadowed in the session as
 				// req.user
-				//console.debug("serializeUser", userObject);
+				//this._debug("serializeUser", userObject);
 				done(null, userObject);
 			});
 
 			Passport.deserializeUser((userObject, done) => {
 				// Session active, look it up to get user
-				//console.debug("deserializeUser",userObject);
+				//this._debug("deserializeUser",userObject);
 				// attach user object as req.user
 				done(null, userObject);
 			});
 
 			Passport.use(new XanadoPass(
-				(user, pass) => this.getUser({ name: user, pass: pass })));
+				(user, pass) => this.getUser({ name: user, pass: pass }),
+				token => this.getUser({ token: token })));
 
 			// Load and configure oauth2 strategies
 			const strategies = [];
+			/* istanbul ignore next */
 			for (let provider in this.config.auth.oauth2) {
 				strategies.push(new Promise(resolve => {
 					const cfg = this.config.auth.oauth2[provider];
@@ -177,7 +198,7 @@ define("server/UserManager", [
 				if (/(^|[?&amp;;])origin=/.test(req.url))
 					req.session.origin = decodeURI(
 						req.url.replace(/^.*[?&amp;;]origin=([^&amp;;]*).*$/,"$1"));
-				//console.debug("Remembering origin", req.session.origin);
+				//this._debug("Remembering origin", req.session.origin);
 				next();
 			});
 
@@ -196,14 +217,19 @@ define("server/UserManager", [
 			// Log in a user
 			app.post(
 				"/login",
-				Passport.authenticate("xanado", { assignProperty: "userObject" }),
+				Passport.authenticate("xanado", {
+					// Assign this property in req
+					assignProperty: "userObject"
+				}),
 				(req, res) => {
-					// error will -> 401
+					// error in passport will -> 401
 					req.userObject.provider = "xanado";
+					// Have to call .login or the cookie doesn't get set
 					return this.passportLogin(req, res, req.userObject)
 					.then(() => this.sendResult(res, 200, []));
 				});
 			
+			/* istanbul ignore next */
 			app.get(
 				"/oauth2-providers",
 				(req, res) => this.handle_oauth2_providers(req, res));
@@ -220,8 +246,17 @@ define("server/UserManager", [
 
 			// Receive a password reset from a link in email
 			app.get(
-				"/reset-password/:token",
-				(req, res) => this.handle_xanado_password_reset(req, res));
+				"/password-reset/:token",
+				Passport.authenticate("xanado", {
+					assignProperty: "userObject"
+				}),
+				(req, res) => {
+					// error in passport will -> 401
+					req.userObject.provider = "xanado";
+					// Have to call .login or the cookie doesn't get set
+					return this.passportLogin(req, res, req.userObject)
+					.then(() => res.redirect("/"));
+				});
 
 			// Change the password for the current user
 			app.post(
@@ -230,17 +265,17 @@ define("server/UserManager", [
 		}
 
 		/**
-		 * Call req.login to complete the login process
+		 * Promisify req.login to complete the login process
 		 * @param {object} uo user object
-		 * @private
+		 * @return {Promise} promise that resolves when the login completes
+         * @private
 		 */
 		passportLogin(req, res, uo) {
-			if (this._debug)
-				console.debug("passportLogin in", uo);
+			this._debug("passportLogin ", uo.name, uo.key);
 			return new Promise(resolve => {
-				req.login(uo, () => {
-					if (this._debug)
-						console.log(uo, "logged in");
+				req.login(uo, e => {
+					if (e) throw e;
+					this._debug(uo.name, uo.key, "logged in");
 					resolve(uo);
 				});
 			});
@@ -249,7 +284,7 @@ define("server/UserManager", [
 		/**
 		 * Load the user DB
 		 * @return {Promise} promise that resolves to the DB
-		 * @private
+         * @private
 		 */
 		getDB() {
 			if (this.db)
@@ -258,20 +293,23 @@ define("server/UserManager", [
 			return Lock.lock(this.config.auth.db_file)
 			.then(release => Fs.readFile(this.config.auth.db_file)
 				  .then(data => release()
-						.then(() => JSON.parse(data))))
+						.then(() => {
+							return JSON.parse(data);
+						})))
 			.then(db => {
 				this.db = db || [];
 				return db;
 			})
 			.catch(e => {
 				this.db = [];
+				return this.db;
 			});
 		}
 
 		/**
 		 * Write the DB after an update e.g. user added, pw change etc
 		 * @return {Promise} that resolves when the write completes
-		 * @private
+         * @private
 		 */
 		writeDB() {
 			const s = JSON.stringify(this.db, null, 1);
@@ -295,7 +333,6 @@ define("server/UserManager", [
 		 * @param {string?} key optionally force the key to this
 		 * @param {boolean} ignorePass truw will ignore passwords
 		 * @return {Promise} resolve to user object, or throw
-		 * @private
 		 */
 		getUser(desc, ignorePass) {
 			return this.getDB()
@@ -330,7 +367,8 @@ define("server/UserManager", [
 							throw new Error(/*i18n*/"um-bad-pass");
 						})
 						.catch(e => {
-							console.error("getUser", desc, "failed; bad pass", e);
+							this._debug("getUser", desc,
+										  "failed; bad pass", e);
 							throw new Error(/*i18n*/"um-bad-pass");
 						});
 					}
@@ -339,21 +377,23 @@ define("server/UserManager", [
 						&amp;&amp; uo.email === desc.email)
 						return uo;
 				}
-				console.error("getUser", desc, "failed; no such user");
+				this._debug("getUser", desc, "failed; no such user");
 				throw new Error(/*i18n*/"um-no-such-user");
 			});
 		}
 
 		/**
-		 * @private
+		 * Configure an OAuth2 Passport strategy
+         * @private
 		 */
+		/* istanbul ignore next */
 		setUpOAuth2Strategy(strategy, provider, cfg, app) {
 			if (!cfg.clientID || !cfg.clientSecret || !cfg.callbackURL)
 				throw new Error("Misconfiguration", cfg);
 			Passport.use(new strategy(
 				cfg,
 				(accessToken, refreshToken, profile, done) => {
-					//console.debug("Logging in", profile.displayName);
+					//this._debug("Logging in", profile.displayName);
 					if (profile.emails &amp;&amp; profile.emails.length > 0)
 						profile.email = profile.emails[0].value;
 					if (!profile.id || !profile.displayName)
@@ -395,46 +435,19 @@ define("server/UserManager", [
 				Passport.authenticate(provider, { assignProperty: "userObject" }),
 				(req, res) => {
 					// error will -> 401
-					//console.debug("OAuth2 user is", req.userObject);
+					//this._debug("OAuth2 user is", req.userObject);
 					req.login(req.userObject, () => {
 						// Back to where we came from
-						//console.debug("Redirect to",req.session.origin);
+						//this._debug("Redirect to",req.session.origin);
 						res.redirect(req.session.origin);
 					});
 				});
 		}
 
 		/**
-		 * Generate a unique key not already in the user DB. Assumes
-		 * the DB is loaded.
-		 * @return {string} unique 16-character string
-		 * @private
-		 */
-		genKey() {
-			let key, unique;
-			do {
-				do {
-					key = Math.floor(1e16 + Math.random() * 9e15)
-					.toString(36).substr(0, 10);
-				} while (key === UserManager.ROBOT_KEY);
-
-				unique = true;
-				if (this.db) {
-					for (let f of this.db) {
-						if (key === f.key) {
-							unique = false;
-							break;
-						}
-					}
-				}
-			} while (!unique);
-			return key;
-		}
-
-		/**
 		 * Make a one-time token for use in password resets
 		 * @param {Object} user user object
-		 * @private
+         * @private
 		 */
 		setToken(user) {
 			const token = Math.floor(1e16 + Math.random() * 9e15)
@@ -454,17 +467,15 @@ define("server/UserManager", [
 		 * @param {string?} desc.email user email
 		 * @param {string?} key optionally force the key to this
 		 * @return {Promise} resolve to user object, or reject if duplicate
-		 * @private
 		 */
 		addUser(desc) {
 			if (!desc.key)
-				desc.key = this.genKey();
+				desc.key = Utils.genKey(this.db.map(f => f.key));
 			return pw_hash(desc.pass)
 			.then(pw => {
 				if (typeof pw !== "undefined")
 					desc.pass = pw;
-				if (this._debug)
-					console.debug("Add user", desc);
+				this._debug("Add user", desc);
 				this.db.push(desc);
 				return this.writeDB()
 				.then(() => desc);
@@ -472,16 +483,17 @@ define("server/UserManager", [
 		}
 
 		/**
-		 * @private
+		 * Send a result to the browser
+         * @private
 		 */
 		sendResult(res, status, info) {
-			if (this._debug)
-				console.debug(`&lt;-- ${status}`, info);
+			this._debug(`&lt;-- ${status}`, info);
 			res.status(status).send(info);
 		}
 
 		/**
-		 * @private
+		 * Handle registration of a user using Xanado password database
+         * @private
 		 */
 		handle_xanado_register(req, res, next) {
 			const username = req.body.register_username;
@@ -510,7 +522,9 @@ define("server/UserManager", [
 
 		/**
 		 * Get a list of oauth2 providers
+         * @private
 		 */
+		/* istanbul ignore next */
 		handle_oauth2_providers(req, res) {
 			const list = [];
 			for (let name in this.config.auth.oauth2) {
@@ -523,7 +537,7 @@ define("server/UserManager", [
 		/**
 		 * Simply forgets the user, doesn't log OAuth2 users out from
 		 * the provider.
-		 * @private
+         * @private
 		 */
 		handle_logout(req, res) {
 			if (req.session
@@ -531,11 +545,10 @@ define("server/UserManager", [
 				&amp;&amp; req.session.passport.user
 				&amp;&amp; req.logout) {
 				const departed = req.session.passport.user.name;
-				if (this._debug)
-					console.debug("Logging out", departed);
-				req.logout();
-				return this.sendResult(res, 200, [
-					/*i18n*/"um-logged-out", departed ]);
+				this._debug("Logging out", departed);
+				return new Promise(resolve => req.logout(resolve))
+                .then(() => this.sendResult(res, 200, [
+					/*i18n*/"um-logged-out", departed ]));
 			}
 			return this.sendResult(
 				res, 500, [ /*i18n*/"um-not-logged-in" ]);
@@ -543,7 +556,7 @@ define("server/UserManager", [
 
 		/**
 		 * Gets a list of known users, user name and player key only
-		 * @private
+         * @private
 		 */
 		handle_users(req, res) {
 			if (req.isAuthenticated())
@@ -559,7 +572,8 @@ define("server/UserManager", [
 		}
 
 		/**
-		 * @private
+		 * Change the current users' password
+         * @private
 		 */
 		handle_xanado_change_password(req, res) {
 			if (req.session
@@ -567,8 +581,14 @@ define("server/UserManager", [
 				&amp;&amp; req.session.passport.user) {
 				const pass = req.body.password;
 				const userObject = req.session.passport.user;
-				userObject.pass = pass;
-				return this.writeDB()
+				this._debug("Changing pw for", userObject.name, userObject.key);
+				return pw_hash(pass)
+				.then(pass => userObject.pass = pass)
+				.then(() => this.getUser(userObject))
+				.then(uo => {
+					uo.pass = userObject.pass;
+				})
+				.then(() => this.writeDB())
 				.then(() => this.sendResult(res, 200, [
 					/*i18n*/"um-pass-changed",
 					req.session.passport.user.name ]));
@@ -578,11 +598,13 @@ define("server/UserManager", [
 		}
 
 		/**
-		 * @private
+		 * Reset the password for the given email address. A reset token will
+		 * be mailed to the user that they can then use to log in.
+         * @private
 		 */
 		handle_xanado_reset_password(req, res) {
 			const email = req.body.reset_email;
-			//console.debug(`/reset-password for ${email}`);
+			this._debug("/reset-password for", email);
 			if (!email)
 				return this.sendResult(
 					res, 500, [ /*i18n*/"um-unknown-email" ]);
@@ -591,21 +613,20 @@ define("server/UserManager", [
 			.then(user => {
 				return this.setToken(user)
 				.then(token => {
-					const url = `${surly}/reset-password/${token}`;
-					if (this._debug)
-						console.debug(`Send password reset ${url} to ${user.email}`);
-					if (!this.options.mail)
+					const url = `${surly}/password-reset/${token}`;
+					this._debug(`Send password reset ${url} to ${user.email}`);
+					if (!this.config.mail)
 						return this.sendResult(res, 500, [
 							/*i18n*/"um-mail-not-configured" ]);
-					return this.options.mail.transport.sendMail({
-						from: this.options.mail.sender,
+					return this.config.mail.transport.sendMail({
+						from: this.config.mail.sender,
 						to:  user.email,
 						subject: Platform.i18n("um-password-reset"),
-						text: Platform.i18n("um-reset-text", url),
+						text: Platform.i18n("um-reset-text") + url,
 						html: Platform.i18n("um-reset-html", url)
 					})
 					.then(() => this.sendResult(
-						res, 403, [ /*i18n*/"um-reset-sent", user.name ]))
+						res, 200, [ /*i18n*/"um-reset-sent", user.name ]))
 					.catch(e => {
 						console.error("WARNING: Mail misconfiguration?", e);
 						return this.sendResult(
@@ -617,21 +638,9 @@ define("server/UserManager", [
 		}
 
 		/**
-		 * @private
-		 */
-		handle_password_reset(req, res) {
-			if (this._debug)
-				console.debug(`Password reset ${req.params.token}`);
-			return this.getUser({token: req.params.token})
-			.then(userObject => this.passportLogin(req, res, userObject))
-			.then(() => res.redirect("/"))
-			.catch(e => this.sendResult(res, 500, [	e.message ]));
-		}
-
-		/**
 		 * Report who is logged in. This will return a redacted user
 		 * object, with just the user name and uniqe key
-		 * @private
+         * @private
 		 */
 		handle_session(req, res) {
 			if (req.user)
@@ -647,23 +656,26 @@ define("server/UserManager", [
 
 		/**
 		 * Write new session settings for the user
-		 * @private
+         * @private
 		 */
 		handle_session_settings(req, res) {
 			if (req.user) {
-				if (this._debug)
-					console.debug("Session settings", req.body);
 				req.user.settings = req.body;
-				return this.writeDB()
-				.then(() => this.sendResult(res, 200, req.user_settings));
+				return this.getUser(req.user)
+				.then(user => {
+					user.settings = req.body;
+					this._debug("Session settings", user);
+					return this.writeDB()
+					.then(() => this.sendResult(res, 200, req.user.settings));
+				});
 			}
+			/* istanbul ignore next */
 			return this.sendResult(res, 401, [	"not-logged-in" ]);
 		}
 
 		/**
 		 * Middleware to check if a user is signed in. Use it with
 		 * any route where a logged-in user is required.
-		 * @private
 		 */
 		checkLoggedIn(req, res, next) {
 			if (req.isAuthenticated())
@@ -671,8 +683,6 @@ define("server/UserManager", [
 			return this.sendResult(res, 401, [ /*i18n*/"um-not-logged-in" ]);
 		}
 	}
-
-	UserManager.ROBOT_KEY = "babefacebabeface";
 
 	return UserManager;
 });
@@ -686,13 +696,13 @@ define("server/UserManager", [
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="I18N.html">I18N</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Command.html">Command</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Notify.html">Notify</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri May 13 2022 17:17:21 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Mon May 23 2022 14:43:45 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>
