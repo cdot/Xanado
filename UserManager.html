@@ -32,17 +32,24 @@
         
             <div class="class-description"><p>Manage user login, registration, password reset using Express
 and Passport. User object will be kept in req, and contains
-{ name:, email:, key:, pass: }</p>
+<code>{ name:, email:, key:, pass: }</code></p>
 <p>This makes no pretence of being secure, it is simply a means to manage
 simple player login to a game.
-The routes added are:
-POST /register (name, email, pass)
-POST /login (name, pass)
-POST /logout
-POST /reset-password
-POST /change-password (pass)
-GET /password-reset/:token
-GET /session get the redacted user object for the logged-in player</p></div>
+Routes specific to Xanado users are:</p>
+<ul>
+<li><code>POST /register</code> register a new Xanado user</li>
+<li><code>POST /login</code> login a Xanado used</li>
+<li><code>POST /reset-password</code> request a password rest token. This won't invalidate
+the password.</li>
+<li><code>POST /change-password</code> (pass)</li>
+<li><code>GET /password-reset/:token</code>
+Routes relevant to all login session are:</li>
+<li><code>POST /logout</code> logout the current session. Note this won't discard any
+session cookies set by OAuth2 modules.</li>
+<li><code>GET /session</code> get the redacted user object for the logged-in player.
+This includes extra settings.</li>
+<li><code>GET /session-settings</code> set new extra settings in the session.</li>
+</ul></div>
         
     
 </header>
@@ -350,7 +357,7 @@ stores user information</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="server_UserManager.js.html">server/UserManager.js</a>, <a href="server_UserManager.js.html#line80">line 80</a>
+        <a href="server_UserManager.js.html">server/UserManager.js</a>, <a href="server_UserManager.js.html#line85">line 85</a>
     </li></ul></dd>
     
 
@@ -454,7 +461,7 @@ stores user information</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="server_UserManager.js.html">server/UserManager.js</a>, <a href="server_UserManager.js.html#line86">line 86</a>
+        <a href="server_UserManager.js.html">server/UserManager.js</a>, <a href="server_UserManager.js.html#line91">line 91</a>
     </li></ul></dd>
     
 
@@ -783,7 +790,7 @@ Will be encrypted if defined before saving.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="server_UserManager.js.html">server/UserManager.js</a>, <a href="server_UserManager.js.html#line443">line 443</a>
+        <a href="server_UserManager.js.html">server/UserManager.js</a>, <a href="server_UserManager.js.html#line466">line 466</a>
     </li></ul></dd>
     
 
@@ -894,7 +901,7 @@ any route where a logged-in user is required.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="server_UserManager.js.html">server/UserManager.js</a>, <a href="server_UserManager.js.html#line652">line 652</a>
+        <a href="server_UserManager.js.html">server/UserManager.js</a>, <a href="server_UserManager.js.html#line662">line 662</a>
     </li></ul></dd>
     
 
@@ -930,7 +937,7 @@ any route where a logged-in user is required.</p>
     
 
     
-    <h4 class="name" id="getUser"><span class="type-signature"></span>getUser<span class="signature">(desc, user<span class="signature-attributes">nullable</span>, pass<span class="signature-attributes">nullable</span>, email<span class="signature-attributes">nullable</span>, key<span class="signature-attributes">nullable</span>, ignorePass)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+    <h4 class="name" id="getUser"><span class="type-signature"></span>getUser<span class="signature">(desc)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
     
 
     
@@ -939,9 +946,7 @@ any route where a logged-in user is required.</p>
 
 <div class="description">
     <p>Promise to get the user object for the described user.
-You can lookup a user without name if you have email or key.
-But if you give name you also have to give password - unless
-ignorePass is explicitly set</p>
+You can lookup a user without name if you have email or key.</p>
 </div>
 
 
@@ -964,8 +969,6 @@ ignorePass is explicitly set</p>
 
         <th>Type</th>
 
-        
-        <th>Attributes</th>
         
 
         
@@ -992,9 +995,55 @@ ignorePass is explicitly set</p>
             </td>
 
             
+
+            
+
+            <td class="description last"><p>user descriptor</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>key</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
                 <td class="attributes">
                 
 
+                
+                    &lt;nullable><br>
                 
 
                 
@@ -1003,7 +1052,8 @@ ignorePass is explicitly set</p>
 
             
 
-            <td class="description last"><p>user descriptor</p></td>
+            <td class="description last"><p>match the user key. This will take
+precedence over any other type of matching.</p></td>
         </tr>
 
     
@@ -1036,7 +1086,8 @@ ignorePass is explicitly set</p>
 
             
 
-            <td class="description last"><p>user name</p></td>
+            <td class="description last"><p>user name - if you give this you also
+have to either give <code>password</code> or <code>ignorePass</code></p></td>
         </tr>
 
     
@@ -1069,7 +1120,39 @@ ignorePass is explicitly set</p>
 
             
 
-            <td class="description last"><p>user password, requires user.</p></td>
+            <td class="description last"><p>user password, requires user, may be undefined
+but must be present if <code>user</code> is given.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ignorePass</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>true will ignore passwords</p></td>
         </tr>
 
     
@@ -1106,67 +1189,10 @@ ignorePass is explicitly set</p>
         </tr>
 
     
+    </tbody>
+</table>
 
-        <tr>
-            
-                <td class="name"><code>key</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
             </td>
-
-            
-                <td class="attributes">
-                
-
-                
-                    &lt;nullable><br>
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>optionally force the key to this</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>ignorePass</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>truw will ignore passwords</p></td>
         </tr>
 
     
@@ -1207,7 +1233,7 @@ ignorePass is explicitly set</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="server_UserManager.js.html">server/UserManager.js</a>, <a href="server_UserManager.js.html#line309">line 309</a>
+        <a href="server_UserManager.js.html">server/UserManager.js</a>, <a href="server_UserManager.js.html#line315">line 315</a>
     </li></ul></dd>
     
 
@@ -1281,7 +1307,7 @@ ignorePass is explicitly set</p>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Mon May 23 2022 14:43:45 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed May 25 2022 08:13:06 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

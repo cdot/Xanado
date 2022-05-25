@@ -31,12 +31,12 @@
         <h2><span class="attribs"><span class="type-signature"></span></span>TrieNode<span class="signature">(letter, next, isWordEnding, starterDepth, isFirstChild)</span><span class="type-signature"></span></h2>
         
             <div class="class-description"><p>A Trie/DAWG node.
-Represents a letter in a set of words.
-It has pointers to a child list representing the next letters that can
-follow this letter, and a next pointer to the next alternative to this
-letter in the child list of it's parent node.
-Note this is only used while generating a DAWG from a lexicon. TrieNodes
-are serialised using the above structure but are then rebuilt using
+Represents a letter in a set of words.  It has pointers to a
+child list representing the next letters that can follow this
+letter, and a next pointer to the next alternative to this
+letter in the child list of it's parent node.  Note this is
+only used while generating a DAWG from a lexicon. TrieNodes are
+serialised using the above structure but are then rebuilt using
 <a href="LetterNode.html">LetterNode</a>s at the sharp end.</p></div>
         
     
@@ -177,8 +177,9 @@ are serialised using the above structure but are then rebuilt using
 
             
 
-            <td class="description last"><p>The maximum depth below this node before the
-end-of-word is reached, for the first word added</p></td>
+            <td class="description last"><p>The maximum depth below this
+node before the end-of-word is reached, for the first word
+added</p></td>
         </tr>
 
     
@@ -242,7 +243,7 @@ end-of-word is reached, for the first word added</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_TrieNode.js.html">dawg/TrieNode.js</a>, <a href="dawg_TrieNode.js.html#line25">line 25</a>
+        <a href="dawg_TrieNode.js.html">dawg/TrieNode.js</a>, <a href="dawg_TrieNode.js.html#line20">line 20</a>
     </li></ul></dd>
     
 
@@ -288,107 +289,30 @@ end-of-word is reached, for the first word added</p></td>
     
 
     
-
-    
-        <h3 class="subsection-title">Methods</h3>
+        <h3 class="subsection-title">Members</h3>
 
         
             
+<h4 class="name" id="child"><span class="type-signature"></span>child<span class="type-signature"> :<a href="TrieNode.html">TrieNode</a></span></h4>
 
-    
-
-    
-    <h4 class="name" id="eachWord"><span class="type-signature"></span>eachWord<span class="signature">(nodes, cb)</span><span class="type-signature"></span></h4>
-    
-
-    
 
 
 
 <div class="description">
-    <p>Depth-first tree walk. Will visit ends of words in
-sorted order. Caution; this is NOT the same as dawg/Node.eachWord.</p>
+    <p>Pointer to the first next letter if this letter is matched</p>
 </div>
 
 
 
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
+    <h5>Type:</h5>
+    <ul>
+        <li>
             
-                <td class="name"><code>nodes</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array.&lt;<a href="TrieNode.html">TrieNode</a>></span>
+<span class="param-type"><a href="TrieNode.html">TrieNode</a></span>
 
 
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>list of nodes visited to create the word</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>cb</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="TrieNode.html#~wordCallback">TrieNode~wordCallback</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>callback function</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
+        </li>
+    </ul>
 
 
 
@@ -423,7 +347,7 @@ sorted order. Caution; this is NOT the same as dawg/Node.eachWord.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_TrieNode.js.html">dawg/TrieNode.js</a>, <a href="dawg_TrieNode.js.html#line99">line 99</a>
+        <a href="dawg_TrieNode.js.html">dawg/TrieNode.js</a>, <a href="dawg_TrieNode.js.html#line43">line 43</a>
     </li></ul></dd>
     
 
@@ -439,14 +363,72 @@ sorted order. Caution; this is NOT the same as dawg/Node.eachWord.</p>
 
 
 
+        
+            
+<h4 class="name" id="id"><span class="type-signature"></span>id<span class="type-signature"> :number</span></h4>
+
+
+
+
+<div class="description">
+    <p>Unique ID for this node, purely used for debugging</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">number</span>
+
+
+        </li>
+    </ul>
 
 
 
 
 
+<dl class="details">
 
+    
 
+    
 
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="dawg_TrieNode.js.html">dawg/TrieNode.js</a>, <a href="dawg_TrieNode.js.html#line31">line 31</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
 
 
 
@@ -455,11 +437,595 @@ sorted order. Caution; this is NOT the same as dawg/Node.eachWord.</p>
 
         
             
+<h4 class="name" id="index"><span class="type-signature"></span>index<span class="type-signature"> :number</span></h4>
+
+
+
+
+<div class="description">
+    <p>Index of the node in the encoded DAWG, assigned when the
+encoding is generated</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">number</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
 
     
 
     
-    <h4 class="name" id="encode"><span class="type-signature"></span>encode<span class="signature">(array)</span><span class="type-signature"></span></h4>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="dawg_TrieNode.js.html">dawg/TrieNode.js</a>, <a href="dawg_TrieNode.js.html#line81">line 81</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="isEndOfWord"><span class="type-signature"></span>isEndOfWord<span class="type-signature"> :boolean</span></h4>
+
+
+
+
+<div class="description">
+    <p>Marker for a valid end-of-word node</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">boolean</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="dawg_TrieNode.js.html">dawg/TrieNode.js</a>, <a href="dawg_TrieNode.js.html#line49">line 49</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="isFirstChild"><span class="type-signature"></span>isFirstChild<span class="type-signature"> :boolean</span></h4>
+
+
+
+
+<div class="description">
+    <p>Marker for the first child under a parent node</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">boolean</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="dawg_TrieNode.js.html">dawg/TrieNode.js</a>, <a href="dawg_TrieNode.js.html#line55">line 55</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="isPruned"><span class="type-signature"></span>isPruned<span class="type-signature"> :boolean</span></h4>
+
+
+
+
+<div class="description">
+    <p>Will be set if the node is to be pruned after DAWG generation</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">boolean</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="dawg_TrieNode.js.html">dawg/TrieNode.js</a>, <a href="dawg_TrieNode.js.html#line61">line 61</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="letter"><span class="type-signature"></span>letter<span class="type-signature"> :string</span></h4>
+
+
+
+
+<div class="description">
+    <p>The letter at this node</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">string</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="dawg_TrieNode.js.html">dawg/TrieNode.js</a>, <a href="dawg_TrieNode.js.html#line25">line 25</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="maxChildDepth"><span class="type-signature"></span>maxChildDepth<span class="type-signature"> :number</span></h4>
+
+
+
+
+<div class="description">
+    <p>Maximum number of nodes under this node (iei remaining length
+of the longest word this node partiipates in)</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">number</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="dawg_TrieNode.js.html">dawg/TrieNode.js</a>, <a href="dawg_TrieNode.js.html#line68">line 68</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="next"><span class="type-signature"></span>next<span class="type-signature"> :<a href="TrieNode.html">TrieNode</a></span></h4>
+
+
+
+
+<div class="description">
+    <p>Pointer to the next alternative to this letter</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="TrieNode.html">TrieNode</a></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="dawg_TrieNode.js.html">dawg/TrieNode.js</a>, <a href="dawg_TrieNode.js.html#line37">line 37</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="numberOfChildren"><span class="type-signature"></span>numberOfChildren<span class="type-signature"> :number</span></h4>
+
+
+
+
+<div class="description">
+    <p>Number of child nodes under this node - used for optimisation</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">number</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="dawg_TrieNode.js.html">dawg/TrieNode.js</a>, <a href="dawg_TrieNode.js.html#line74">line 74</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="encode"><span class="type-signature"></span>encode<span class="signature">()</span><span class="type-signature"> &rarr; {Array.&lt;number>}</span></h4>
     
 
     
@@ -479,55 +1045,6 @@ been established.</p>
 
 
 
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>array</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array.&lt;number></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>array to accept the encoding</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
 
 
 
@@ -561,7 +1078,7 @@ been established.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_TrieNode.js.html">dawg/TrieNode.js</a>, <a href="dawg_TrieNode.js.html#line260">line 260</a>
+        <a href="dawg_TrieNode.js.html">dawg/TrieNode.js</a>, <a href="dawg_TrieNode.js.html#line330">line 330</a>
     </li></ul></dd>
     
 
@@ -586,6 +1103,28 @@ been established.</p>
 
 
 
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>array with the 2-integer encoding</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array.&lt;number></span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
@@ -699,7 +1238,7 @@ given letter.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_TrieNode.js.html">dawg/TrieNode.js</a>, <a href="dawg_TrieNode.js.html#line121">line 121</a>
+        <a href="dawg_TrieNode.js.html">dawg/TrieNode.js</a>, <a href="dawg_TrieNode.js.html#line188">line 188</a>
     </li></ul></dd>
     
 
@@ -731,164 +1270,6 @@ given letter.</p>
     <p>the node found, or null</p>
 </div>
 
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="TrieNode.html">TrieNode</a></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="findSameSubtrie"><span class="type-signature"></span>findSameSubtrie<span class="signature">(red)</span><span class="type-signature"> &rarr; {<a href="TrieNode.html">TrieNode</a>}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Returns the first node in the red[maxChildDepth], that is
-identical to 'this'. If the function returns 'this'
-then it is the first of its kind in the
-Trie.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>red</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array.&lt;Array.&lt;<a href="TrieNode.html">TrieNode</a>>></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>reduction structure</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_TrieNode.js.html">dawg/TrieNode.js</a>, <a href="dawg_TrieNode.js.html#line207">line 207</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
 
 
 <dl>
@@ -1063,7 +1444,7 @@ list is sorted on letter</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_TrieNode.js.html">dawg/TrieNode.js</a>, <a href="dawg_TrieNode.js.html#line140">line 140</a>
+        <a href="dawg_TrieNode.js.html">dawg/TrieNode.js</a>, <a href="dawg_TrieNode.js.html#line207">line 207</a>
     </li></ul></dd>
     
 
@@ -1152,7 +1533,7 @@ under and after it as well</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_TrieNode.js.html">dawg/TrieNode.js</a>, <a href="dawg_TrieNode.js.html#line72">line 72</a>
+        <a href="dawg_TrieNode.js.html">dawg/TrieNode.js</a>, <a href="dawg_TrieNode.js.html#line130">line 130</a>
     </li></ul></dd>
     
 
@@ -1312,7 +1693,7 @@ first equivalent.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_TrieNode.js.html">dawg/TrieNode.js</a>, <a href="dawg_TrieNode.js.html#line224">line 224</a>
+        <a href="dawg_TrieNode.js.html">dawg/TrieNode.js</a>, <a href="dawg_TrieNode.js.html#line293">line 293</a>
     </li></ul></dd>
     
 
@@ -1472,7 +1853,7 @@ of equal Trie branches.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_TrieNode.js.html">dawg/TrieNode.js</a>, <a href="dawg_TrieNode.js.html#line175">line 175</a>
+        <a href="dawg_TrieNode.js.html">dawg/TrieNode.js</a>, <a href="dawg_TrieNode.js.html#line242">line 242</a>
     </li></ul></dd>
     
 
@@ -1634,7 +2015,7 @@ from the root to the end of the word</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_TrieNode.js.html">dawg/TrieNode.js</a>, <a href="dawg_TrieNode.js.html#line87">line 87</a>
+        <a href="dawg_TrieNode.js.html">dawg/TrieNode.js</a>, <a href="dawg_TrieNode.js.html#line145">line 145</a>
     </li></ul></dd>
     
 
@@ -1684,7 +2065,7 @@ from the root to the end of the word</p></td>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Mon May 23 2022 14:43:45 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed May 25 2022 08:13:06 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>
