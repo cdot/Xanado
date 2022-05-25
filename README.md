@@ -42,10 +42,7 @@ so you are recommended to run the compressor every so often to
 incorporate those words.
 
 ## Internationalisation
-The UI uses the [Wikimedia jQuery.i18n framework](https://github.com/wikimedia/jquery.i18n) to support translations. Currently translation files are provided for English, (une très mauvaise traduction en) French, and (eine schlechte Übersetzung ins) German. To generate your own translation (or improve on Google's), copy `/i18n/en.json` to a file using your language code (e.g. `it` for Italian) and edit the new file to provide the translation. You can use the `bin/checkStrings.pl` Perl program to check the completeness of your translations.
-
-## Challenges
-Currently only [double challenge](https://en.wikipedia.org/wiki/Challenge_(Scrabble)) is supported. An extension would be to support other challenge types.
+The UI uses the [Wikimedia jQuery.i18n framework](https://github.com/wikimedia/jquery.i18n) to support translations. Currently translation files are provided for English, (une très mauvaise traduction en) French, and (eine schlechte Übersetzung ins) German. To generate your own translation (or improve on Google's), copy `/i18n/en.json` to a file using your language code (e.g. `it` for Italian) and edit the new file to provide the translation. You can use `npm run tx` to check the completeness of your translations (requires an installation of `perl`).
 
 ## Flow of Control
 
@@ -89,28 +86,25 @@ history, allowing a full replay of game events at a later date
 (e.g. when refreshing the Ui.)
 
 ## Testing
-The `test` subdirectory contains a number of simple tests, written using the
-`Mocha` testing framework. They are all run in that directory using `node`.
-* `Game.js` is a set of unit tests for the game logic
-* `findBestMove.js` is unit tests for the robot player
-* `firstPlay.js` is unit tests for the first play by a robot player
-* `Fridge.js` is unit tests for the freeze/thaw code
-* `playARobotGame.js` will play a (random) game between two robots
+The `test` subdirectory contains unit tests for the server
+written using the `mocha` framework. Run them using `npm run test`.
+Also supported is test coverage analysis using `istanbul`; run `npm run coverage`.
+Coverage statistics are outout in the `coverage` directory. You can also run `eslint` on the code using `npm run lint`.
 
 ## Documentation
-
 The code is documented using `jsdoc`. The documentation is automatically
 built when a new version is pushed to github, and can be found on <a href="https://cdot.github.io/CrosswordGame/">github pages</a>.
 
-For development, the `Makefile` at the root has a
-`doc` target that will generate the documentation in the `doc` subdirectory.
+For development, `npm run doc` will generate the documentation in the `doc`
+subdirectory.
 You can read the doc in a browser by opening `file:///..../doc/index.html`
 or, if the game server is running, by loading `http://localhost:9093/doc/index.html` (adjust URL to suit your install)
 
 ## Docker
-`Dockerfile` can be used for building local docker images. For example,
+`Dockerfile` can be used for building local docker images (assuming you have
+a docker server running).
 ```
-$ docker build . --tag xword
+npm run docker
 ```
 will build an image using `Dockerfile`
 ```
