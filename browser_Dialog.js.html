@@ -137,24 +137,43 @@ define("browser/Dialog", () => {
 							`url("${$(this).data('image')}")`);
 			});
 
-			// Using tooltips with a selectmenu is horrible. Applying
-			// tooltip() to the select is useless, you have to apply it to
-			// the span that covers the select. However this span is not
-			// created until some indeterminate time in the future, and
-			// there is no event triggered. The alternative is to create
-			// the selectmenu now, but doing so blows away the browser's
-			// memory of previous selections, which we want. So instead we
-			// have to brute-force initialise the 'title' attribute from
-			// the 'data-i18n-tooltip' attribute. Later, when the
-			// selectmenus have (hopefully!) been created, map them to
-			// jquery tooltips.
-			this.$dlg.find('select[data-i18n-tooltip]').each(function() {
-				$(this).attr('title', $.i18n($(this).data('i18n-tooltip')));
-			});
-			setTimeout(() => this.$dlg
-					   .find('.ui-selectmenu-button')
-					   .tooltip(),
-					   100);
+			// Using tooltips with a selectmenu is tricky.
+            // Applying tooltip() to the select is useless, you have
+			// to apply it to the span that is inserted as next
+			// sibling after the select. However this span is not
+			// created until some indeterminate time in the future,
+			// and there is no event triggered.
+            //
+            // What have to do is to wait until the selectmenus
+            // have (hopefully!) been created before creating the
+            // tooltips.
+			this.$dlg
+            .find('select')
+			.selectmenu()
+			.on("selectmenuchange",
+				function() {
+                    $(this).blur();
+                    this.$dlg.data("this").enableSubmit();
+                });
+ 
+			setTimeout(
+                () => this.$dlg
+				.find('select[data-i18n-tooltip] ~ .ui-selectmenu-button')
+				.tooltip({
+                    items: ".ui-selectmenu-button",
+				    position: {
+					    my: "left+15 center",
+					    at: "right center",
+                        within: "body"
+				    },
+				    content: function() {
+				        return $.i18n(
+                            $(this)
+                            .prev()
+                            .data('i18n-tooltip'));
+				    }
+                }),
+				100);
 
 			// hide or show a password
 			this.$dlg.find('.hide-password')
@@ -186,11 +205,6 @@ define("browser/Dialog", () => {
 			.on("click", () => this.$dlg.data("this").submit());
 
 			this.enableSubmit();
-
-			this.$dlg.find("select")
-			.selectmenu()
-			.on("selectmenuchange",
-				() => this.$dlg.data("this").enableSubmit());
 
 			this.created = true;
 			if (this.onCreation)
@@ -329,13 +343,13 @@ define("browser/Dialog", () => {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Command.html">Command</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Notify.html">Notify</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Default">Default</a></li><li><a href="global.html#%257Bstring">{string</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed May 25 2022 14:23:00 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Thu Jun 02 2022 11:49:45 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: common/Utils.js</title>
+    <title>JSDoc: Global</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,89 +17,231 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: common/Utils.js</h1>
+    <h1 class="page-title">Global</h1>
 
     
 
 
 
+
+<section>
+
+<header>
     
-    <section>
-        <article>
-            <pre class="prettyprint source linenums"><code>/*Copyright (C) 2019-2022 The Xanado Project https://github.com/cdot/Xanado
-License MIT. See README.md at the root of this distribution for full copyright
-and license information*/
-/* eslint-env amd */
+        <h2></h2>
+        
+    
+</header>
 
-/**
- * Common utilities used on browser and server side
- * @return {string}
- */
-define("common/Utils", [ "platform" ], Platform => {
+<article>
+    <div class="container-overview">
+    
+        
 
-	class Utils {
+        
 
-		/**
-		 * Generate a unique 16-character key using a-z0-9
-		 * @param {string[]?} miss optional array of pregenerated keys to miss
-		 * @return {string} a key not already in miss
-		 */
-		static genKey(miss) {
-			const chs = "0123456789abcdef".split("");
-			if (miss) {
-				let key;
-				do {
-					key = Utils.genKey();
-				} while (key in miss);
-				return key;
-			}
-			const s = [];
-			for (let i = 0; i &lt; 16; i++)
-				s.push(chs[Math.floor(Math.random() * 16)]);
-			return s.join("");
-		}
 
-		/**
-		 * Format a time interval in seconds for display in a string e.g
-		 * `formatTimeInterval(601)` -> `"10:01"`
-		 * Maximum ordinal is days.
-		 * @param {number} t time period in seconds
-		 */
-		static formatTimeInterval(t) {
-			const neg = (t &lt; 0) ? "-" : "";
-			t = Math.abs(t);
-			const s = `0${t % 60}`.slice(-2);
-			t = Math.floor(t / 60);
-			const m = `0${t % 60}`.slice(-2);
-			t = Math.floor(t / 60);
-			if (t === 0) return `${neg}${m}:${s}`;
-			const h = `0${t % 24}`.slice(-2);
-			t = Math.floor(t / 24);
-			if (t === 0) return `${neg}${h}:${m}:${s}`;
-			return `${neg}${t}:${h}:${m}:${s}`;
-		}
+<dl class="details">
 
-		/**
-		 * Construct a test string giving a friendly description of a list
-		 * of "things" e.g. `andList(["A","B","C"])` will return `A, B and C`
-		 */
-		static andList(list) {
-			if (list.length == 0)
-				return "";
-			if (list.length == 1)
-				return list[0];
+    
 
-			return Platform.i18n("$1 and $2",
-							 list.slice(0, list.length - 1).join(", "),
-							 list[list.length - 1]);
-		}
-	}
+    
 
-	return Utils;
-});
-</code></pre>
-        </article>
-    </section>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+<h4 class="name" id="Default"><span class="type-signature">(nullable) </span>Default<span class="type-signature"> :string</span></h4>
+
+
+
+
+<div class="description">
+    <p>Name of the dictionary the robot will use. Defaults to
+the game dictionary. Only used for findBestPlay for robot players.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">string</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line100">line 100</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="%7Bstring"><span class="type-signature"></span>{string<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>Array of all the letters in the bag, excluding blank.</p>
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_LetterBag.js.html">game/LetterBag.js</a>, <a href="game_LetterBag.js.html#line19">line 19</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
 
 
 
