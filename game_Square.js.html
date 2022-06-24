@@ -27,11 +27,13 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/*Copyright (C) 2019-2022 The Xanado Project https://github.com/cdot/Xanado
-License MIT. See README.md at the root of this distribution for full copyright
-and license information*/
+  License MIT. See README.md at the root of this distribution for full copyright
+  and license information. Author Crawford Currie http://c-dot.co.uk*/
 /* eslint-env amd, jquery */
 
-define("game/Square", ["platform"], (Platform) => {
+define("game/Square", [
+  "platform"
+], Platform => {
 
 	// Map the characters in the board template to CSS classes
 	const CSS_CLASS =  {
@@ -49,84 +51,89 @@ define("game/Square", ["platform"], (Platform) => {
 	 * A square on the game board or rack. A Tile holder with some
 	 * underlying attributes; a position, an owner, and a type that
 	 * dictates the score multipliers that apply. The owner will be a
-	 * subclass of {@link Surface} (a {@link Rack} or a {@link Board})
+	 * subclass of {@linkcode Surface} (a {@linkcode Rack} or a {@linkcode Board})
 	 */
 	class Square {
+
 		/**
-		 * @param {string} type /^[QqTtSs_]$/ see {@link Board}
-		 * @param {Surface} owner the container this is in
-		 * @param {number} col 0-based column where the square is
-		 * @param {number?} row 0-based row where the square is
+     * @param {object} spec Specification
+		 * @param {string} spec.type /^[QqTtSs_]$/ see {@linkcode Board}
+		 * @param {Surface} spec.owner the container this is in
+		 * @param {number} spec.col 0-based column where the square is
+		 * @param {number?} spec.row 0-based row where the square is
 		 * (undefined on a rack)
 		 */
-		constructor(type, owner, col, row) {
-			/**
-			 * /^[QqTtSs_]$/ see {@link Board}
-			 * @member {string}
-			 */
-			this.type = type;
+		constructor(spec) {
+      /**
+		   * /^[QqTtSs_]$/ see {@linkcode Board}
+		   * @member {string}
+		   */
+			this.type = spec.type;
 
 			/**
-			 * Rack or Board
-			 * @member {Surface?}
-			 */
-			this.owner = owner; // Rack or Board
+		   * Rack or Board
+		   * @member {Surface?}
+		   */
+      this.owner = spec.owner; // Rack or Board
 
-			/**
-			 * 0-based row where the square is (undefined on a 1D surface)
-			 * @member {number}
-			 */
-			this.col = col;
+		  /**
+		   * 0-based column where the square is.
+		   * @member {number}
+		   */
+			this.col = spec.col;
 
-			/**
-			 * 0-based row where the square is (undefined on a 1D surface)
-			 * @member {number}
-			 */
-			if (typeof row !== "undefined")
-				this.row = row;
+		  /**
+		   * Unique id for this square
+		   * @member {string}
+		   */
+			this.id = `${this.owner.id}_${this.col}`;
 
-			let id = `${owner.id}_${col}`;
-			if (typeof row !== "undefined")
-				id += `x${row}`;
+			if (typeof spec.row !== "undefined") {
+		    /**
+		     * 0-based row where the square is (undefined on a 1D surface).
+		     * @member {number?}
+		     */
+				this.row = spec.row;
+				this.id += `x${this.row}`;
+      }
 
-			/**
-			 * Unique id for this square
-			 * @member {string}
-			 */
-			this.id = id;
+      if (spec.tile) {
+		    /**
+		     * Tile placed on this square
+		     * @member {Tile?}
+		     */
+		    this.tile = spec.tile;
 
-			/**
-			 * Multiplier for letters using this square
-			 * @member {number}
-			 */
-			this.letterScoreMultiplier = 1;
+		    if (spec.tileLocked)
+		      /**
+		       * True if the placed tile cannot be moved i.e. it was
+		       * placed in a prior move. Locked tiles don't gather
+		       * bonuses.
+		       * @member {boolean}
+           * @private
+		       */
+          this.tileLocked = true;
+      }
 
-			/**
-			 * Multiplier for wordss using this square
-			 * @member {number}
-			 */
-			this.wordScoreMultiplier = 1;
+		  if (spec.underlay)
+        /**
+		     * Underlay character to put in the background of the square when
+		     * there is no tile present.
+		     * @member {string}
+		     */
+		    this.underlay = spec.underlay;
 
-			/**
-			 * Tile placed on this square
-			 * @member {Tile?}
-			 */
-			this.tile = null;
+		  /**
+		   * Multiplier for letters using this square
+		   * @member {number}
+		   */
+		  this.letterScoreMultiplier = 1;
 
-			/**
-			 * True if the tile cannot be moved i.e. it was
-			 * placed in a prior move. Locked tiles don't gather
-			 * bonuses.
-			 * @member {boolean}
-			 */
-			this.tileLocked = false;
-
-			/**
-			 * Underlay character to put in the background of the square when
-			 * there is no tile present.
-			 * @member {string}
-			 */
-			this.underlay = undefined;
+		  /**
+		   * Multiplier for words using this square
+		   * @member {number}
+		   */
+		  this.wordScoreMultiplier = 1;
 
 			// Determine score multipliers from type
 			switch (this.type) {
@@ -141,66 +148,72 @@ define("game/Square", ["platform"], (Platform) => {
 		}
 
 		/**
-		 * Determine if the square has a tile or not
+		 * @return true if the square doesn't have a tile placed on it
 		 */
 		isEmpty() {
 			return !this.tile;
 		}
 
+    /**
+     * @return {boolean} true if a tile is placed and it is locked
+     */
+    isLocked() {
+      return this.tile &amp;&amp; this.tileLocked;
+    }
+
 		/**
 		 * Place a tile on this square. Tiles are locked when a play is
 		 * committed to a Board.
-		 * @param {Tile?} tile the Tile to place, or undefined to remove
-		 * the placement.
-		 * @param {boolean} locked whether the tile is to be locked to
+		 * @param {Tile} tile the tile to place
+		 * @param {boolean} [lock] whether the tile is to be locked to
 		 * the square (fixed on the board).
+     * @return {Tile?} tile unplaced from the square, if any
 		 */
-		placeTile(tile, locked) {
-			/* istanbul ignore if */
+		placeTile(tile, lock) {
+      /* istanbul ignore if */
 			if (tile &amp;&amp; this.tile &amp;&amp; tile !== this.tile) {
 				console.error("Tile ", tile, " over ", this.tile);
 				throw Error(`Square already occupied: ${this}`);
 			}
 
-			if (tile) {
-				tile.col = this.col;
-				if (typeof this.row !== "undefined")
-					tile.row = this.row;
-				this.tile = tile;
-				this.tileLocked = locked;
-			}
-			else {
-				// Note that a locked tile might be unplaced as
-				// part of undoing a challenged play
-				if (this.tile) {
-					this.tile.row = -1;
-					this.tile.col = -1;
-				}
-				delete this.tile;
-			}
+      const oldTile = this.tile;
+			tile.col = this.col;
+			if (typeof this.row !== "undefined")
+				tile.row = this.row;
+			this.tile = tile;
+
+      if (lock)
+        this.tileLocked = true;
 
 			// Used in the UI to update the square
 			Platform.trigger("SquareChanged", [ this ]);
+
+      return oldTile;
 		}
 
 		/**
-		 * Debug
+		 * Remove the tile placed on this square.
+     * @return {Tile?} tile unplaced from the square, if any
 		 */
-		/* istanbul ignore next */
-		toString() {
-			// All squares have a col
-			let string = `${this.type} square @ ${this.col}`;
-			// Squares on the board have a row too
-			if (this.row >= 0)
-				string += "," + this.row;
+    unplaceTile() {
+			// Note that a locked tile might be unplaced as
+			// part of undoing a challenged play. Only then should
+      // the tile letter be reset.
+      const unplaced = this.tile;
+			if (unplaced) {
+        if (this.tileLocked) {
+					unplaced.reset(); // clear letter
+          delete this.tileLocked;
+        }
+        delete unplaced.col;
+        delete unplaced.row;
+				delete this.tile;
 
-			if (this.tile) {
-				string += ` => ${this.tile}`;
-				if (this.tileLocked)
-					string += " (Locked)";
-			}
-			return string;
-		}
+			  Platform.trigger("SquareChanged", [ this ]);
+        return unplaced;
+      }
+      return undefined;
+    }
 
 		/**
 		 * Create the jquery representation
@@ -222,12 +235,12 @@ define("game/Square", ["platform"], (Platform) => {
 			/* istanbul ignore if */
 			if ($div.length === 0)
 				// No visual representation for this square - for
-				// example, a square in another player's rack
+				// example, might be a square in another player's rack
 				return;
 
 			$div.removeClass("selected")
-				.removeClass("temporary")
-				.off("click");
+			.removeClass("temporary")
+			.off("click");
 
 			if (this.tile)
 				this.refreshOccupied($div);
@@ -260,7 +273,7 @@ define("game/Square", ["platform"], (Platform) => {
 		/**
 		 * Update a square that has a Tile dropped on it
 		 * @param {jQuery} $div the &lt;div> for the square
-         * @private
+     * @private
 		 */
 		refreshOccupied($div) {
 			if ($div.hasClass("ui-droppable"))
@@ -322,7 +335,7 @@ define("game/Square", ["platform"], (Platform) => {
 		/**
 		 * Update a square that doesn't have a Tile dropped on it
 		 * @param {jQuery} $div the &lt;div> for the square
-         * @private
+     * @private
 		 */
 		refreshEmpty($div) {
 
@@ -356,6 +369,25 @@ define("game/Square", ["platform"], (Platform) => {
 			if (typeof this.underlay !== "undefined")
 				$div.append(`&lt;div class="underlay">${this.underlay}&lt;/div>`);
 		}
+
+    /* istanbul ignore next */
+    /**
+     * @override
+     */
+		toString() {
+			// All squares have a col
+			let string = `${this.type} square @ ${this.col}`;
+			// Squares on the board have a row too
+			if (this.row >= 0)
+				string += "," + this.row;
+
+			if (this.tile) {
+				string += ` => ${this.tile}`;
+				if (this.tileLocked)
+					string += " (Locked)";
+			}
+			return string;
+		}
 	}		
 
 	return Square;
@@ -370,13 +402,13 @@ define("game/Square", ["platform"], (Platform) => {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Default">Default</a></li><li><a href="global.html#%257Bstring">{string</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jun 03 2022 10:54:05 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jun 24 2022 17:16:45 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

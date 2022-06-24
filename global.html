@@ -94,18 +94,182 @@
     
 
     
-        <h3 class="subsection-title">Members</h3>
+
+    
+
+    
+        <h3 class="subsection-title">Type Definitions</h3>
 
         
+                
+<h4 class="name" id="BagLetter">BagLetter</h4>
+
+
+
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
             
-<h4 class="name" id="Default"><span class="type-signature">(nullable) </span>Default<span class="type-signature"> :string</span></h4>
+<span class="param-type">object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Edition.js.html">game/Edition.js</a>, <a href="game_Edition.js.html#line10">line 10</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+            
+                
+<h4 class="name" id="Command">Command</h4>
 
 
 
 
 <div class="description">
-    <p>Name of the dictionary the robot will use. Defaults to
-the game dictionary. Only used for findBestPlay for robot players.</p>
+    <p>Commands that can be sent from the UI to the Server.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">UNPAUSE</span>
+|
+
+<span class="param-type">PAUSE</span>
+|
+
+<span class="param-type">CHALLENGE</span>
+|
+
+<span class="param-type">PLAY</span>
+|
+
+<span class="param-type">TAKE_BACK</span>
+|
+
+<span class="param-type">PASS</span>
+|
+
+<span class="param-type">GAME_OVER</span>
+|
+
+<span class="param-type">SWAP</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Types.js.html">game/Types.js</a>, <a href="game_Types.js.html#line42">line 42</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+            
+                
+<h4 class="name" id="Key">Key</h4>
+
+
+
+
+<div class="description">
+    <p>A 16-character key that uniquely identifies a player or a game.</p>
 </div>
 
 
@@ -153,7 +317,7 @@ the game dictionary. Only used for findBestPlay for robot players.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line100">line 100</a>
+        <a href="game_Types.js.html">game/Types.js</a>, <a href="game_Types.js.html#line18">line 18</a>
     </li></ul></dd>
     
 
@@ -169,18 +333,61 @@ the game dictionary. Only used for findBestPlay for robot players.</p>
 
 
 
-        
             
-<h4 class="name" id="%7Bstring"><span class="type-signature"></span>{string<span class="type-signature"></span></h4>
+                
+<h4 class="name" id="Notify">Notify</h4>
 
 
 
 
 <div class="description">
-    <p>Array of all the letters in the bag, excluding blank.</p>
+    <p>Notifications intended for all listeners</p>
 </div>
 
 
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">UNPAUSE</span>
+|
+
+<span class="param-type">PAUSE</span>
+|
+
+<span class="param-type">JOIN</span>
+|
+
+<span class="param-type">REJECT</span>
+|
+
+<span class="param-type">MESSAGE</span>
+|
+
+<span class="param-type">NEXT_GAME</span>
+|
+
+<span class="param-type">ANOTHER_GAME</span>
+|
+
+<span class="param-type">TICK</span>
+|
+
+<span class="param-type">TURN</span>
+|
+
+<span class="param-type">CONNECTIONS</span>
+|
+
+<span class="param-type">UPDATE</span>
+|
+
+<span class="param-type">MONITOR</span>
+
+
+        </li>
+    </ul>
 
 
 
@@ -215,7 +422,7 @@ the game dictionary. Only used for findBestPlay for robot players.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_LetterBag.js.html">game/LetterBag.js</a>, <a href="game_LetterBag.js.html#line19">line 19</a>
+        <a href="game_Types.js.html">game/Types.js</a>, <a href="game_Types.js.html#line57">line 57</a>
     </li></ul></dd>
     
 
@@ -231,11 +438,604 @@ the game dictionary. Only used for findBestPlay for robot players.</p>
 
 
 
-        
+            
+                
+<h4 class="name" id="Penalty">Penalty</h4>
+
+
+
+
+<div class="description">
+    <p>Different types of penalty for a failed challenge.</p>
+<ul>
+<li>NONE - no penalty</li>
+<li>MISS - challenging player misses next turn</li>
+<li>PER_TURN - challenger loses a fixed number of points</li>
+<li>PER_WORD - challenger loses points for each wrongly challenged word</li>
+</ul>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">NONE</span>
+|
+
+<span class="param-type">MISS</span>
+|
+
+<span class="param-type">PER_TURN</span>
+|
+
+<span class="param-type">PER_WORD</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
     
 
     
 
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Types.js.html">game/Types.js</a>, <a href="game_Types.js.html#line91">line 91</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+            
+                
+<h4 class="name" id="Request">Request</h4>
+
+
+
+
+<div class="description">
+    <p>See <a href="https://nodejs.org/api/http.html">http.ServerRequest</a></p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">http.SereverRequest</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Types.js.html">game/Types.js</a>, <a href="game_Types.js.html#line8">line 8</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+            
+                
+<h4 class="name" id="Response">Response</h4>
+
+
+
+
+<div class="description">
+    <p>See <a href="https://nodejs.org/api/http.html">http.ServerResponse</a></p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">http.ServerResponse</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Types.js.html">game/Types.js</a>, <a href="game_Types.js.html#line13">line 13</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+            
+                
+<h4 class="name" id="State">State</h4>
+
+
+
+
+<div class="description">
+    <p>Game states.</p>
+<ul>
+<li>WAITING - until enough players join the game</li>
+<li>PLAYING - until the game is over, then one of:</li>
+<li>GAME_OVER - game was played to end, or</li>
+<li>TWO_PASSES - all players passed twice, or</li>
+<li>FAILED_CHALLENGE - a challenge on the final play failed, or</li>
+<li>TIMED_OUT - game is too old, will be pruned</li>
+</ul>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">WAITING</span>
+|
+
+<span class="param-type">PLAYING</span>
+|
+
+<span class="param-type">GAME_OVER</span>
+|
+
+<span class="param-type">TWO_PASSES</span>
+|
+
+<span class="param-type">FAILED_CHALLENGE</span>
+|
+
+<span class="param-type">TIMED_OUT</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Types.js.html">game/Types.js</a>, <a href="game_Types.js.html#line23">line 23</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+            
+                
+<h4 class="name" id="Timer">Timer</h4>
+
+
+
+
+<div class="description">
+    <p>Types of game timer</p>
+<ul>
+<li>NONE - game is untimed</li>
+<li>TURN - each turn is time-limited</li>
+<li>GAME - game is time limited, and a points penalty is applied for overtime</li>
+</ul>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">NONE</span>
+|
+
+<span class="param-type">TURN</span>
+|
+
+<span class="param-type">GAME</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Types.js.html">game/Types.js</a>, <a href="game_Types.js.html#line78">line 78</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+            
+                
+<h4 class="name" id="Turns">Turns</h4>
+
+
+
+
+<div class="description">
+    <p>Different types of <a href="Turn.html"><code>Turn</code></a></p>
+<ul>
+<li>PLAY - some tiles were placed on the board</li>
+<li>SWAP - player swapped for fresh tiles from the bag</li>
+<li>GAME_OVER - game is over</li>
+<li>CHALLENGE_LOST - player challenged, and lost</li>
+<li>CHALLENGE_WON - player challenged, and won</li>
+<li>TOOK_BACK - player took back their play</li>
+<li>PASSED - player passed</li>
+<li>TIMED_OUT - player was timed out (if timer type is <code>TURN</code>)</li>
+</ul>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">PLAY</span>
+|
+
+<span class="param-type">SWAP</span>
+|
+
+<span class="param-type">GAME_OVER</span>
+|
+
+<span class="param-type">CHALLENGE_LOST</span>
+|
+
+<span class="param-type">CHALLENGE_WON</span>
+|
+
+<span class="param-type">TOOK_BACK</span>
+|
+
+<span class="param-type">PASSED</span>
+|
+
+<span class="param-type">TIMED_OUT</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Types.js.html">game/Types.js</a>, <a href="game_Types.js.html#line106">line 106</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+            
+                
+<h4 class="name" id="WordCheck">WordCheck</h4>
+
+
+
+
+<div class="description">
+    <p>Ways to check played words.</p>
+<ul>
+<li>NONE - don't check played words</li>
+<li>AFTER - report to player (only) if played words were in dictionary</li>
+<li>REJECT - refuse to accept words not in the dictionary. A bad play
+in this case does not result in a penalty, it just won't accept
+the play.</li>
+</ul>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">NONE</span>
+|
+
+<span class="param-type">AFTER</span>
+|
+
+<span class="param-type">REJECT</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Types.js.html">game/Types.js</a>, <a href="game_Types.js.html#line129">line 129</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+            
     
 
     
@@ -249,13 +1049,13 @@ the game dictionary. Only used for findBestPlay for robot players.</p>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Default">Default</a></li><li><a href="global.html#%257Bstring">{string</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jun 03 2022 10:54:05 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jun 24 2022 17:16:45 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

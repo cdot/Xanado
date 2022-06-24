@@ -27,8 +27,8 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/*Copyright (C) 2019-2022 The Xanado Project https://github.com/cdot/Xanado
-License MIT. See README.md at the root of this distribution for full copyright
-and license information*/
+  License MIT. See README.md at the root of this distribution for full copyright
+  and license information. Author Crawford Currie http://c-dot.co.uk*/
 /* eslint-env browser, jquery */
 
 /**
@@ -48,12 +48,16 @@ requirejs([
 	const TWIST_OPEN = "\u25BC";
 	const TWIST_CLOSE = "\u25B2";
 
-    const Notify    = Types.Notify;
-    const Penalty   = Types.Penalty;
-    const State     = Types.State;
-    const Timer     = Types.Timer;
-    const WordCheck = Types.WordCheck;
+  const Notify    = Types.Notify;
+  const Penalty   = Types.Penalty;
+  const State     = Types.State;
+  const Timer     = Types.Timer;
+  const WordCheck = Types.WordCheck;
 
+  /**
+   * Management interface for a database of games.
+   * @extends UI
+   */
 	class GamesUI extends UI {
 
 		constructor() {
@@ -81,11 +85,11 @@ requirejs([
 				console.log("Send reminders");
 				$.post("/sendReminder/*")
 				.then(info => $("#alertDialog")
-					  .text($.i18n.apply(null, info))
-					  .dialog({
-						  title: $.i18n("Email turn reminders"),
-						  modal: true
-					  }))
+					    .text($.i18n.apply(null, info))
+					    .dialog({
+						    title: $.i18n("Email turn reminders"),
+						    modal: true
+					    }))
 				.catch(UI.report);
 			});
 
@@ -157,7 +161,7 @@ requirejs([
 					$tr.append(`&lt;td>${dic}&lt;/td>`);
 				}
 
-				if (game.timerType !== Timer.NONE &amp;&amp; player.clock) {
+				if (game.timerType &amp;&amp; player.clock) {
 					const left = $.i18n("$1s left to play", player.clock);
 					$tr.append(`&lt;td>${left}&lt;/td>`);
 				}
@@ -232,8 +236,8 @@ requirejs([
 
 			// Not the signed in player
 			if (this.getSetting("canEmail")
-				&amp;&amp; !player.isRobot
-				&amp;&amp; game.whosTurnKey === player.key) {
+				  &amp;&amp; !player.isRobot
+				  &amp;&amp; game.whosTurnKey === player.key) {
 				$box.append(
 					$("&lt;button name='email' title=''>&lt;/button>")
 					.button({ label: $.i18n("Send reminder") })
@@ -244,17 +248,47 @@ requirejs([
 						console.log("Send reminder");
 						$.post(`/sendReminder/${game.key}`)
 						.then(names => $("#alertDialog")
-							  .text($.i18n(/*i18n*/"Reminded $1", names.join(", ")))
-							  .dialog({
-								  title: $.i18n("Reminded $1", player.name),
-								  modal: true
-							  }))
+							    .text($.i18n(/*i18n*/"Reminded $1", names.join(", ")))
+							    .dialog({
+								    title: $.i18n("Reminded $1", player.name),
+								    modal: true
+							    }))
 						.catch(UI.report);
 					}));
 			}
 
 			return $tr;
 		}
+
+    $headline(game) {
+			const headline = [ game.edition ];
+
+			if (game.getPlayers().length > 0)
+				headline.push($.i18n(
+					"players $1",
+					Utils.andList(game.getPlayers().map(p => p.name))));
+			headline.push($.i18n(
+				"created $1",
+				new Date(game.creationTimestamp).toDateString()));
+
+			const isActive = (game.state === State.PLAYING
+							          || game.state === State.WAITING);
+			
+		  const $h = $("&lt;span>&lt;/span>")
+      .addClass("headline")
+			.text(headline.join(", "));
+
+			if (!isActive)
+				$h.append(
+          $("&lt;span>&lt;/span>")
+          .addClass("game-state")
+          .text($.i18n(game.state)))
+        .append(
+          $("&lt;span>&lt;/span>")
+          .addClass("who-won")
+          .text($.i18n(" $1 won", game.getWinner().name)));
+      return $h;
+    }
 
 		/**
 		 * Construct a table that shows the state of the given game
@@ -264,10 +298,10 @@ requirejs([
 			const $box = $(`&lt;div class="game" id="${game.key}">&lt;/div>`);
 			const $twist = $("&lt;div class='twist'>&lt;/div>");
 			const $twistButton =
-				  $("&lt;button name='twist'>&lt;/button>")
-				  .button({ label: TWIST_OPEN })
-				  .addClass("no-padding")
-				  .on("click", () => showHideTwist(!$twist.is(":visible")));
+				    $("&lt;button name='twist'>&lt;/button>")
+				    .button({ label: TWIST_OPEN })
+				    .addClass("no-padding")
+				    .on("click", () => showHideTwist(!$twist.is(":visible")));
 
 			const showHideTwist = show => {
 				if (show) {
@@ -283,30 +317,12 @@ requirejs([
 			
 			showHideTwist(this.isUntwisted &amp;&amp; this.isUntwisted[game.key]);
 
-			const headline = [ game.edition ];
-
-			if (game.getPlayers().length > 0)
-				headline.push($.i18n(
-					"players $1",
-					Utils.andList(game.getPlayers().map(p => p.name))));
-			headline.push($.i18n(
-				"created $1",
-				new Date(game.creationTimestamp).toDateString()));
-
-			const isActive = (game.state === State.PLAYING
-							  || game.state === State.WAITING);
-
-			
-			const $headline = $("&lt;span>&lt;/span>");
-			$headline
-			.text(headline.join(", "));
-			if (!isActive)
-				$headline.append($("&lt;span class='game-state'>&lt;/span>").text($.i18n(game.state)));
-
 			$box
-			.append($('&lt;div class="game-key">&lt;/div>').text(game.key))
+			.append($('&lt;div>&lt;/div>')
+              .addClass("game-key")
+              .text(game.key))
 			.append($twistButton)
-			.append($headline)
+			.append(this.$headline(game))
 			.append($twist);
 
 			const options = [];
@@ -314,31 +330,31 @@ requirejs([
 				options.push($.i18n("Dictionary $1", game.dictionary));
 			if (game.timerType === Timer.TURN)
 				options.push($.i18n("Turn time limit $1",
-									 Utils.formatTimeInterval(game.timeLimit)));
+									          Utils.formatTimeInterval(game.timeLimit)));
 			else if (game.timerType === Timer.GAME) {
 				options.push($.i18n("Game time limit $1",
-									Utils.formatTimeInterval(game.timeLimit)));
-				options.push($.i18n("Overtime penalty $1 points per minute",
-                                    game.timePenalty));
-            }
+									          Utils.formatTimeInterval(game.timeLimit)));
+				options.push($.i18n("Overtime penalty $1 point{{PLURAL:$1||s}} per minute",
+                            game.timePenalty));
+      }
 			if (game.predictScore)
 				options.push($.i18n("Predict score"));
-			if (game.wordCheck &amp;&amp; game.wordCheck !== WordCheck.NONE)
+			if (game.wordCheck)
 				options.push($.i18n(game.wordCheck));
 			if (game.allowTakeBack)
 				options.push($.i18n("Allow 'Take back'"));
-			if (game.maxPlayers === game.minPlayers)
+			if (game.minPlayers &amp;&amp; game.maxPlayers === game.minPlayers)
 				options.push($.i18n("$1 players", game.minPlayers));
 			else if (game.maxPlayers > game.minPlayers)
 				options.push($.i18n("$1 to $2 players",
-									game.minPlayers, game.maxPlayers));
+									          game.minPlayers, game.maxPlayers));
 			else if (game.minPlayers > 2)
 				options.push($.i18n("At least $1 players", game.minPlayers));
 
-			switch (game.penaltyType) {
+			switch (game.challengePenalty) {
 			case Penalty.PER_TURN:
 				options.push($.i18n("Lose $1 points for a failed challenge",
-									game.penaltyPoints));
+									          game.penaltyPoints));
 				break;
 			case Penalty.PER_WORD:
 				options.push($.i18n(
@@ -355,6 +371,10 @@ requirejs([
 					$(`&lt;div class="game-options">&lt;/div>`)
 					.text($.i18n("Options: " + options.join(", "))));
 			}
+
+			const isActive = (game.state === State.PLAYING
+							          || game.state === State.WAITING);
+
 			const $table = $("&lt;table>&lt;/table>").addClass("player-table");
 			$twist.append($table);
 			game.getPlayers().forEach(
@@ -365,9 +385,9 @@ requirejs([
 				$table.find(`#player${game.whosTurnKey}`).addClass("whosTurn");
 
 			if (isActive
-				&amp;&amp; this.session
-				&amp;&amp; (game.maxPlayers === 0
-					|| game.getPlayers().length &lt; game.maxPlayers)) {
+				  &amp;&amp; this.session
+				  &amp;&amp; ((game.maxPlayers || 0) === 0
+				      || game.getPlayers().length &lt; game.maxPlayers)) {
 
 				if (!game.getPlayer(this.session.key)) {
 					// Can join game
@@ -397,12 +417,12 @@ requirejs([
 							content: $.i18n("tooltip-add-robot")
 						})
 						.on("click", () =>
-							Dialog.open("AddRobotDialog", {
-								ui: this,
-								postAction: `/addRobot/${game.key}`,
-								postResult: () => this.refresh_game(game.key),
-								error: UI.report
-							})));
+							  Dialog.open("AddRobotDialog", {
+								  ui: this,
+								  postAction: `/addRobot/${game.key}`,
+								  postResult: () => this.refresh_game(game.key),
+								  error: UI.report
+							  })));
 				}
 			}
 			
@@ -433,9 +453,9 @@ requirejs([
 						$("&lt;button name='another' title=''>&lt;/button>")
 						.button({ label: $.i18n("Another game like this") })
 						.on("click",
-							() => $.post(`/anotherGame/${game.key}`)
-							.then(() => this.refresh_games())
-							.catch(UI.report)));
+							  () => $.post(`/anotherGame/${game.key}`)
+							  .then(() => this.refresh_games())
+							  .catch(UI.report)));
 				}
 
 				$twist.append(
@@ -445,26 +465,42 @@ requirejs([
 					})
 					.button({ label: $.i18n("Delete") })
 					.on("click", () => $.post(`/deleteGame/${game.key}`)
-						.then(() => this.refresh_games())
-						.catch(UI.report)));
+						  .then(() => this.refresh_games())
+						  .catch(UI.report)));
 
 				return $box;
 			}
 
 			// Nobody logged in, offer to observe
+      const obs = $.i18n("Observe game");
 			$twist.append(
 				$("&lt;button name='observe' title=''>&lt;/button>")
-				.button({ label: $.i18n("Observe game") })
+				.button({ label: obs })
 				.tooltip({
 					content: $.i18n("tooltip-observe-game")
 				})
-				.on("click", () => {
-					console.log(`Observe game ${game.key}`);
-					window.open(
-						`/html/game.html?game=${game.key}`,
-						"_blank");
-					this.refresh_game(game.key);
-				}));
+        .on("click", () => $("#observeDialog")
+					  .dialog({
+              create: function () {
+                $(this).find("button[type=submit]")
+                .on("click", () => {
+                  $(this).dialog("close");
+                });
+              },
+						  title: obs,
+						  closeText: obs,
+						  modal: true,
+					    close: function() {
+                const name = encodeURIComponent(
+                  $(this).find("#observerName").val());
+                console.log("Observe game", game.key,
+                            "as", name);
+					      window.open(
+						      `/html/game.html?game=${game.key};observer=${name}`,
+						      "_blank");
+					      this.refresh_game(game.key);
+					    }
+            })));
 
 			return $box;
 		}
@@ -492,7 +528,7 @@ requirejs([
 			const $gt = $("#gamesTable");
 			$gt.empty();
 
-            const games = simples.map(simple => new Game(simple));
+      const games = simples.map(simple => new Game(simple));
 
 			games.forEach(game => $gt.append(this.$game(game)));
 
@@ -543,7 +579,6 @@ requirejs([
 				this.getSession()
 				.then(session => {
 					if (session) {
-						console.log("Signed in as", this.session.name);
 						$("#create-game").show();
 						$("#chpw_button").toggle(session.provider === "xanado");
 					} else {
@@ -585,13 +620,13 @@ requirejs([
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Default">Default</a></li><li><a href="global.html#%257Bstring">{string</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jun 03 2022 10:54:05 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jun 24 2022 17:16:45 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

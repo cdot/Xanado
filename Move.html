@@ -33,7 +33,7 @@
             <div class="class-description"><p>A Move is a collection of tile placements, and the delta score
 achieved for the move. We also record the words created by the
 move. It is used to send a human player's play to the server,
-which then sends a matching <a href="Turn.html">Turn</a> to every player.</p></div>
+which then sends a matching <a href="Turn.html"><code>Turn</code></a> to every player.</p></div>
         
     
 </header>
@@ -162,7 +162,7 @@ params.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Move.js.html">game/Move.js</a>, <a href="game_Move.js.html#line14">line 14</a>
+        <a href="game_Move.js.html">game/Move.js</a>, <a href="game_Move.js.html#line16">line 16</a>
     </li></ul></dd>
     
 
@@ -212,13 +212,17 @@ params.</p></td>
 
         
             
-<h4 class="name" id="bonus"><span class="type-signature"></span>bonus<span class="type-signature"> :number</span></h4>
+<h4 class="name" id="placements"><span class="type-signature">(nullable) </span>placements<span class="type-signature"> :Array.&lt;<a href="Tile.html">Tile</a>></span></h4>
 
 
 
 
 <div class="description">
-    <p>Bonus for the play (included in score)</p>
+    <p>List of tiles placed in this move. Tiles are required
+to carry col, row positions where they were placed.  In
+a Turn, for type=<code>move</code> it indicates the move. For
+<code>Turns.TOOK_BACK</code> and <code>Turns.CHALLENGE_WON</code> it is
+the move just taken back/challenged.</p>
 </div>
 
 
@@ -227,7 +231,7 @@ params.</p></td>
     <ul>
         <li>
             
-<span class="param-type">number</span>
+<span class="param-type">Array.&lt;<a href="Tile.html">Tile</a>></span>
 
 
         </li>
@@ -266,7 +270,7 @@ params.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Move.js.html">game/Move.js</a>, <a href="game_Move.js.html#line43">line 43</a>
+        <a href="game_Move.js.html">game/Move.js</a>, <a href="game_Move.js.html#line54">line 54</a>
     </li></ul></dd>
     
 
@@ -345,7 +349,80 @@ in Turn.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Move.js.html">game/Move.js</a>, <a href="game_Move.js.html#line37">line 37</a>
+        <a href="game_Move.js.html">game/Move.js</a>, <a href="game_Move.js.html#line26">line 26</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="words"><span class="type-signature">(nullable) </span>words<span class="type-signature"> :Array.&lt;object></span></h4>
+
+
+
+
+<div class="description">
+    <p>List of words created by the play:</p>
+<pre class="prettyprint source"><code>{ word: string, score: number }</code></pre>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Array.&lt;object></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Move.js.html">game/Move.js</a>, <a href="game_Move.js.html#line41">line 41</a>
     </li></ul></dd>
     
 
@@ -474,7 +551,7 @@ in Turn.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Move.js.html">game/Move.js</a>, <a href="game_Move.js.html#line71">line 71</a>
+        <a href="game_Move.js.html">game/Move.js</a>, <a href="game_Move.js.html#line62">line 62</a>
     </li></ul></dd>
     
 
@@ -510,72 +587,19 @@ in Turn.</p>
     
 
     
-    <h4 class="name" id="addReplacement"><span class="type-signature"></span>addReplacement<span class="signature">(tile)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="toString"><span class="type-signature"></span>toString<span class="signature">()</span><span class="type-signature"></span></h4>
     
 
     
 
 
 
-<div class="description">
-    <p>Add a Tile replacement to the move</p>
-</div>
 
 
 
 
 
 
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>tile</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="Tile.html">Tile</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>the Tile to add</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
 
 
 
@@ -611,7 +635,7 @@ in Turn.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Move.js.html">game/Move.js</a>, <a href="game_Move.js.html#line82">line 82</a>
+        <a href="game_Move.js.html">game/Move.js</a>, <a href="game_Move.js.html#line72">line 72</a>
     </li></ul></dd>
     
 
@@ -657,13 +681,13 @@ in Turn.</p>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Default">Default</a></li><li><a href="global.html#%257Bstring">{string</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jun 03 2022 10:54:06 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jun 24 2022 17:16:45 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

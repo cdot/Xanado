@@ -27,93 +27,131 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/*Copyright (C) 2019-2022 The Xanado Project https://github.com/cdot/Xanado
-License MIT. See README.md at the root of this distribution for full copyright
-and license information*/
+  License MIT. See README.md at the root of this distribution for full copyright
+  and license information. Author Crawford Currie http://c-dot.co.uk*/
 /* eslint-env amd */
 
-define("game/Turn", ["game/Move"], Move => {
+define("game/Turn", [
+  "game/Tile", "game/Move", "game/Types"
+], (Tile, Move, Types) => {
+
+  const Penalty = Types.Penalty;
 
 	/**
-	 * Communicating the result of a command from server back to client,
-	 * and in a game history. Despite the name, a Turn is used not just
-	 * for a player's turn (such as a play or a swap) but also for other
-	 * results from commands sent to the server, such as challenges.
+	 * Despite the name, a Turn is used not just for a player's turn
+	 * (such as a play or a swap) but also for other results from
+	 * commands sent to the server, such as challenges.
+   * @extends Move
 	 */
 	class Turn extends Move {
-
-		/* Turn types */
-		static PLAY           = "play";
-		static SWAP           = "swap";
-		static GAME_OVER      = "game-over";
-		static CHALLENGE_LOST = "challenge-lost";
-		static CHALLENGE_WON  = "challenge-won";
-		static TOOK_BACK      = "took-back";
-		static PASSED         = "passed";
-		static TIMED_OUT      = "timed-out";
-		
 		/**
-		 * @param {Game} game the Game
+		 * The 'type' of the turn.
+		 * @member {Turns}
+		 */
+    type;
+
+		/**
+		 * Key of the game
+		 * @member {Key}
+		 */
+    gameKey;
+
+		/**
+		 * Key of the player who has been affected by the turn. Normally
+		 * this is the player who made the Move that resulted in the Turn,
+		 * but in the case of a challenge it is the player who was
+		 * challenged.
+		 * @member {Key}
+		 */
+    playerKey;
+
+		/**
+		 * Key of the next player who's turn it is
+		 * @member {Key}
+		 */
+    nextToGoKey;
+
+		/**
+		 * @param {Game} game the game this is a turn in.
 		 * @param {object} params parameters. Any field with the same name
-		 * as a member (or a member of {@link Move}) will initialise
+		 * as a member (or a member of {@linkcode Move}) will initialise
 		 * that member.
 		 */
 		constructor(game, params) {
 			super(params);
 
-			/**
-			 * Key of the game
-			 * @member {string}
-			 */
 			this.gameKey = game.key;
-
-			/**
-			 * The 'type' of the turn. This will be a Turn.* constant
-			 * constants.
-			 * @member {string}
-			 */
 			this.type = params.type;
-
-			/**
-			 * Key of the player who has been affected by the turn. Normally
-			 * this is the player who made the Move that resulted in the Turn,
-			 * but in the case of a challenge it is the player who was
-			 * challenged.
-			 * @member {string}
-			 */
 			this.playerKey = params.playerKey;
-
-			/**
-			 * Key of the next player who's turn it is
-			 * @member {string}
-			 */
 			this.nextToGoKey = params.nextToGoKey;
-			
-			/**
-			 * For `Turn.CHALLENGE_WON` and `Turn.CHALLENGE_LOST`,
-			 * the key of the player who challenged. playerkey in this case
-			 * will be the player who's play was challenged (always the
-			 * previous player)
-			 * @member {string?}
-			 */
-			if (params.challengerKey)
+
+			if (params.replacements)
+		    /**
+		     * List of tiles drawn from the bag to replace the tiles played
+		     * in this turn. These tiles will not have positions.
+		     * @member {Tile[]?}
+		     */
+				this.replacements = params.replacements.map(
+					tilespec => new Tile(tilespec));
+
+		  if (params.challengerKey)
+        /**
+		     * For `Turns.CHALLENGE_WON` and `Turns.CHALLENGE_LOST`,
+		     * the key of the player who challenged. playerkey in this case
+		     * will be the player who's play was challenged (always the
+		     * previous player)
+		     * @member {Key?}
+		     */
 				this.challengerKey = params.challengerKey;
 
 			let ep = game.getPlayers().find(p => p.rack.isEmpty());
-			/**
-			 * Player who's rack has been left empty by the play that
-			 * resulted in this turn
-			 * @member {string?}
-			 */
 			if (ep)
+		    /**
+		     * Player who's rack has been left empty by the play that
+		     * resulted in this turn
+		     * @member {Key?}
+		     */
 				this.emptyPlayerKey = ep.key;
 
-			/**
-			 * String describing the reason the game ended. Only used when
-			 * type==Turn.GAME_OVER
-			 * @member {string?}
-			 */
 			if (params.endState)
+		    /**
+		     * String describing the reason the game ended. Only used when
+		     * type==Turns.GAME_OVER
+		     * @member {State?}
+		     */
 				this.endState = params.endState;
+		}
+
+    /* istanbul ignore next */
+		/**
+     * @override
+		 */
+		toString() {
+      let s = `Turn ${this.type} ${this.playerKey}`;
+      if (this.challengerKey)
+        s += ` by ${this.challengerKey}`;
+      if (this.nextToGoKey &amp;&amp; this.nextToGoKey !== this.playerKey)
+        s += ` ->${this.nextToGoKey}`;
+
+      if (typeof this.score !== "undefined")
+        s += ` (${this.score})`;
+
+      if (this.placements)
+        s += " &lt;=" + this.placements.map(t => t.toString(true));
+      
+      if (this.words)
+        s += ' "' + this.words.map(w => w.word) + '"';
+
+      if (this.replacements)
+			  s += " =>" + this.replacements.map(t => t.toString(true));
+
+      if (this.penalty === Penalty.MISS)
+        s += ` MISS`;
+      
+      if (this.endState)
+        s += ` ${this.endState}`;
+
+      return s;
 		}
 	}
 
@@ -129,13 +167,13 @@ define("game/Turn", ["game/Move"], Move => {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Default">Default</a></li><li><a href="global.html#%257Bstring">{string</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jun 03 2022 10:54:05 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jun 24 2022 17:16:45 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -30,7 +30,7 @@
     
         <h2><span class="attribs"><span class="type-signature"></span></span>Player<span class="signature">(params)</span><span class="type-signature"></span></h2>
         
-            <div class="class-description"><p>A player in a <a href="Game.html">Game</a>. Player objects are specific to
+            <div class="class-description"><p>A player in a <a href="Game.html"><code>Game</code></a>. Player objects are specific to
 a single game, and are used on both browser and server sides.</p></div>
         
     
@@ -102,11 +102,11 @@ a single game, and are used on both browser and server sides.</p></div>
 
             
 
-            <td class="description last"><p>named parameters, or other layer or simple
-object to copy. <code>name</code> and <code>key </code> are required. Any of <code>debug</code>,
-<code>isRobot</code>, <code>canChallenge</code>, <code>wantsAdvice</code>, <code>dictionary</code> or
-<code>missNextTurn</code> can be passed to override the default.
-`</p></td>
+            <td class="description last"><p>named parameters, or other player or simple
+object to copy. <code>name</code> and <code>key </code> are required. Any of <code>_debug</code>,
+<code>isRobot</code>, <code>passes</code>, <code>score</code>, <code>clock</code>, <code>canChallenge</code>,
+<code>wantsAdvice</code>,<code>dictionary</code>, <code>isConnected</code> or
+<code>missNextTurn</code> can be passed.</p></td>
         </tr>
 
     
@@ -147,7 +147,7 @@ object to copy. <code>name</code> and <code>key </code> are required. Any of <co
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line21">line 21</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line19">line 19</a>
     </li></ul></dd>
     
 
@@ -251,7 +251,7 @@ object to copy. <code>name</code> and <code>key </code> are required. Any of <co
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line111">line 111</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line125">line 125</a>
     </li></ul></dd>
     
 
@@ -269,7 +269,7 @@ object to copy. <code>name</code> and <code>key </code> are required. Any of <co
 
         
             
-<h4 class="name" id="canChallenge"><span class="type-signature">(nullable) </span>canChallenge<span class="type-signature"> :boolean</span></h4>
+<h4 class="name" id="canChallenge"><span class="type-signature"></span>canChallenge<span class="type-signature"> :boolean</span></h4>
 
 
 
@@ -323,7 +323,7 @@ object to copy. <code>name</code> and <code>key </code> are required. Any of <co
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line98">line 98</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line109">line 109</a>
     </li></ul></dd>
     
 
@@ -352,7 +352,7 @@ this is the number of seconds before the player's turn times
 out (if they are the current player). For <code>TIMER_GAME</code> it's
 the number of seconds before the chess clock runs out.
 Default is undefined. Setting and management is done in
-<a href="Game.html">Game</a></p>
+<a href="Game.html"><code>Game</code></a></p>
 </div>
 
 
@@ -400,7 +400,7 @@ Default is undefined. Setting and management is done in
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line64">line 64</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line71">line 71</a>
     </li></ul></dd>
     
 
@@ -418,15 +418,88 @@ Default is undefined. Setting and management is done in
 
         
             
-<h4 class="name" id="isConnected"><span class="type-signature">(nullable) </span>isConnected<span class="type-signature"> :boolean</span></h4>
+<h4 class="name" id="dictionary"><span class="type-signature">(nullable) </span>dictionary<span class="type-signature"> :string</span></h4>
 
 
 
 
 <div class="description">
-    <p>The connected flag is set when the player is created
-from a Player.simple structure. It is not used server-side.
-Default is false.</p>
+    <p>Name of the dictionary the robot will use. Defaults to
+the game dictionary. Only used for findBestPlay for robot players.
+Default is undefined.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">string</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line118">line 118</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="isConnected"><span class="type-signature"></span>isConnected<span class="type-signature"> :boolean</span></h4>
+
+
+
+
+<div class="description">
+    <p>The connected flag may be set when the Player is created
+from a simple structure. It is not used server-side.</p>
 </div>
 
 
@@ -474,7 +547,7 @@ Default is false.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line72">line 72</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line79">line 79</a>
     </li></ul></dd>
     
 
@@ -492,7 +565,7 @@ Default is false.</p>
 
         
             
-<h4 class="name" id="isRobot"><span class="type-signature">(nullable) </span>isRobot<span class="type-signature"> :boolean</span></h4>
+<h4 class="name" id="isRobot"><span class="type-signature"></span>isRobot<span class="type-signature"> :boolean</span></h4>
 
 
 
@@ -546,7 +619,7 @@ Default is false.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line92">line 92</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line102">line 102</a>
     </li></ul></dd>
     
 
@@ -564,7 +637,7 @@ Default is false.</p>
 
         
             
-<h4 class="name" id="key"><span class="type-signature"></span>key<span class="type-signature"> :string</span></h4>
+<h4 class="name" id="key"><span class="type-signature"></span>key<span class="type-signature"> :<a href="global.html#Key">Key</a></span></h4>
 
 
 
@@ -579,7 +652,7 @@ Default is false.</p>
     <ul>
         <li>
             
-<span class="param-type">string</span>
+<span class="param-type"><a href="global.html#Key">Key</a></span>
 
 
         </li>
@@ -618,7 +691,7 @@ Default is false.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line27">line 27</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line33">line 33</a>
     </li></ul></dd>
     
 
@@ -691,7 +764,7 @@ to a failed challenge. Default is false.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line79">line 79</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line87">line 87</a>
     </li></ul></dd>
     
 
@@ -763,7 +836,7 @@ to a failed challenge. Default is false.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line33">line 33</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line39">line 39</a>
     </li></ul></dd>
     
 
@@ -836,7 +909,7 @@ since the last non-pass/swap play. Default is 0.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line47">line 47</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line53">line 53</a>
     </li></ul></dd>
     
 
@@ -909,7 +982,7 @@ it's only then we know how big it has to be.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line40">line 40</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line46">line 46</a>
     </li></ul></dd>
     
 
@@ -933,7 +1006,7 @@ it's only then we know how big it has to be.</p>
 
 
 <div class="description">
-    <p>Player's current score. Default is 0.</p>
+    <p>Player's current score.</p>
 </div>
 
 
@@ -981,7 +1054,7 @@ it's only then we know how big it has to be.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line53">line 53</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line59">line 59</a>
     </li></ul></dd>
     
 
@@ -1054,7 +1127,7 @@ they used. Default is false.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line86">line 86</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line95">line 95</a>
     </li></ul></dd>
     
 
@@ -1135,7 +1208,7 @@ side only.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line302">line 302</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line275">line 275</a>
     </li></ul></dd>
     
 
@@ -1286,7 +1359,7 @@ a Player.simple</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line269">line 269</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line242">line 242</a>
     </li></ul></dd>
     
 
@@ -1468,7 +1541,7 @@ a Player.simple</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line196">line 196</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line168">line 168</a>
     </li></ul></dd>
     
 
@@ -1606,7 +1679,7 @@ side only.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line311">line 311</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line284">line 284</a>
     </li></ul></dd>
     
 
@@ -1642,7 +1715,7 @@ side only.</p>
     
 
     
-    <h4 class="name" id="returnTiles"><span class="type-signature"></span>returnTiles<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="returnTiles"><span class="type-signature"></span>returnTiles<span class="signature">(letterBag)</span><span class="type-signature"></span></h4>
     
 
     
@@ -1650,7 +1723,7 @@ side only.</p>
 
 
 <div class="description">
-    <p>Return all tiles to the letter bag</p>
+    <p>Return all tiles to the letter bag.</p>
 </div>
 
 
@@ -1659,6 +1732,55 @@ side only.</p>
 
 
 
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>letterBag</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LetterBag.html">LetterBag</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>LetterBag to return tiles to</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -1694,7 +1816,7 @@ side only.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line209">line 209</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line182">line 182</a>
     </li></ul></dd>
     
 
@@ -1858,7 +1980,7 @@ timer expires, ignored if time undefined</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line237">line 237</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line210">line 210</a>
     </li></ul></dd>
     
 
@@ -1903,7 +2025,8 @@ timer expires, ignored if time undefined</p></td>
 
 <div class="description">
     <p>Create simple flat structure describing a subset of the player
-state</p>
+state. This is used for sending minimal player information to
+the <code>games</code> interface.</p>
 </div>
 
 
@@ -2039,7 +2162,7 @@ state</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line144">line 144</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line139">line 139</a>
     </li></ul></dd>
     
 
@@ -2068,7 +2191,8 @@ state</p>
 
         
 <div class="param-desc">
-    <p>resolving to a simple structure describing the player</p>
+    <p>resolving to a simple structure describing
+the player</p>
 </div>
 
 
@@ -2149,7 +2273,7 @@ state</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line217">line 217</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line190">line 190</a>
     </li></ul></dd>
     
 
@@ -2237,7 +2361,7 @@ state</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line258">line 258</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line231">line 231</a>
     </li></ul></dd>
     
 
@@ -2280,10 +2404,6 @@ state</p>
 
 
 
-<div class="description">
-    <p>Generate a simple string representation of the player</p>
-</div>
-
 
 
 
@@ -2325,7 +2445,7 @@ state</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line246">line 246</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line219">line 219</a>
     </li></ul></dd>
     
 
@@ -2371,13 +2491,13 @@ state</p>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Default">Default</a></li><li><a href="global.html#%257Bstring">{string</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jun 03 2022 10:54:06 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jun 24 2022 17:16:45 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

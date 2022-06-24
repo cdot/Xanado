@@ -27,12 +27,12 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/*Copyright (C) 2019-2022 The Xanado Project https://github.com/cdot/Xanado
-License MIT. See README.md at the root of this distribution for full copyright
-and license information*/
+  License MIT. See README.md at the root of this distribution for full copyright
+  and license information. Author Crawford Currie http://c-dot.co.uk*/
 /* eslint-env browser, jquery */
 
 define("browser/UI", [
-	"socket.io",  "browser/Dialog",
+	"socket.io-client",  "browser/Dialog",
 
 	"jquery",
 	"jqueryui",
@@ -42,9 +42,9 @@ define("browser/UI", [
 	"i18n_language",
 	"i18n_messagestore",
 	"i18n_parser",
-    "cldrpluralruleparser"
+  "cldrpluralruleparser"
 ], (
-	io, Dialog
+	Sockets, Dialog
 ) => {
 
 	/**
@@ -134,10 +134,10 @@ define("browser/UI", [
 			}
 			catch(e) {
 				$(audio).on("canplaythrough", 
-					() => {
-						$(audio).off("canplaythrough");
-						audio.play();
-					}, true);
+					          () => {
+						          $(audio).off("canplaythrough");
+						          audio.play();
+					          }, true);
 			}
 		}
 
@@ -185,7 +185,7 @@ define("browser/UI", [
 		 */
 		decorate() {
 			// gear button
-			$("#settingsButton")
+			$(".settingsButton")
 			.on("click", () => {
 				const curTheme = this.getSetting("theme");
 				Dialog.open("SettingsDialog", {
@@ -209,8 +209,9 @@ define("browser/UI", [
 				}
 			});
 
-			console.debug("Connecting to socket");
-			this.socket = io.connect(null);
+			console.debug("UI loaded, connecting to socket");
+      // The server URL will be deduced from the window.location
+			this.socket = Sockets.connect();
 			let $reconnectDialog = null;
 			this.socket
 			.on("connect", skt => {
@@ -280,7 +281,7 @@ define("browser/UI", [
 			$(".logged-in,.not-logged-in").hide();
 			return $.get("/session")
 			.then(session => {
- 				console.debug("Signed in as", session.name);
+ 				console.debug(`Signed in as '${session.name}'`);
 				$(".not-logged-in").hide();
 				$(".logged-in")
 				.show()
@@ -292,8 +293,11 @@ define("browser/UI", [
 			})
 			.catch(e => {
 				$(".logged-in").hide();
-				$(".not-logged-in").show()
-				.find("button")
+				$(".not-logged-in").show();
+        if (typeof this.observer === "string")
+          $(".observer").show().text($.i18n(
+            "Observer '$1'", this.observer));
+				$(".not-logged-in>button")
 				.on("click", () => Dialog.open("LoginDialog", {
 					postResult: () => location.replace(location),
 					error: UI.report
@@ -311,7 +315,7 @@ define("browser/UI", [
 		 */
 		getSetting(key) {
 			return (this.session &amp;&amp; this.session.settings
-					&amp;&amp; typeof this.session.settings[key] !== "undefined")
+					    &amp;&amp; typeof this.session.settings[key] !== "undefined")
 			? this.session.settings[key]
 			: this.defaults[key];
 		}
@@ -329,8 +333,8 @@ define("browser/UI", [
 		 */
 		canNotify() {
 			if (!(this.usingHttps
-				  &amp;&amp; this.getSetting("notification")
-				  &amp;&amp; "Notification" in window))
+				    &amp;&amp; this.getSetting("notification")
+				    &amp;&amp; "Notification" in window))
 				return Promise.reject();
 
 			switch (Notification.permission) {
@@ -406,13 +410,13 @@ define("browser/UI", [
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Default">Default</a></li><li><a href="global.html#%257Bstring">{string</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jun 03 2022 10:54:05 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jun 24 2022 17:16:45 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

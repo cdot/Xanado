@@ -27,11 +27,13 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/*Copyright (C) 2019-2022 The Xanado Project https://github.com/cdot/Xanado
-License MIT. See README.md at the root of this distribution for full copyright
-and license information*/
+  License MIT. See README.md at the root of this distribution for full copyright
+  and license information. Author Crawford Currie http://c-dot.co.uk*/
 /* eslint-env amd, node */
 
-define("dawg/TrieNode", [ "dawg/LetterNode" ], LetterNode => {
+define("dawg/TrieNode", [
+  "dawg/LetterNode"
+], LetterNode => {
 
 	let nodeIds = 0;
 
@@ -43,73 +45,73 @@ define("dawg/TrieNode", [ "dawg/LetterNode" ], LetterNode => {
 	 * letter in the child list of it's parent node.  Note this is
 	 * only used while generating a DAWG from a lexicon. TrieNodes are
 	 * serialised using the above structure but are then rebuilt using
-	 * {@link LetterNode}s at the sharp end.
+	 * {@linkcode LetterNode}s at the sharp end.
 	 */
 	class TrieNode {
-        /**
-         * The letter at this node
-         * @member {string}
-         */
-        letter = undefined;
+    /**
+     * The letter at this node
+     * @member {string}
+     */
+    letter = undefined;
 
-        /**
-         * Unique ID for this node, purely used for debugging
-         * @member {number}
-         */
-        id = -1;
+    /**
+     * Unique ID for this node, purely used for debugging
+     * @member {number}
+     */
+    id = -1;
 
-        /**
-         * Pointer to the next alternative to this letter
-         * @member {TrieNode}
-         */
-        next = null;
+    /**
+     * Pointer to the next alternative to this letter
+     * @member {TrieNode}
+     */
+    next = null;
 
-        /**
-         * Pointer to the first next letter if this letter is matched
-         * @member {TrieNode}
-         */
-        child = null;
+    /**
+     * Pointer to the first next letter if this letter is matched
+     * @member {TrieNode}
+     */
+    child = null;
 
-        /**
-         * Marker for a valid end-of-word node
-         * @member {boolean}
-         */
-        isEndOfWord = false;
+    /**
+     * Marker for a valid end-of-word node
+     * @member {boolean}
+     */
+    isEndOfWord = false;
 
-        /**
-         * Marker for the first child under a parent node. This is
-         * used when the node is arrived at other than through the
-         * parent
-         * @member {boolean}
-         */
-        isFirstChild = false;
+    /**
+     * Marker for the first child under a parent node. This is
+     * used when the node is arrived at other than through the
+     * parent
+     * @member {boolean}
+     */
+    isFirstChild = false;
 
-        /**
-         * Will be set if the node is to be pruned after DAWG generation
-         * @member {boolean}
-         */
-        isPruned = false;
+    /**
+     * Will be set if the node is to be pruned after DAWG generation
+     * @member {boolean}
+     */
+    isPruned = false;
 
-        /**
-         * Maximum number of nodes under this node (iei remaining length
-         * of the longest word this node partiipates in)
-         * @member {number}
-         */
-        maxChildDepth = 0;
-        
-        /**
-         * Number of child nodes under this node - used for optimisation
-         * @member {number}
-         */
-        numberOfChildren = 0;
+    /**
+     * Maximum number of nodes under this node (iei remaining length
+     * of the longest word this node partiipates in)
+     * @member {number}
+     */
+    maxChildDepth = 0;
+    
+    /**
+     * Number of child nodes under this node - used for optimisation
+     * @member {number}
+     */
+    numberOfChildren = 0;
 
-        /**
-         * Index of the node in the encoded DAWG, assigned when the
-         * encoding is generated
-         * @member {number}
-         */
-        index = -1;
-        
+    /**
+     * Index of the node in the encoded DAWG, assigned when the
+     * encoding is generated
+     * @member {number}
+     */
+    index = -1;
+    
 		/**
 		 * @param {string} letter codepoint
 		 * @param {TrieNode} next next node pointer
@@ -128,11 +130,11 @@ define("dawg/TrieNode", [ "dawg/LetterNode" ], LetterNode => {
 			this.id = nodeIds++;
 		}
 
-        /**
-         * Debug
-         * @param {boolean} deeply true to expand child nodes
-         */
-        /* istanbul ignore next */
+    /* istanbul ignore next */
+    /**
+     * Debug
+     * @param {boolean} deeply true to expand child nodes
+     */
 		toString(deeply) {
 			let simpler = `{${this.id} ${this.letter}`;
 
@@ -140,15 +142,15 @@ define("dawg/TrieNode", [ "dawg/LetterNode" ], LetterNode => {
 				simpler += ".";
 			if (this.child) {
 				simpler += "+";
-                if (deeply)
-                    simpler += this.child.toString(deeply);
-            }
-            simpler += "}";
+        if (deeply)
+          simpler += this.child.toString(deeply);
+      }
+      simpler += "}";
 			if (this.next) {
 				simpler += "-";
-                if (deeply)
-                    simpler += this.next.toString(deeply);
-            }
+        if (deeply)
+          simpler += this.next.toString(deeply);
+      }
 
 			return simpler;
 		}
@@ -183,7 +185,7 @@ define("dawg/TrieNode", [ "dawg/LetterNode" ], LetterNode => {
 		 * sorted order.
 		 * @param {TrieNode[]} nodes list of nodes visited to create the word
 		 * @param {TrieNode~wordCallback} cb callback function
-         * @private
+     * @private
 		 */
 		eachWord(nodes, cb) {
 
@@ -201,13 +203,13 @@ define("dawg/TrieNode", [ "dawg/LetterNode" ], LetterNode => {
 				this.next.eachWord(nodes, cb);
 		}
 
-        eachNode(cb) {
-            cb(this);
-            if (this.next)
-                this.next.eachNode(cb);
-            if (this.child)
-                this.child.eachNode(cb);
-        }
+    eachNode(cb) {
+      cb(this);
+      if (this.next)
+        this.next.eachNode(cb);
+      if (this.child)
+        this.child.eachNode(cb);
+    }
 
 		/**
 		 * Search along this's child next chain for a node with the 
@@ -270,19 +272,19 @@ define("dawg/TrieNode", [ "dawg/LetterNode" ], LetterNode => {
 		 * @return {boolean} if the are the same
 		 */
 		sameSubtrie(other) {
-            //console.debug("CMP",this.toString(), !other ? "null" : other.toString());
+      //console.debug("CMP",this.toString(), !other ? "null" : other.toString());
 			if (other === this) // identity
 				return true;
 
 			if (other === null
-				|| other.letter !== this.letter
-				|| other.maxChildDepth !== this.maxChildDepth
-				|| other.numberOfChildren !== this.numberOfChildren
-				|| other.isEndOfWord !== this.isEndOfWord
-				|| !this.child &amp;&amp; other.child
-				|| this.child &amp;&amp; !other.child
-				|| !this.next &amp;&amp; other.next
-				|| this.next &amp;&amp; !other.next)
+				  || other.letter !== this.letter
+				  || other.maxChildDepth !== this.maxChildDepth
+				  || other.numberOfChildren !== this.numberOfChildren
+				  || other.isEndOfWord !== this.isEndOfWord
+				  || !this.child &amp;&amp; other.child
+				  || this.child &amp;&amp; !other.child
+				  || !this.next &amp;&amp; other.next
+				  || this.next &amp;&amp; !other.next)
 				return false;
 
 			if (this.child &amp;&amp; !this.child.sameSubtrie(other.child))
@@ -301,7 +303,7 @@ define("dawg/TrieNode", [ "dawg/LetterNode" ], LetterNode => {
 		 * Trie.
 		 * @param {TrieNode[][]} red reduction structure
 		 * @return {TrieNode}
-         * @private
+     * @private
 		 */
 		findSameSubtrie(red) {
 			//return red[this.maxChildDepth].find(n => this.sameSubtrie(n));
@@ -309,7 +311,7 @@ define("dawg/TrieNode", [ "dawg/LetterNode" ], LetterNode => {
 			for (x = 0; x &lt; red[this.maxChildDepth].length; x++)
 				if (this.sameSubtrie(red[this.maxChildDepth][x]))
 					break;
-            /* istanbul ignore if */
+      /* istanbul ignore if */
 			if (red[this.maxChildDepth][x].isPruned)
 				throw Error("Same subtrie equivalent is pruned!");
 			return red[this.maxChildDepth][x];
@@ -335,7 +337,7 @@ define("dawg/TrieNode", [ "dawg/LetterNode" ], LetterNode => {
 					// as pruned, so let us replace it with its first
 					// equivalent which isn't tagged.
 					this.child = this.child.findSameSubtrie(red);
-                    /* istanbul ignore if */
+          /* istanbul ignore if */
 					if (this.child === null)
 						throw Error("Something horrible");
 					trimmed++;
@@ -368,7 +370,7 @@ define("dawg/TrieNode", [ "dawg/LetterNode" ], LetterNode => {
 			if (!this.next)
 				numb |= LetterNode.END_OF_LIST_BIT_MASK;
 			array.push(numb);
-            return array;
+      return array;
 		}
 	}
 
@@ -384,13 +386,13 @@ define("dawg/TrieNode", [ "dawg/LetterNode" ], LetterNode => {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Default">Default</a></li><li><a href="global.html#%257Bstring">{string</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jun 03 2022 10:54:05 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jun 24 2022 17:16:45 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

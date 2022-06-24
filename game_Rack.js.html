@@ -27,8 +27,8 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/*Copyright (C) 2019-2022 The Xanado Project https://github.com/cdot/Xanado
-License MIT. See README.md at the root of this distribution for full copyright
-and license information*/
+  License MIT. See README.md at the root of this distribution for full copyright
+  and license information. Author Crawford Currie http://c-dot.co.uk*/
 /* eslint-env node, jquery */
 
 /**
@@ -38,7 +38,8 @@ and license information*/
 define("game/Rack", ["game/Surface"], Surface => {
 
 	/**
-	 * A Rack is a 1-column {@link Surface}
+	 * A Rack is a 1-column {@linkcode Surface}
+   * @extends Surface
 	 */
 	class Rack extends Surface {
 
@@ -67,13 +68,6 @@ define("game/Rack", ["game/Surface"], Surface => {
 		}
 
 		/**
-		 * Debug
-		 */
-		toString() {
-			return `Rack ${this.tiles().join(",")}`;
-		}
-
-		/**
 		 * One dimensional
 		 * @override
 		 */
@@ -84,23 +78,23 @@ define("game/Rack", ["game/Surface"], Surface => {
 		/**
 		 * Add a Tile to the rack
 		 * @param {Tile} tile the Tile to add, must != null
-		 * @return {number} the col of the added tile (or -1
-		 * if it couldn't be placed)
+		 * @return {Square?} the square where the tile was placed
+     * (undefined if it couldn't be placed)
 		 */
 		addTile(tile) {
-			let col = -1;
-			if (tile.isBlank)
-				tile.letter = " ";
+      let rackSquare;
+			tile.reset();
 			this.forEachEmptySquare(square => {
+        rackSquare = square;
 				square.placeTile(tile);
-				col = square.col;
 				return true;
 			});
-			return col;
+			return rackSquare;
 		}
 
 		/**
-		 * Get an unsorted list of the letters currently on the rack
+		 * Get an unsorted list of the letters currently on the rack.
+     * Blanks are represented by a space.
 		 * @return {string[]}
 		 */
 		letters() {
@@ -119,7 +113,7 @@ define("game/Rack", ["game/Surface"], Surface => {
 			let square;
 			this.forEachTiledSquare(sq => {
 				if (!square &amp;&amp; sq.tile.isBlank
-					|| sq.tile.letter === letter)
+					  || sq.tile.letter === letter)
 					square = sq;
 			});
 
@@ -133,15 +127,15 @@ define("game/Rack", ["game/Surface"], Surface => {
 		 */
 		removeTile(remove) {
 			const square = this.findSquare(remove.letter);
-            /* istanbul ignore if */
+      /* istanbul ignore if */
 			if (!square)
 				throw Error("Cannot find '"
-							+ remove.letter + "' on " + this);
+							      + remove.letter + "' on " + this);
 			const tile = square.tile;
 			// If the tile is a blank, set the letter to the remove letter
 			if (tile.isBlank)
 				tile.letter = remove.letter;
-			square.placeTile(null);
+			square.unplaceTile();
 			return tile;
 		}
 
@@ -165,11 +159,12 @@ define("game/Rack", ["game/Surface"], Surface => {
 		}
 
 		/**
-		 * Get a list of tiles that are not blanks
+		 * Get a list of letters on the rack that are not blanks
+     * @return {string[]}
 		 */
 		lettersLeft() {
 			return this.tiles().filter(tile => !tile.isBlank)
-			.map(tile => tile.letter);
+		  .map(tile => tile.letter);
 		}
 
 		/**
@@ -179,7 +174,7 @@ define("game/Rack", ["game/Surface"], Surface => {
 		 * @return {jQuery}
 		 */
 		$ui(underlay) {
-			const $table = $('&lt;table class="Rack">&lt;/table>');
+			const $table = $('&lt;table class="rack">&lt;/table>');
 			const $tbody = $("&lt;tbody>&lt;/tbody>");
 			$table.append($tbody);
 			const $tr = $(`&lt;tr>&lt;/tr>`);
@@ -191,6 +186,14 @@ define("game/Rack", ["game/Surface"], Surface => {
 			});
 			$tbody.append($tr);
 			return $table;
+		}
+
+    /* istanbul ignore next */
+		/**
+		 * @override
+		 */
+		toString() {
+			return `Rack ${this.tiles().join(",")}`;
 		}
 	}
 
@@ -206,13 +209,13 @@ define("game/Rack", ["game/Surface"], Surface => {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Default">Default</a></li><li><a href="global.html#%257Bstring">{string</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jun 03 2022 10:54:05 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jun 24 2022 17:16:45 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

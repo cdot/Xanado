@@ -27,8 +27,8 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/*Copyright (C) 2019-2022 The Xanado Project https://github.com/cdot/Xanado
-License MIT. See README.md at the root of this distribution for full copyright
-and license information*/
+  License MIT. See README.md at the root of this distribution for full copyright
+  and license information. Author Crawford Currie http://c-dot.co.uk*/
 /* eslint-env browser, jquery */
 
 /**
@@ -38,9 +38,9 @@ define("browser/CreateGameDialog", [
 	"browser/Dialog", "game/Types", "game/Game"
 ], (Dialog, Types, Game) => {
 
-    const Timer = Types.Timer;
-    const Penalty = Types.Penalty;
-    const WordCheck = Types.WordCheck;
+  const Timer = Types.Timer;
+  const Penalty = Types.Penalty;
+  const WordCheck = Types.WordCheck;
 
 	class CreateGameDialog extends Dialog {
 		
@@ -49,9 +49,9 @@ define("browser/CreateGameDialog", [
 		 */
 		canSubmit() {
 			console.debug("Validate edition",
-						  this.$dlg.find("[name=edition]").val(),
-						  "play dictionary",
-						  this.$dlg.find("[name=dictionary]").val());
+						        this.$dlg.find("[name=edition]").val(),
+						        "play dictionary",
+						        this.$dlg.find("[name=dictionary]").val());
 			return (this.$dlg.find("[name=edition]").val() !== 'none');
 		}
 
@@ -62,67 +62,69 @@ define("browser/CreateGameDialog", [
 			this.ui = options.ui;
 		}
 
-        showTimerFields() {
-            const type = this.$dlg.find("[name=timerType]").val();
-            switch (type) {
-            default:
-                this.$dlg.find("[name=timeLimitMinutes]")
-                .parent().hide();
-                this.$dlg.find("[name=timePenalty]")
-                .parent().hide();
-                break;
-            case Timer.TURN:
-                this.$dlg.find("[name=timeLimitMinutes]")
-                .parent().show();
-                this.$dlg.find("[name=timePenalty]")
-                .parent().hide();
-                break;
-            case Timer.GAME:
-                this.$dlg.find("[name=timeLimitMinutes]")
-                .parent().show();
-                this.$dlg.find("[name=timePenalty]")
-                .parent().show();
-                break;
-            }
-        }
+    showTimerFields() {
+      const type = this.$dlg.find("[name=timerType]").val();
+      switch (type) {
+      default:
+        this.$dlg.find("[name=timeLimitMinutes]")
+        .parent().hide();
+        this.$dlg.find("[name=timePenalty]")
+        .parent().hide();
+        break;
+      case Timer.TURN:
+        this.$dlg.find("[name=timeLimitMinutes]")
+        .parent().show();
+        this.$dlg.find("[name=timePenalty]")
+        .parent().hide();
+        break;
+      case Timer.GAME:
+        this.$dlg.find("[name=timeLimitMinutes]")
+        .parent().show();
+        this.$dlg.find("[name=timePenalty]")
+        .parent().show();
+        break;
+      }
+    }
 
-        showPenaltyFields() {
-            const type = this.$dlg.find("[name=penaltyType]").val();
-            switch (type) {
-            default:
-                this.$dlg.find("[name=penaltyPoints]")
-                .parent().hide();
-                break;
-            case Penalty.PER_TURN:
-            case Penalty.PER_WORD:
-                this.$dlg.find("[name=penaltyPoints]")
-                .parent().show();
-                break;
-            }
-        }
+    showPenaltyFields() {
+      const type = this.$dlg.find("[name=challengePenalty]").val();
+      switch (type) {
+      default:
+        this.$dlg.find("[name=penaltyPoints]")
+        .parent().hide();
+        break;
+      case Penalty.PER_TURN:
+      case Penalty.PER_WORD:
+        this.$dlg.find("[name=penaltyPoints]")
+        .parent().show();
+        break;
+      }
+    }
 
-        showFeedbackFields() {
-            const dic = this.$dlg.find("[name=dictionary]").val();
-            this.$dlg.find("[name=wordCheck]")
-            .parent().toggle(dic !== "none");
-        }
+    showFeedbackFields() {
+      const dic = this.$dlg.find("[name=dictionary]").val();
+      this.$dlg.find("[name=wordCheck]")
+      .parent().toggle(dic !== "none");
+    }
 
 		createDialog() {
-			const $pen = this.$dlg.find("[name=penaltyType]");
-			Penalty._types.forEach(p => $pen.append(
-				`&lt;option value="${p}">${$.i18n(p)}&lt;/option>`));
-            $pen.on("selectmenuchange", () => this.showPenaltyFields());
-            this.showPenaltyFields();
+      function makeOptions(list, $sel) {
+        for (const p of list)
+          $sel.append(
+				    `&lt;option value="${p}">${p ? $.i18n(p) : $.i18n("None")}&lt;/option>`);
+      }
+			const $pen = this.$dlg.find("[name=challengePenalty]");
+			makeOptions(Penalty._types, $pen);
+      $pen.on("selectmenuchange", () => this.showPenaltyFields());
+      this.showPenaltyFields();
 
 			const $tim = this.$dlg.find("[name=timerType]");
-			Timer._types.forEach(t => $tim.append(
-				`&lt;option value="${t}">${$.i18n(t)}&lt;/option>`));
-            $tim.on("selectmenuchange", () => this.showTimerFields());
-            this.showTimerFields();
+			makeOptions(Timer._types, $tim);
+      $tim.on("selectmenuchange", () => this.showTimerFields());
+      this.showTimerFields();
 
 			const $wc = this.$dlg.find("[name=wordCheck]");
-			WordCheck._types.forEach(c => $wc.append(
-				`&lt;option value="${c}">${$.i18n(c)}&lt;/option>`));
+			makeOptions(WordCheck._types, $wc);
 
 			let promise;
 			Promise.all([
@@ -140,8 +142,8 @@ define("browser/CreateGameDialog", [
 					.forEach(d => $dics.append(`&lt;option>${d}&lt;/option>`));
 					if (this.ui.getSetting('dictionary'))
 						$dics.val((this.ui.getSetting('dictionary')));
-                    $dics.on("selectmenuchange", () => this.showFeedbackFields());
-                    this.showFeedbackFields();
+          $dics.on("selectmenuchange", () => this.showFeedbackFields());
+          this.showFeedbackFields();
 				})
 			])
 			.then(() => super.createDialog());
@@ -160,13 +162,13 @@ define("browser/CreateGameDialog", [
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Default">Default</a></li><li><a href="global.html#%257Bstring">{string</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jun 03 2022 10:54:05 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jun 24 2022 17:16:45 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

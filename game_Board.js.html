@@ -27,36 +27,46 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/*Copyright (C) 2019-2022 The Xanado Project https://github.com/cdot/Xanado
-License MIT. See README.md at the root of this distribution for full copyright
-and license information*/
+  License MIT. See README.md at the root of this distribution for full copyright
+  and license information. Author Crawford Currie http://c-dot.co.uk*/
 /* eslint-env amd, node, jquery */
 
-define("game/Board", ["game/Surface", "game/Tile", "game/Move"], (Surface, Tile, Move) => {
+define("game/Board", [
+  "game/Surface", "game/Tile", "game/Move"
+], (Surface, Tile, Move) => {
 
 	/**
-	 * The square game board
+	 * The square game board.
+   * @extends Surface
 	 */
 	class Board extends Surface {
+
+		/**
+     * Row of middle square on board.
+     * @member {number}
+     */
+    midrow;
+
+		/**
+     * Column of middle square on board.
+     * @member {number}
+     */
+    midcol;
 
 		/**
 		 * @param {Edition} edition the edition defining the board layout
 		 */
 		constructor(edition) {
 			super("Board", edition.cols, edition.rows,
-				  (col, row) => edition.squareType(col, row));
+				    (col, row) => edition.squareType(col, row));
 
-			// Copy essentials from the Edition, so we don't have
-			// to serialise it
-			this.bonuses = edition.bonuses;
-			this.rackCount = edition.rackCount;
-			this.swapCount = edition.swapCount;
 			this.midrow = Math.floor(edition.rows / 2);
 			this.midcol = Math.floor(edition.cols / 2);
 		}
 
 		/**
 		 * Load the board from the string representation output by
-		 * toString. This is for use in tests.
+		 * {@linkcode Board#toString|toString}. This is for use in tests.
 		 * @param {string} sboard string representation of the board
 		 * @param {Edition} edition the edition defining the board layout.
 		 * This has to be provided because we don't cache the actual
@@ -83,38 +93,106 @@ define("game/Board", ["game/Surface", "game/Tile", "game/Move"], (Surface, Tile,
 			}
 		}
 
+    
 		/**
-		 * Debug
+		 * Given a play at col, row, compute it's score. Used in
+     * findBestPlay, and must perform as well as possible. Read
+     * the description of {@linkcode Board#analysePlay|analysePlay}
+     * to understand the difference between these two related functions.
+     * Note: does *not* include any bonuses due to number of tiles played.
+		 * @param {number} col the col of the LAST letter
+		 * @param {number} row the row of the LAST letter
+		 * @param {number} dcol 1 if the word being played across
+		 * @param {number} drow 1 if the word is being played down
+		 * @param {Tile[]} tiles a list of tiles that are being placed
+		 * @param {string[]?} words optional list to be populated with
+		 * words that have been created by the play
+		 * @return {number} the score of the play.
 		 */
-		toString() {
-			let s = `Board ${this.cols}x${this.rows}\n`;
+		scorePlay(col, row, dcol, drow, tiles, words) {
+			// Accumulator for the primary word being formed by the tiles
+			let wordScore = 0;
 
-			for (let row = 0; row &lt; this.rows; row++) {
-				const r = [];
-				for (let col = 0; col &lt; this.cols; col++) {
-					const square = this.at(col, row);
-					const t = square.tile;
-					if (t) {
-						// Show cast blanks using lower case letters
-						// May not work in non-Latin languages.
-						if (t.isBlank)
-							r.push(t.letter.toLowerCase());
-						else
-							r.push(t.letter);
-					} else {
-						if (square.letterScoreMultiplier > 1)
-							r.push(square.letterScoreMultiplier);
-						else if (square.wordScoreMultiplier > 1)
-							r.push(4 + square.wordScoreMultiplier);
-						else
-							r.push(" ");
-					}
+			// Accumulator for crossing words scores.
+			let crossWordsScore = 0;
+
+			// Multipler for the main word
+			let wordMultiplier = 1;
+
+			for (let tile of tiles) {
+				const c = tile.col;
+				const r = tile.row;
+				let letterScore = tile.score;
+				const square = this.at(c, r);
+				if (square.isLocked()) {
+					wordScore += letterScore;
+					continue; // pre-existing tile, no bonuses
 				}
-				s += `|${r.join("|")}|\n`;
+
+				// Letter is being placed, so letter multiplier applies to all
+				// new words created, including cross words
+				letterScore *= square.letterScoreMultiplier;
+
+				wordScore += letterScore;
+
+				// Multiplier for any new words that cross this letter
+				const crossWordMultiplier = square.wordScoreMultiplier;
+				wordMultiplier *= crossWordMultiplier;
+
+				// This is a new tile, need to analyse cross words and
+				// apply bonuses
+				let crossWord = "";
+				let crossWordScore = 0;
+
+				// Look left/up
+				for (let cp = c - drow, rp = r - dcol;
+					   cp >= 0 &amp;&amp; rp >= 0 &amp;&amp; this.at(cp, rp).tile;
+					   cp -= drow, rp -= dcol) {
+					const tile = this.at(cp, rp).tile;
+					crossWord = tile.letter + crossWord;
+					crossWordScore += tile.score;
+				}
+
+				crossWord += tile.letter;
+
+				// Look right/down
+				for (let cp = c + drow, rp = r + dcol;
+					   cp &lt; this.cols &amp;&amp; rp &lt; this.rows
+					   &amp;&amp; this.at(cp, rp).tile;
+					   cp += drow, rp += dcol) {
+					const tile = this.at(cp, rp).tile;
+					crossWord += tile.letter;
+					crossWordScore += tile.score;
+				}
+
+				if (crossWordScore > 0) {
+					// This tile (and bonuses) contribute to cross words
+					crossWordScore += letterScore;
+					crossWordScore *= crossWordMultiplier;
+					if (words)
+						words.push({
+              word: crossWord,
+              score: crossWordScore
+            });
+
+					crossWordsScore += crossWordScore;
+				}
 			}
-			return s;
+
+			wordScore *= wordMultiplier;
+
+			if (words)
+				words.push({
+					word: tiles.map(tile => tile.letter).join(""),
+					score: wordScore
+				});
+
+			// Add cross word values to the main word value
+			wordScore += crossWordsScore;
+
+			return wordScore;
 		}
-		
+
 		/**
 		 * True if one of the neighbours of [col, row] is already occupied by
 		 * a tile that was placed in a previous move
@@ -124,13 +202,13 @@ define("game/Board", ["game/Surface", "game/Tile", "game/Move"], (Surface, Tile,
 		touchingOld(col, row) {
 			return (
 				(col > 0 &amp;&amp; this.at(col - 1, row).tile
-				 &amp;&amp; this.at(col - 1, row).tileLocked)
-				|| (col &lt; this.cols - 1 &amp;&amp; this.at(col + 1, row).tile
-					&amp;&amp; this.at(col + 1, row).tileLocked)
-				|| (row > 0 &amp;&amp; this.at(col, row - 1).tile
-					&amp;&amp; this.at(col, row - 1).tileLocked)
-				|| (row &lt; this.rows - 1 &amp;&amp; this.at(col, row + 1).tile
-					&amp;&amp; this.at(col, row + 1).tileLocked));
+				 &amp;&amp; this.at(col - 1, row).isLocked())
+			  || (col &lt; this.cols - 1 &amp;&amp; this.at(col + 1, row).tile
+					  &amp;&amp; this.at(col + 1, row).isLocked())
+			  || (row > 0 &amp;&amp; this.at(col, row - 1).tile
+					  &amp;&amp; this.at(col, row - 1).isLocked())
+			  || (row &lt; this.rows - 1 &amp;&amp; this.at(col, row + 1).tile
+					  &amp;&amp; this.at(col, row + 1).isLocked()));
 		}
 
 		/**
@@ -139,24 +217,24 @@ define("game/Board", ["game/Surface", "game/Tile", "game/Move"], (Surface, Tile,
 		 * and difficult to analyse.
 		 * @param {Move.wordSpec[]} words list to update
 		 * @return {number} the total score
-         * @private
+     * @private
 		 */
 		scoreNewWords(words) {
 			let totalScore = 0;
 			let row, col;
-			
-			const taste = (dcol, drow) => {			
+
+			const taste = (dcol, drow) => {
 				let wordScore = 0;
 				let letters = "";
 				let wordMultiplier = 1;
 				let isNewWord = false;
 				while (col &lt; this.cols
-					   &amp;&amp; row &lt; this.rows
-					   &amp;&amp; this.at(col, row).tile) {
+					     &amp;&amp; row &lt; this.rows
+					     &amp;&amp; this.at(col, row).tile) {
 					const square = this.at(col, row);
 					let letterScore = square.tile.score;
-					isNewWord = isNewWord || !square.tileLocked;
-					if (!square.tileLocked) {
+					isNewWord = isNewWord || !square.isLocked();
+					if (!square.isLocked()) {
 						letterScore *= square.letterScoreMultiplier;
 						wordMultiplier *= square.wordScoreMultiplier;
 					}
@@ -189,127 +267,21 @@ define("game/Board", ["game/Surface", "game/Tile", "game/Move"], (Surface, Tile,
 		}
 
 		/**
-		 * Given a play at col, row, compute its score. Used in findBestPlay.
-		 * @param {number} col the col of the LAST letter
-		 * @param {number} row the row of the LAST letter
-		 * @param {number} dcol 1 if the word being played across
-		 * @param {number} drow 1 if the word is being played down
-		 * @param {Tile[]} tiles a list of Tiles that have been newly placed
-		 * @param {string[]} words optional list to be populated with
-		 * words that have been created by the play
-		 * @return {number} the score of the play.
-		 */
-		scorePlay(col, row, dcol, drow, tiles, words) {
-
-			// Accumulator for the primary word being formed by the tiles
-			let wordScore = 0;
-
-			// Accumulator for crossing words scores.
-			let crossWordsScore = 0;
-
-			// Multipler for the main word
-			let wordMultiplier = 1;
-
-			// Number of tiles being placed, for calculating bonus
-			let tilesPlaced = 0;
-			for (let tile of tiles) {
-				const c = tile.col;
-				const r = tile.row;
-				let letterScore = tile.score;
-				const square = this.at(c, r);
-				if (square.tileLocked) {
-					wordScore += letterScore;
-					continue; // pre-existing tile, no bonuses
-				}
-
-				// Letter is being placed, so letter multiplier applies to all
-				// new words created, including cross words
-				letterScore *= square.letterScoreMultiplier;
-
-				tilesPlaced++;
-
-				wordScore += letterScore;
-
-				// Multiplier for any new words that cross this letter
-				const crossWordMultiplier = square.wordScoreMultiplier;
-				wordMultiplier *= crossWordMultiplier;
-
-				// This is a new tile, need to analyse cross words and
-				// apply bonuses
-				let crossWord = "";
-				let crossWordScore = 0;
-
-				// Look left/up
-				for (let cp = c - drow, rp = r - dcol;
-					 cp >= 0 &amp;&amp; rp >= 0 &amp;&amp; this.at(cp, rp).tile;
-					 cp -= drow, rp -= dcol) {
-					const tile = this.at(cp, rp).tile;
-					crossWord = tile.letter + crossWord;
-					crossWordScore += tile.score;
-				}
-
-				crossWord += tile.letter;
-
-				// Look right/down
-				for (let cp = c + drow, rp = r + dcol;
-					 cp &lt; this.cols &amp;&amp; rp &lt; this.rows
-					 &amp;&amp; this.at(cp, rp).tile;
-					 cp += drow, rp += dcol) {
-					const tile = this.at(cp, rp).tile;
-					crossWord += tile.letter;
-					crossWordScore += tile.score;
-				}
-
-				if (crossWordScore > 0) {
-					// This tile (and bonuses) contribute to cross words
-					crossWordScore += letterScore;
-					crossWordScore *= crossWordMultiplier;
-					if (words &amp;&amp; words.filter(w => w.word === crossWord).length === 0)
-						words.push({ word: crossWord, score: crossWordScore });
-
-					crossWordsScore += crossWordScore;
-				}
-			}
-
-			wordScore *= wordMultiplier;
-
-			if (words)
-				words.push({
-					word: tiles.map(tile => tile.letter).join(""),
-					score: wordScore
-				});
-
-			// Add cross word values to the main word value
-			wordScore += crossWordsScore;
-
-			return wordScore + this.calculateBonus(tilesPlaced);
-		}
-
-		/**
-		 * Calculate the bonus if tilesPlaced tiles are placed
-		 * Really belongs in Edition, but here because Edition is
-		 * not sent to the client.
-		 * @param {number} tilesPlaced
-		 */
-		calculateBonus(tilesPlaced) {
-			if (typeof this.bonuses[tilesPlaced] === "number")
-				return this.bonuses[tilesPlaced];
-			return 0;
-		}
-
-		/**
-		 * UI-side move calculation. Constructs a {@link Move}.
-		 * `analysePlay` and `scorePlay` do essentially the same job; given a board with
-		 * tiles placed but not locked, calculate the score and the words formed. They
-		 * differ in respect of their application; analysePlay is intended to
-		 * be used client-side to calculate a move made by a human, whereas scorePlay
-		 * is used to calculate the score for a play being constructed on the server
-		 * side by a robot.
-		 * @return {(Move|string)} Move or a string if there is a problem
+		 * UI-side move calculation. Constructs a {@linkcode Move}.
+		 * `analysePlay` and {@linkcode Board#scorePlay|scorePlay} do
+     * essentially the same job; calculate the score for a given
+		 * play. They differ in respect of their application;
+		 * `analysePlay` is used client-side to calculate a move made by a
+		 * human and has to be tolerant of disconnected plays and other
+		 * errors. It works on a board with tiles placed but not locked.
+		 * `scorePlay` is used server-side to calculate the score for a
+		 * play being constructed on the server side by a robot, and has
+		 * to perform as well as possible. Note that neither `analysePlay`
+		 * nor `scorePlay` calculate bonuses for number of tiles played.
+		 * @return {(Move|string)} Move, or a string if there is a problem
 		 */
 		analysePlay() {
 			// Check that the start field is occupied
-
 			if (!this.at(this.midcol, this.midrow).tile)
 				return /*i18n*/"Centre must be used";
 
@@ -318,7 +290,7 @@ define("game/Board", ["game/Surface", "game/Tile", "game/Move"], (Surface, Tile,
 			// Find top-leftmost placed tile
 			let topLeftX, topLeftY, tile;
 			this.forEachTiledSquare((square, col, row) => {
-				if (square.tileLocked)
+				if (square.isLocked())
 					return false;
 				tile = square.tile;
 				topLeftX = col;
@@ -338,11 +310,11 @@ define("game/Board", ["game/Surface", "game/Tile", "game/Move"], (Surface, Tile,
 			for (let col = topLeftX + 1; col &lt; this.cols; col++) {
 				if (this.at(col, topLeftY).isEmpty())
 					break;
-				if (!this.at(col, topLeftY).tileLocked) {
+				if (!this.at(col, topLeftY).isLocked()) {
 					legalPlacements[col][topLeftY] = true;
 					horizontal = true;
 					isTouchingOld =
-					isTouchingOld || this.touchingOld(col, topLeftY);
+				  isTouchingOld || this.touchingOld(col, topLeftY);
 				}
 			}
 
@@ -350,10 +322,10 @@ define("game/Board", ["game/Surface", "game/Tile", "game/Move"], (Surface, Tile,
 				for (let row = topLeftY + 1; row &lt; this.rows; row++) {
 					if (!this.at(topLeftX, row).tile) {
 						break;
-					} else if (!this.at(topLeftX, row).tileLocked) {
+					} else if (!this.at(topLeftX, row).isLocked()) {
 						legalPlacements[topLeftX][row] = true;
 						isTouchingOld =
-						isTouchingOld || this.touchingOld(topLeftX, row);
+					  isTouchingOld || this.touchingOld(topLeftX, row);
 					}
 				}
 			}
@@ -366,7 +338,7 @@ define("game/Board", ["game/Surface", "game/Tile", "game/Move"], (Surface, Tile,
 			let disco = false;
 			this.forEachTiledSquare((square, col, row) => {
 				totalTiles++;
-				disco = disco || (!square.tileLocked &amp;&amp; !legalPlacements[col][row]);
+				disco = disco || (!square.isLocked() &amp;&amp; !legalPlacements[col][row]);
 			});
 			
 			if (disco)
@@ -377,19 +349,17 @@ define("game/Board", ["game/Surface", "game/Tile", "game/Move"], (Surface, Tile,
 
 			const placements = [];
 			this.forEachTiledSquare(square => {
-				if (!square.tileLocked) {
+				if (!square.isLocked()) {
 					placements.push(square.tile);
 				}
 			});
-	
-			const bonus = this.calculateBonus(placements.length);
+	    
 			const words = [];
-			const score = this.scoreNewWords(words) + bonus;
+			const score = this.scoreNewWords(words);
 			return new Move(
 				{
 					placements: placements,
 					score: score,
-					bonus: bonus,
 					words: words
 				});
 		}
@@ -415,6 +385,41 @@ define("game/Board", ["game/Surface", "game/Tile", "game/Move"], (Surface, Tile,
 			}
 			return $table;
 		}
+
+    /* istanbul ignore next */
+		/**
+     * Generate a string representation of the board in the format
+     * readable by {@linkcode Board#parse|parse}
+     * @override
+		 */
+		toString() {
+			let s = `Board ${this.cols}x${this.rows}\n`;
+
+			for (let row = 0; row &lt; this.rows; row++) {
+				const r = [];
+				for (let col = 0; col &lt; this.cols; col++) {
+					const square = this.at(col, row);
+					const t = square.tile;
+					if (t) {
+						// Show cast blanks using lower case letters
+						// May not work in non-Latin languages.
+						if (t.isBlank)
+							r.push(t.letter.toLowerCase());
+						else
+							r.push(t.letter);
+					} else {
+						if (square.letterScoreMultiplier > 1)
+							r.push(square.letterScoreMultiplier);
+						else if (square.wordScoreMultiplier > 1)
+							r.push(4 + square.wordScoreMultiplier);
+						else
+							r.push(" ");
+					}
+				}
+				s += `|${r.join("|")}|\n`;
+			}
+			return s;
+		}
 	}
 
 	return Board;
@@ -429,13 +434,13 @@ define("game/Board", ["game/Surface", "game/Tile", "game/Move"], (Surface, Tile,
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Default">Default</a></li><li><a href="global.html#%257Bstring">{string</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jun 03 2022 10:54:05 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jun 24 2022 17:16:45 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

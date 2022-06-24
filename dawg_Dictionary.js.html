@@ -27,8 +27,8 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/*Copyright (C) 2019-2022 The Xanado Project https://github.com/cdot/Xanado
-License MIT. See README.md at the root of this distribution for full copyright
-and license information*/
+  License MIT. See README.md at the root of this distribution for full copyright
+  and license information. Author Crawford Currie http://c-dot.co.uk*/
 /* eslint-env amd, node */
 
 define("dawg/Dictionary", [
@@ -48,12 +48,27 @@ define("dawg/Dictionary", [
 	 */
 	class Dictionary {
 
-	    /**
-         * Cache of dictionaries
-         * @member {Dictionary[]}
-         * @private
-         */
-        static cache = [];
+	  /**
+     * Cache of dictionaries
+     * @member {Dictionary[]}
+     * @private
+     */
+    static cache = [];
+
+		/**
+		 * First node in the dictionary.
+		 * @member {LetterNode?}
+		 */
+		root;
+
+		/**
+     * List of valid start points, such that at least one
+		 * start point must match() for any sequence of chars, or
+		 * there can't possibly be a word. Map from letter to a
+		 * LetterNode or a list of LetterNode.
+		 * @private
+		 */
+    sequenceRoots;
 
 		/**
 		 * @param {string} name name of the dictionary
@@ -61,7 +76,6 @@ define("dawg/Dictionary", [
 		 * Note that this constructor is private.
 		 */
 		constructor(name) {
-			
 			/**
 			 * List of valid start points, such that at least one
 			 * start point must match() for any sequence of chars,
@@ -69,19 +83,6 @@ define("dawg/Dictionary", [
 			 * @member {string}
 			 */
 			this.name = name;
-
-			/**
-			 * First node in the dictionary.
-			 * @member {LetterNode?}
-			 */
-			this.root = undefined;
-
-			// List of valid start points, such that at least one
-			// start point must match() for any sequence of chars, or
-			// there can't possibly be a word. Map from letter to a
-			// LetterNode or a list of LetterNode.
-			// Private
-			//this.sequenceRoots = undefined;
 		}
 
 		/**
@@ -90,9 +91,9 @@ define("dawg/Dictionary", [
 		 * discarded.
 		 * @param {(Buffer|Array)?} data the DAWG data.
 		 * @return {Dictionary} this
-         * @private
+     * @private
 		 */
-        loadDAWG(data) {
+    loadDAWG(data) {
 			const dv = new DataView(data);
 			let index = 0;
 			const numberOfNodes = dv.getUint32(4 * index++);
@@ -164,25 +165,27 @@ define("dawg/Dictionary", [
 		}
 
 		/**
-		 * Find anagrams of a set of letters.
-		 * @param {string} theChars the letters, ' ' for an any-letter wildcard
+		 * Find anagrams of a set of letters. An anagram is defined as any
+     * complete (2 or more characters) word that uses all or some of the
+     * letters passed in.
+		 * @param {string} theChars the letters, ' ' for an any-letter wildcard.
 		 * @return {Object&lt;string, string>} a map of actual words to the letter
-		 * sequence (using ' ' for blanks) that matched
+		 * sequence (using ' ' for blanks) that matched.
 		 */
 		findAnagrams(theChars) {
 			theChars = theChars.toUpperCase();
 
 			/* istanbul ignore if */
 			if (theChars.length &lt; 2)
-				return [ theChars ];
+        throw new Error("Too short to find anagrams");
 
-			// Sort the list of characters. Not strictly needed,
-			// just easier to debug.
-			const sortedChars = theChars.split("").sort();
+			// Sort the list of characters.
+			// Sorting makes it easier to debug.
+			const ac = theChars.split("");//.sort();
 
-			//console.log('Sorted chars', sortedChars);
+			//console.log('Sorted chars', ac);
 			const foundWords = {};
-			this.root.findAnagrams("", "", sortedChars, foundWords);
+			this.root.findWordsThatUse(ac, "", "", foundWords);
 			return foundWords;
 		}
 
@@ -190,7 +193,7 @@ define("dawg/Dictionary", [
 		 * For each letter of the alphabet, establish a list of valid
 		 * start points, such that at least one start point must match()
 		 * for any sequence of chars, or there can't possibly be a word.
-         * @private
+     * @private
 		 */
 		createSequenceRoots() {
 			this.sequenceRoots = {};
@@ -216,6 +219,22 @@ define("dawg/Dictionary", [
 			return this.sequenceRoots[ch] || [];
 		}
 
+    /**
+     * Do the work of adding a word, but don't do anything about
+     * pre-/post- links or sequence roots.
+     * @private
+     */
+		_addWord(word) {
+			/* istanbul ignore if */
+			if (word.length === 0)
+				return false;
+			if (this.root)
+			  return this.root.add(word);
+			this.root = new LetterNode(word.charAt(0));
+			this.root.add(word);
+      return true;
+		}
+
 		/**
 		 * Add a word to the dictionary. No attempt is made at compression.
 		 * Note that previously retrieved sequence roots will no longer
@@ -226,18 +245,17 @@ define("dawg/Dictionary", [
 		 * @return {boolean} true if the word needed to be added, false
 		 * if it was empty or already there.
 		 */
-		addWord(word) {
-			/* istanbul ignore if */
-			if (word.length === 0)
-				return false;
-			if (!this.root)
-				this.root = new LetterNode(word.charAt(0));
-			if (this.hasWord(word))
-				return false;
-			this.root.add(word);
-			delete this.sequenceRoots;
-			return true;
-		}
+    addWord(word) {
+      if (this._addWord(word)) {
+        // Don't recreate, that will be done on demand
+			  delete this.sequenceRoots;
+			  // Re-build forward and back lists. This could be done
+        // incrementally, but it's a reasonably cheap operation so....
+			  this.root.buildLists();
+        return true;
+      }
+      return false;
+    }
 
 		/**
 		 * Find start node for the character sequence in the sequence
@@ -248,7 +266,8 @@ define("dawg/Dictionary", [
 		 * sequence is a valid part of; that's not the point, this is
 		 * intended to help eliminate invalid sequences when extending
 		 * a word backwards from a seed letter.
-         * @private
+		 * @param {string} seq letter sequence
+     * @private
 		 */
 		findSequence(seq) {
 			if (!this.sequenceRoots)
@@ -290,7 +309,7 @@ define("dawg/Dictionary", [
 		 * @param {string} name name of the dictionary to load
 		 * @param {string?} path path to dictionary files. If undefined,
 		 * defaults to `Platform.getFilePath("dictionaries")`
-		 * @return {Promise} Promise that resolves to a new {@link Dictionary}
+		 * @return {Promise} Promise that resolves to a new {@linkcode Dictionary}
 		 * or undefined if a dictionary of that name could not be loaded.
 		 */
 		static load(name, path) {
@@ -319,15 +338,15 @@ define("dawg/Dictionary", [
 					if (!dict)
 						dict = new Dictionary(name);
 					const words = text
-						  .toString()
-						  .toUpperCase()
-						  .split(/\r?\n/)
-						  .map(w => w.replace(/\s.*$/, ""))
-						  .filter(line => line.length > 0)
-						  .sort();
+						    .toString()
+						    .toUpperCase()
+						    .split(/\r?\n/)
+						    .map(w => w.replace(/\s.*$/, ""))
+						    .filter(line => line.length > 0)
+						    .sort();
 					let added = 0;
 					words.forEach(w => {
-						if (dict.addWord(w))
+						if (dict._addWord(w))
 							added++;
 						return false;
 					});
@@ -341,6 +360,7 @@ define("dawg/Dictionary", [
 			.then(() => {
 				if (dict) {
 					// one of .dict or .white (or both) loaded
+          // Add bidirectional traversal links
 					dict.addLinks();
 					Dictionary.cache[name] = dict;
 					//console.debug(`Loaded dictionary ${name}`);
@@ -362,13 +382,13 @@ define("dawg/Dictionary", [
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Default">Default</a></li><li><a href="global.html#%257Bstring">{string</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jun 03 2022 10:54:05 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jun 24 2022 17:16:45 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

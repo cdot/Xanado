@@ -167,7 +167,7 @@ chains.</p></div>
 
         
             
-<h4 class="name" id="child"><span class="type-signature"></span>child<span class="type-signature"> :<a href="LetterNode.html">LetterNode</a></span></h4>
+<h4 class="name" id="child"><span class="type-signature">(nullable) </span>child<span class="type-signature"> :<a href="LetterNode.html">LetterNode</a></span></h4>
 
 
 
@@ -221,7 +221,7 @@ chains.</p></div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_LetterNode.js.html">dawg/LetterNode.js</a>, <a href="dawg_LetterNode.js.html#line81">line 81</a>
+        <a href="dawg_LetterNode.js.html">dawg/LetterNode.js</a>, <a href="dawg_LetterNode.js.html#line75">line 75</a>
     </li></ul></dd>
     
 
@@ -581,7 +581,7 @@ chains.</p></div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_LetterNode.js.html">dawg/LetterNode.js</a>, <a href="dawg_LetterNode.js.html#line87">line 87</a>
+        <a href="dawg_LetterNode.js.html">dawg/LetterNode.js</a>, <a href="dawg_LetterNode.js.html#line81">line 81</a>
     </li></ul></dd>
     
 
@@ -653,7 +653,7 @@ chains.</p></div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_LetterNode.js.html">dawg/LetterNode.js</a>, <a href="dawg_LetterNode.js.html#line67">line 67</a>
+        <a href="dawg_LetterNode.js.html">dawg/LetterNode.js</a>, <a href="dawg_LetterNode.js.html#line116">line 116</a>
     </li></ul></dd>
     
 
@@ -671,7 +671,7 @@ chains.</p></div>
 
         
             
-<h4 class="name" id="next"><span class="type-signature"></span>next<span class="type-signature"> :number|<a href="LetterNode.html">LetterNode</a></span></h4>
+<h4 class="name" id="next"><span class="type-signature">(nullable) </span>next<span class="type-signature"> :number|<a href="LetterNode.html">LetterNode</a></span></h4>
 
 
 
@@ -730,80 +730,7 @@ to a pointer.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_LetterNode.js.html">dawg/LetterNode.js</a>, <a href="dawg_LetterNode.js.html#line75">line 75</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="post"><span class="type-signature">(nullable) </span>post<span class="type-signature"> :Array.&lt;<a href="LetterNode.html">LetterNode</a>></span></h4>
-
-
-
-
-<div class="description">
-    <p>List of nodes that are linked to from this node. Set up
-by <a href="LetterNode.html#buildLists">LetterNode#buildLists</a>.</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">Array.&lt;<a href="LetterNode.html">LetterNode</a>></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_LetterNode.js.html">dawg/LetterNode.js</a>, <a href="dawg_LetterNode.js.html#line115">line 115</a>
+        <a href="dawg_LetterNode.js.html">dawg/LetterNode.js</a>, <a href="dawg_LetterNode.js.html#line69">line 69</a>
     </li></ul></dd>
     
 
@@ -827,8 +754,8 @@ by <a href="LetterNode.html#buildLists">LetterNode#buildLists</a>.</p>
 
 
 <div class="description">
-    <p>List of letters that are in the nodes listed in <code>post</code>.
-Set up by <a href="LetterNode.html#buildLists">LetterNode#buildLists</a>.</p>
+    <p>List of letters that are in the nodes listed in <code>postNode</code>.
+Set up by <a href="LetterNode.html#buildLists"><code>buildLists</code></a>.</p>
 </div>
 
 
@@ -876,7 +803,7 @@ Set up by <a href="LetterNode.html#buildLists">LetterNode#buildLists</a>.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_LetterNode.js.html">dawg/LetterNode.js</a>, <a href="dawg_LetterNode.js.html#line108">line 108</a>
+        <a href="dawg_LetterNode.js.html">dawg/LetterNode.js</a>, <a href="dawg_LetterNode.js.html#line109">line 109</a>
     </li></ul></dd>
     
 
@@ -894,14 +821,14 @@ Set up by <a href="LetterNode.html#buildLists">LetterNode#buildLists</a>.</p>
 
         
             
-<h4 class="name" id="pre"><span class="type-signature">(nullable) </span>pre<span class="type-signature"> :Array.&lt;<a href="LetterNode.html">LetterNode</a>></span></h4>
+<h4 class="name" id="postNodes"><span class="type-signature">(nullable) </span>postNodes<span class="type-signature"> :Array.&lt;<a href="LetterNode.html">LetterNode</a>></span></h4>
 
 
 
 
 <div class="description">
-    <p>List of nodes that link forward to this node. Set up
-by <a href="LetterNode.html#buildLists">LetterNode#buildLists</a>.</p>
+    <p>List of nodes that are linked to from this node. Set up
+by <a href="LetterNode.html#buildLists"><code>buildLists</code></a>.</p>
 </div>
 
 
@@ -949,7 +876,7 @@ by <a href="LetterNode.html#buildLists">LetterNode#buildLists</a>.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_LetterNode.js.html">dawg/LetterNode.js</a>, <a href="dawg_LetterNode.js.html#line94">line 94</a>
+        <a href="dawg_LetterNode.js.html">dawg/LetterNode.js</a>, <a href="dawg_LetterNode.js.html#line102">line 102</a>
     </li></ul></dd>
     
 
@@ -973,8 +900,8 @@ by <a href="LetterNode.html#buildLists">LetterNode#buildLists</a>.</p>
 
 
 <div class="description">
-    <p>List of letters that are in the nodes listed in <code>pre</code>.
-Set up by <a href="LetterNode.html#buildLists">LetterNode#buildLists</a>.</p>
+    <p>List of letters that are in the nodes listed in <code>preNodes</code>.
+Set up by <a href="LetterNode.html#buildLists"><code>buildLiss</code></a>.</p>
 </div>
 
 
@@ -1022,7 +949,80 @@ Set up by <a href="LetterNode.html#buildLists">LetterNode#buildLists</a>.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_LetterNode.js.html">dawg/LetterNode.js</a>, <a href="dawg_LetterNode.js.html#line101">line 101</a>
+        <a href="dawg_LetterNode.js.html">dawg/LetterNode.js</a>, <a href="dawg_LetterNode.js.html#line95">line 95</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="preNodes"><span class="type-signature">(nullable) </span>preNodes<span class="type-signature"> :Array.&lt;<a href="LetterNode.html">LetterNode</a>></span></h4>
+
+
+
+
+<div class="description">
+    <p>List of nodes that link forward to this node. Set up
+by <a href="LetterNode.html#buildLists"><code>buildLists</code></a>.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Array.&lt;<a href="LetterNode.html">LetterNode</a>></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="dawg_LetterNode.js.html">dawg/LetterNode.js</a>, <a href="dawg_LetterNode.js.html#line88">line 88</a>
     </li></ul></dd>
     
 
@@ -1050,7 +1050,7 @@ Set up by <a href="LetterNode.html#buildLists">LetterNode#buildLists</a>.</p>
     
 
     
-    <h4 class="name" id="add"><span class="type-signature"></span>add<span class="signature">(word)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="add"><span class="type-signature"></span>add<span class="signature">(word)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
     
 
     
@@ -1152,7 +1152,7 @@ whitelist nodes to a DAG.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_LetterNode.js.html">dawg/LetterNode.js</a>, <a href="dawg_LetterNode.js.html#line191">line 191</a>
+        <a href="dawg_LetterNode.js.html">dawg/LetterNode.js</a>, <a href="dawg_LetterNode.js.html#line198">line 198</a>
     </li></ul></dd>
     
 
@@ -1177,6 +1177,29 @@ whitelist nodes to a DAG.</p>
 
 
 
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>true if the word was added, false if it
+was already there</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
@@ -1198,7 +1221,8 @@ whitelist nodes to a DAG.</p>
 <div class="description">
     <p>Build forward and backward lists to allow us to navigate
 in both directions - forward through words, and backwards too.
-This has to be done from the root of the DAG.</p>
+This has to be done from the root of the DAG, and has to be
+re-done if the DAG is modified..</p>
 </div>
 
 
@@ -1242,7 +1266,7 @@ This has to be done from the root of the DAG.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_LetterNode.js.html">dawg/LetterNode.js</a>, <a href="dawg_LetterNode.js.html#line216">line 216</a>
+        <a href="dawg_LetterNode.js.html">dawg/LetterNode.js</a>, <a href="dawg_LetterNode.js.html#line238">line 238</a>
     </li></ul></dd>
     
 
@@ -1403,7 +1427,7 @@ serialised Dictionary.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_LetterNode.js.html">dawg/LetterNode.js</a>, <a href="dawg_LetterNode.js.html#line309">line 309</a>
+        <a href="dawg_LetterNode.js.html">dawg/LetterNode.js</a>, <a href="dawg_LetterNode.js.html#line338">line 338</a>
     </li></ul></dd>
     
 
@@ -1588,7 +1612,7 @@ Caution this is NOT the same as dawg/TrieNode.eachWord.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_LetterNode.js.html">dawg/LetterNode.js</a>, <a href="dawg_LetterNode.js.html#line151">line 151</a>
+        <a href="dawg_LetterNode.js.html">dawg/LetterNode.js</a>, <a href="dawg_LetterNode.js.html#line152">line 152</a>
     </li></ul></dd>
     
 
@@ -1632,7 +1656,7 @@ Caution this is NOT the same as dawg/TrieNode.eachWord.</p>
 
 
 <div class="description">
-    <p>Enumerate each node in the dictionary in depth-first order.
+    <p>Enumerate each node in the dictionary.
 Calls cb on each node, stops if cb returns false.</p>
 </div>
 
@@ -1726,7 +1750,7 @@ Calls cb on each node, stops if cb returns false.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_LetterNode.js.html">dawg/LetterNode.js</a>, <a href="dawg_LetterNode.js.html#line173">line 173</a>
+        <a href="dawg_LetterNode.js.html">dawg/LetterNode.js</a>, <a href="dawg_LetterNode.js.html#line176">line 176</a>
     </li></ul></dd>
     
 
@@ -1886,7 +1910,7 @@ Calls cb on each node, stops if cb returns false.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_LetterNode.js.html">dawg/LetterNode.js</a>, <a href="dawg_LetterNode.js.html#line132">line 132</a>
+        <a href="dawg_LetterNode.js.html">dawg/LetterNode.js</a>, <a href="dawg_LetterNode.js.html#line130">line 130</a>
     </li></ul></dd>
     
 
@@ -1922,12 +1946,16 @@ Calls cb on each node, stops if cb returns false.</p>
     
 
     
-    <h4 class="name" id="findAnagrams"><span class="type-signature"></span>findAnagrams<span class="signature">(realWord, blankedWord, sortedChars, foundWords)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="findWordsThatUse"><span class="type-signature"></span>findWordsThatUse<span class="signature">(chars, realWord, blankedWord, foundWords)</span><span class="type-signature"></span></h4>
     
 
     
 
 
+
+<div class="description">
+    <p>Find words that can be made from a sorted set of letters.</p>
+</div>
 
 
 
@@ -1958,6 +1986,29 @@ Calls cb on each node, stops if cb returns false.</p>
     </thead>
 
     <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>chars</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>the available set of characters</p></td>
+        </tr>
+
     
 
         <tr>
@@ -2003,29 +2054,6 @@ Calls cb on each node, stops if cb returns false.</p>
 
             <td class="description last"><p>the string built using spaces for blanks
 if they are used</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>sortedChars</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>the available set of characters, sorted</p></td>
         </tr>
 
     
@@ -2089,7 +2117,7 @@ if they are used</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_LetterNode.js.html">dawg/LetterNode.js</a>, <a href="dawg_LetterNode.js.html#line262">line 262</a>
+        <a href="dawg_LetterNode.js.html">dawg/LetterNode.js</a>, <a href="dawg_LetterNode.js.html#line289">line 289</a>
     </li></ul></dd>
     
 
@@ -2251,7 +2279,7 @@ be the root of a word</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_LetterNode.js.html">dawg/LetterNode.js</a>, <a href="dawg_LetterNode.js.html#line241">line 241</a>
+        <a href="dawg_LetterNode.js.html">dawg/LetterNode.js</a>, <a href="dawg_LetterNode.js.html#line266">line 266</a>
     </li></ul></dd>
     
 
@@ -2412,7 +2440,7 @@ be the root of a word</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_LetterNode.js.html">dawg/LetterNode.js</a>, <a href="dawg_LetterNode.js.html#line162">line 162</a>
+        <a href="dawg_LetterNode.js.html">dawg/LetterNode.js</a>, <a href="dawg_LetterNode.js.html#line165">line 165</a>
     </li></ul></dd>
     
 
@@ -2590,7 +2618,7 @@ be the root of a word</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_LetterNode.js.html">dawg/LetterNode.js</a>, <a href="dawg_LetterNode.js.html#line121">line 121</a>
+        <a href="dawg_LetterNode.js.html">dawg/LetterNode.js</a>, <a href="dawg_LetterNode.js.html#line119">line 119</a>
     </li></ul></dd>
     
 
@@ -2634,13 +2662,13 @@ be the root of a word</p></td>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Default">Default</a></li><li><a href="global.html#%257Bstring">{string</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jun 03 2022 10:54:06 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jun 24 2022 17:16:45 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

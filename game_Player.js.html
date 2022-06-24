@@ -27,192 +27,164 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/*Copyright (C) 2019-2022 The Xanado Project https://github.com/cdot/Xanado
-License MIT. See README.md at the root of this distribution for full copyright
-and license information*/
+  License MIT. See README.md at the root of this distribution for full copyright
+  and license information. Author Crawford Currie http://c-dot.co.uk*/
 /* eslint-env amd, jquery */
 
 define("game/Player", [
 	"platform", "game/Types", "game/Rack",
-], (
-	Platform, Types, Rack
-) => {
+], (Platform, Types, Rack) => {
 
-    const Timer = Types.Timer;
+  const Timer = Types.Timer;
 
 	// Unicode characters
 	const BLACK_CIRCLE = "\u25cf";
 
 	/**
-	 * A player in a {@link Game}. Player objects are specific to
+	 * A player in a {@linkcode Game}. Player objects are specific to
 	 * a single game, and are used on both browser and server sides.
 	 */
 	class Player {
 
 		/**
-		 * Player unique key. Required.
-		 * @member {string}
-		 */
-		key;
-
-		/**
-		 * Player name. Required.
-		 * @member {string}
-		 */
-		name;
-
-		/**
-		 * Player doesn't have a rack until they join a game, as
-		 * it's only then we know how big it has to be.
-		 * @member {Rack}
-		 */
-		rack;
-
-		/**
-		 * Number of times this player has passed (or swapped)
-		 * since the last non-pass/swap play. Default is 0.
-		 * @member {number}
-		 */
-		passes = 0;
-
-		/**
-		 * Player's current score. Default is 0.
-		 * @member {number}
-		 */
-		score = 0;
-
-		/**
-		 * Player countdown clock. In games with `timerType` `TIMER_TURN`,
-		 * this is the number of seconds before the player's turn times
-		 * out (if they are the current player). For `TIMER_GAME` it's
-		 * the number of seconds before the chess clock runs out.
-         * Default is undefined. Setting and management is done in
-         * {@link Game}
-		 * @member {number?}
-		 */
-		clock;
-
-		/**
-		 * The connected flag is set when the player is created
-		 * from a Player.simple structure. It is not used server-side.
-         * Default is false.
-		 * @member {boolean?}
-		 */
-		isConnected;
-
-		/**
-		 * True if this player is due to miss their next play due
-		 * to a failed challenge. Default is false.
-		 * @member {boolean?}
-		 */
-		missNextTurn;
-
-		/**
-		 * Set true to advise human player of better plays than the one
-		 * they used. Default is false.
-		 * @member {boolean}
-		 */
-		wantsAdvice;
-
-		/**
-		 * Is player a robot? Default is false.
-		 * @member {boolean?}
-		 */
-		isRobot;
-
-		/**
-		 * Can robot player challenge? Default is false.
-		 * @member {boolean?}
-		 */
-		canChallenge;
-
-		/**
-		 * Name of the dictionary the robot will use. Defaults to
-         * the game dictionary. Only used for findBestPlay for robot players.
-		 * @member {string?} Default is undefined.
-		 */
-		dictionary;
-
-        /**
-		 * Debug function
-		 * @member {function}
-		 */
-        _debug = () => {};
-
-		/**
-		 * @param {object} params named parameters, or other layer or simple
-		 * object to copy. `name` and `key ` are required. Any of `debug`,
-         * `isRobot`, `canChallenge`, `wantsAdvice`, `dictionary` or
-         * `missNextTurn` can be passed to override the default.
-         * `
+		 * @param {object} params named parameters, or other player or simple
+		 * object to copy. `name` and `key ` are required. Any of `_debug`,
+     * `isRobot`, `passes`, `score`, `clock`, `canChallenge`,
+     * `wantsAdvice`,`dictionary`, `isConnected` or
+     * `missNextTurn` can be passed.
 		 */
 		constructor(params) {
-			this.name = params.name;
-			this.key = params.key;
+		  /**
+		   * Player unique key. Required.
+		   * @member {Key}
+		   */
+		  this.key = params.key;
+
+		  /**
+		   * Player name. Required.
+		   * @member {string}
+		   */
+		  this.name = params.name;
+
+		  /**
+		   * Player doesn't have a rack until they join a game, as
+		   * it's only then we know how big it has to be.
+		   * @member {Rack}
+		   */
+		  this.rack = undefined;
+
+		  /**
+		   * Number of times this player has passed (or swapped)
+		   * since the last non-pass/swap play. Default is 0.
+		   * @member {number}
+		   */
+		  this.passes = params.passes || 0;
+
+		  /**
+		   * Player's current score.
+		   * @member {number}
+		   */
+		  this.score = params.score || 0;
+
+      if (params.clock)
+		    /**
+		     * Player countdown clock. In games with `timerType` `TIMER_TURN`,
+		     * this is the number of seconds before the player's turn times
+		     * out (if they are the current player). For `TIMER_GAME` it's
+		     * the number of seconds before the chess clock runs out.
+         * Default is undefined. Setting and management is done in
+         * {@linkcode Game}
+		     * @member {number?}
+		     */
+		    this.clock = params.clock;
+
+		  if (params.isConnected)
+        /**
+		     * The connected flag may be set when the Player is created
+		     * from a simple structure. It is not used server-side.
+		     * @member {boolean}
+		     */
+		    this.isConnected = true;
+
+		  if (params.missNextTurn)
+        /**
+		     * True if this player is due to miss their next play due
+		     * to a failed challenge. Default is false.
+		     * @member {boolean?}
+		     */
+		    this.missNextTurn = true;
+
+		  if (params.wantsAdvice)
+        /**
+		     * Set true to advise human player of better plays than the one
+		     * they used. Default is false.
+		     * @member {boolean}
+		     */
+		    this.wantsAdvice = true;
+
+      if (params.isRobot)
+		    /**
+		     * Is player a robot? Default is false.
+		     * @member {boolean}
+		     */
+		    this.isRobot = true;
+
+      if (params.canChallenge)
+		    /**
+		     * Can robot player challenge? Default is false.
+		     * @member {boolean}
+		     */
+		    this.canChallenge = true;
+
+		  if (params.dictionary)
+        /**
+		     * Name of the dictionary the robot will use. Defaults to
+         * the game dictionary. Only used for findBestPlay for robot players.
+         * Default is undefined.
+		     * @member {string?}
+		     */
+		    this.dictionary = params.dictionary;
+
 			if (typeof params._debug === "function")
+      /**
+		   * Debug function
+		   * @member {function}
+		   */
 				this._debug = params._debug;
-			if (params.isRobot)
-                this.isRobot = true;
-			if (params.canChallenge)
-                this.canChallenge = true;
-            if (params.wantsAdvice)
-			    this.wantsAdvice = true;
-			if (params.dictionary)
-                this.dictionary = params.dictionary;
-			if (params.missNextTurn)
-                this.missNextTurn = true;
+      else
+        this._debug = () => {};
 		}
 
 		/**
 		 * Create simple flat structure describing a subset of the player
-		 * state
+		 * state. This is used for sending minimal player information to
+     * the `games` interface.
 		 * @param {Game} game the game the player is participating in
 		 * @param {UserManager?} um user manager for getting emails if wanted
-		 * @return {Promise} resolving to a simple structure describing the player
+		 * @return {Promise} resolving to a simple structure describing 
+     * the player
 		 */
 		simple(game, um) {
 			return ((this.isRobot || !um)
-					? Promise.resolve(this)
-					: um.getUser({key: this.key}))
+					    ? Promise.resolve(this)
+					    : um.getUser({ key: this.key }).catch(e => this))
 			.then(ump => {
-                const simple = {
+        const simple = {
 					name: this.name,
 					key: this.key,
-                    score: this.score
-                };
-                if (this.isRobot) simple.isRobot = true;
-                if (this.isConnected) simple.isConnected = true;
+          score: this.score
+        };
+        if (this.isRobot) simple.isRobot = true;
+        if (this.isConnected) simple.isConnected = true;
 				if (this.dictionary) simple.dictionary = this.dictionary;
-                if (this.clock) simple.clock = this.clock;
-					
+        if (this.clock) simple.clock = this.clock;
+				
 				// Can they be emailed?
 				if (ump.email) simple.email = true;
 
-				// Is the player currently connected through a socket.
-				// Set in Player.simple before transmission to the client,
-				// client creates a Player(simple), which initialises
-				// connected on the client. Not used server-side.
-				if (this.isRobot || game.getConnection(this) !== null)
-                    simple.isRobot = true;
-
 				if (this.missNextTurn) simple.missNextTurn = true;
 
-                return simple;
-			})
-			.catch(e => {
-				// User key not found in the db. Not fatal, just pretend it's
-				// a robot.
-				return {
-					name: "Unknown",
-					isRobot: this.isRobot,
-					dictionary: this.dictionary,
-					key: this.key,
-					score: this.score,
-					clock: this.clock,
-					isConnected: this.isRobot
-					|| (game.getConnection(this) !== null)
-					// A robot never misses its next turn, because its
-					// challenges never fail
-				};
+        return simple;
 			});
 		}
 
@@ -232,7 +204,8 @@ define("game/Player", [
 		}
 
 		/**
-		 * Return all tiles to the letter bag
+		 * Return all tiles to the letter bag.
+		 * @param {LetterBag} letterBag LetterBag to return tiles to
 		 */
 		returnTiles(letterBag) {
 			for (let tile of this.rack.tiles())
@@ -246,7 +219,7 @@ define("game/Player", [
 			this.clock--;
 			this._debug("Tick", this.name, this.clock);
 			if (this.clock &lt;= 0 &amp;&amp; typeof this._onTimeout === "function") {
-				this._debug(`${this.name} has timed out at ${Date.now()}`);
+				this._debug(this.name, "has timed out at", new Date());
 				this._onTimeout();
 				// Timeout only happens once!
 				delete this._onTimeout;
@@ -263,13 +236,13 @@ define("game/Player", [
 		 * timer expires, ignored if time undefined
 		 */
 		setTimeout(time, onTimeout) {
-			this._debug(`${this.name} turn timeout in ${time}s`);
+			this._debug(this.name, `turn timeout in ${time}s`);
 			this.clock = time;
 			this._onTimeout = onTimeout;
 		}
 
 		/**
-		 * Generate a simple string representation of the player
+     * @override
 		 */
 		toString() {
 			let s = `Player '${this.name}'`;
@@ -296,7 +269,7 @@ define("game/Player", [
 		 */
 		$ui(curPlayer) {
 			const $tr = $(`&lt;tr id="player${this.key}">&lt;/tr>`)
-				  .addClass("player-row");
+				    .addClass("player-row");
 			if (curPlayer &amp;&amp; this.key === curPlayer.key)
 				$tr.addClass("whosTurn");
 			$tr.append(`&lt;td class="turn-pointer">&amp;#10148;&lt;/td>`);
@@ -304,7 +277,7 @@ define("game/Player", [
 			$icon.addClass(this.isRobot ? "icon-robot" : "icon-person");
 			$tr.append($("&lt;td>&lt;/td>").append($icon));
 			const who = curPlayer &amp;&amp; this.key === curPlayer.key
-				? Platform.i18n("You") : this.name;
+				    ? Platform.i18n("You") : this.name;
 			const $name = $(`&lt;td class="player-name">${who}&lt;/td>`);
 			if (this.missNextTurn)
 				$name.addClass("miss-turn");
@@ -314,7 +287,7 @@ define("game/Player", [
 			// Robots are always connected
 			const $status = $(`&lt;td class='connect-state'>${BLACK_CIRCLE}&lt;/td>`);
 			$status.addClass(
-                this.isConnected || this.isRobot ? "online" : "offline");
+        this.isConnected || this.isRobot ? "online" : "offline");
 			$tr.append($status);
 			
 			$tr.append(`&lt;td class='score'>${this.score}&lt;/td>`);
@@ -337,9 +310,9 @@ define("game/Player", [
 		 * @param {boolean} tf true/false
 		 */
 		online(tf) {
-            const conn = this.isRobot || tf;
+      const conn = this.isRobot || tf;
 			if (!this.isRobot)
-                this.isConnected = conn;
+        this.isConnected = conn;
 			let rem = conn ? "offline" : "online";
 			let add = conn ? "online" : "offline";
 			$(`#player${this.key} .connect-state`)
@@ -360,13 +333,13 @@ define("game/Player", [
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Default">Default</a></li><li><a href="global.html#%257Bstring">{string</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jun 03 2022 10:54:05 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jun 24 2022 17:16:45 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

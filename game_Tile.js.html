@@ -27,8 +27,8 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/*Copyright (C) 2019-2022 The Xanado Project https://github.com/cdot/Xanado
-License MIT. See README.md at the root of this distribution for full copyright
-and license information*/
+  License MIT. See README.md at the root of this distribution for full copyright
+  and license information. Author Crawford Currie http://c-dot.co.uk*/
 
 define("game/Tile", () => {
 	/**
@@ -40,59 +40,79 @@ define("game/Tile", () => {
 		/**
 		 * @param {Tile|object} spec optional Tile to copy or spec of tile
 		 * @param {string} spec.letter character(s) represented by this tile
-		 * @param {boolean} spec.isBlank true if this tile is a blank (irresepective of letter)
-		 * @param {number} spec.score value of this tile
-		 * @param {number} spec.col optional column where the tile is placed
-		 * @param {number} spec.row optional row where the tile is placed
+		 * @param {boolean?} spec.isBlank true if this tile is a blank
+     * (irresepective of letter)
+		 * @param {number?} spec.score value of this tile, default 0
+		 * @param {number?} spec.col optional column where the tile is placed
+		 * @param {number?} spec.row optional row where the tile is placed
 		 */
 		constructor(spec) {
-			// Caution; during gameplay, .letter for a blank will be cast
-			// to a letter chosen by the player. When the tile is returned
-			// to the rack, the letter will be reset to " " as isBlank is true.
-			// However the letter will stick to the Tile when it is sent to
-			// the server as part of a move. Henceforward that Tile will
-			// be locked to the chosen letter.
+      
+		  /**
+		   * Character(s) represented by this tile.
+		   * Caution; during gameplay, `letter` for a blank will be set
+		   * to a letter chosen by the player. When the tile is returned
+		   * to the rack, the letter will be reset to " " as isBlank is true.
+		   * However the letter will stick to the Tile when it is sent to
+		   * the server as part of a move. Henceforward that Tile will
+		   * be locked to the chosen letter on the server side.
+		   * @member {string}
+		   */
+		  this.letter = spec.letter;
 
-			/**
-			 * character(s) represented by this tile
-			 * @member {string}
-			 */
-			this.letter = " ";
+		  /**
+		   * Value of this tile
+		   * @member {number}
+		   */
+		  this.score = spec.score || 0;
 
-			/**
-			 * value of this tile
-			 * @member {number}
-			 */
-			this.score = 0;
+      if (typeof spec.col !== "undefined")
+		    /**
+		     * Column where the tile is placed
+		     * @member {number?}
+		     */
+        this.col = spec.col;
 
-			/**
-			 * true if this tile is a blank (irresepective of letter)
-			 * @member {boolean}
-			 */
-			this.isBlank = false;
+      if (typeof spec.row !== "undefined")
+		    /**
+		     * Row where the tile is placed
+		     * @member {number?}
+		     */
+        this.row = spec.row;
 
-			/**
-			 * Column where the tile is placed
-			 * @member {number}
-			 */
-			this.col = undefined;
-			
-			/**
-			 * Row where the tile is placed
-			 * @member {number}
-			 */
-			this.row = undefined;
+      if (spec.isBlank)
+		    /**
+		     * True if this tile is a blank (irresepective of letter)
+		     * @member {boolean}
+		     */
+        this.isBlank = true;
+    }
 
-			if (spec)
-				Object.getOwnPropertyNames(spec).forEach(
-					p => this[p] = spec[p]);
+    /**
+     * Remove letter cast and positional information from the tile e.g. before
+     * returning it to the bag or rack.
+     * @return {Tile} this
+     */
+    reset() {
+			delete this.row;
+			delete this.col;
+      if (this.isBlank)
+        this.letter = " ";
+      return this;
+    }
+
+    /* istanbul ignore next */
+		/**
+		 * @override
+		 */
+		toString() {
+			let pl = typeof this.col === "number" ? `@${this.col}` : "";
+      if (typeof this.row === "number")
+        pl += `,${this.row}`;
+      const b = this.isBlank ? "[]" : "";
+			return `[${this.letter}${b}${pl}(${this.score})]`;
 		}
-
-		toString(place) {
-			const pl = place ? `@${this.col},${this.row}` : "";
-			return `|${this.letter}${pl}(${this.score})|`;
-		}
-	}
+  }
 
 	return Tile;
 });
@@ -106,13 +126,13 @@ define("game/Tile", () => {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Default">Default</a></li><li><a href="global.html#%257Bstring">{string</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jun 03 2022 10:54:05 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jun 24 2022 17:16:45 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

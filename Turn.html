@@ -30,10 +30,9 @@
     
         <h2><span class="attribs"><span class="type-signature"></span></span>Turn<span class="signature">(game, params)</span><span class="type-signature"></span></h2>
         
-            <div class="class-description"><p>Communicating the result of a command from server back to client,
-and in a game history. Despite the name, a Turn is used not just
-for a player's turn (such as a play or a swap) but also for other
-results from commands sent to the server, such as challenges.</p></div>
+            <div class="class-description"><p>Despite the name, a Turn is used not just for a player's turn
+(such as a play or a swap) but also for other results from
+commands sent to the server, such as challenges.</p></div>
         
     
 </header>
@@ -104,7 +103,7 @@ results from commands sent to the server, such as challenges.</p></div>
 
             
 
-            <td class="description last"><p>the Game</p></td>
+            <td class="description last"><p>the game this is a turn in.</p></td>
         </tr>
 
     
@@ -128,7 +127,7 @@ results from commands sent to the server, such as challenges.</p></div>
             
 
             <td class="description last"><p>parameters. Any field with the same name
-as a member (or a member of <a href="Move.html">Move</a>) will initialise
+as a member (or a member of <a href="Move.html"><code>Move</code></a>) will initialise
 that member.</p></td>
         </tr>
 
@@ -170,7 +169,7 @@ that member.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line14">line 14</a>
+        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line18">line 18</a>
     </li></ul></dd>
     
 
@@ -204,6 +203,17 @@ that member.</p></td>
     </div>
 
     
+        <h3 class="subsection-title">Extends</h3>
+
+        
+
+
+    <ul>
+        <li><a href="Move.html">Move</a></li>
+    </ul>
+
+
+    
 
     
 
@@ -220,7 +230,228 @@ that member.</p></td>
 
         
             
-<h4 class="name" id="gameKey"><span class="type-signature"></span>gameKey<span class="type-signature"> :string</span></h4>
+<h4 class="name" id="challengerKey"><span class="type-signature">(nullable) </span>challengerKey<span class="type-signature"> :<a href="global.html#Key">Key</a></span></h4>
+
+
+
+
+<div class="description">
+    <p>For <code>Turns.CHALLENGE_WON</code> and <code>Turns.CHALLENGE_LOST</code>,
+the key of the player who challenged. playerkey in this case
+will be the player who's play was challenged (always the
+previous player)</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="global.html#Key">Key</a></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line77">line 77</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="emptyPlayerKey"><span class="type-signature">(nullable) </span>emptyPlayerKey<span class="type-signature"> :<a href="global.html#Key">Key</a></span></h4>
+
+
+
+
+<div class="description">
+    <p>Player who's rack has been left empty by the play that
+resulted in this turn</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="global.html#Key">Key</a></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line86">line 86</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="endState"><span class="type-signature">(nullable) </span>endState<span class="type-signature"> :<a href="global.html#State">State</a></span></h4>
+
+
+
+
+<div class="description">
+    <p>String describing the reason the game ended. Only used when
+type==Turns.GAME_OVER</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="global.html#State">State</a></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line94">line 94</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="gameKey"><span class="type-signature"></span>gameKey<span class="type-signature"> :<a href="global.html#Key">Key</a></span></h4>
 
 
 
@@ -235,7 +466,7 @@ that member.</p></td>
     <ul>
         <li>
             
-<span class="param-type">string</span>
+<span class="param-type"><a href="global.html#Key">Key</a></span>
 
 
         </li>
@@ -274,7 +505,7 @@ that member.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line39">line 39</a>
+        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line29">line 29</a>
     </li></ul></dd>
     
 
@@ -292,7 +523,7 @@ that member.</p></td>
 
         
             
-<h4 class="name" id="nextToGoKey"><span class="type-signature"></span>nextToGoKey<span class="type-signature"> :string</span></h4>
+<h4 class="name" id="nextToGoKey"><span class="type-signature"></span>nextToGoKey<span class="type-signature"> :<a href="global.html#Key">Key</a></span></h4>
 
 
 
@@ -307,7 +538,7 @@ that member.</p></td>
     <ul>
         <li>
             
-<span class="param-type">string</span>
+<span class="param-type"><a href="global.html#Key">Key</a></span>
 
 
         </li>
@@ -346,7 +577,7 @@ that member.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line61">line 61</a>
+        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line44">line 44</a>
     </li></ul></dd>
     
 
@@ -364,7 +595,88 @@ that member.</p></td>
 
         
             
-<h4 class="name" id="playerKey"><span class="type-signature"></span>playerKey<span class="type-signature"> :string</span></h4>
+<h4 class="name" id="placements"><span class="type-signature">(nullable) </span>placements<span class="type-signature"> :Array.&lt;<a href="Tile.html">Tile</a>></span></h4>
+
+
+
+
+<div class="description">
+    <p>List of tiles placed in this move. Tiles are required
+to carry col, row positions where they were placed.  In
+a Turn, for type=<code>move</code> it indicates the move. For
+<code>Turns.TOOK_BACK</code> and <code>Turns.CHALLENGE_WON</code> it is
+the move just taken back/challenged.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Array.&lt;<a href="Tile.html">Tile</a>></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Move.html#placements">Move#placements</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Move.js.html">game/Move.js</a>, <a href="game_Move.js.html#line54">line 54</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="playerKey"><span class="type-signature"></span>playerKey<span class="type-signature"> :<a href="global.html#Key">Key</a></span></h4>
 
 
 
@@ -382,7 +694,7 @@ challenged.</p>
     <ul>
         <li>
             
-<span class="param-type">string</span>
+<span class="param-type"><a href="global.html#Key">Key</a></span>
 
 
         </li>
@@ -421,7 +733,7 @@ challenged.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line55">line 55</a>
+        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line38">line 38</a>
     </li></ul></dd>
     
 
@@ -439,14 +751,14 @@ challenged.</p>
 
         
             
-<h4 class="name" id="type"><span class="type-signature"></span>type<span class="type-signature"> :string</span></h4>
+<h4 class="name" id="replacements"><span class="type-signature">(nullable) </span>replacements<span class="type-signature"> :Array.&lt;<a href="Tile.html">Tile</a>></span></h4>
 
 
 
 
 <div class="description">
-    <p>The 'type' of the turn. This will be a Turn.* constant
-constants.</p>
+    <p>List of tiles drawn from the bag to replace the tiles played
+in this turn. These tiles will not have positions.</p>
 </div>
 
 
@@ -455,7 +767,7 @@ constants.</p>
     <ul>
         <li>
             
-<span class="param-type">string</span>
+<span class="param-type">Array.&lt;<a href="Tile.html">Tile</a>></span>
 
 
         </li>
@@ -494,7 +806,241 @@ constants.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line46">line 46</a>
+        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line66">line 66</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="score"><span class="type-signature"></span>score<span class="type-signature"> :number|object</span></h4>
+
+
+
+
+<div class="description">
+    <p>Score for the play.
+If a number, change in score for the player as a result of
+this move. If an object, change in score for each
+player, indexed by player key. The object form is only used
+in Turn.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">number</span>
+|
+
+<span class="param-type">object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Move.html#score">Move#score</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Move.js.html">game/Move.js</a>, <a href="game_Move.js.html#line26">line 26</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="type"><span class="type-signature"></span>type<span class="type-signature"> :<a href="global.html#Turns">Turns</a></span></h4>
+
+
+
+
+<div class="description">
+    <p>The 'type' of the turn.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="global.html#Turns">Turns</a></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line23">line 23</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="words"><span class="type-signature">(nullable) </span>words<span class="type-signature"> :Array.&lt;object></span></h4>
+
+
+
+
+<div class="description">
+    <p>List of words created by the play:</p>
+<pre class="prettyprint source"><code>{ word: string, score: number }</code></pre>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Array.&lt;object></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Move.html#words">Move#words</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Move.js.html">game/Move.js</a>, <a href="game_Move.js.html#line41">line 41</a>
     </li></ul></dd>
     
 
@@ -513,6 +1059,241 @@ constants.</p>
         
     
 
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="addPlacement"><span class="type-signature"></span>addPlacement<span class="signature">(tile)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Add a Tile placement to the move</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>tile</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Tile.html">Tile</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>the Tile to add</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Move.html#addPlacement">Move#addPlacement</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Move.js.html">game/Move.js</a>, <a href="game_Move.js.html#line62">line 62</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="toString"><span class="type-signature"></span>toString<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Move.html#toString">Move#toString</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line101">line 101</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
     
 
     
@@ -528,13 +1309,13 @@ constants.</p>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Default">Default</a></li><li><a href="global.html#%257Bstring">{string</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jun 03 2022 10:54:06 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jun 24 2022 17:16:46 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

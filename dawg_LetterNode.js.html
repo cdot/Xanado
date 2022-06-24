@@ -27,8 +27,8 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/*Copyright (C) 2019-2022 The Xanado Project https://github.com/cdot/Xanado
-License MIT. See README.md at the root of this distribution for full copyright
-and license information*/
+  License MIT. See README.md at the root of this distribution for full copyright
+  and license information. Author Crawford Currie http://c-dot.co.uk*/
 /* eslint-env amd, node */
 
 define("dawg/LetterNode", () => {
@@ -43,17 +43,17 @@ define("dawg/LetterNode", () => {
 	 * `NO`, `SO` and `SAD`:
 	 * ```
 	 *   N -next-> S -next->
-     *   |         |
-     * child     child
-     *   |         |
-     *   `-> O(e)  `-> A -next-> O(e)
-     *                 |
-     *               child
-     *                 |
-     *                 D(e)
+   *   |         |
+   * child     child
+   *   |         |
+   *   `-> O(e)  `-> A -next-> O(e)
+   *                 |
+   *               child
+   *                 |
+   *                 D(e)
 	 * ```
 	 * where (e) indicates a node that is a valid end-of-word.
-     * The example is a tree; however the DAWG compressor will
+   * The example is a tree; however the DAWG compressor will
 	 * collapse letter sequences that are common to several words,
 	 * to create a more optimal DAG.
 	 *
@@ -64,49 +64,43 @@ define("dawg/LetterNode", () => {
 	 */
 	class LetterNode {
 
-	    /**
-         * Bit mask for end-of-word marker
-         * @member {number}
-         */
-	    static END_OF_WORD_BIT_MASK = 0x1;
+	  /**
+     * Bit mask for end-of-word marker
+     * @member {number}
+     */
+	  static END_OF_WORD_BIT_MASK = 0x1;
 
-	    /**
-         * Bit mask for end-of-list marker
-         * @member {number}
-         */
-	    static END_OF_LIST_BIT_MASK = 0x2;
+	  /**
+     * Bit mask for end-of-list marker
+     * @member {number}
+     */
+	  static END_OF_LIST_BIT_MASK = 0x2;
 
-        /**
-         * Shift to create space for masks
-         * @member {number}
-         */
-	    static CHILD_INDEX_SHIFT = 2;
+    /**
+     * Shift to create space for masks
+     * @member {number}
+     */
+	  static CHILD_INDEX_SHIFT = 2;
 
-        /**
-         * Mask for child index, exclusing above bit masks
-         * @member {number}
-         */
-	    static CHILD_INDEX_BIT_MASK = 0x3FFFFFFF;
-
-		/**
-		 * The letter at this node
-		 * @member {string}
-		 */
-		letter = undefined;
+    /**
+     * Mask for child index, exclusing above bit masks
+     * @member {number}
+     */
+	  static CHILD_INDEX_BIT_MASK = 0x3FFFFFFF;
 
 		/**
 		 * Pointer to the next (alternative) node in this peer chain.
-         * During loading this will be a number that will be converted
-         * to a pointer.
-		 * @member {number|LetterNode}
+     * During loading this will be a number that will be converted
+     * to a pointer.
+		 * @member {(number|LetterNode)?}
 		 */
-		next = null;
+		next;
 
 		/**
 		 * Pointer to the head of the child chain
-		 * @member {LetterNode}
+		 * @member {LetterNode?}
 		 */
-		child = null;
+		child;
 
 		/**
 		 * Is this the end of a valid word?
@@ -116,33 +110,37 @@ define("dawg/LetterNode", () => {
 
 		/**
 		 * List of nodes that link forward to this node. Set up
-		 * by {@link LetterNode#buildLists}.
+		 * by {@linkcode LetterNode#buildLists|buildLists}.
 		 * @member {LetterNode[]?}
 		 */
-		pre = undefined;
+		preNodes;
 
 		/**
-		 * List of letters that are in the nodes listed in `pre`.
-		 * Set up by {@link LetterNode#buildLists}.
+		 * List of letters that are in the nodes listed in `preNodes`.
+		 * Set up by {@linkcode LetterNode#buildLists|buildLiss}.
 		 * @member {string[]?}
 		 */
-		preLetters = undefined;
-			
-		/**
-		 * List of letters that are in the nodes listed in `post`.
-		 * Set up by {@link LetterNode#buildLists}.
-		 * @member {LetterNode[]?}
-		 */
-		postLetters = undefined;
-
+		preLetters;
+		
 		/**
 		 * List of nodes that are linked to from this node. Set up
-		 * by {@link LetterNode#buildLists}.
+		 * by {@linkcode LetterNode#buildLists|buildLists}.
 		 * @member {LetterNode[]?}
 		 */
-		post = undefined;
+		postNodes;
+
+		/**
+		 * List of letters that are in the nodes listed in `postNode`.
+		 * Set up by {@linkcode LetterNode#buildLists|buildLists}.
+		 * @member {LetterNode[]?}
+		 */
+		postLetters;
 
 		constructor(letter) {
+		  /**
+		   * The letter at this node
+		   * @member {string}
+		   */
 			this.letter = letter;
 		}
 
@@ -158,14 +156,17 @@ define("dawg/LetterNode", () => {
 		 * @param {LetterNode~wordCallback} cb the callback
 		 */
 		eachWord(s, cb) {
-			if (this.isEndOfWord)
-				cb(s + this.letter, this);
+      let node = this;
 
-			if (this.child)
-				this.child.eachWord(s + this.letter, cb);
+      while (node) {
+			  if (node.isEndOfWord)
+				  cb(s + node.letter, node);
 
-			if (this.next)
-				this.next.eachWord(s, cb);
+			  if (node.child)
+				  node.child.eachWord(s + node.letter, cb);
+
+        node = node.next;
+      }
 		}
 
 		/**
@@ -177,14 +178,16 @@ define("dawg/LetterNode", () => {
 		 * @param {wordCallback} cb the callback
 		 */
 		eachLongWord(s, cb) {
-			if (this.isEndOfWord &amp;&amp; !this.child)
-				cb(s + this.letter, this);
+      let node = this;
 
-			if (this.child)
-				this.child.eachLongWord(s + this.letter, cb);
+      while (node) {
+        if (node.child)
+          node.child.eachLongWord(s + node.letter, cb);
+        else if (node.isEndOfWord)
+          cb(s + node.letter, node);
 
-			if (this.next)
-				this.next.eachLongWord(s, cb);
+        node = node.next;
+      }
 		}
 
 		/**
@@ -194,20 +197,22 @@ define("dawg/LetterNode", () => {
 		 */
 
 		/**
-		 * Enumerate each node in the dictionary in depth-first order.
+		 * Enumerate each node in the dictionary.
 		 * Calls cb on each node, stops if cb returns false.
 		 * @param {LetterNode~nodeCallback} cb the callback
 		 */
 		eachNode(cb) {
-			if (!cb(this))
-				return false;
+      let node = this;
 
-			if (this.child &amp;&amp; !this.child.eachNode(cb))
-				return false;
+      while (node) {
+			  if (!cb(node))
+				  return false;
 
-			if (this.next &amp;&amp; !this.next.eachNode(cb))
-				return false;
+			  if (node.child &amp;&amp; !node.child.eachNode(cb))
+				  return false;
 
+			  node = node.next;
+      }
 			return true;
 		}
 
@@ -215,47 +220,67 @@ define("dawg/LetterNode", () => {
 		 * Add a letter sequence to this node. This is used to add
 		 * whitelist nodes to a DAG.
 		 * @param {string} word word being added
+     * @return {boolean} true if the word was added, false if it
+     * was already there
 		 */
 		add(word) {
-			if (this.letter === word.charAt(0)) {
-				if (word.length === 1)
-					this.isEndOfWord = true;
-				else {
-					const subword = word.substring(1);
-					if (!this.child)
-						this.child = new LetterNode(subword.charAt(0));
-					this.child.add(subword);
-				}
-				return;
-			}
-			if (!this.next || this.next.letter > word.charAt(0)) {
-				const t = this.next;
-				this.next = new LetterNode(word.charAt(0));
-				this.next.next = t;
-			}
-			this.next.add(word);
+      //console.log("Adding", word);
+      let node = this, added = false;
+
+      while (node) {
+			  if (node.letter === word.charAt(0)) {
+          //console.log("Matched", node.letter);
+				  if (word.length === 1) {
+            if (!node.isEndOfWord) {
+              added = true;
+					    node.isEndOfWord = true;
+            }
+            return added;
+				  } else {
+					  word = word.substring(1);
+					  if (!node.child) {
+						  node.child = new LetterNode(word.charAt(0));
+              //console.log("Added", word.charAt(0));
+              added = true;
+            }
+					  node = node.child;
+				  }
+			  } else if (!node.next || node.next.letter > word.charAt(0)) {
+				  const t = node.next;
+				  node.next = new LetterNode(word.charAt(0));
+          added = true;
+				  node.next.next = t;
+			  } else
+			    node = node.next;
+      }
+      /* istanbul ignore next */
+      throw new Error("Unreachable '", word);
 		}
 
 		/**
 		 * Build forward and backward lists to allow us to navigate
 		 * in both directions - forward through words, and backwards too.
-		 * This has to be done from the root of the DAG.
+		 * This has to be done from the root of the DAG, and has to be
+     * re-done if the DAG is modified..
 		 */
 		buildLists(nodeBefore) {
-			this.preNodes = [];
-			this.preLetters = [];
-			this.postNodes = [];
-			this.postLetters = [];
-			if (nodeBefore) {
-				this.preNodes.push(nodeBefore);
-				this.preLetters.push(nodeBefore.letter);
-				nodeBefore.postNodes.push(this);
-				nodeBefore.postLetters.push(this.letter);
-			}
-			if (this.child)
-				this.child.buildLists(this);
-			if (this.next)
-				this.next.buildLists(nodeBefore);
+      let node = this;
+
+      while (node) {
+			  node.preNodes = [];
+			  node.preLetters = [];
+			  node.postNodes = [];
+			  node.postLetters = [];
+			  if (nodeBefore) {
+				  node.preNodes.push(nodeBefore);
+				  node.preLetters.push(nodeBefore.letter);
+				  nodeBefore.postNodes.push(node);
+				  nodeBefore.postLetters.push(node.letter);
+			  }
+			  if (node.child)
+				  node.child.buildLists(node);
+        node = node.next;
+      }
 		}
 
 		/**
@@ -268,6 +293,7 @@ define("dawg/LetterNode", () => {
 		 */
 		match(chars, index) {
 			let node = this;
+
 			while (node) {
 				if (node.letter === chars[index]) {
 					if (index === chars.length - 1)
@@ -281,70 +307,73 @@ define("dawg/LetterNode", () => {
 		}
 
 		/**
+     * Find words that can be made from a sorted set of letters.
+		 * @param {string} chars the available set of characters
 		 * @param {string} realWord the string built so far in this recursion
 		 * @param {string} blankedWord the string built using spaces for blanks
 		 * if they are used
-		 * @param {string} sortedChars the available set of characters, sorted
 		 * @param {string[]} foundWords list of words found
 		 */
-		findAnagrams(realWord, blankedWord, sortedChars, foundWords) {
+		findWordsThatUse(chars, realWord, blankedWord, foundWords) {
+      let node = this;
 
-			// is this character available from sortedChars?
-			// Only use blank if no other choice
-			let i = sortedChars.indexOf(this.letter);
-			if (i &lt; 0) // not there, try blank
-				i = sortedChars.indexOf(" ");
+      while (node) {
+			  // is this character available from chars?
+			  // Only use blank if no other choice
+			  let i = chars.indexOf(node.letter);
+			  if (i &lt; 0) // not there, try blank
+				  i = chars.indexOf(" ");
 
-			if (i >= 0) {
-				const match = sortedChars[i];
+			  if (i >= 0) {
+				  const match = chars[i];
 
-				// The char is available from sortedChars.
-				// Is this then a word?
-				if (this.isEndOfWord) {
-					// A word is found
-					foundWords[realWord + this.letter] = blankedWord + match;
-				}
+				  // The char is available from chars.
+				  // Is this then a word?
+				  if (node.isEndOfWord) {
+					  // A word is found
+					  foundWords[realWord + node.letter]
+            = blankedWord + match;
+				  }
 
-				if (sortedChars.length == 1)
-					return;
+				  if (chars.length > 1) {
+				    // Cut the matched letter out of chars and recurse
+				    // over our child node chain
+				    chars.splice(i, 1);
+            let child = node.child;
+            while (child) {
+					    child.findWordsThatUse(
+						    chars,
+						    realWord + node.letter,
+						    blankedWord + match,
+						    foundWords);
+              child = child.next;
+				    }
+				    chars.splice(i, 0, match);
+          }
+			  }
 
-				// Cut the matched letter out of sortedChars and recurse
-				// over our child node chain
-				sortedChars.splice(i, 1);
-
-				for (let child = this.child; child; child = child.next) {
-					child.findAnagrams(
-						realWord + this.letter,
-						blankedWord + match,
-						sortedChars,
-						foundWords);
-				}
-				sortedChars.splice(i, 0, match);
-			}
-
-			if (this.next)
-				this.next.findAnagrams(
-					realWord, blankedWord, sortedChars, foundWords);
+			  node = node.next;
+      }
 		}
 
-        /**
-         * Decode node information encoded in an integer in a
-         * serialised Dictionary.
-         * @param {number} i index of node in node list
-         * @param {number} numb encoded node
-         * @return {LetterNode} this
-         */
-        decode(i, numb) {
+    /**
+     * Decode node information encoded in an integer in a
+     * serialised Dictionary.
+     * @param {number} i index of node in node list
+     * @param {number} numb encoded node
+     * @return {LetterNode} this
+     */
+    decode(i, numb) {
 			if ((numb &amp; LetterNode.END_OF_WORD_BIT_MASK) != 0)
 				this.isEndOfWord = true;
 			if ((numb &amp; LetterNode.END_OF_LIST_BIT_MASK) == 0)
 				this.next = i + 1;
 			if (((numb >> LetterNode.CHILD_INDEX_SHIFT)
-                 &amp; LetterNode.CHILD_INDEX_BIT_MASK) > 0)
+           &amp; LetterNode.CHILD_INDEX_BIT_MASK) > 0)
 				this.child = ((numb >> LetterNode.CHILD_INDEX_SHIFT)
-                              &amp; LetterNode.CHILD_INDEX_BIT_MASK);
-            return this;
-        }
+                      &amp; LetterNode.CHILD_INDEX_BIT_MASK);
+      return this;
+    }
 	}
 
 	return LetterNode;
@@ -359,13 +388,13 @@ define("dawg/LetterNode", () => {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Default">Default</a></li><li><a href="global.html#%257Bstring">{string</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jun 03 2022 10:54:05 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jun 24 2022 17:16:45 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>
