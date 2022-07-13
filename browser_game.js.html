@@ -32,13 +32,13 @@
 /* eslint-env browser, jquery */
 
 define("browser/game", [
-	"common/Fridge", "common/Utils",
+	"platform", "common/Fridge", "common/Utils",
 	"game/Tile", "game/Rack", "game/Board",
 	"game/Types", "game/Game", "game/Player", "game/Turn",
 	"browser/UI", "browser/Dialog",
 	"jquery", "jqueryui", "cookie", "browser/icon_button"
 ], (
-	Fridge, Utils,
+	Platform, Fridge, Utils,
 	Tile, Rack, Board,
 	Types, Game, Player, Turn,
 	UI, Dialog
@@ -97,11 +97,7 @@ define("browser/game", [
 		// @Override
 		decorate() {
 			let m = document.URL.match(/[?;&amp;]game=([^;&amp;]+)/);
-			if (!m) {
-				const mess = `no game in ${document.URL}`;
-				console.error(mess);
-				throw new Error(mess);
-			}
+			Platform.assert(m, `No game in ${document.URL}`);
 			const gameKey = m[1];
 			m = document.URL.match(/[?;&amp;]observer=([^;&amp;]+)/);
 			if (m) {
@@ -217,17 +213,17 @@ define("browser/game", [
 		 * turn during a game (as against a step in a replay)
 		 */
 		describeTurn(turn, isLatestTurn, interactive) {
-			if (turn.type === Turns.GAME_OVER) {
+			if (turn.type === Turns.GAME_ENDED) {
 				this.describeGameOver(turn, interactive);
 				return;
 			}
 
 			// Who's turn was it?
-			let player = this.game.getPlayer(turn.playerKey);
+			let player = this.game.getPlayerWithKey(turn.playerKey);
 			if (!player)
 				player = new Player({name: "Unknown player"});
 			const challenger = (typeof turn.challengerKey === "string")
-				    ? this.game.getPlayer(turn.challengerKey) : undefined;
+				    ? this.game.getPlayerWithKey(turn.challengerKey) : undefined;
 
 			let what, who;
 			if (turn.type === Turns.CHALLENGE_LOST) {
@@ -272,11 +268,11 @@ define("browser/game", [
 
 			switch (turn.type) {
 
-			case Turns.PLAY:
+			case Turns.PLAYED:
 				turnText = GameUI.$score(turn, false);
 				break;
 
-			case Turns.SWAP:
+			case Turns.SWAPPED:
 				turnText = $.i18n(
 					"Swapped $1 tile{{PLURAL:$1||s}}",
 					turn.replacements.length);
@@ -323,8 +319,7 @@ define("browser/game", [
 				break;
 
 			default:
-				// Terminal, no point in translating
-				throw Error(`Unknown move type ${turn.type}`);
+				Platform.fail(`Unknown move type ${turn.type}`);
 			}
 
 			GameUI.$log(interactive, turnText, "turn-detail");
@@ -333,7 +328,7 @@ define("browser/game", [
 				  &amp;&amp; turn.emptyPlayerKey
 				  &amp;&amp; !this.game.hasEnded()
 				  &amp;&amp; turn.type !== Turns.CHALLENGE_LOST
-				  &amp;&amp; turn.type !== Turns.GAME_OVER) {
+				  &amp;&amp; turn.type !== Turns.GAME_ENDED) {
 				if (this.isThisPlayer(turn.emptyPlayerKey)) {
 					GameUI.$log(interactive, $.i18n(
 						"You have no more tiles, game will be over if your play isn't challenged"),
@@ -341,14 +336,14 @@ define("browser/game", [
 				} else if (this.player)
 					GameUI.$log(interactive, $.i18n(
 						"$1 has no more tiles, game will be over unless you challenge",
-						this.game.getPlayer(turn.emptyPlayerKey).name),
+						this.game.getPlayerWithKey(turn.emptyPlayerKey).name),
 							        "turn-narrative");
 			}
 		}
 
 		/**
 		 * Append a formatted 'end of game' message to the log
-		 * @param {Turn} turn a Turns.GAME_OVER Turn
+		 * @param {Turn} turn a Turns.GAME_ENDED Turn
 		 * @param {boolean} interactive false if we are replaying messages into
 		 * the log, true if this is an interactive response to a player action.
 		 * @private
@@ -481,7 +476,11 @@ define("browser/game", [
       $(".player-clock")
       .hide();
 
-			const ticked = this.game.getPlayer(params.playerKey);
+			const ticked = this.game.getPlayerWithKey(params.playerKey);
+      if (!ticked) {
+        console.error("No such player", params.playerKey);
+        return;
+      }
 			let remains = params.clock;
 			ticked.clock = remains;
 
@@ -489,7 +488,7 @@ define("browser/game", [
 
       let extraClass = "tick-alert-none";
 			if (this.game.timerType === Timer.TURN) {
-			  if (ticked.key === this.player.key
+			  if (this.player &amp;&amp; ticked.key === this.player.key
 				    &amp;&amp; remains &lt;= 10
 				    &amp;&amp; this.getSetting("warnings"))
 				  this.playAudio("tick");
@@ -549,8 +548,21 @@ define("browser/game", [
 				rejection.words.join(", ")), "turn-narrative");
 		}
 
+    /**
+     * A heavy-handed instruction to reloaded the game UI, probably in
+     * response to an "undo"
+     * @private
+     */
+    handle_reload() {
+			const gameKey = this.game.key;
+      const playerKey = this.player.key;
+      location.replace(
+        `/html/game.html?game=${gameKey}&amp;player=${playerKey}`);
+    }
+
 		/**
-		 * Handle a keydown. These are captured in the root of the UI and dispatched here.
+		 * Handle a keydown.
+     * These are captured in the root of the UI and dispatched here.
 		 */
 		handle_keydown(event) {
 			// Only handle events targeted when the board is not
@@ -602,10 +614,10 @@ define("browser/game", [
 			case "!": // Challenge
 				{
 					const lastTurn = this.game.lastTurn();
-					if (lastTurn &amp;&amp; lastTurn.type == Turns.PLAY) {
+					if (lastTurn &amp;&amp; lastTurn.type == Turns.PLAYED) {
 						if (this.isThisPlayer(this.game.whosTurnKey))
 							// Challenge last move
-							this.challenge();
+							this.challenge(lastTurn.playerKey);
 						else
 							// Still us
 							this.takeBackMove();
@@ -715,7 +727,7 @@ define("browser/game", [
 			.then(session => {
 				if (session) {
 					// Find if they are a player
-					this.player = game.getPlayer(session.key);
+					this.player = game.getPlayerWithKey(session.key);
 					if (this.player)
 						return this.player.key;
 				  $(".bad-user")
@@ -786,7 +798,7 @@ define("browser/game", [
 			this.updateGameStatus();
 
 			const lastTurn = game.lastTurn();
-			if (lastTurn &amp;&amp; (lastTurn.type === Turns.PLAY
+			if (lastTurn &amp;&amp; (lastTurn.type === Turns.PLAYED
 							         || lastTurn.type === Turns.CHALLENGE_LOST)) {
 				if (this.isThisPlayer(lastTurn.playerKey)) {
 					// It isn't our turn, but we might still have time to
@@ -880,6 +892,10 @@ define("browser/game", [
 
 			// Attempted play has been rejected
 			.on(Notify.REJECT, params => this.handle_reject(params))
+
+			// Instruction to reload the UI received, probably as the result
+      // of an undo
+			.on(Notify.RELOAD, params => this.handle_reload(params))
 
 			// Game has been paused
 			.on(Notify.PAUSE, params => this.handle_pause(params))
@@ -988,7 +1004,7 @@ define("browser/game", [
 			if (!this.selectedSquare
 				  || !this.selectedSquare.isEmpty()
 				  // Make sure the selected square is on the board!
-				  || !(this.selectedSquare.owner instanceof Board))
+				  || !this.selectedSquare.isOnBoard)
 				return;
 
 			// check it's supported
@@ -1061,7 +1077,7 @@ define("browser/game", [
 			this.selectedSquare = undefined;
 			if (square
 				  // Only select empty squares on the board
-				  &amp;&amp; (!square.isEmpty() || square.owner instanceof Board)) {
+				  &amp;&amp; (!square.isEmpty() || square.isOnBoard)) {
 				this.selectedSquare = square;
 				this.selectedSquare.setSelected(true);
 			}
@@ -1202,12 +1218,12 @@ define("browser/game", [
 
 			const tile = fromSquare.tile;
 
-			if (fromSquare.owner instanceof Board) {
+			if (fromSquare.isOnBoard) {
 				if (this.boardLocked)
 					return; // can't move from board
-				if (!(toSquare.owner instanceof Board))
+				if (!(toSquare.isOnBoard))
 					this.placedCount--;
-			} else if (toSquare.owner instanceof Board) {
+			} else if (toSquare.isOnBoard) {
 				if (this.boardLocked)
 					return; // can't move to board
 				this.placedCount++;
@@ -1215,7 +1231,7 @@ define("browser/game", [
 
 			fromSquare.unplaceTile();
 			if (tile.isBlank) {			
-				if (!(toSquare.owner instanceof Board)) {
+				if (!toSquare.isOnBoard) {
           tile.reset();
 					toSquare.placeTile(tile);
 					toSquare.$refresh();
@@ -1347,9 +1363,9 @@ define("browser/game", [
 				});
 
       this.removeMoveActionButtons();
-			const player = this.game.getPlayer(turn.playerKey);
+			const player = this.game.getPlayerWithKey(turn.playerKey);
 			const challenger = (typeof turn.challengerKey === "string")
-				    ? this.game.getPlayer(turn.challengerKey) : undefined;
+				    ? this.game.getPlayerWithKey(turn.challengerKey) : undefined;
 
 			if (turn.type === Turns.CHALLENGE_LOST) {
 				challenger.score += turn.score;
@@ -1359,7 +1375,7 @@ define("browser/game", [
 					player.score += turn.score;
 				else if (typeof turn.score === "object")
 					Object.keys(turn.score).forEach(
-						k => this.game.getPlayer(k)
+						k => this.game.getPlayerWithKey(k)
 						.score +=
 						(turn.score[k].tiles || 0) +
 						(turn.score[k].time || 0));
@@ -1406,7 +1422,7 @@ define("browser/game", [
 						this.notify(
 							/*.i18n("ui-notify-title-succeeded")*/
 							/*.i18n("ui-notify-body-succeeded")*/
-							this.game.getPlayer(turn.playerKey).name,
+							this.game.getPlayerWithKey(turn.playerKey).name,
 							-turn.score);
 					}
 				}
@@ -1415,7 +1431,7 @@ define("browser/game", [
 					/*.i18n("ui-notify-title-retracted")*/
 					/*.i18n("ui-notify-body-retracted")*/
 					this.notify("retracted",
-								      this.game.getPlayer(turn.playerKey).name);
+								      this.game.getPlayerWithKey(turn.playerKey).name);
 				}
 				break;
 
@@ -1434,7 +1450,7 @@ define("browser/game", [
 				}
 				break;
 
-			case Turns.PLAY:
+			case Turns.PLAYED:
 				if (wasUs)
 					this.placedCount = 0;
 
@@ -1460,14 +1476,14 @@ define("browser/game", [
 					this.game.letterBag.getRandomTiles(
 						turn.replacements.length);
 
-				// Deliberate fall-through to Turns.SWAP to get the
+				// Deliberate fall-through to Turns.SWAPPED to get the
 				// replacements onto the rack
 
-			case Turns.SWAP:
+			case Turns.SWAPPED:
 				// Add replacement tiles to the player's rack. Number of tiles
 				// in letter bag doesn't change.
 				if (turn.replacements) {
-					for (let newTile of turn.replacements)
+					for (const newTile of turn.replacements)
 						player.rack.addTile(new Tile(newTile));
 
 					player.rack.$refresh();
@@ -1475,7 +1491,7 @@ define("browser/game", [
 
 				break;
 
-			case Turns.GAME_OVER:
+			case Turns.GAME_ENDED:
 				// End of game has been accepted
 				this.gameOverConfirmed(turn);
 				return;
@@ -1493,7 +1509,7 @@ define("browser/game", [
 
 			if (turn.nextToGoKey &amp;&amp; turn.type !== Turns.CHALLENGE_WON) {
 
-				if (turn.type == Turns.PLAY) {
+				if (turn.type == Turns.PLAYED) {
 					if (wasUs) {
 						if (this.game.allowTakeBack) {
 							this.addTakeBackPreviousButton(turn);
@@ -1512,7 +1528,7 @@ define("browser/game", [
 					/*.i18n("ui-notify-title-your-turn")*/
 					/*.i18n("ui-notify-body-your-turn")*/
 					this.notify("your-turn",
-								      this.game.getPlayer(turn.playerKey).name);
+								      this.game.getPlayerWithKey(turn.playerKey).name);
 				}
 				this.game.whosTurnKey = turn.nextToGoKey;
 				this.updateWhosTurn();
@@ -1546,7 +1562,7 @@ define("browser/game", [
 		addChallengePreviousButton(turn) {
 			if (!this.player)
 				return;
-			const player = this.game.getPlayer(turn.playerKey);
+			const player = this.game.getPlayerWithKey(turn.playerKey);
 			if (!player)
 				return;
 			const text = $.i18n(
@@ -1555,7 +1571,7 @@ define("browser/game", [
 				    $(`&lt;button name="challenge">${text}&lt;/button>`)
 				    .addClass("moveAction")
 				    .button()
-				    .on("click", () => this.challenge());
+				    .on("click", () => this.challenge(player.key));
 			GameUI.$log(true, $button, "turn-control");
 		}
 
@@ -1570,7 +1586,7 @@ define("browser/game", [
 				    .text($.i18n("Take back"))
 				    .button()
 				    .on("click", () => this.takeBackMove());
-			GameUI.$log($button, "turn-control");
+			GameUI.$log(true, $button, "turn-control");
 		}
 
 		/**
@@ -1581,18 +1597,19 @@ define("browser/game", [
 		}
 
 		/**
-		 * Action on "Challenge" button clicked
+		 * Issue a challenge against the given player.
+     * @param {string} challengedKey key of the player being challenged
 		 */
-		challenge() {
-			// Take back any tiles we placed
+		challenge(challengedKey) {
 			this.takeBackTiles();
-			// Remove action buttons and lock board
-			this.sendCommand(Command.CHALLENGE);
+			this.sendCommand(Command.CHALLENGE, {
+        challengedKey: challengedKey
+      });
 		}
 
 		/**
 		 * Handler for the 'Make Move' button. Invoked via 'click_turnButton'.
-		 * Response will be turn type Turns.PLAY (or Turns.TOOK_BACK if the play
+		 * Response will be turn type Turns.PLAYED (or Turns.TOOK_BACK if the play
 		 * is rejected).
 		 */
 		action_commitMove() {
@@ -1609,8 +1626,6 @@ define("browser/game", [
       if (bonus > 0 &amp;&amp; this.getSetting("cheers"))
 				this.playAudio("bonusCheer");
 
-			move.playerKey = this.player.key;
-
 			this.sendCommand(Command.PLAY, move);
 		}
 
@@ -1618,7 +1633,7 @@ define("browser/game", [
 		 * Handler for the 'Take back' button clicked. Invoked via
 		 * 'click_turnButton'. Response will be a turn type Turns.TOOK_BACK.
 		 */
-		action_takeBackMove() {
+		takeBackMove() {
 			this.takeBackTiles();
 			this.sendCommand(Command.TAKE_BACK);
 		}
@@ -1666,12 +1681,12 @@ define("browser/game", [
       })
 			.catch(console.error);
 		}
-		
+
 		/**
 		 * Handler for the 'Swap' button clicked. Invoked via 'click_turnButton'.
 		 */
 		action_swap() {
-			const tiles = this.swapRack.tiles();
+      const tiles = this.swapRack.tiles();
 			this.swapRack.empty();
 			this.sendCommand(Command.SWAP, tiles);
 		}
@@ -1764,13 +1779,13 @@ define("browser/game", [
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#allow">allow</a></li><li><a href="global.html#challenge">challenge</a></li><li><a href="global.html#confirmGameOver">confirmGameOver</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed Jun 29 2022 13:55:01 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed Jul 13 2022 12:21:51 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: XanadoPass</title>
+    <title>JSDoc: Mixin: BrowserGame</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Class: XanadoPass</h1>
+    <h1 class="page-title">Mixin: BrowserGame</h1>
 
     
 
@@ -28,11 +28,7 @@
 
 <header>
     
-        <h2><span class="attribs"><span class="type-signature"></span></span>XanadoPass<span class="signature">(checkUserPass, checkUserToken)</span><span class="type-signature"></span></h2>
-        
-            <div class="class-description"><p>This a Passport strategy, radically cut-down from passport-local.
-It is required because <code>passport-local</code> logins fail on null password,
-and we specifically want to support this.</p></div>
+        <h2>BrowserGame</h2>
         
     
 </header>
@@ -41,18 +37,90 @@ and we specifically want to support this.</p></div>
     <div class="container-overview">
     
         
+            <div class="description"><p>Mixin that provides browser-specific functionality for <a href="Game.html"><code>Game</code></a></p></div>
+        
 
-    
-    <h2>Constructor</h2>
-    
-
-    
-    <h4 class="name" id="XanadoPass"><span class="type-signature"></span>new XanadoPass<span class="signature">(checkUserPass, checkUserToken)</span><span class="type-signature"></span></h4>
-    
-
-    
+        
 
 
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_BrowserGame.js.html">game/BrowserGame.js</a>, <a href="game_BrowserGame.js.html#line18">line 18</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".$ui"><span class="type-signature">(static) </span>$ui<span class="signature">(thisPlayer)</span><span class="type-signature"> &rarr; {jQuery}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Create the UI for the player table</p>
+</div>
 
 
 
@@ -87,13 +155,13 @@ and we specifically want to support this.</p></div>
 
         <tr>
             
-                <td class="name"><code>checkUserPass</code></td>
+                <td class="name"><code>thisPlayer</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">function</span>
+<span class="param-type"><a href="Player.html">Player</a></span>
 
 
             
@@ -103,30 +171,8 @@ and we specifically want to support this.</p></div>
 
             
 
-            <td class="description last"><p>function used to check name and pass</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>checkUserToken</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>function used to check reset token</p></td>
+            <td class="description last"><p>the player for whom the DOM is
+being generated</p></td>
         </tr>
 
     
@@ -167,7 +213,167 @@ and we specifically want to support this.</p></div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="server_UserManager.js.html">server/UserManager.js</a>, <a href="server_UserManager.js.html#line40">line 40</a>
+        <a href="game_BrowserGame.js.html">game/BrowserGame.js</a>, <a href="game_BrowserGame.js.html#line32">line 32</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>jQuery object representing the player table</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">jQuery</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".updatePlayerList"><span class="type-signature">(static) </span>updatePlayerList<span class="signature">(observers)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Given a list of Player.simple, update the players list
+to reflect the members and ordering of that list.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>observers</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;object></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>list of observers</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_BrowserGame.js.html">game/BrowserGame.js</a>, <a href="game_BrowserGame.js.html#line46">line 46</a>
     </li></ul></dd>
     
 
@@ -197,34 +403,7 @@ and we specifically want to support this.</p></div>
 
 
 
-    
-    </div>
-
-    
-        <h3 class="subsection-title">Extends</h3>
-
         
-
-
-    <ul>
-        <li>Passport.Strategy</li>
-    </ul>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
     
 
     

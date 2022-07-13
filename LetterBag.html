@@ -28,7 +28,7 @@
 
 <header>
     
-        <h2><span class="attribs"><span class="type-signature"></span></span>LetterBag<span class="signature">(edition)</span><span class="type-signature"></span></h2>
+        <h2><span class="attribs"><span class="type-signature"></span></span>LetterBag<span class="signature">(edition, predictable<span class="signature-attributes">nullable</span>)</span><span class="type-signature"></span></h2>
         
             <div class="class-description"><p>The bag of letters during a game.</p></div>
         
@@ -45,7 +45,7 @@
     
 
     
-    <h4 class="name" id="LetterBag"><span class="type-signature"></span>new LetterBag<span class="signature">(edition)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="LetterBag"><span class="type-signature"></span>new LetterBag<span class="signature">(edition, predictable<span class="signature-attributes">nullable</span>)</span><span class="type-signature"></span></h4>
     
 
     
@@ -78,6 +78,8 @@ given edition</p>
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
         
 
@@ -103,10 +105,52 @@ given edition</p>
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
             <td class="description last"><p>the Edition defining the bag contents</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>predictable</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>set to turn off sshuffling the
+bag contents (for testing)</p></td>
         </tr>
 
     
@@ -269,6 +313,80 @@ given edition</p>
 
         
             
+<h4 class="name" id="predictable"><span class="type-signature">(nullable) </span>predictable<span class="type-signature"> :boolean</span></h4>
+
+
+
+
+<div class="description">
+    <p>Set to disable shuffling the bag. This is used when
+replaying moves, when we need a predictable set for tiles
+to be delivered next out of the bag.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">boolean</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_LetterBag.js.html">game/LetterBag.js</a>, <a href="game_LetterBag.js.html#line62">line 62</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
 <h4 class="name" id="tiles"><span class="type-signature"></span>tiles<span class="type-signature"> :Array.&lt;<a href="Tile.html">Tile</a>></span></h4>
 
 
@@ -405,7 +523,7 @@ again.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_LetterBag.js.html">game/LetterBag.js</a>, <a href="game_LetterBag.js.html#line81">line 81</a>
+        <a href="game_LetterBag.js.html">game/LetterBag.js</a>, <a href="game_LetterBag.js.html#line97">line 97</a>
     </li></ul></dd>
     
 
@@ -517,7 +635,7 @@ again.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_LetterBag.js.html">game/LetterBag.js</a>, <a href="game_LetterBag.js.html#line94">line 94</a>
+        <a href="game_LetterBag.js.html">game/LetterBag.js</a>, <a href="game_LetterBag.js.html#line110">line 110</a>
     </li></ul></dd>
     
 
@@ -628,7 +746,7 @@ tiles in the bag, may return a shorter array.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_LetterBag.js.html">game/LetterBag.js</a>, <a href="game_LetterBag.js.html#line59">line 59</a>
+        <a href="game_LetterBag.js.html">game/LetterBag.js</a>, <a href="game_LetterBag.js.html#line71">line 71</a>
     </li></ul></dd>
     
 
@@ -738,7 +856,7 @@ tiles in the bag, may return a shorter array.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_LetterBag.js.html">game/LetterBag.js</a>, <a href="game_LetterBag.js.html#line125">line 125</a>
+        <a href="game_LetterBag.js.html">game/LetterBag.js</a>, <a href="game_LetterBag.js.html#line181">line 181</a>
     </li></ul></dd>
     
 
@@ -826,7 +944,7 @@ tiles in the bag, may return a shorter array.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_LetterBag.js.html">game/LetterBag.js</a>, <a href="game_LetterBag.js.html#line118">line 118</a>
+        <a href="game_LetterBag.js.html">game/LetterBag.js</a>, <a href="game_LetterBag.js.html#line174">line 174</a>
     </li></ul></dd>
     
 
@@ -867,6 +985,326 @@ tiles in the bag, may return a shorter array.</p>
     <dd>
         
 <span class="param-type">number</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="removeTile"><span class="type-signature"></span>removeTile<span class="signature">(tile)</span><span class="type-signature"> &rarr; (nullable) {<a href="Tile.html">Tile</a>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Remove a matching tile from the bag. Either the exact tile
+will be matched or a tile that represents the same letter.
+Blanks only match blanks.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>tile</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Tile.html">Tile</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>tile to match in the bag</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_LetterBag.js.html">game/LetterBag.js</a>, <a href="game_LetterBag.js.html#line145">line 145</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>the tile removed, or undefined if it wasn't found</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="Tile.html">Tile</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="removeTiles"><span class="type-signature"></span>removeTiles<span class="signature">(tiles)</span><span class="type-signature"> &rarr; {Array.&lt;<a href="Tile.html">Tile</a>>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Take a list of matching tiles out of the letter bag.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>tiles</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;<a href="Tile.html">Tile</a>></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>list of tiles to match and remove</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_LetterBag.js.html">game/LetterBag.js</a>, <a href="game_LetterBag.js.html#line163">line 163</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>list of tiles removed from the bag</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array.&lt;<a href="Tile.html">Tile</a>></span>
 
 
     </dd>
@@ -986,7 +1424,144 @@ tile doesn't always re-emerge next.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_LetterBag.js.html">game/LetterBag.js</a>, <a href="game_LetterBag.js.html#line109">line 109</a>
+        <a href="game_LetterBag.js.html">game/LetterBag.js</a>, <a href="game_LetterBag.js.html#line123">line 123</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="returnTiles"><span class="type-signature"></span>returnTiles<span class="signature">(tiles)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Return an array of tiles to the bag, and give it a shimmy</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>tiles</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;<a href="Tile.html">Tile</a>></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>tiles to return to bag</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_LetterBag.js.html">game/LetterBag.js</a>, <a href="game_LetterBag.js.html#line132">line 132</a>
     </li></ul></dd>
     
 
@@ -1030,7 +1605,8 @@ tile doesn't always re-emerge next.</p>
 
 
 <div class="description">
-    <p>Randomize tiles in-place using Durstenfeld shuffle</p>
+    <p>Randomize tiles in-place using Durstenfeld shuffle. Randomness
+can be disabled by setting <a href="LetterBag.html#predictable"><code>LetterBag#predictable</code></a></p>
 </div>
 
 
@@ -1074,7 +1650,7 @@ tile doesn't always re-emerge next.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_LetterBag.js.html">game/LetterBag.js</a>, <a href="game_LetterBag.js.html#line66">line 66</a>
+        <a href="game_LetterBag.js.html">game/LetterBag.js</a>, <a href="game_LetterBag.js.html#line79">line 79</a>
     </li></ul></dd>
     
 
@@ -1162,7 +1738,7 @@ tile doesn't always re-emerge next.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_LetterBag.js.html">game/LetterBag.js</a>, <a href="game_LetterBag.js.html#line134">line 134</a>
+        <a href="game_LetterBag.js.html">game/LetterBag.js</a>, <a href="game_LetterBag.js.html#line190">line 190</a>
     </li></ul></dd>
     
 
@@ -1208,13 +1784,13 @@ tile doesn't always re-emerge next.</p>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#allow">allow</a></li><li><a href="global.html#challenge">challenge</a></li><li><a href="global.html#confirmGameOver">confirmGameOver</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed Jun 29 2022 13:55:02 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed Jul 13 2022 12:21:51 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

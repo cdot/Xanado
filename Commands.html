@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: Platform</title>
+    <title>JSDoc: Mixin: Commands</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Class: Platform</h1>
+    <h1 class="page-title">Mixin: Commands</h1>
 
     
 
@@ -28,11 +28,7 @@
 
 <header>
     
-        <h2><span class="attribs"><span class="type-signature"></span></span>Platform<span class="signature">()</span><span class="type-signature"></span></h2>
-        
-            <div class="class-description"><p>Interface isolating platform details from the rest of
-the code. The purpose is to allow common code to run on
-both browser and server.</p></div>
+        <h2>Commands</h2>
         
     
 </header>
@@ -41,29 +37,10 @@ both browser and server.</p></div>
     <div class="container-overview">
     
         
+            <div class="description"><p>Mixin that provides handlers for commands coming from the UI</p></div>
+        
 
-    
-    <h2>Constructor</h2>
-    
-
-    
-    <h4 class="name" id="Platform"><span class="type-signature"></span>new Platform<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
+        
 
 
 <dl class="details">
@@ -95,7 +72,7 @@ both browser and server.</p></div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_Platform.js.html">common/Platform.js</a>, <a href="common_Platform.js.html#line68">line 68</a>
+        <a href="game_Commands.js.html">game/Commands.js</a>, <a href="game_Commands.js.html#line20">line 20</a>
     </li></ul></dd>
     
 
@@ -107,24 +84,7 @@ both browser and server.</p></div>
 </dl>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        
     
     </div>
 
@@ -141,82 +101,6 @@ both browser and server.</p></div>
     
 
     
-        <h3 class="subsection-title">Members</h3>
-
-        
-            
-<h4 class="name" id=".Database"><span class="type-signature">(static) </span>Database<span class="type-signature"> :<a href="Database.html">Database</a></span></h4>
-
-
-
-
-<div class="description">
-    <p>Implementation of <a href="Database.html"><code>Database</code></a> for this platform</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type"><a href="Database.html">Database</a></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_Platform.js.html">common/Platform.js</a>, <a href="common_Platform.js.html#line162">line 162</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-    
 
     
         <h3 class="subsection-title">Methods</h3>
@@ -227,7 +111,7 @@ both browser and server.</p></div>
     
 
     
-    <h4 class="name" id=".assert"><span class="type-signature">(static) </span>assert<span class="signature">(condition, descr)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".anotherGame"><span class="type-signature">(static) </span>anotherGame<span class="signature">()</span><span class="type-signature"> &rarr; {Promise}</span></h4>
     
 
     
@@ -235,7 +119,119 @@ both browser and server.</p></div>
 
 
 <div class="description">
-    <p>Platform-specific assert</p>
+    <p>Create another game the same, but with players re-ordered.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Commands.js.html">game/Commands.js</a>, <a href="game_Commands.js.html#line538">line 538</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>resolving to the new game</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".hint"><span class="type-signature">(static) </span>hint<span class="signature">(player)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Handler for 'hint' request. This is NOT a turn handler.
+Asynchronously calculate a play for the given player, and
+notify all players that they requested a hint.</p>
 </div>
 
 
@@ -271,13 +267,13 @@ both browser and server.</p></div>
 
         <tr>
             
-                <td class="name"><code>condition</code></td>
+                <td class="name"><code>player</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">boolean</span>
+<span class="param-type"><a href="Player.html">Player</a></span>
 
 
             
@@ -287,30 +283,7 @@ both browser and server.</p></div>
 
             
 
-            <td class="description last"><p>must be true or will throw an Error</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>descr</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Error description</p></td>
+            <td class="description last"><p>to get a hint for</p></td>
         </tr>
 
     
@@ -351,7 +324,7 @@ both browser and server.</p></div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_Platform.js.html">common/Platform.js</a>, <a href="common_Platform.js.html#line76">line 76</a>
+        <a href="game_Commands.js.html">game/Commands.js</a>, <a href="game_Commands.js.html#line678">line 678</a>
     </li></ul></dd>
     
 
@@ -387,7 +360,7 @@ both browser and server.</p></div>
     
 
     
-    <h4 class="name" id=".fail"><span class="type-signature">(static) </span>fail<span class="signature">(descr)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".pass"><span class="type-signature">(static) </span>pass<span class="signature">(player, type)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
     
 
     
@@ -395,7 +368,9 @@ both browser and server.</p></div>
 
 
 <div class="description">
-    <p>assert(false)</p>
+    <p>Handler for 'pass' command.
+Player wants to (or has to) miss their move. Either they
+can't play, or challenged and failed.</p>
 </div>
 
 
@@ -431,7 +406,30 @@ both browser and server.</p></div>
 
         <tr>
             
-                <td class="name"><code>descr</code></td>
+                <td class="name"><code>player</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Player.html">Player</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>player passing (must be current player)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>type</code></td>
             
 
             <td class="type">
@@ -447,7 +445,8 @@ both browser and server.</p></div>
 
             
 
-            <td class="description last"><p>Error description</p></td>
+            <td class="description last"><p>pass type, <code>Turns.PASSED</code> or
+<code>Turns.TIMED_OUT</code>. If undefined, defaults to <code>Turns.PASSED</code></p></td>
         </tr>
 
     
@@ -488,7 +487,7 @@ both browser and server.</p></div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_Platform.js.html">common/Platform.js</a>, <a href="common_Platform.js.html#line83">line 83</a>
+        <a href="game_Commands.js.html">game/Commands.js</a>, <a href="game_Commands.js.html#line340">line 340</a>
     </li></ul></dd>
     
 
@@ -513,6 +512,28 @@ both browser and server.</p></div>
 
 
 
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>resolving to the game</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
@@ -524,7 +545,7 @@ both browser and server.</p></div>
     
 
     
-    <h4 class="name" id=".findBestPlay"><span class="type-signature">(abstract, static) </span>findBestPlay<span class="signature">(game, rack, cb, dictpath<span class="signature-attributes">nullable</span>, dictionary<span class="signature-attributes">nullable</span>)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+    <h4 class="name" id=".pause"><span class="type-signature">(static) </span>pause<span class="signature">(player)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
     
 
     
@@ -532,9 +553,7 @@ both browser and server.</p></div>
 
 
 <div class="description">
-    <p>If available, find the best play. This is used to abstract
-the best play controller from the rest of the server code,
-so it can be invoked either directly or asynchronously.</p>
+    <p>Pause the game</p>
 </div>
 
 
@@ -558,7 +577,164 @@ so it can be invoked either directly or asynchronously.</p>
         <th>Type</th>
 
         
-        <th>Attributes</th>
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>player</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Player.html">Player</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>to play</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Commands.js.html">game/Commands.js</a>, <a href="game_Commands.js.html#line157">line 157</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>resolving to the game</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".play"><span class="type-signature">(static) </span>play<span class="signature">(player, move)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Place tiles on the board.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
         
 
         
@@ -572,38 +748,218 @@ so it can be invoked either directly or asynchronously.</p>
 
         <tr>
             
-                <td class="name"><code>game</code></td>
+                <td class="name"><code>player</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type"><a href="Game.html">Game</a></span>
+<span class="param-type"><a href="Player.html">Player</a></span>
 
 
             
             </td>
 
             
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
 
             
 
-            <td class="description last"><p>the Game</p></td>
+            <td class="description last"><p>player requesting the move</p></td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>rack</code></td>
+                <td class="name"><code>move</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Move.html">Move</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>a Move (or the spec of a Move)</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Commands.js.html">game/Commands.js</a>, <a href="game_Commands.js.html#line34">line 34</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>resolving to a the game</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".swap"><span class="type-signature">(static) </span>swap<span class="signature">(player, tiles)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Handler for swap command.
+Scrabble Rule 7: You may use a turn to exchange all,
+some, or none of the letters. To do this, place your
+discarded letter(s) facedown. Draw the same number of
+letters from the pool, then mix your discarded
+letter(s) into the pool.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>player</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Player.html">Player</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>player making the swap (must be current
+player)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>tiles</code></td>
             
 
             <td class="type">
@@ -616,119 +972,10 @@ so it can be invoked either directly or asynchronously.</p>
             </td>
 
             
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
 
             
 
-            <td class="description last"><p>rack in the form of a simple list of Tile</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>cb</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="Platform.html#~bestMoveCallback">Platform~bestMoveCallback</a></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>accepts a best play
-whenever a new one is found, or a string containing a
-message</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>dictpath</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-                    &lt;nullable><br>
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>path to dictionaries to override
-the default</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>dictionary</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-                    &lt;nullable><br>
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>name of dictionary to override the
-game dictionary</p></td>
+            <td class="description last"><p>list of tiles to swap</p></td>
         </tr>
 
     
@@ -769,7 +1016,7 @@ game dictionary</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_Platform.js.html">common/Platform.js</a>, <a href="common_Platform.js.html#line121">line 121</a>
+        <a href="game_Commands.js.html">game/Commands.js</a>, <a href="game_Commands.js.html#line485">line 485</a>
     </li></ul></dd>
     
 
@@ -798,8 +1045,7 @@ game dictionary</p></td>
 
         
 <div class="param-desc">
-    <p>Promise that resolves when all best moves
-have been tried</p>
+    <p>resolving to the game</p>
 </div>
 
 
@@ -828,7 +1074,7 @@ have been tried</p>
     
 
     
-    <h4 class="name" id=".getFilePath"><span class="type-signature">(abstract, static) </span>getFilePath<span class="signature">(p)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".takeBack"><span class="type-signature">(static) </span>takeBack<span class="signature">(player, type)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
     
 
     
@@ -836,8 +1082,8 @@ have been tried</p>
 
 
 <div class="description">
-    <p>Get the absolute path to a file or directory within the
-installation.</p>
+    <p>Undo the last move. This might be as a result of a player request,
+or the result of a challenge.</p>
 </div>
 
 
@@ -873,7 +1119,32 @@ installation.</p>
 
         <tr>
             
-                <td class="name"><code>p</code></td>
+                <td class="name"><code>player</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Player.html">Player</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>if type==Turns.CHALLENGE_WON this must be
+the challenging player. Otherwise it is the player taking their
+play back.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>type</code></td>
             
 
             <td class="type">
@@ -889,7 +1160,8 @@ installation.</p>
 
             
 
-            <td class="description last"><p>a path relative to the root of the installation</p></td>
+            <td class="description last"><p>the type of the takeBack; Turns.TOOK_BACK
+or Turns.CHALLENGE_WON.</p></td>
         </tr>
 
     
@@ -930,95 +1202,7 @@ installation.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_Platform.js.html">common/Platform.js</a>, <a href="common_Platform.js.html#line132">line 132</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id=".readFile"><span class="type-signature">(abstract, static) </span>readFile<span class="signature">()</span><span class="type-signature"> &rarr; {Promise}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Read a file</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_Platform.js.html">common/Platform.js</a>, <a href="common_Platform.js.html#line142">line 142</a>
+        <a href="game_Commands.js.html">game/Commands.js</a>, <a href="game_Commands.js.html#line274">line 274</a>
     </li></ul></dd>
     
 
@@ -1047,7 +1231,7 @@ installation.</p>
 
         
 <div class="param-desc">
-    <p>resolves to the file contents</p>
+    <p>Promise resolving to the game</p>
 </div>
 
 
@@ -1076,7 +1260,7 @@ installation.</p>
     
 
     
-    <h4 class="name" id=".readZip"><span class="type-signature">(abstract, static) </span>readZip<span class="signature">()</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+    <h4 class="name" id=".toggleAdvice"><span class="type-signature">(static) </span>toggleAdvice<span class="signature">(player)</span><span class="type-signature"></span></h4>
     
 
     
@@ -1084,117 +1268,7 @@ installation.</p>
 
 
 <div class="description">
-    <p>Read a gz file</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_Platform.js.html">common/Platform.js</a>, <a href="common_Platform.js.html#line152">line 152</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>resolves to the file contents</p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id=".trigger"><span class="type-signature">(abstract, static) </span>trigger<span class="signature">(event, args)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Emit the given event for handling by the platform's event system</p>
+    <p>Toggle advice on/off</p>
 </div>
 
 
@@ -1230,13 +1304,13 @@ installation.</p>
 
         <tr>
             
-                <td class="name"><code>event</code></td>
+                <td class="name"><code>player</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">string</span>
+<span class="param-type"><a href="Player.html">Player</a></span>
 
 
             
@@ -1246,31 +1320,7 @@ installation.</p>
 
             
 
-            <td class="description last"><p>name of event to emit</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>args</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array.&lt;object></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>array of arguments to pass to the
-event handler</p></td>
+            <td class="description last"><p>who is being toggled</p></td>
         </tr>
 
     
@@ -1311,7 +1361,7 @@ event handler</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_Platform.js.html">common/Platform.js</a>, <a href="common_Platform.js.html#line93">line 93</a>
+        <a href="game_Commands.js.html">game/Commands.js</a>, <a href="game_Commands.js.html#line587">line 587</a>
     </li></ul></dd>
     
 
@@ -1342,23 +1392,21 @@ event handler</p></td>
 
 
         
-    
-
-    
-        <h3 class="subsection-title">Type Definitions</h3>
-
-        
-                
+            
 
     
 
     
-    <h4 class="name" id="~bestMoveCallback"><span class="type-signature"></span>bestMoveCallback<span class="signature">(best)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".unpause"><span class="type-signature">(static) </span>unpause<span class="signature">(player)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
     
 
     
 
 
+
+<div class="description">
+    <p>Unpause the game</p>
+</div>
 
 
 
@@ -1393,16 +1441,13 @@ event handler</p></td>
 
         <tr>
             
-                <td class="name"><code>best</code></td>
+                <td class="name"><code>player</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type"><a href="Move.html">Move</a></span>
-|
-
-<span class="param-type">string</span>
+<span class="param-type"><a href="Player.html">Player</a></span>
 
 
             
@@ -1412,8 +1457,7 @@ event handler</p></td>
 
             
 
-            <td class="description last"><p>move found so far, or a
-progress string for debug (only intended for developer)</p></td>
+            <td class="description last"><p>to play</p></td>
         </tr>
 
     
@@ -1454,7 +1498,7 @@ progress string for debug (only intended for developer)</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_Platform.js.html">common/Platform.js</a>, <a href="common_Platform.js.html#line97">line 97</a>
+        <a href="game_Commands.js.html">game/Commands.js</a>, <a href="game_Commands.js.html#line178">line 178</a>
     </li></ul></dd>
     
 
@@ -1479,12 +1523,36 @@ progress string for debug (only intended for developer)</p></td>
 
 
 
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>resolving to the game</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
 
 
-            
+        
+    
+
     
 
     

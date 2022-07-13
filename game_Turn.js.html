@@ -72,6 +72,12 @@ define("game/Turn", [
     nextToGoKey;
 
 		/**
+		 * Time the turn was finished, assigned by the server.
+		 * @member {number}
+		 */
+    timestamp;
+
+		/**
 		 * @param {Game} game the game this is a turn in.
 		 * @param {object} params parameters. Any field with the same name
 		 * as a member (or a member of {@linkcode Move}) will initialise
@@ -84,6 +90,7 @@ define("game/Turn", [
 			this.type = params.type;
 			this.playerKey = params.playerKey;
 			this.nextToGoKey = params.nextToGoKey;
+      this.timestamp = params.timestamp;
 
 			if (params.replacements)
 		    /**
@@ -116,10 +123,18 @@ define("game/Turn", [
 			if (params.endState)
 		    /**
 		     * String describing the reason the game ended. Only used when
-		     * type==Turns.GAME_OVER
+		     * type==Turns.GAME_ENDED
 		     * @member {State?}
 		     */
 				this.endState = params.endState;
+
+      if (params.passes &amp;&amp; params.passes > 0)
+		    /**
+		     * Number of passes the player had before this play. Required
+         * for undo.
+		     * @member {number?}
+		     */
+        this.passes = params.passes;
 		}
 
     /* istanbul ignore next */
@@ -133,8 +148,10 @@ define("game/Turn", [
       if (this.nextToGoKey &amp;&amp; this.nextToGoKey !== this.playerKey)
         s += ` ->${this.nextToGoKey}`;
 
-      if (typeof this.score !== "undefined")
-        s += ` (${this.score})`;
+      if (typeof this.score === "object")
+        s += ` (${this.score.tiles||0},${this.score.time||0})`;
+      else if (typeof this.score === "number")
+          s += ` (${this.score})`;
 
       if (this.placements)
         s += " &lt;=" + this.placements.map(t => t.toString(true));
@@ -143,7 +160,7 @@ define("game/Turn", [
         s += ' "' + this.words.map(w => w.word) + '"';
 
       if (this.replacements)
-			  s += " =>" + this.replacements.map(t => t.toString(true));
+			  s += " => " + this.replacements.map(t => t.toString(true));
 
       if (this.penalty === Penalty.MISS)
         s += ` MISS`;
@@ -167,13 +184,13 @@ define("game/Turn", [
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#allow">allow</a></li><li><a href="global.html#challenge">challenge</a></li><li><a href="global.html#confirmGameOver">confirmGameOver</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed Jun 29 2022 13:55:01 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed Jul 13 2022 12:21:51 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -36,12 +36,12 @@ define("server/Server", [
 	"platform",	"common/Fridge",
 	"server/UserManager",
 	"game/Types",
-	"game/Game", "game/Player", "game/Turn", "game/Edition"
+	"game/Game", "game/Undo", "game/Player", "game/Turn", "game/Edition"
 ], (
 	fs, Path, Events, Cookie, cors, Express, ErrorHandler,
 	Platform, Fridge,
 	UserManager, Types,
-	Game, Player, Turn, Edition
+	Game, Undo, Player, Turn, Edition
 ) => {
 
 	const Fs = fs.promises;
@@ -60,9 +60,9 @@ define("server/Server", [
 		constructor(config) {
 			this.config = config;
 
-			/* istanbul ignore if */
-			if (!config.defaults)
-				throw new Error("No config.defaults, see example-config.json for requirements");
+			Platform.assert(
+        config.defaults,
+				"No config.defaults, see example-config.json for requirements");
 
 			/* istanbul ignore if */
 			if (config.debug_server)
@@ -387,37 +387,24 @@ define("server/Server", [
 
 				// Chat message
 				this._debug("-S-> message", message);
-        let m;
-				if (message.text === "hint")
+        const mess = message.text.split(/\s+/);
+        const verb = mess[0];
+        switch (verb) {
+				case "hint":
 					socket.game.hint(socket.player);
-				else if (message.text === "advise")
+          break;
+
+				case "advise":
 					socket.game.toggleAdvice(socket.player);
-				else if ((m = /^allow\s+(\w+)\s*$/.exec(message.text))) {
-					socket.game.getDictionary()
-          .then(dict => {
-            const word = m[1].toUpperCase();
-            if (dict.addWord(word)) {
-              socket.game.notifyAll(
-                Notify.MESSAGE, {
-                  sender: /*i18n*/"Advisor",
-                  text:
-                  /*i18n*/"$1 has added '$2' to $3",
-                  args: [
-                    socket.player.name, word, dict.name
-                  ]
-                });
-            } else {
-              socket.game.notifyPlayer(
-                socket.player,
-                Notify.MESSAGE, {
-                  sender: /*i18n*/"Advisor",
-                  text: /*i18n*/"'$1' is already in $2",
-                  args: [ word, dict.name ]
-                });
-            }
-          });
-				} else
-					socket.game.notifyAll(Notify.MESSAGE, message);
+          break;
+
+        case "allow":
+					socket.game.allow(socket.player, mess[1]);
+          break;
+
+        default:
+					  socket.game.notifyAll(Notify.MESSAGE, message);
+        }
 			});
 		}
 
@@ -681,12 +668,9 @@ define("server/Server", [
 		 * @return {Promise}
 		 */
 		request_invitePlayers(req, res, next) {
-      /* istanbul ignore if */
-			if (!this.config.mail || !this.config.mail.transport)
-				throw new Error("Mail is not configured");
-      /* istanbul ignore if */
-			if (!req.body.player)
-				throw new Error("Nobody to notify");
+			Platform.assert(this.config.mail &amp;&amp; this.config.mail.transport,
+				              "Mail is not configured");
+			Platform.assert(req.body.player, "Nobody to notify");
 
 			const gameURL =
 				    `${req.protocol}://${req.get("Host")}/html/games.html?untwist=${req.params.gameKey}`;
@@ -782,7 +766,7 @@ define("server/Server", [
 					this._debug("Player", playerKey, "joining", gameKey);
 					player = new Player(
 						{ name: req.user.name, key: playerKey });
-					game.addPlayer(player);
+					game.addPlayer(player, true);
 					prom = game.save();
 				}
 				// The game may now be ready to start
@@ -810,9 +794,7 @@ define("server/Server", [
 			return this.loadGame(gameKey)
 			.then(g => game = g)
 			.then(() => {
-				if (game.hasRobot())
-			    /* istanbul ignore next */
-					throw new Error("Game already has a robot");
+				Platform.assert(!game.hasRobot(), "Game already has a robot");
 
 				this._debug("Robot joining", gameKey, "with", dic);
 				// Robot always has the same player key
@@ -826,7 +808,7 @@ define("server/Server", [
 				if (dic &amp;&amp; dic !== "none")
 			    /* istanbul ignore next */
 					robot.dictionary = dic;
-				game.addPlayer(robot);
+				game.addPlayer(robot, true);
 				return game.save()
 				// Game may now be ready to start
 				.then(() => game.playIfReady())
@@ -846,9 +828,7 @@ define("server/Server", [
 			return this.loadGame(gameKey)
 			.then(game => {
 				const robot = game.hasRobot();
-				if (!robot)
-			    /* istanbul ignore next */
-					throw new Error("Game doesn't have a robot");
+				Platform.assert(robot, "Game doesn't have a robot");
 				this._debug("Robot leaving", gameKey);
 				game.removePlayer(robot);
 				return game.save();
@@ -884,7 +864,7 @@ define("server/Server", [
 					.then(() => this.updateObservers());
 				}
 			  /* istanbul ignore next */
-				throw new Error(
+				return Platform.fail(
 					`Player ${playerKey} is not in game ${gameKey}`);
 			});
 		}
@@ -958,14 +938,16 @@ define("server/Server", [
 					return Promise.resolve();
 
 				const player = game.getPlayerWithKey(playerKey);
-				if (!player)
-			    /* istanbul ignore next */
-					throw new Error(
+				Platform.assert(player,
 						`Player ${playerKey} is not in game ${gameKey}`);
 
 				// The command name and arguments
 				const args = req.body;
-				
+
+        // Add a timestamp, unless the sender provided one 
+        if (typeof req.body.timestamp === "undefined")
+          req.body.timestamp = Date.now();
+
 				this._debug("COMMAND", command,
                     "player", player.name,
                     "game", game.key);
@@ -974,32 +956,40 @@ define("server/Server", [
 				/* istanbul ignore next */
 				switch (command) {
 
+				case Command.CHALLENGE:
+					return game.challenge(
+            player, game.getPlayerWithKey(args.challengedKey));
+
+				case Command.CONFIRM_GAME_OVER:
+					return game.confirmGameOver(player);
+
+				case Command.PASS:
+					return game.pass(player, Turns.PASSED);
+
+				case Command.PAUSE:
+					return game.pause(player);
+
 				case Command.PLAY:
 					return game.play(player, args);
 
-				case Command.PASS:
-					return game.pass(player);
+        case Command.REDO:
+          return game.redo(player, args);
 
 				case Command.SWAP:
 					return game.swap(player, args);
 
-				case Command.CHALLENGE:
-					return game.challenge(player);
-
 				case Command.TAKE_BACK:
 					return game.takeBack(player, Turns.TOOK_BACK);
 
-				case Command.CONFIRM_GAME_OVER:
-					return game.confirmGameOver();
-
-				case Command.PAUSE:
-					return game.pause(player);
+        case Command.UNDO:
+          game.undo();
+          break;
 
 				case Command.UNPAUSE:
 					return game.unpause(player);
 
 				default:
-					throw Error(`unrecognized command: ${command}`);
+					return Platform.fail(`unrecognized command: ${command}`);
 				}
       })
 			.then(() => {
@@ -1023,13 +1013,13 @@ define("server/Server", [
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#allow">allow</a></li><li><a href="global.html#challenge">challenge</a></li><li><a href="global.html#confirmGameOver">confirmGameOver</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed Jun 29 2022 13:55:01 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed Jul 13 2022 12:21:51 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

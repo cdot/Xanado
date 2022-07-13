@@ -35,7 +35,9 @@
  * A Rack is a set of tiles that a player can play from. It's
  * a 1D array of Square.
  */
-define("game/Rack", ["game/Surface"], Surface => {
+define("game/Rack", [
+  "platform", "game/Surface", "game/Tile"
+], (Platform, Surface, Tile) => {
 
 	/**
 	 * A Rack is a 1-column {@linkcode Surface}
@@ -44,7 +46,8 @@ define("game/Rack", ["game/Surface"], Surface => {
 	class Rack extends Surface {
 
 		/**
-		 * @param {string} id unique id for this rack.
+		 * @param {string|Rack} id unique id for this rack, or a rack to copy.
+     * The squares and the tiles they carry will be copied as well.
 		 * @param {number} size rack size
 		 * @param {string?} underlay text string with one character for
 		 * each cell in UI of the rack. This is the SWAP string that
@@ -57,15 +60,25 @@ define("game/Rack", ["game/Surface"], Surface => {
 			// the swap rack, but will also have racks that have no UI
 			// for the other players. The ID for these racks must be
 			// player specific.
-			super(id, size, 1, () => "_");
-			if (typeof underlay !== "undefined") {
-				let idx = 0;
-				this.forEachSquare(square => {
-					square.setUnderlay(underlay.charAt(idx++));
-					return idx === underlay.length;
-				});
-			}
-		}
+      if (id instanceof Rack) {
+        // Copy constructor
+        // Only used in game simulation. Underlay not supported.
+        super(id.id, id.cols, 1, () => "_");
+        id.forEachTiledSquare(square => {
+          this.addTile(new Tile(square.tile));
+          return false;
+        });
+      } else
+			  super(id, size, 1, () => "_");
+    
+		  if (typeof underlay !== "undefined") {
+			  let idx = 0;
+			  this.forEachSquare(square => {
+				  square.setUnderlay(underlay.charAt(idx++));
+				  return idx === underlay.length;
+			  });
+		  }
+    }
 
 		/**
 		 * One dimensional
@@ -92,7 +105,16 @@ define("game/Rack", ["game/Surface"], Surface => {
 			return rackSquare;
 		}
 
-		/**
+    /**
+     * Put tiles back on the rack.
+     * @param {Tile[]} tiles list of tiles
+     * @return {Square[]} squares the tiles were placed on
+     */
+    addTiles(tiles) {
+      return tiles.map(tile => this.addTile(tile));
+    }
+
+    /**
 		 * Get an unsorted list of the letters currently on the rack.
      * Blanks are represented by a space.
 		 * @return {string[]}
@@ -127,10 +149,8 @@ define("game/Rack", ["game/Surface"], Surface => {
 		 */
 		removeTile(remove) {
 			const square = this.findSquare(remove.letter);
-      /* istanbul ignore if */
-			if (!square)
-				throw Error("Cannot find '"
-							      + remove.letter + "' on " + this);
+			Platform.assert(square,
+			`Cannot find '${remove.letter}' on ${this.toString()}`);
 			const tile = square.tile;
 			// If the tile is a blank, set the letter to the remove letter
 			if (tile.isBlank)
@@ -138,6 +158,22 @@ define("game/Rack", ["game/Surface"], Surface => {
 			square.unplaceTile();
 			return tile;
 		}
+
+    /**
+     * Take tiles out of the rack
+     * @param {Tile[]} tiles list of tiles
+     * @param {Rack} rack rack
+     * @return {Tile[]} list of tiles removed
+     */
+    removeTiles(tiles) {
+      const racked = [];
+			for (const tile of tiles) {
+	      const removed = this.removeTile(tile);
+        Platform.assert(removed, `${tile.toString()} missing from rack`);
+        racked.push(removed);
+      }
+      return racked;
+    }
 
 		/**
 		 * Shuffle tile positions within the rack
@@ -209,13 +245,13 @@ define("game/Rack", ["game/Surface"], Surface => {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#allow">allow</a></li><li><a href="global.html#challenge">challenge</a></li><li><a href="global.html#confirmGameOver">confirmGameOver</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed Jun 29 2022 13:55:01 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed Jul 13 2022 12:21:51 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

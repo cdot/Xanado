@@ -43,8 +43,8 @@
  * @exports game/findBestPlay
  */
 define("game/findBestPlay", [
-	"game/Edition", "game/Tile", "game/Move", "dawg/Dictionary"
-], (Edition, Tile, Move, Dictionary) => {
+	"platform", "game/Edition", "game/Tile", "game/Move", "dawg/Dictionary"
+], (Platform, Edition, Tile, Move, Dictionary) => {
 
 	// Shortcuts to game information during move computation
   let game;        // class Game
@@ -433,8 +433,8 @@ define("game/findBestPlay", [
 				const rackTile = shrunkRack.find(t => t.letter == c)
 					    || shrunkRack.find(t => t.isBlank);
         /* istanbul ignore next */
-				if (!rackTile) // assert
-					throw new Error("Can't do this with the available tiles");
+				Platform.assert(rackTile,
+					              "Can't do this with the available tiles");
 				placements.push(new Tile({
 					letter: c,
 					isBlank: rackTile.isBlank,
@@ -492,20 +492,8 @@ define("game/findBestPlay", [
     game = gemm;
 		report = listener;
 
-    /* istanbul ignore if */
-		if (!game.edition) {
-			report("Error: Game has no edition " + game);
-			// Terminal, no point in translating
-			return Promise.reject("Game has no edition");
-		}
-
-    /* istanbul ignore if */
-		if (!dictionary) {
-      console.error("No dictionary", new Error().stack);
-			report("Error: No dictionary for findBestPlay");
-			// Terminal, no point in translating
-			return Promise.reject("No dictionary for findbextPlay");
-		}
+    Platform.assert(game.edition, "No edition");
+		Platform.assert(dictionary, "No dictionary for findBestPlay");
 
 		// sort and reverse to make sure high value letters come
 		// first and blanks come last. It's not going to make it
@@ -532,9 +520,7 @@ define("game/findBestPlay", [
 		  dict = de[0];
 		  edition = de[1];
 
-		  /* istanbul ignore if */
-		  if (!dict || !edition)
-			  throw new Error("Setup failure");
+		  Platform.assert(dict &amp;&amp; edition, "Setup failure");
 
 		  report("Starting findBestPlay computation", rackTiles);
 		  bestScore = 0;
@@ -609,13 +595,13 @@ define("game/findBestPlay", [
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#allow">allow</a></li><li><a href="global.html#challenge">challenge</a></li><li><a href="global.html#confirmGameOver">confirmGameOver</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed Jun 29 2022 13:55:01 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed Jul 13 2022 12:21:51 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

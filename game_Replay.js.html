@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: game/Replay.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: game/Replay.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*Copyright (C) 2022 The Xanado Project https://github.com/cdot/Xanado
+  License MIT. See README.md at the root of this distribution for full copyright
+  and license information. Author Crawford Currie http://c-dot.co.uk*/
+/* eslint-env amd */
+
+define("game/Replay", [
+	"platform", "common/Utils",
+	"game/Types", "game/LetterBag",
+  "game/Player", "game/Tile", "game/Rack", "game/Turn",
+  "game/Game"
+], (
+	Platform, Utils,
+	Types, LetterBag,
+  Player, Tile, Rack, Turn,
+  Game
+) => {
+
+  const Turns = Types.Turns;
+  const State = Types.State;
+
+  // Remove randomness from the letterbag
+  class SimBag extends LetterBag {
+    constructor(edition, bag) {
+      super(edition);
+      this.tiles = [];
+      for (const tile of bag.tiles)
+        this.tiles.push(new Tile(tile));
+    }
+    shake() {}
+  }
+
+  /**
+   * Extend Game to support replay of another game
+   * @extends Game
+   */
+  class Replay extends Game {
+
+    /*
+     * Copy another game and play the turns in that game, to arrive
+     * at the same state.
+     * The letter bag, players, and some other initial conditions
+     * are copied from the other game. All players are played as
+     * human players - there is no move computation done.
+     * @param {Game} playedGame the game containing turns and players
+     * to simulate.
+     */
+    constructor(playedGame) {
+      super(playedGame);
+      this.playedGame = playedGame;
+      this.state = State.PLAYING;
+      this.nextTurn = 0;
+    }
+
+    /**
+     * @override
+     */
+    create() {
+      return super.create()
+      .then(() => this.getEdition())
+      .then(edition => {
+        this.letterBag = new SimBag(edition, this.playedGame.letterBag);
+        this.state = State.PLAYING;
+        this.whosTurnKey = this.playedGame.turns[0].playerKey;
+        // Copy players and their racks.
+		    for (const p of this.playedGame.players) {
+          const np = new Player(p);
+          np.isRobot = false;
+          np.rack = new Rack(p.rack);
+          np.passes = 0;
+          np.score = 0;
+          this.addPlayer(np);
+          this._debug("\tlast rack for", np.key, np.rack.toString());
+        }
+
+        // Remember the initial bag tiles
+        const preUndoBag = new LetterBag(edition).tiles;
+
+        // To get back to the initial game state we have to run through
+        // the turn history backwards to reconstruct initial racks.
+        // Could use Undo to do this, but it's overkill as we don't need
+        // (or want) to modify the board
+        const turns = this.playedGame.turns;
+        this.letterBag.predictable = true;
+        for (let i = turns.length - 1; i >= 0; i--) {
+          const turn = turns[i];
+          const player = this.getPlayerWithKey(turn.playerKey);
+          if (turn.type === Turns.TOOK_BACK
+              || turn.type === Turns.CHALLENGE_WON) {
+            player.rack.removeTiles(turn.placements);
+            this.bag2rack(turn.replacements, player.rack);
+          } else {
+            let racked;
+            if (turn.replacements)
+              racked = player.rack.removeTiles(turn.replacements);
+            if (turn.placements)
+              // Copy the tiles so we don't lose placement info
+              player.rack.addTiles(turn.placements.map(t => new Tile(t)));
+            if (racked)
+              this.letterBag.returnTiles(racked);
+          }
+        }
+        this.letterBag.tiles = preUndoBag;
+        for (const pl of this.players) {
+          pl.missNextTurn = false;
+          for (const tile of pl.rack.tiles())
+            this.letterBag.removeTile(tile);
+          this._debug("Start rack for", pl.name, pl.key, pl.rack.toString());
+        }
+
+        this._debug("Start bag", this.letterBag.toString());
+        this._debug("--------------------------------");
+
+        return this;
+      });
+    }
+
+    /**
+     * Promise to perform a single step in the simulation
+     * @return {Promise} promise that resolves when the simulation step
+     * has been run
+     */
+    step() {
+      // Copy the turn to avoid accidental overwrite
+      const turn = new Turn(this, this.playedGame.turns[this.nextTurn++]);
+      return this.redo(turn)
+      .then(() => {
+        for (const pl of this.players)
+          this._debug(pl.key, pl.score, pl.rack.toString());
+        this._debug("---------------------");
+      });
+    }
+  }
+
+  return Replay;
+});
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#allow">allow</a></li><li><a href="global.html#challenge">challenge</a></li><li><a href="global.html#confirmGameOver">confirmGameOver</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed Jul 13 2022 12:21:51 GMT+0000 (Coordinated Universal Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

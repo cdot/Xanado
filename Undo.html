@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: Trie</title>
+    <title>JSDoc: Mixin: Undo</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Class: Trie</h1>
+    <h1 class="page-title">Mixin: Undo</h1>
 
     
 
@@ -28,12 +28,7 @@
 
 <header>
     
-        <h2><span class="attribs"><span class="type-signature"></span></span>Trie<span class="signature">()</span><span class="type-signature"></span></h2>
-        
-            <div class="class-description"><p>Root of a tree of <a href="TrieNode.html"><code>TrieNode</code></a>, and operations thereon required
-to convert the Trie into an optimal Directed Acyclic Word Graph (DAWG).
-As such this is mis-named; the structure starts life as a Trie but
-may also represent a DAWG.</p></div>
+        <h2>Undo</h2>
         
     
 </header>
@@ -42,33 +37,10 @@ may also represent a DAWG.</p></div>
     <div class="container-overview">
     
         
+            <div class="description"><p>Mixin that provides Undo functionality for Game</p></div>
+        
 
-    
-    <h2>Constructor</h2>
-    
-
-    
-    <h4 class="name" id="Trie"><span class="type-signature"></span>new Trie<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Construct a Trie from a simple word list</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
+        
 
 
 <dl class="details">
@@ -100,7 +72,7 @@ may also represent a DAWG.</p></div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_Trie.js.html">dawg/Trie.js</a>, <a href="dawg_Trie.js.html#line14">line 14</a>
+        <a href="game_Undo.js.html">game/Undo.js</a>, <a href="game_Undo.js.html#line16">line 16</a>
     </li></ul></dd>
     
 
@@ -112,24 +84,7 @@ may also represent a DAWG.</p></div>
 </dl>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        
     
     </div>
 
@@ -146,226 +101,6 @@ may also represent a DAWG.</p></div>
     
 
     
-        <h3 class="subsection-title">Members</h3>
-
-        
-            
-<h4 class="name" id="_debug"><span class="type-signature"></span>_debug<span class="type-signature"> :function</span></h4>
-
-
-
-
-<div class="description">
-    <p>Debug function</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">function</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_Trie.js.html">dawg/Trie.js</a>, <a href="dawg_Trie.js.html#line53">line 53</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="numberOfNodes"><span class="type-signature"></span>numberOfNodes<span class="type-signature"> :number</span></h4>
-
-
-
-
-<div class="description">
-    <p>Total number of nodes in this trie (count of all nodes)</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">number</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_Trie.js.html">dawg/Trie.js</a>, <a href="dawg_Trie.js.html#line26">line 26</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="numberOfWords"><span class="type-signature"></span>numberOfWords<span class="type-signature"> :number</span></h4>
-
-
-
-
-<div class="description">
-    <p>Total number of words in this trie (count of end nodes)</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">number</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_Trie.js.html">dawg/Trie.js</a>, <a href="dawg_Trie.js.html#line20">line 20</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-    
 
     
         <h3 class="subsection-title">Methods</h3>
@@ -376,7 +111,7 @@ may also represent a DAWG.</p></div>
     
 
     
-    <h4 class="name" id="addWord"><span class="type-signature"></span>addWord<span class="signature">(word)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".bag2rack"><span class="type-signature">(static) </span>bag2rack<span class="signature">(tiles, rack)</span><span class="type-signature"></span></h4>
     
 
     
@@ -384,7 +119,7 @@ may also represent a DAWG.</p></div>
 
 
 <div class="description">
-    <p>Add a word to the Trie</p>
+    <p>Take tiles out of the letter bag and put them back on the rack</p>
 </div>
 
 
@@ -420,13 +155,13 @@ may also represent a DAWG.</p></div>
 
         <tr>
             
-                <td class="name"><code>word</code></td>
+                <td class="name"><code>tiles</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">string</span>
+<span class="param-type">Array.&lt;<a href="Tile.html">Tile</a>></span>
 
 
             
@@ -436,7 +171,30 @@ may also represent a DAWG.</p></div>
 
             
 
-            <td class="description last"><p>word to add</p></td>
+            <td class="description last"><p>list of tiles</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>rack</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Rack.html">Rack</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>to put the tiles on</p></td>
         </tr>
 
     
@@ -477,7 +235,7 @@ may also represent a DAWG.</p></div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_Trie.js.html">dawg/Trie.js</a>, <a href="dawg_Trie.js.html#line74">line 74</a>
+        <a href="game_Undo.js.html">game/Undo.js</a>, <a href="game_Undo.js.html#line29">line 29</a>
     </li></ul></dd>
     
 
@@ -513,7 +271,7 @@ may also represent a DAWG.</p></div>
     
 
     
-    <h4 class="name" id="eachWord"><span class="type-signature"></span>eachWord<span class="signature">(cb)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".board2rack"><span class="type-signature">(static) </span>board2rack<span class="signature">(tiles, rack)</span><span class="type-signature"></span></h4>
     
 
     
@@ -521,7 +279,7 @@ may also represent a DAWG.</p></div>
 
 
 <div class="description">
-    <p>Visit all words in sorted order.</p>
+    <p>Move tiles from the board back to the rack</p>
 </div>
 
 
@@ -557,13 +315,13 @@ may also represent a DAWG.</p></div>
 
         <tr>
             
-                <td class="name"><code>cb</code></td>
+                <td class="name"><code>tiles</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type"><a href="TrieNode.html#~wordCallback">TrieNode~wordCallback</a></span>
+<span class="param-type">Array.&lt;<a href="Tile.html">Tile</a>></span>
 
 
             
@@ -573,7 +331,30 @@ may also represent a DAWG.</p></div>
 
             
 
-            <td class="description last"><p>callback function</p></td>
+            <td class="description last"><p>list of tiles</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>rack</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Rack.html">Rack</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>to put the tiles on</p></td>
         </tr>
 
     
@@ -614,7 +395,7 @@ may also represent a DAWG.</p></div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_Trie.js.html">dawg/Trie.js</a>, <a href="dawg_Trie.js.html#line118">line 118</a>
+        <a href="game_Undo.js.html">game/Undo.js</a>, <a href="game_Undo.js.html#line44">line 44</a>
     </li></ul></dd>
     
 
@@ -650,7 +431,7 @@ may also represent a DAWG.</p></div>
     
 
     
-    <h4 class="name" id="encode"><span class="type-signature"></span>encode<span class="signature">()</span><span class="type-signature"> &rarr; {ArrayBuffer}</span></h4>
+    <h4 class="name" id=".rack2board"><span class="type-signature">(static) </span>rack2board<span class="signature">(tiles, rack)</span><span class="type-signature"></span></h4>
     
 
     
@@ -658,7 +439,167 @@ may also represent a DAWG.</p></div>
 
 
 <div class="description">
-    <p>Convert a Trie (or DAWG) into a linear 32-bit integer array.</p>
+    <p>Move tiles from the rack to the board</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>tiles</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;<a href="Tile.html">Tile</a>></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>list of tiles</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>rack</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Rack.html">Rack</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>to get the tiles from</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Undo.js.html">game/Undo.js</a>, <a href="game_Undo.js.html#line60">line 60</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".redo"><span class="type-signature">(static) </span>redo<span class="signature">()</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Replay the given turn back into the game</p>
 </div>
 
 
@@ -702,7 +643,7 @@ may also represent a DAWG.</p></div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_Trie.js.html">dawg/Trie.js</a>, <a href="dawg_Trie.js.html#line301">line 301</a>
+        <a href="game_Undo.js.html">game/Undo.js</a>, <a href="game_Undo.js.html#line229">line 229</a>
     </li></ul></dd>
     
 
@@ -731,7 +672,7 @@ may also represent a DAWG.</p></div>
 
         
 <div class="param-desc">
-    <p>array of 32-bit integers</p>
+    <p>promise resolving to undefined</p>
 </div>
 
 
@@ -742,7 +683,7 @@ may also represent a DAWG.</p></div>
     </dt>
     <dd>
         
-<span class="param-type">ArrayBuffer</span>
+<span class="param-type">Promise</span>
 
 
     </dd>
@@ -760,7 +701,7 @@ may also represent a DAWG.</p></div>
     
 
     
-    <h4 class="name" id="generateDAWG"><span class="type-signature"></span>generateDAWG<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".undo"><span class="type-signature">(static) </span>undo<span class="signature">(nosave<span class="signature-attributes">nullable</span>)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
     
 
     
@@ -768,8 +709,9 @@ may also represent a DAWG.</p></div>
 
 
 <div class="description">
-    <p>Go through the steps to generate a DAWG from a Trie tree
-by merging duplicate sub-trees.</p>
+    <p>Undo the most recent turn. Resets the play state as if the turn had never
+happened. Sends a Notify.UNDONE to all listeners, passing the Turn
+that was unplayed.</p>
 </div>
 
 
@@ -778,6 +720,67 @@ by merging duplicate sub-trees.</p>
 
 
 
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>nosave</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>disables saving after undo.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -813,7 +816,7 @@ by merging duplicate sub-trees.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_Trie.js.html">dawg/Trie.js</a>, <a href="dawg_Trie.js.html#line283">line 283</a>
+        <a href="game_Undo.js.html">game/Undo.js</a>, <a href="game_Undo.js.html#line195">line 195</a>
     </li></ul></dd>
     
 
@@ -838,6 +841,28 @@ by merging duplicate sub-trees.</p>
 
 
 
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>promise resolving to undefined</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 

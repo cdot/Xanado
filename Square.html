@@ -31,7 +31,7 @@
         <h2><span class="attribs"><span class="type-signature"></span></span>Square<span class="signature">(spec)</span><span class="type-signature"></span></h2>
         
             <div class="class-description"><p>A square on the game board or rack. A Tile holder with some
-underlying attributes; a position, an owner, and a type that
+underlying attributes; a position, an owner type, and a type that
 dictates the score multipliers that apply. The owner will be a
 subclass of <a href="Surface.html"><code>Surface</code></a> (a <a href="Rack.html"><code>Rack</code></a> or a <a href="Board.html"><code>Board</code></a>)</p></div>
         
@@ -163,13 +163,13 @@ subclass of <a href="Surface.html"><code>Surface</code></a> (a <a href="Rack.htm
 
         <tr>
             
-                <td class="name"><code>owner</code></td>
+                <td class="name"><code>base</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type"><a href="Surface.html">Surface</a></span>
+<span class="param-type">string</span>
 
 
             
@@ -187,7 +187,7 @@ subclass of <a href="Surface.html"><code>Surface</code></a> (a <a href="Rack.htm
 
             
 
-            <td class="description last"><p>the container this is in</p></td>
+            <td class="description last"><p>base of #tag e.g. &quot;Board_&quot;</p></td>
         </tr>
 
     
@@ -404,7 +404,7 @@ subclass of <a href="Surface.html"><code>Surface</code></a> (a <a href="Rack.htm
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line55">line 55</a>
+        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line49">line 49</a>
     </li></ul></dd>
     
 
@@ -476,7 +476,80 @@ subclass of <a href="Surface.html"><code>Surface</code></a> (a <a href="Rack.htm
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line61">line 61</a>
+        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line55">line 55</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="isOnBoard"><span class="type-signature">(nullable) </span>isOnBoard<span class="type-signature"> :boolean</span></h4>
+
+
+
+
+<div class="description">
+    <p>Flag indicating if this square is at a 2D position and
+therefore on the game board.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">boolean</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line69">line 69</a>
     </li></ul></dd>
     
 
@@ -500,7 +573,7 @@ subclass of <a href="Surface.html"><code>Surface</code></a> (a <a href="Rack.htm
 
 
 <div class="description">
-    <p>Multiplier for letters using this square</p>
+    <p>Multiplier for letters using this square. Defaults to 1 if undefined.</p>
 </div>
 
 
@@ -548,79 +621,7 @@ subclass of <a href="Surface.html"><code>Surface</code></a> (a <a href="Rack.htm
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line102">line 102</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="owner"><span class="type-signature">(nullable) </span>owner<span class="type-signature"> :<a href="Surface.html">Surface</a></span></h4>
-
-
-
-
-<div class="description">
-    <p>Rack or Board</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type"><a href="Surface.html">Surface</a></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line49">line 49</a>
+        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line105">line 105</a>
     </li></ul></dd>
     
 
@@ -692,7 +693,7 @@ subclass of <a href="Surface.html"><code>Surface</code></a> (a <a href="Rack.htm
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line68">line 68</a>
+        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line62">line 62</a>
     </li></ul></dd>
     
 
@@ -933,7 +934,7 @@ there is no tile present.</p>
 
 
 <div class="description">
-    <p>Multiplier for words using this square</p>
+    <p>Multiplier for words using this square. Defaults to 1 if undefined.</p>
 </div>
 
 
@@ -981,7 +982,7 @@ there is no tile present.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line108">line 108</a>
+        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line115">line 115</a>
     </li></ul></dd>
     
 
@@ -1110,7 +1111,7 @@ there is no tile present.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line194">line 194</a>
+        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line191">line 191</a>
     </li></ul></dd>
     
 
@@ -1651,7 +1652,7 @@ the square (fixed on the board).</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line235">line 235</a>
+        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line232">line 232</a>
     </li></ul></dd>
     
 
@@ -1788,7 +1789,7 @@ the square (fixed on the board).</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line227">line 227</a>
+        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line224">line 224</a>
     </li></ul></dd>
     
 
@@ -1872,7 +1873,7 @@ the square (fixed on the board).</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line349">line 349</a>
+        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line345">line 345</a>
     </li></ul></dd>
     
 
@@ -1960,7 +1961,7 @@ the square (fixed on the board).</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line170">line 170</a>
+        <a href="game_Square.js.html">game/Square.js</a>, <a href="game_Square.js.html#line167">line 167</a>
     </li></ul></dd>
     
 
@@ -2028,13 +2029,13 @@ the square (fixed on the board).</p></td>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#allow">allow</a></li><li><a href="global.html#challenge">challenge</a></li><li><a href="global.html#confirmGameOver">confirmGameOver</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed Jun 29 2022 13:55:02 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed Jul 13 2022 12:21:51 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

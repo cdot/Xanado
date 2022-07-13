@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Module: design/valett</title>
+    <title>JSDoc: Source: game/BrowserGame.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,134 +17,86 @@
 
 <div id="main">
 
-    <h1 class="page-title">Module: design/valett</h1>
+    <h1 class="page-title">Source: game/BrowserGame.js</h1>
 
     
 
 
 
-
-<section>
-
-<header>
     
-        
-            
-        
-    
-</header>
-
-<article>
-    <div class="container-overview">
-    
-        
-            <div class="description"><p>Command-line invocation of the Valett word corpus analyser
-Based on code from https://github.com/jmlewis/valett</p>
-<p><code>node js/design/valett.js</code> will tell you how to use it.</p></div>
-        
-
-        
-            
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="design_valett.js.html">design/valett.js</a>, <a href="design_valett.js.html#line7">line 7</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</article>
-
-</section>
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*Copyright (C) 2021-2022 The Xanado Project https://github.com/cdot/Xanado
+  License MIT. See README.md at the root of this distribution for full copyright
+  and license information. Author Crawford Currie http://c-dot.co.uk*/
+/* eslint-env amd */
+
+define("game/BrowserGame", [
+	"platform", "game/Types", "game/Player"
+], (
+	Platform, Types, Player
+) => {
+  const Notify    = Types.Notify;
+  const State     = Types.State;
+  const Penalty   = Types.Penalty;
+  const Timer     = Types.Timer;
+  const WordCheck = Types.WordCheck;
+  const Turns     = Types.Turns;
+
+  /**
+   * Mixin that provides browser-specific functionality for {@linkcode Game}
+   * @mixin BrowserGame
+   */
+  const BrowserGame = {
+
+		/**
+		 * Create the UI for the player table
+     * @function
+     * @memberof BrowserGame
+		 * @param {Player} thisPlayer the player for whom the DOM is
+		 * being generated
+		 * @return {jQuery} jQuery object representing the player table
+		 */
+		$ui(thisPlayer) {
+			const $tab = $("&lt;table>&lt;/table>").addClass("player-table");
+			this.players.forEach(
+				p => $tab.append(p.$ui(thisPlayer)));
+			return $tab;
+		},
+
+    /**
+		 * Given a list of Player.simple, update the players list
+		 * to reflect the members and ordering of that list.
+     * @function
+     * @memberof BrowserGame
+		 * @param {object[]} observers list of observers
+		 */
+		updatePlayerList(observers) {
+			for (let player of this.players)
+				player.online(false);
+			const newOrder = [];
+			for (let watcher of observers) {
+				let player = this.getPlayerWithKey(watcher.key);
+				if (!player) {
+					// New player in game
+					player = new Player(watcher);
+					this.addPlayer(player, true);
+					player._debug = this._debug;
+				}
+				player.online(watcher.isConnected || watcher.isRobot);
+				newOrder.push(player);
+				if (watcher.isNextToGo)
+					this.whosTurnKey = player.key;
+			}
+			this.players = newOrder;
+		}
+  };
+
+  return BrowserGame;
+});
+</code></pre>
+        </article>
+    </section>
 
 
 
