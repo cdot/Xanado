@@ -37,7 +37,7 @@
     <div class="container-overview">
     
         
-            <div class="description"><p>Mixin that provides server-specific functionality for <a href="Game.html"><code>Game</code></a></p></div>
+            <div class="description"><p>Provides server-specific functionality for <a href="Game.html"><code>Game</code></a></p></div>
         
 
         
@@ -82,7 +82,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_ServerGame.js.html">game/ServerGame.js</a>, <a href="game_ServerGame.js.html#line27">line 27</a>
+        <a href="server_ServerGame.js.html">server/ServerGame.js</a>, <a href="server_ServerGame.js.html#line24">line 24</a>
     </li></ul></dd>
     
 
@@ -121,209 +121,6 @@
     
 
     
-    <h4 class="name" id=".addPlayer"><span class="type-signature">(static) </span>addPlayer<span class="signature">(player, fillRack<span class="signature-attributes">nullable</span>)</span><span class="type-signature"> &rarr; {<a href="Game.html">Game</a>}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Add a player to the game, and give them an initial rack</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>player</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="Player.html">Player</a></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>fillRack</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-                    &lt;nullable><br>
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>true to fill the player's rack
-from the game's letter bag.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_ServerGame.js.html">game/ServerGame.js</a>, <a href="game_ServerGame.js.html#line184">line 184</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>this</p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="Game.html">Game</a></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
     <h4 class="name" id=".anotherGame"><span class="type-signature">(static) </span>anotherGame<span class="signature">()</span><span class="type-signature"> &rarr; {Promise}</span></h4>
     
 
@@ -332,7 +129,8 @@ from the game's letter bag.</p></td>
 
 
 <div class="description">
-    <p>Create another game the same, but with players re-ordered.</p>
+    <p>Create another game the same, but with players re-ordered. The
+key for the new game is broadcast in a <code>NEXT_GAME</code> notification.</p>
 </div>
 
 
@@ -384,7 +182,7 @@ from the game's letter bag.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Commands.js.html">game/Commands.js</a>, <a href="game_Commands.js.html#line538">line 538</a>
+        <a href="game_Commands.js.html">game/Commands.js</a>, <a href="game_Commands.js.html#line543">line 543</a>
     </li></ul></dd>
     
 
@@ -494,7 +292,7 @@ from the game's letter bag.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_ServerGame.js.html">game/ServerGame.js</a>, <a href="game_ServerGame.js.html#line603">line 603</a>
+        <a href="server_ServerGame.js.html">server/ServerGame.js</a>, <a href="server_ServerGame.js.html#line533">line 533</a>
     </li></ul></dd>
     
 
@@ -941,7 +739,7 @@ Stops game timers and sets the state of the game if it has.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_ServerGame.js.html">game/ServerGame.js</a>, <a href="game_ServerGame.js.html#line94">line 94</a>
+        <a href="server_ServerGame.js.html">server/ServerGame.js</a>, <a href="server_ServerGame.js.html#line81">line 81</a>
     </li></ul></dd>
     
 
@@ -1126,7 +924,7 @@ available server side.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_ServerGame.js.html">game/ServerGame.js</a>, <a href="game_ServerGame.js.html#line481">line 481</a>
+        <a href="server_ServerGame.js.html">server/ServerGame.js</a>, <a href="server_ServerGame.js.html#line411">line 411</a>
     </li></ul></dd>
     
 
@@ -1156,120 +954,6 @@ available server side.</p>
         
 <div class="param-desc">
     <p>promise that resolves to undefined</p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id=".create"><span class="type-signature">(static) </span>create<span class="signature">()</span><span class="type-signature"> &rarr; {Promise}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Promise to finish construction of a new Game.
-Load the edition and create the board and letter bag.
-Not done in the constructor because we need to return
-a Promise. Must be followed by onLoad to connect a
-DB and complete initialisation of private fields.</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_ServerGame.js.html">game/ServerGame.js</a>, <a href="game_ServerGame.js.html#line118">line 118</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>that resolves to this</p>
 </div>
 
 
@@ -1401,7 +1085,7 @@ save state and notify connected players with the Turn object.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_ServerGame.js.html">game/ServerGame.js</a>, <a href="game_ServerGame.js.html#line350">line 350</a>
+        <a href="server_ServerGame.js.html">server/ServerGame.js</a>, <a href="server_ServerGame.js.html#line281">line 281</a>
     </li></ul></dd>
     
 
@@ -1560,7 +1244,7 @@ save state and notify connected players with the Turn object.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_ServerGame.js.html">game/ServerGame.js</a>, <a href="game_ServerGame.js.html#line373">line 373</a>
+        <a href="server_ServerGame.js.html">server/ServerGame.js</a>, <a href="server_ServerGame.js.html#line304">line 304</a>
     </li></ul></dd>
     
 
@@ -1670,7 +1354,7 @@ save state and notify connected players with the Turn object.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_ServerGame.js.html">game/ServerGame.js</a>, <a href="game_ServerGame.js.html#line64">line 64</a>
+        <a href="server_ServerGame.js.html">server/ServerGame.js</a>, <a href="server_ServerGame.js.html#line51">line 51</a>
     </li></ul></dd>
     
 
@@ -1700,116 +1384,6 @@ save state and notify connected players with the Turn object.</p>
         
 <div class="param-desc">
     <p>resolving to a <a href="Dictionary.html"><code>Dictionary</code></a></p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id=".getEdition"><span class="type-signature">(static) </span>getEdition<span class="signature">()</span><span class="type-signature"> &rarr; {Promise}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Get the edition for this game, lazy-loading as necessary</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_ServerGame.js.html">game/ServerGame.js</a>, <a href="game_ServerGame.js.html#line54">line 54</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>resolving to an <a href="Edition.html"><code>Edition</code></a></p>
 </div>
 
 
@@ -1949,7 +1523,7 @@ notify all players that they requested a hint.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Commands.js.html">game/Commands.js</a>, <a href="game_Commands.js.html#line678">line 678</a>
+        <a href="game_Commands.js.html">game/Commands.js</a>, <a href="game_Commands.js.html#line684">line 684</a>
     </li></ul></dd>
     
 
@@ -2081,7 +1655,7 @@ notify all players that they requested a hint.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_ServerGame.js.html">game/ServerGame.js</a>, <a href="game_ServerGame.js.html#line42">line 42</a>
+        <a href="server_ServerGame.js.html">server/ServerGame.js</a>, <a href="server_ServerGame.js.html#line39">line 39</a>
     </li></ul></dd>
     
 
@@ -2265,7 +1839,7 @@ through different sockets.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_ServerGame.js.html">game/ServerGame.js</a>, <a href="game_ServerGame.js.html#line248">line 248</a>
+        <a href="server_ServerGame.js.html">server/ServerGame.js</a>, <a href="server_ServerGame.js.html#line170">line 170</a>
     </li></ul></dd>
     
 
@@ -2449,7 +2023,7 @@ given player.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_ServerGame.js.html">game/ServerGame.js</a>, <a href="game_ServerGame.js.html#line263">line 263</a>
+        <a href="server_ServerGame.js.html">server/ServerGame.js</a>, <a href="server_ServerGame.js.html#line189">line 189</a>
     </li></ul></dd>
     
 
@@ -2494,8 +2068,7 @@ given player.</p>
 
 <div class="description">
     <p>Send a message to just one player. Note that the player
-may be connected multiple times through different sockets.
-Only available server-side.</p>
+may be connected multiple times through different sockets.</p>
 </div>
 
 
@@ -2593,7 +2166,8 @@ Only available server-side.</p>
 
             
 
-            <td class="description last"><p>to send with message</p></td>
+            <td class="description last"><p>to send with message. Will have
+<code>messageID</code> added to it.</p></td>
         </tr>
 
     
@@ -2634,7 +2208,7 @@ Only available server-side.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_ServerGame.js.html">game/ServerGame.js</a>, <a href="game_ServerGame.js.html#line228">line 228</a>
+        <a href="server_ServerGame.js.html">server/ServerGame.js</a>, <a href="server_ServerGame.js.html#line145">line 145</a>
     </li></ul></dd>
     
 
@@ -2775,7 +2349,7 @@ reset. Only available server-side.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_ServerGame.js.html">game/ServerGame.js</a>, <a href="game_ServerGame.js.html#line146">line 146</a>
+        <a href="server_ServerGame.js.html">server/ServerGame.js</a>, <a href="server_ServerGame.js.html#line106">line 106</a>
     </li></ul></dd>
     
 
@@ -2968,7 +2542,7 @@ can't play, or challenged and failed.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Commands.js.html">game/Commands.js</a>, <a href="game_Commands.js.html#line340">line 340</a>
+        <a href="game_Commands.js.html">game/Commands.js</a>, <a href="game_Commands.js.html#line342">line 342</a>
     </li></ul></dd>
     
 
@@ -3435,7 +3009,7 @@ can't play, or challenged and failed.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_ServerGame.js.html">game/ServerGame.js</a>, <a href="game_ServerGame.js.html#line280">line 280</a>
+        <a href="server_ServerGame.js.html">server/ServerGame.js</a>, <a href="server_ServerGame.js.html#line211">line 211</a>
     </li></ul></dd>
     
 
@@ -3779,144 +3353,6 @@ can't play, or challenged and failed.</p>
     
 
     
-    <h4 class="name" id=".removePlayer"><span class="type-signature">(static) </span>removePlayer<span class="signature">(player)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Remove a player from the game, taking their tiles back into
-the bag</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>player</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="Player.html">Player</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_ServerGame.js.html">game/ServerGame.js</a>, <a href="game_ServerGame.js.html#line206">line 206</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
     <h4 class="name" id=".save"><span class="type-signature">(static) </span>save<span class="signature">()</span><span class="type-signature"> &rarr; {Promise}</span></h4>
     
 
@@ -3969,7 +3405,7 @@ the bag</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_ServerGame.js.html">game/ServerGame.js</a>, <a href="game_ServerGame.js.html#line79">line 79</a>
+        <a href="server_ServerGame.js.html">server/ServerGame.js</a>, <a href="server_ServerGame.js.html#line66">line 66</a>
     </li></ul></dd>
     
 
@@ -4016,6 +3452,95 @@ the bag</p>
 </dl>
 
     
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".sendCONNECTIONS"><span class="type-signature">(static) </span>sendCONNECTIONS<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Notify players with a list of the currently connected
+players, non-playing observers and non-connected players.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="server_ServerGame.js.html">server/ServerGame.js</a>, <a href="server_ServerGame.js.html#line323">line 323</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4165,7 +3690,7 @@ player)</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Commands.js.html">game/Commands.js</a>, <a href="game_Commands.js.html#line485">line 485</a>
+        <a href="game_Commands.js.html">game/Commands.js</a>, <a href="game_Commands.js.html#line489">line 489</a>
     </li></ul></dd>
     
 
@@ -4425,7 +3950,8 @@ or Turns.CHALLENGE_WON.</p></td>
 
 
 <div class="description">
-    <p>Toggle advice on/off</p>
+    <p>Toggle advice on/off. All players are told using
+a <code>MESSAGE</code> notification.</p>
 </div>
 
 
@@ -4526,7 +4052,7 @@ or Turns.CHALLENGE_WON.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Commands.js.html">game/Commands.js</a>, <a href="game_Commands.js.html#line587">line 587</a>
+        <a href="game_Commands.js.html">game/Commands.js</a>, <a href="game_Commands.js.html#line593">line 593</a>
     </li></ul></dd>
     
 
@@ -4905,96 +4431,6 @@ that was unplayed.</p>
 
 
         
-            
-
-    
-
-    
-    <h4 class="name" id=".updateConnections"><span class="type-signature">(static) </span>updateConnections<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Notify observers with a list of the currently connected
-observers and non-connected players. Only available
-server-side.</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_ServerGame.js.html">game/ServerGame.js</a>, <a href="game_ServerGame.js.html#line392">line 392</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
     
 
     
@@ -5016,7 +4452,7 @@ server-side.</p>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed Jul 13 2022 12:21:51 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Sun Jul 17 2022 17:05:13 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

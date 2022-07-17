@@ -32,7 +32,7 @@
 /* eslint-env browser, jquery */
 
 define("browser/UI", [
-	"socket.io-client",  "browser/Dialog",
+	"socket.io-client",  "browser/Dialog", "platform",
 
 	"jquery",
 	"jqueryui",
@@ -44,7 +44,7 @@ define("browser/UI", [
 	"i18n_parser",
   "cldrpluralruleparser"
 ], (
-	Sockets, Dialog
+	Sockets, Dialog, Platform
 ) => {
 
 	/**
@@ -129,24 +129,30 @@ define("browser/UI", [
 			if (audio.playing)
 				audio.pause();
 
-			try {
-				audio.play();
-			}
-			catch(e) {
-				$(audio).on("canplaythrough", 
-					          () => {
-						          $(audio).off("canplaythrough");
-						          audio.play();
-					          }, true);
-			}
-		}
+			audio.play()
+			.catch(() => {
+        // play() can throw if the audio isn't loaded yet. Catching
+        // canplaythrough might help (though it's really a bit of
+        // overkill, as none of Xanado's audio is "important")
+				$(audio).on(
+          "canplaythrough", 
+					() => {
+						$(audio).off("canplaythrough");
+            audio.play()
+            .catch(() => {
+              // Probably no interaction yet
+            });
+					}, true);
+			});
+    }
 
 		/**
 		 * Complete construction using promises
 		 * @return {Promise} promise that resolves when the UI is ready
 		 * @protected
 		 */
-		build() {
+		create() {
+      // Set up translations
 			return Promise.all([
 				$.get("/locales")
 				.then(locales => {
@@ -172,18 +178,50 @@ define("browser/UI", [
 				$.get("/defaults")
 				.then(defaults => this.defaults = defaults)
 			])
-			.then(() => $("button").button())
-			.then(() => this.decorate());
+			.then(() => {
+        $("button").button();
+			  $(document)
+			  .tooltip({
+				  items: "[data-i18n-tooltip]",
+				  content: function() {
+					  return $.i18n($(this).data("i18n-tooltip"));
+				  }
+			  });
+      })
+      .then(() => this.handleURLArguments())
+      .then(() => {
+			  console.debug("Connecting to socket");
+        // The server URL will be deduced from the request
+			  this.socket = Sockets.connect();
+			  this.attachSocketListeners();
+      })
+      .then(() => this.attachHandlers());
 		}
 
+    /**
+     * Parse the URL used to load this page to extract parameters.
+     * @return {Promise } promise that resolves to a key-value map
+     */
+    handleURLArguments() {
+      const bits = document.URL.split("?");
+      const urlArgs = {};
+      if (bits.length > 1) {
+        const sargs = bits[1].split(/[;&amp;]/);
+        for (const sarg of sargs) {
+          const kv = sarg.split("=");
+          urlArgs[decodeURIComponent(kv[0])] =
+          decodeURIComponent(kv[1]);
+        }
+      }
+      return Promise.resolve(urlArgs);
+    }
+
 		/**
-		 * Once the locales and defaults have been loaded, decorate the
-		 * UI with shared functionality. Subclasses should override this
-		 * and end the promise chain with a call to super.decorate()
-		 * @return {Promise} promise that resolves when decoration is
-		 * complete and the UI is ready.
+		 * Attach handlers for jquery and game events. This must NOT
+     * attach socket handlers, just DOM object handlers.  Subclasses
+     * should override this calling to super.attachHandlers() last.
 		 */
-		decorate() {
+		attachHandlers() {
 			// gear button
 			$(".settingsButton")
 			.on("click", () => {
@@ -201,19 +239,35 @@ define("browser/UI", [
 				});
 			});
 
-			$(document)
-			.tooltip({
-				items: "[data-i18n-tooltip]",
-				content: function() {
-					return $.i18n($(this).data("i18n-tooltip"));
-				}
-			});
+			$(".user-interface").show();
+		}
 
-			console.debug("UI loaded, connecting to socket");
-      // The server URL will be deduced from the window.location
-			this.socket = Sockets.connect();
+		/**
+		 * Called when a connection to the server is reported by the
+		 * socket. Use to update the UI to reflect the game state.
+		 * Implement in subclasses.
+     * @abstract
+		 */
+		readyToListen() {
+			return Promise.reject("Not implemented");
+		}
+
+		/**
+		 * Attach socket communications listeners. Override in subclasses,
+     * making sure to call super.attachSocketListeners()
+		 */
+		attachSocketListeners() {
+
+      Platform.assert(!this._socketListenersAttached);
+      this._socketListenersAttached = true;
+
 			let $reconnectDialog = null;
+
+			// socket.io events 'new_namespace', 'disconnecting',
+			// 'initial_headers', 'headers', 'connection_error' are not handled
+
 			this.socket
+
 			.on("connect", skt => {
 				// Note: "connect" is synonymous with "connection"
 				// Socket has connected to the server
@@ -222,7 +276,7 @@ define("browser/UI", [
 					$reconnectDialog.dialog("close");
 					$reconnectDialog = null;
 				}
-				this.connectToServer();
+				this.readyToListen();
 			})
 
 			.on("disconnect", skt => {
@@ -238,38 +292,14 @@ define("browser/UI", [
 				});
 				setTimeout(() => {
 					// Try and rejoin after a 3s timeout
-					this.connectToServer()
+					this.readyToListen()
 					.catch(e => {
 						console.debug(e);
 						if (!$reconnectDialog)
 							UI.report(mess);
 					});
 				}, 3000);
-
 			});
-
-			this.attachSocketListeners(this.socket);
-
-			return new Promise(resolve => {
-				$(".user-interface").show();
-				resolve();
-			});
-		}
-
-		/**
-		 * Called when a connection to the server is reported by the
-		 * socket. Use to update the UI to reflect the game state.
-		 * Implement in subclasses.
-		 */
-		connectToServer() {
-			return Promise.reject("Not implemented");
-		}
-
-		/**
-		 * Attach socket communications listeners. Implement in subclasses.
-		 * @param {Socket} communications socket
-		 */
-		attachSocketListeners(socket) {
 		}
 
 		/**
@@ -416,7 +446,7 @@ define("browser/UI", [
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed Jul 13 2022 12:21:51 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Sun Jul 17 2022 17:05:12 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

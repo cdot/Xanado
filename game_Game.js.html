@@ -32,40 +32,48 @@
 /* eslint-env amd */
 /* global process */
 
-// Mix-ins, load based on platform.
+// Mix-in load based on platform. Done this way to simplify loading
+// the same object from freezer in different contexts (browser, server)
 const mixin = typeof process !== 'undefined' &amp;&amp;
       process.release.name.search(/node|io.js/) >= 0
-      ? "game/ServerGame" : "game/BrowserGame";
+      ? "server/ServerGame" : "browser/BrowserGame";
 
 define("game/Game", [
 	"platform", "common/Utils",
 	"game/Types", "game/Board", "game/LetterBag",
 	"game/Player", "game/Square", "game/Tile", "game/Rack",
-  "game/Move", "game/Turn", mixin
+  "game/Edition", "game/Move", "game/Turn", mixin
 ], (
 	Platform, Utils,
 	Types, Board, LetterBag,
 	Player, Square, Tile, Rack,
-  Move, Turn, Mixin
+  Edition, Move, Turn, Mixin
 ) => {
 
-  const Notify    = Types.Notify;
   const State     = Types.State;
   const Penalty   = Types.Penalty;
   const Timer     = Types.Timer;
-  const WordCheck = Types.WordCheck;
-  const Turns     = Types.Turns;
 
 	/**
-	 * The Game object may be used server or browser side.
+	 * Base class of Game objects. Common functionality shared by browser
+   * and server sides.
    * @mixes BrowserGame
    * @mixes ServerGame
 	 */
 	class Game {
 
 		// Classes used in Freeze/Thaw
-		static classes = [ LetterBag, Square, Board, Tile, Rack,
-						           Game, Player, Move, Turn ];
+		static classes = {
+      Board: Board,
+      Game: Game,
+      LetterBag: LetterBag,
+      Move: Move,
+			Player: Player,
+      Rack: Rack,
+      Square: Square,
+      Tile: Tile,
+      Turn: Turn
+    };
 
 		/**
 		 * A new game is constructed from scratch by
@@ -85,27 +93,21 @@ define("game/Game", [
 		constructor(params) {
 		  /**
 		   * An i18n message identifier indicating the game state.
-       * Lateinit in {@linkcode Game#create|create} or as the result of a
-       * load.
 		   * @member {State}
 		   */
-      this.state = undefined;
+      this.state = State.WAITING;
     
 		  /**
-		   * Key that uniquely identifies this game. Lateinit in
-       * {@linkcode Game#create|create} or as the result of a
-       * load.
+		   * Key that uniquely identifies this game.
 		   * @member {Key}
 		   */
-		  this.key = undefined;
+		  this.key = Utils.genKey();
 
 		  /**
 		   * Epoch ms when this game was created.
-       * Lateinit in {@linkcode Game#create|create} or as the result of a
-       * load.
 		   * @member {number}
 		   */
-		  this.creationTimestamp = undefined;
+		  this.creationTimestamp = Date.now();
 
 		  /**
 		   * List of players in the game.
@@ -117,8 +119,6 @@ define("game/Game", [
 
 		  /**
 		   * Complete list of the turn history of this game.
-       * Lateinit in {@linkcode Game#create|create} or as the result of a
-       * load.
 		   * @member {Turn[]}
        * @private
 		   */
@@ -126,8 +126,6 @@ define("game/Game", [
 
 		  /**
 		   * The game board.
-       * Lateinit in {@linkcode Game#create|create} or as the result of a
-       * load.
 		   * @member {Board}
 		   */
 		  this.board = undefined;
@@ -344,6 +342,74 @@ define("game/Game", [
 		}
 
 		/**
+     * Creation steps that can't be done in the constructor because
+     * they require promises.
+		 * Load the edition and create the board and letter bag.
+		 * Not done in the constructor because we need to return
+		 * a Promise. Must be followed by onLoad to connect a
+		 * DB and complete initialisation of private fields.
+		 * @return {Promise} that resolves to this
+		 */
+		create() {
+      return this.getEdition()
+			.then(edo => {
+				this.board = new Board(edo);
+				this.letterBag = new LetterBag(edo);
+        this.bonuses = edo.bonuses;
+				this.rackSize = edo.rackCount;
+				this.swapSize = edo.swapCount;
+				return this;
+			});
+		}
+
+		/**
+		 * Get the edition for this game, lazy-loading as necessary
+		 * @return {Promise} resolving to an {@linkcode Edition}
+		 */
+		getEdition() {
+			return Edition.load(this.edition);
+		}
+
+    /**
+		 * Add a player to the game.
+		 * @param {Player} player
+		 * @param {boolean?} fillRack true to fill the player's rack
+     * from the game's letter bag.
+     * @return {Game} this
+		 */
+		addPlayer(player, fillRack) {
+			Platform.assert(this.letterBag, "Cannot addPlayer() before create()");
+			Platform.assert(
+        !this.maxPlayers || this.players.length &lt; this.maxPlayers,
+				"Cannot addPlayer() to a full game");
+			player._debug = this._debug;
+			this.players.push(player);
+			if (this.timerType)
+				player.clock = this.timeLimit;
+      if (fillRack)
+        player.fillRack(this.letterBag, this.rackSize);
+			this._debug(this.key, "added player", player.toString());
+      return this;
+		}
+
+		/**
+		 * Remove a player from the game, taking their tiles back into
+		 * the bag
+		 * @param {Player} player
+		 */
+		removePlayer(player) {
+			player.returnTiles(this.letterBag);
+			const index = this.players.findIndex(p => p.key === player.key);
+			Platform.assert(index >= 0,
+				              `No such player ${player.key} in ${this.key}`);
+			this.players.splice(index, 1);
+			this._debug(player.key, "left", this.key);
+			if (this.players.length &lt; (this.minPlayers || 2)
+          &amp;&amp; this.state !== State.GAME_OVER)
+				this.state = State.WAITING;
+		}
+
+		/**
 		 * Get the player with key
 		 * @param {string} player key
 		 * @return {Player} player, or undefined if not found
@@ -353,15 +419,11 @@ define("game/Game", [
 		}
 
 		/**
-		 * Get the player by key.
-		 * @param {string} key key of player to get. If undefined, will
-		 * return the current player
+		 * Get the current player.
 		 * @return {Player} player, or undefined if not found
 		 */
-		getPlayer(key) {
-			if (typeof key === "undefined")
-				key = this.whosTurnKey;
-			return this.getPlayerWithKey(key);
+		getPlayer() {
+			return this.getPlayerWithKey(this.whosTurnKey);
 		}
 
 		/**
@@ -487,41 +549,6 @@ define("game/Game", [
 				return undefined;
 
 			return this.turns[this.turns.length - 1];
-		}
-
-		/**
-		 * Get the last move made in this game. A move is the last
-		 * successful placement of tiles that is not followed by a
-		 * `Turns.TOOK_BACK` or `Turns.CHALLENGE_WON`.
-		 * @return {Turn} the last move recorded for the game, or undefined
-     * if there have been no turns or the game is over.
-		 */
-		lastPlay() {
-			let i = this.turns.length - 1;
-			let skipPrevious = false;
-			while (i >= 0) {
-				switch (this.turns[i].type) {
-				case Turns.PLAYED:
-					if (!skipPrevious)
-						return this.turns[i];
-					skipPrevious = false;
-					break;
-
-				case Turns.CHALLENGE_LOST:
-				case Turns.SWAPPED:
-					break;
-
-				case Turns.CHALLENGE_WON:
-				case Turns.TOOK_BACK:
-					skipPrevious = true;
-					break;
-
-				case Turns.GAME_ENDED:
-					return undefined;
-				}
-				i--;
-			}
-			return undefined;
 		}
 
     /**
@@ -684,7 +711,7 @@ define("game/Game", [
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed Jul 13 2022 12:21:51 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Sun Jul 17 2022 17:05:12 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

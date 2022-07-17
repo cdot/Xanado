@@ -629,7 +629,7 @@ Empty until a clip is played.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="browser_games.js.html">browser/games.js</a>, <a href="browser_games.js.html#line269">line 269</a>
+        <a href="browser_games.js.html">browser/games.js</a>, <a href="browser_games.js.html#line272">line 272</a>
     </li></ul></dd>
     
 
@@ -815,7 +815,7 @@ Empty until a clip is played.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="browser_games.js.html">browser/games.js</a>, <a href="browser_games.js.html#line127">line 127</a>
+        <a href="browser_games.js.html">browser/games.js</a>, <a href="browser_games.js.html#line130">line 130</a>
     </li></ul></dd>
     
 
@@ -851,7 +851,7 @@ Empty until a clip is played.</p>
     
 
     
-    <h4 class="name" id="attachSocketListeners"><span class="type-signature"></span>attachSocketListeners<span class="signature">(communications)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="attachHandlers"><span class="type-signature"></span>attachHandlers<span class="signature">()</span><span class="type-signature"></span></h4>
     
 
     
@@ -859,7 +859,9 @@ Empty until a clip is played.</p>
 
 
 <div class="description">
-    <p>Attach socket communications listeners. Implement in subclasses.</p>
+    <p>Attach handlers for jquery and game events. This must NOT
+attach socket handlers, just DOM object handlers.  Subclasses
+should override this calling to super.attachHandlers() last.</p>
 </div>
 
 
@@ -870,53 +872,98 @@ Empty until a clip is played.</p>
 
 
 
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>communications</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Socket</span>
 
 
-            
-            </td>
 
-            
 
-            
-
-            <td class="description last"><p>socket</p></td>
-        </tr>
+<dl class="details">
 
     
-    </tbody>
-</table>
+
+    
+
+    
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="UI.html#attachHandlers">UI#attachHandlers</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line196">line 196</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="attachSocketListeners"><span class="type-signature"></span>attachSocketListeners<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Attach socket communications listeners. Override in subclasses,
+making sure to call super.attachSocketListeners()</p>
+</div>
+
+
+
+
+
+
+
 
 
 
@@ -957,7 +1004,7 @@ Empty until a clip is played.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line244">line 244</a>
+        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line231">line 231</a>
     </li></ul></dd>
     
 
@@ -982,121 +1029,6 @@ Empty until a clip is played.</p>
 
 
 
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="build"><span class="type-signature">(protected) </span>build<span class="signature">()</span><span class="type-signature"> &rarr; {Promise}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Complete construction using promises</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-overrides">Overrides:</dt>
-    <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="UI.html#build">UI#build</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line121">line 121</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>promise that resolves when the UI is ready</p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise</span>
-
-
-    </dd>
-</dl>
-
-    
 
 
 
@@ -1165,7 +1097,7 @@ Empty until a clip is played.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line365">line 365</a>
+        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line395">line 395</a>
     </li></ul></dd>
     
 
@@ -1259,7 +1191,7 @@ create Notifications.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line306">line 306</a>
+        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line336">line 336</a>
     </li></ul></dd>
     
 
@@ -1317,7 +1249,7 @@ create Notifications.</p>
     
 
     
-    <h4 class="name" id="connectToServer"><span class="type-signature"></span>connectToServer<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="create"><span class="type-signature">(protected) </span>create<span class="signature">()</span><span class="type-signature"> &rarr; {Promise}</span></h4>
     
 
     
@@ -1325,9 +1257,7 @@ create Notifications.</p>
 
 
 <div class="description">
-    <p>Called when a connection to the server is reported by the
-socket. Use to update the UI to reflect the game state.
-Implement in subclasses.</p>
+    <p>Complete construction using promises</p>
 </div>
 
 
@@ -1353,7 +1283,7 @@ Implement in subclasses.</p>
     
     <dt class="tag-overrides">Overrides:</dt>
     <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="UI.html#connectToServer">UI#connectToServer</a>
+        <a href="UI.html#create">UI#create</a>
     </li></ul></dd>
     
 
@@ -1376,102 +1306,7 @@ Implement in subclasses.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line236">line 236</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="decorate"><span class="type-signature"></span>decorate<span class="signature">()</span><span class="type-signature"> &rarr; {Promise}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Once the locales and defaults have been loaded, decorate the
-UI with shared functionality. Subclasses should override this
-and end the promise chain with a call to super.decorate()</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-overrides">Overrides:</dt>
-    <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="UI.html#decorate">UI#decorate</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line158">line 158</a>
+        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line126">line 126</a>
     </li></ul></dd>
     
 
@@ -1500,8 +1335,7 @@ and end the promise chain with a call to super.decorate()</p>
 
         
 <div class="param-desc">
-    <p>promise that resolves when decoration is
-complete and the UI is ready.</p>
+    <p>promise that resolves when the UI is ready</p>
 </div>
 
 
@@ -1587,7 +1421,7 @@ complete and the UI is ready.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line252">line 252</a>
+        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line282">line 282</a>
     </li></ul></dd>
     
 
@@ -1754,7 +1588,7 @@ is not defined).</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line288">line 288</a>
+        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line318">line 318</a>
     </li></ul></dd>
     
 
@@ -1801,6 +1635,121 @@ is not defined).</p>
 |
 
 <span class="param-type">boolean</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="handleURLArguments"><span class="type-signature"></span>handleURLArguments<span class="signature">()</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Parse the URL used to load this page to extract parameters.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="UI.html#handleURLArguments">UI#handleURLArguments</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line177">line 177</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>promise that resolves to a key-value map</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
 
 
     </dd>
@@ -1924,7 +1873,7 @@ is not defined).</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line334">line 334</a>
+        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line364">line 364</a>
     </li></ul></dd>
     
 
@@ -2106,6 +2055,101 @@ must exist as an mp3 file in the /audio directory.</p></td>
     
 
     
+    <h4 class="name" id="readyToListen"><span class="type-signature">(abstract) </span>readyToListen<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Called when a connection to the server is reported by the
+socket. Use to update the UI to reflect the game state.
+Implement in subclasses.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="UI.html#readyToListen">UI#readyToListen</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line223">line 223</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
     <h4 class="name" id="refresh"><span class="type-signature"></span>refresh<span class="signature">()</span><span class="type-signature"> &rarr; {Promise}</span></h4>
     
 
@@ -2158,7 +2202,7 @@ must exist as an mp3 file in the /audio directory.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="browser_games.js.html">browser/games.js</a>, <a href="browser_games.js.html#line548">line 548</a>
+        <a href="browser_games.js.html">browser/games.js</a>, <a href="browser_games.js.html#line551">line 551</a>
     </li></ul></dd>
     
 
@@ -2318,7 +2362,7 @@ games table)</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="browser_games.js.html">browser/games.js</a>, <a href="browser_games.js.html#line527">line 527</a>
+        <a href="browser_games.js.html">browser/games.js</a>, <a href="browser_games.js.html#line530">line 530</a>
     </li></ul></dd>
     
 
@@ -2406,7 +2450,7 @@ games table)</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="browser_games.js.html">browser/games.js</a>, <a href="browser_games.js.html#line536">line 536</a>
+        <a href="browser_games.js.html">browser/games.js</a>, <a href="browser_games.js.html#line539">line 539</a>
     </li></ul></dd>
     
 
@@ -2546,7 +2590,7 @@ games table)</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="browser_games.js.html">browser/games.js</a>, <a href="browser_games.js.html#line485">line 485</a>
+        <a href="browser_games.js.html">browser/games.js</a>, <a href="browser_games.js.html#line488">line 488</a>
     </li></ul></dd>
     
 
@@ -2683,7 +2727,7 @@ games table)</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="browser_games.js.html">browser/games.js</a>, <a href="browser_games.js.html#line494">line 494</a>
+        <a href="browser_games.js.html">browser/games.js</a>, <a href="browser_games.js.html#line497">line 497</a>
     </li></ul></dd>
     
 
@@ -2735,7 +2779,7 @@ games table)</p>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed Jul 13 2022 12:21:51 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Sun Jul 17 2022 17:05:12 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

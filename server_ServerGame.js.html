@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: game/ServerGame.js</title>
+    <title>JSDoc: Source: server/ServerGame.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: game/ServerGame.js</h1>
+    <h1 class="page-title">Source: server/ServerGame.js</h1>
 
     
 
@@ -31,13 +31,13 @@
   and license information. Author Crawford Currie http://c-dot.co.uk*/
 /* eslint-env amd */
 
-define("game/ServerGame", [
+define("server/ServerGame", [
 	"platform", "common/Utils",
- 	"dawg/Dictionary", "game/Edition", "game/Board", "game/LetterBag",
+ 	"dawg/Dictionary", "game/Board", "game/LetterBag",
   "game/Types", "game/Commands", "game/Undo"
 ], (
 	Platform, Utils,
-  Dictionary, Edition, Board, LetterBag,
+  Dictionary, Board, LetterBag,
   Types, Commands, Undo
 ) => {
   const Notify    = Types.Notify;
@@ -47,13 +47,10 @@ define("game/ServerGame", [
   const WordCheck = Types.WordCheck;
   const Turns     = Types.Turns;
 
-  function _showData(data) {
-    const s = data.toString();
-    return (s === "[object Object]") ? data : s;
-  }
+  let messageSequenceNumber = 0;
 
   /**
-   * Mixin that provides server-specific functionality for {@linkcode Game}
+   * Provides server-specific functionality for {@linkcode Game}
    * @mixin ServerGame
    * @mixes Commands
    * @mixes Undo
@@ -71,16 +68,6 @@ define("game/ServerGame", [
 			return this.getEdition()
 			.then(ed => this.board.parse(sboard, ed))
 			.then(() => this);
-		},
-
-		/**
-		 * Get the edition for this game, lazy-loading as necessary
-     * @function
-     * @memberof ServerGame
-		 * @return {Promise} resolving to an {@linkcode Edition}
-		 */
-		getEdition() {
-			return Edition.load(this.edition);
 		},
 
 		/**
@@ -134,33 +121,6 @@ define("game/ServerGame", [
 		},
 
 		/**
-		 * Promise to finish construction of a new Game.
-		 * Load the edition and create the board and letter bag.
-		 * Not done in the constructor because we need to return
-		 * a Promise. Must be followed by onLoad to connect a
-		 * DB and complete initialisation of private fields.
-     * @function
-     * @memberof ServerGame
-		 * @return {Promise} that resolves to this
-		 */
-		create() {
-			// Can't be done in the constructor because we have to
-			// return a Promise.
-		  this.creationTimestamp = Date.now();
-		  this.key = Utils.genKey();
-      this.state = State.WAITING;
-			return this.getEdition()
-			.then(edo => {
-				this.board = new Board(edo);
-				this.letterBag = new LetterBag(edo);
-        this.bonuses = edo.bonuses;
-				this.rackSize = edo.rackCount;
-				this.swapSize = edo.swapCount;
-				return this;
-			});
-		},
-
-		/**
 		 * Promise to finish the construction or load from serialisation
 		 * of a game.
 		 * A game has to know what DB so it knows where to save. The
@@ -200,66 +160,28 @@ define("game/ServerGame", [
 			return Promise.resolve(this);
 		},
 
-		/**
-		 * Add a player to the game, and give them an initial rack
-     * @function
-     * @memberof ServerGame
-		 * @param {Player} player
-		 * @param {boolean?} fillRack true to fill the player's rack
-     * from the game's letter bag.
-     * @return {Game} this
-		 */
-		addPlayer(player, fillRack) {
-			Platform.assert(this.letterBag, "Cannot addPlayer() before create()");
-			Platform.assert(
-        !this.maxPlayers || this.players.length &lt; this.maxPlayers,
-				"Cannot addPlayer() to a full game");
-			player._debug = this._debug;
-			this.players.push(player);
-			this._debug(this.key, "added player", player.toString());
-			if (this.timerType)
-				player.clock = this.timeLimit;
-      if (fillRack)
-        player.fillRack(this.letterBag, this.rackSize);
-      return this;
-		},
-
-		/**
-		 * Remove a player from the game, taking their tiles back into
-		 * the bag
-     * @function
-     * @memberof ServerGame
-		 * @param {Player} player
-		 */
-		removePlayer(player) {
-			player.returnTiles(this.letterBag);
-			const index = this.players.findIndex(p => p.key === player.key);
-			Platform.assert(index >= 0,
-				              `No such player ${player.key} in ${this.key}`);
-			this.players.splice(index, 1);
-			this._debug(player.key, "left", this.key);
-			if (this.players.length &lt; (this.minPlayers || 2)
-          &amp;&amp; this.state !== State.GAME_OVER)
-				this.state = State.WAITING;
-		},
-
     /**
 		 * Send a message to just one player. Note that the player
 		 * may be connected multiple times through different sockets.
-		 * Only available server-side.
      * @function
      * @memberof ServerGame
 		 * @param {Player} player player to send to
 		 * @param {string} message to send
-		 * @param {Object} data to send with message
+		 * @param {Object} data to send with message. Will have
+     * `messageID` added to it.
 		 */
 		notifyPlayer(player, message, data) {
-			this._debug("&lt;-S-", player.key, message, _showData(data));
+      const body = {
+        messageID: ++messageSequenceNumber,
+        data: data
+      };
+			this._debug("&lt;-S-", player.key, message,
+                  messageSequenceNumber, Utils.stringify(data));
 			// Player may be connected several times
 			this._connections.forEach(
 				socket => {
 					if (socket.player === player)
-						socket.emit(message, data);
+						socket.emit(message, body);
 					return false;
 				});
 		},
@@ -274,9 +196,13 @@ define("game/ServerGame", [
 		 * @param {Object} data to send with message
 		 */
 		notifyAll(message, data) {
+      const body = {
+        messageID: ++messageSequenceNumber,
+        data: data
+      };
 			if (message !== Notify.TICK)
-        this._debug("&lt;-S- *", message, _showData(data));
-			this._connections.forEach(socket => socket.emit(message, data));
+        this._debug("&lt;-S- *", message, messageSequenceNumber, Utils.stringify(data));
+			this._connections.forEach(socket => socket.emit(message, body));
 		},
 
 		/**
@@ -289,12 +215,17 @@ define("game/ServerGame", [
 		 * @param {Object} data to send with message
 		 */
 		notifyOthers(player, message, data) {
-			this._debug("&lt;-S- !", player.key, message, _showData(data));
+      const body = {
+        messageID: ++messageSequenceNumber,
+        data: data
+      };
+			this._debug("&lt;-S- !", player.key, message, messageSequenceNumber,
+                  Utils.stringify(data));
 			// Player may be connected several times
 			this._connections.forEach(
 				socket => {
 					if (socket.player.key !== player.key)
-						socket.emit(message, data);
+						socket.emit(message, body);
 					return false;
 				});
 		},
@@ -341,7 +272,7 @@ define("game/ServerGame", [
 					}
 					// Notify all connections of the order change
 					// (asynchronously)
-					this.updateConnections();
+					this.sendCONNECTIONS();
 				}
 
 				const player = this.players[0];
@@ -389,7 +320,7 @@ define("game/ServerGame", [
 			return this.save()
 			.then(() => this.notifyAll(Notify.TURN, turn))
 			.then(() => this);
-		},
+    },
 
 		/**
 		 * Does player have an active connection to this game?
@@ -399,25 +330,25 @@ define("game/ServerGame", [
 		 * @return {WebSocket} a decorated socket, or null if not connected.
 		 */
 		getConnection(player) {
-			for (let socket of this._connections) {
-				if (socket.player === player) {
-          player.isConnected = true;
-					return socket;
-        }
-			}
-      if (player)
+      if (player) {
+			  for (const socket of this._connections) {
+				  if (socket.player &amp;&amp; socket.player === player) {
+            player.isConnected = true;
+					  return socket;
+          }
+			  }
         player.isConnected = false;
+      }
 			return null;
 		},
 
 		/**
-		 * Notify observers with a list of the currently connected
-     * observers and non-connected players. Only available
-     * server-side.
+		 * Notify players with a list of the currently connected
+     * players, non-playing observers and non-connected players.
      * @function
      * @memberof ServerGame
 		 */
-		updateConnections() {
+		sendCONNECTIONS() {
 			Promise.all(
 				this.players
 				.map(player => player.simple(this)
@@ -425,7 +356,6 @@ define("game/ServerGame", [
 						   cat.gameKey = this.key;
 						   if (cat.key === this.whosTurnKey)
 							   cat.isNextToGo = true;
-               cat.toString = () => `${cat.name}/${cat.key}`;
 						   return cat;
 					   })))
 			.then(res => {
@@ -536,7 +466,7 @@ define("game/ServerGame", [
 			this._connections.push(socket);
 
 			// Tell players that the player is connected
-			this.updateConnections();
+			this.sendCONNECTIONS();
 
 			// Add disconnect listener
 			/* istanbul ignore next */
@@ -547,7 +477,7 @@ define("game/ServerGame", [
 				} else
           this._debug("non-player disconnected");
 				this._connections.splice(this._connections.indexOf(socket), 1);
-				this.updateConnections();
+				this.sendCONNECTIONS();
 			});
 
 			return this.playIfReady();
@@ -582,10 +512,10 @@ define("game/ServerGame", [
 
 		/**
 		 * If the game has a time limit, start an interval timer.
-     * @function
-     * @memberof ServerGame
      * @return {boolean} true if the clock is started, false otherwise
      * (e.g. if it is already running)
+     * @function
+     * @memberof ServerGame
 		 * @private
 		 */
 		startTheClock() {
@@ -638,8 +568,8 @@ define("game/ServerGame", [
 			// challenge is a Promise that will resolve to true if a
 			// challenge is made, or false otherwise.
 			let challenge = Promise.resolve(false);
-      let lastPlay = this.lastPlay();
-			if (lastPlay
+      let lastPlay = this.turns[this.turns.length - 1];
+			if (lastPlay &amp;&amp; lastPlay.type === Turns.PLAYED
 				  &amp;&amp; this.dictionary
 				  &amp;&amp; player.canChallenge) {
 				const lastPlayer = this.getPlayerWithKey(lastPlay.playerKey);
@@ -722,7 +652,7 @@ define("game/ServerGame", [
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed Jul 13 2022 12:21:51 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Sun Jul 17 2022 17:05:12 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>
