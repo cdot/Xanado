@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: browser/Game.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: browser/Game.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*Copyright (C) 2021-2022 The Xanado Project https://github.com/cdot/Xanado
+  License MIT. See README.md at the root of this distribution for full copyright
+  and license information. Author Crawford Currie http://c-dot.co.uk*/
+/* eslint-env amd */
+
+define([
+  "platform", "common/Utils", "game/Player", "game/Types"
+], (
+  Platform, Utils, Player, Types
+) => {
+
+  const Turns = Types.Turns;
+  const Penalty = Types.Penalty;
+  const State = Types.State;
+
+  /**
+   * Browser-side mixin for {@linkcode Game}
+   * @mixin BrowserGame
+   */
+  const BrowserGame = {
+
+    /**
+     * Create the UI for the player table
+     * @function
+     * @instance
+     * @memberof BrowserGame
+     * @param {Player} thisPlayer the player for whom the DOM is
+     * being generated
+     * @return {jQuery} jQuery object representing the player table
+     */
+    $playerTable(thisPlayer) {
+      const $tab = $("&lt;table>&lt;/table>").addClass("player-table");
+      this.players.forEach(
+        p => $tab.append(p.$tableRow(thisPlayer)));
+      return $tab;
+    },
+
+    /**
+     * Given a list of Player.simple, update the players list
+     * to reflect the members and ordering of that list.
+     * @function
+     * @instance
+     * @memberof BrowserGame
+     * @param {object[]} observers list of observers (simple objects)
+     */
+    updatePlayerList(observers) {
+      for (let player of this.players)
+        player.online(false);
+      const newOrder = [];
+      for (let watcher of observers) {
+        let player = this.getPlayerWithKey(watcher.key);
+        if (!player) {
+          // New player in game
+          player = Player.fromSimple(watcher);
+          this.addPlayer(player, true);
+          player._debug = this._debug;
+        }
+        player.online(watcher.isConnected || watcher.isRobot);
+        newOrder.push(player);
+        if (watcher.isNextToGo)
+          this.whosTurnKey = player.key;
+      }
+      this.players = newOrder;
+    },
+
+    /**
+     * Generate a description of the given turn
+     * @param {Turn} turn the turn to describe
+     * @param {Player} uiPlayer the player who's UI the description is
+     * being generated for
+     * @param {boolean} isLastTurn set true if this is the most
+     * recent turn
+     * @return {jQuery} a jquery div
+     */
+    describeTurn(turn, uiPlayer, isLastTurn) {
+      if (turn.type === Turns.GAME_ENDED)
+        return this.describeGameOver(turn, uiPlayer);
+
+      const $description = $("&lt;div>&lt;/div>").addClass("turn-description");
+
+      // Who's turn was it?
+      const $player = $("&lt;div>&lt;/div>").addClass("turn-player");
+      let player = this.getPlayerWithKey(turn.playerKey);
+      if (!player)
+        player = new Player({name: "Unknown player"});
+      const challenger = (typeof turn.challengerKey === "string")
+            ? this.getPlayerWithKey(turn.challengerKey) : undefined;
+
+      let what, who;
+      if (turn.type === Turns.CHALLENGE_LOST) {
+        what = $.i18n("challenge");
+        if (challenger === uiPlayer)
+          who = $.i18n("Your");
+        else
+          who = $.i18n("$1's", challenger.name);
+      } else {
+        what = $.i18n("turn");
+        if (player === uiPlayer)
+          who = $.i18n("Your");
+        else
+          who = $.i18n("$1's", player.name);
+      }
+      $player.append(
+        $.i18n("&lt;span class='player-name'>$1&lt;/span> $2", who, what));
+
+      $description.append($player);
+
+      // What did they do?
+      const $action = $("&lt;div>&lt;/div>").addClass("turn-detail");
+
+      let playerPossessive;
+      let playerIndicative;
+      if (player === uiPlayer) {
+        playerPossessive = $.i18n("your");
+        playerIndicative = $.i18n("You");
+      } else {
+        playerPossessive = $.i18n("$1's", player.name);
+        playerIndicative = player.name;
+      }
+
+      let challengerPossessive;
+      let challengerIndicative;
+      if (challenger === uiPlayer) {
+        challengerPossessive = $.i18n("Your");
+        challengerIndicative = $.i18n("You");
+      } else if (challenger) {
+        challengerPossessive = $.i18n("$1's", challenger.name);
+        challengerIndicative = challenger.name;
+      }
+
+      switch (turn.type) {
+
+      case Turns.PLAYED:
+        $action.append(turn.$score(false));
+        break;
+
+      case Turns.SWAPPED:
+        $action.append($.i18n(
+          "Swapped $1 tile{{PLURAL:$1||s}}",
+          turn.replacements.length));
+        break;
+
+      case Turns.TIMED_OUT:
+        $action.append($.i18n("Timed out"));
+        break;
+
+      case Turns.PASSED:
+        $action.append($.i18n("Passed"));
+        break;
+
+      case Turns.TOOK_BACK:
+        $action.append($.i18n("Took back their turn"));
+        break;
+
+      case Turns.CHALLENGE_WON:
+        $action.append($.i18n(
+          "$1 successfully challenged $2 play.",
+          challengerIndicative, playerPossessive)
+        + " "
+        + $.i18n(
+          "$1 lost $2 point{{PLURAL:$2||s}}",
+          playerIndicative, -turn.score));
+        break;
+
+      case Turns.CHALLENGE_LOST:
+        $action.append($.i18n(
+          "$1 challenge of $2 play failed.",
+          challengerPossessive, playerPossessive));
+        switch (this.challengePenalty) {
+        case Penalty.PER_WORD:
+        case Penalty.PER_TURN:
+          $action.append(" " + $.i18n(
+            "$1 lost $2 point{{PLURAL:$2||s}}",
+            challengerIndicative, -turn.score));
+          break;
+        case Penalty.MISS:
+          $action.append(
+            " " + $.i18n("$1 will miss a turn", challengerIndicative));
+          break;
+        }
+        break;
+
+      default:
+        Platform.fail(`Unknown move type ${turn.type}`);
+      }
+
+      $description.append($action);
+
+      if (isLastTurn
+          &amp;&amp; turn.emptyPlayerKey
+          &amp;&amp; !this.hasEnded()
+          &amp;&amp; turn.type !== Turns.CHALLENGE_LOST
+          &amp;&amp; turn.type !== Turns.GAME_ENDED) {
+
+        const $narrative = $("&lt;div>&lt;/div>").addClass("turn-narrative");
+        if (turn.emptyPlayerKey === uiPlayer.key)
+          $narrative.append($.i18n(
+            "You have no more tiles, game will be over if your play isn't challenged"));
+        else if (turn.emptyPlayerKey)
+          $narrative.append($.i18n(
+            "$1 has no more tiles, game will be over unless you challenge",
+            this.getPlayerWithKey(turn.emptyPlayerKey).name));
+        $description.append($narrative);
+      }
+
+      return $description;
+    },
+
+    /**
+     * Append a formatted 'end of game' message to the log
+     * @param {Turn} turn a Turns.GAME_ENDED Turn
+     * @param {Player} uiPlayer the player who's UI the description is
+     * being generated for
+     * @return {jQuery} a jquery div
+     * @private
+     */
+    describeGameOver(turn, uiPlayer) {
+      const adjustments = [];
+      const winningScore = this.winningScore();
+      const winners = [];
+
+      const $description = $("&lt;div>&lt;/div>").addClass("turn-description");
+
+      // When the game ends, each player's score is reduced by
+      // the sum of their unplayed letters. If a player has used
+      // all of his or her letters, the sum of the other players'
+      // unplayed letters is added to that player's score. The
+      // score adjustments are already done, on the server side,
+      // we just need to present the results.
+      const unplayed = this.getPlayers().reduce(
+        (sum, player) => sum + player.rack.score(), 0);
+
+      const $state = $("&lt;div>&lt;/div>").addClass("game-state")
+      .append($.i18n(turn.endState || State.GAME_OVER));
+
+      $description.append($state);
+
+      const $narrative = $("&lt;div>&lt;/div>").addClass("game-outcome");
+      this.getPlayers().forEach(player => {
+        const isMe = player === uiPlayer;
+        const name = isMe ? $.i18n("You") : player.name;
+        const $rackAdjust = $("&lt;div>&lt;/div>").addClass("rack-adjust");
+
+        if (player.score === winningScore)
+          winners.push(name);
+
+        if (player.rack.isEmpty()) {
+          if (unplayed > 0) {
+            $rackAdjust.text($.i18n(
+              "$1 gained $2 point{{PLURAL:$2||s}} from the racks of other players",
+              name, unplayed));
+          }
+        } else if (player.rack.score() > 0) {
+          // Lost sum of unplayed letters
+          $rackAdjust.text($.i18n(
+            "$1 lost $2 point{{PLURAL:$2||s}} for a rack containing '$3'",
+            name, player.rack.score(),
+            player.rack.lettersLeft().join(",")));
+        }
+        player.$refresh();
+        $narrative.append($rackAdjust);
+
+        const timePenalty = turn.score[player.key].time;
+        if (typeof timePenalty === "number" &amp;&amp; timePenalty !== 0) {
+          const $timeAdjust = $("&lt;div>&lt;/div>").addClass("time-adjust");
+          $timeAdjust.text($.i18n(
+            "$1 lost $2 point{{PLURAL:$2||s}} to the clock",
+            name, Math.abs(timePenalty)));
+          $narrative.append($timeAdjust);
+        }
+      });
+
+      const $whoWon = $("&lt;div>&lt;/div>").addClass("game-winner");
+      let who;
+      let nWinners = 0;
+      if (this.getWinner() === uiPlayer &amp;&amp; winners.length === 1)
+        who = $.i18n("You");
+      else {
+        who = Utils.andList(winners);
+        nWinners = winners.length;
+      }
+      $whoWon.append($.i18n("$1 {{PLURAL:$2|has|have}} won",
+                            who, nWinners));
+
+      $description.append($whoWon);
+      $description.append($narrative);
+
+      return $description;
+    }
+  };
+
+  return BrowserGame;
+});
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Sun Jul 24 2022 15:05:35 GMT+0000 (Coordinated Universal Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

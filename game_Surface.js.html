@@ -31,191 +31,191 @@
   and license information. Author Crawford Currie http://c-dot.co.uk*/
 /* eslint-env amd, node, jquery */
 
-define("game/Surface", [
+define([
   "game/Square"
 ], Square => {
 
-	/**
-	 * Abstract base class of a 2D grid of {@linkcode Sqaure} (a Rack or a Board)
-	 */
-	class Surface {
+  /**
+   * Abstract base class of a 2D grid of {@linkcode Sqaure} (a Rack or a Board)
+   */
+  class Surface {
 
-		/**
-		 * Unique id for the surface. This is used in the construction
+    /**
+     * Unique id for the surface. This is used in the construction
      * of HTML id attributes for the Squares it contains.
-		 * @member {string}
-		 */
-		id;
+     * @member {string}
+     */
+    id;
 
-		/**
-		 * Number of columns on the surface.
-		 * @member {number}
-		 */
-		cols;
+    /**
+     * Number of columns on the surface.
+     * @member {number}
+     */
+    cols;
 
-		/**
-		 * Number of rows on the surface. This will be 0 for a Rack.
-		 * @member {number}
-		 */
-		rows;
+    /**
+     * Number of rows on the surface. This will be 0 for a Rack.
+     * @member {number}
+     */
+    rows;
 
-		/**
-		 * rows X cols array of Square
-		 * @member {Square[][]}
-		 * @private
-		 */
-		squares = [];
+    /**
+     * rows X cols array of Square
+     * @member {Square[][]}
+     * @private
+     */
+    squares = [];
 
-		/**
-		 * @param {string} id unique id for the surface 
-		 * @param {number} cols number of columns
-		 * @param {number} rows number of rows (1 for a rack)
-		 * @param {function} type function(col, row) returning the square type
-		 */
-		constructor(id, cols, rows, type) {
-			this.id = id;
-			this.cols = cols;
-			this.rows = rows;
+    /**
+     * @param {string} id unique id for the surface 
+     * @param {number} cols number of columns
+     * @param {number} rows number of rows (1 for a rack)
+     * @param {function} type function(col, row) returning the square type
+     */
+    constructor(id, cols, rows, type) {
+      this.id = id;
+      this.cols = cols;
+      this.rows = rows;
 
-			for (let i = 0; i &lt; cols; i++) {
-				const row = [];
-				for (let j = 0; j &lt; rows; j++) {
+      for (let i = 0; i &lt; cols; i++) {
+        const row = [];
+        for (let j = 0; j &lt; rows; j++) {
           const spec = {
-						type: type(i, j),
+            type: type(i, j),
             base: id,
             col: i
           };
           if (rows > 1)
             spec.row = j;
-					row.push(new Square(spec));
+          row.push(new Square(spec));
         }
-				this.squares.push(row);
-			}
-		}
+        this.squares.push(row);
+      }
+    }
 
-		/**
-		 * Get the square at [col][row]
-		 */
-		at(col, row) {
-			return this.squares[col][row];
-		}
+    /**
+     * Get the square at [col][row]
+     */
+    at(col, row) {
+      return this.squares[col][row];
+    }
 
-		/**
-		 * Call fn on every square, column major.
-		 * @param {function} fn function(Square, col, row)
-		 * Iteration will stop if fn returns true.
-		 * @return {boolean} true if fn() returns true, false otherwise
-		 */
-		forEachSquare(fn) {
-			for (let c = 0; c &lt; this.cols; c++)
-				for (let r = 0; r &lt; this.rows; r++)
-					if (fn(this.squares[c][r], c, r))
-						return true;
-			return false;
-		}
+    /**
+     * Call fn on every square, column major.
+     * @param {function} fn function(Square, col, row)
+     * Iteration will stop if fn returns true.
+     * @return {boolean} true if fn() returns true, false otherwise
+     */
+    forEachSquare(fn) {
+      for (let c = 0; c &lt; this.cols; c++)
+        for (let r = 0; r &lt; this.rows; r++)
+          if (fn(this.squares[c][r], c, r))
+            return true;
+      return false;
+    }
 
-		/**
-		 * Call fn(square, col, row) on every square that has a tile
-		 * @param {function} fn function(Square, col, row)
-		 * Iteration will stop if the function returns true.
-		 * @return {boolean} true if fn() returns true, false otherwise
-		 */
-		forEachTiledSquare(fn) {
-			return this.forEachSquare((square, c, r) => {
-				if (square.tile)
-					return fn(square, c, r);
-				return false;
-			});
-		}
+    /**
+     * Call fn(square, col, row) on every square that has a tile
+     * @param {function} fn function(Square, col, row)
+     * Iteration will stop if the function returns true.
+     * @return {boolean} true if fn() returns true, false otherwise
+     */
+    forEachTiledSquare(fn) {
+      return this.forEachSquare((square, c, r) => {
+        if (square.tile)
+          return fn(square, c, r);
+        return false;
+      });
+    }
 
-		/**
-		 * Call fn(square, col, row) on every square that has no tile.
-		 * @param {function} fn function(Square, col, row)
-		 * Iteration will stop if the function returns true.
-		 * @return {boolean} true if fn() returns true, false otherwise
-		 */
-		forEachEmptySquare(fn) {
-			return this.forEachSquare((square, c, r) => {
-				if (!square.tile)
-					return fn(square, c, r);
-				return false;
-			});
-		}
+    /**
+     * Call fn(square, col, row) on every square that has no tile.
+     * @param {function} fn function(Square, col, row)
+     * Iteration will stop if the function returns true.
+     * @return {boolean} true if fn() returns true, false otherwise
+     */
+    forEachEmptySquare(fn) {
+      return this.forEachSquare((square, c, r) => {
+        if (!square.tile)
+          return fn(square, c, r);
+        return false;
+      });
+    }
 
-		/**
-		 * Get the number of squares currently occupied by a tile
-		 * @return {number} number of occupied squares
-		 */
-		squaresUsed() {
-			let count = 0;
-			this.forEachTiledSquare(() => {
-				count++;
-				return false;
-			});
-			return count;
-		}
+    /**
+     * Get the number of squares currently occupied by a tile
+     * @return {number} number of occupied squares
+     */
+    squaresUsed() {
+      let count = 0;
+      this.forEachTiledSquare(() => {
+        count++;
+        return false;
+      });
+      return count;
+    }
 
-		/**
-		 * Get a list of the tiles placed on the surface
-		 * @return {Tile[]} list of placed tiles
-		 */
-		tiles() {
-			const tiles = [];
-			this.forEachTiledSquare(square => {
-				tiles.push(square.tile);
-				return false;
-			});
-			return tiles;
-		}
+    /**
+     * Get a list of the tiles placed on the surface
+     * @return {Tile[]} list of placed tiles
+     */
+    tiles() {
+      const tiles = [];
+      this.forEachTiledSquare(square => {
+        tiles.push(square.tile);
+        return false;
+      });
+      return tiles;
+    }
 
-		/**
-		 * Remove all tiles from the surface, return a list of tiles
-		 * removed;
-		 */
-		empty() {
-			const removed = [];
-			this.forEachTiledSquare(square => {
-				removed.push(square.tile);
-				square.unplaceTile();
-			});
-			return removed;
-		}
+    /**
+     * Remove all tiles from the surface, return a list of tiles
+     * removed;
+     */
+    empty() {
+      const removed = [];
+      this.forEachTiledSquare(square => {
+        removed.push(square.tile);
+        square.unplaceTile();
+      });
+      return removed;
+    }
 
-		/**
-		 * Get the total of the scoring tiles placed on the
-		 * surface. Does not apply square multipliers.
-		 * @return {number} total score
-		 */
-		score() {
-			return this.tiles().reduce((s, tile) => s + tile.score, 0);
-		}
+    /**
+     * Get the total of the scoring tiles placed on the
+     * surface. Does not apply square multipliers.
+     * @return {number} total score
+     */
+    score() {
+      return this.tiles().reduce((s, tile) => s + tile.score, 0);
+    }
 
-		/**
-		 * Determine if the surface is empty of tiles
-		 * @return {boolean} true if surface is empty
-		 */
-		isEmpty() {
-			return this.tiles().length === 0;
-		}
+    /**
+     * Determine if the surface is empty of tiles
+     * @return {boolean} true if surface is empty
+     */
+    isEmpty() {
+      return this.tiles().length === 0;
+    }
 
-		/* istanbul ignore next */
-		/**
-		 * Refresh the UI for all squares.  Must be implemented by
-		 * subclasses.
-		 */
-		$ui() {
-			throw new Error("Pure virtual");
-		}
+    /* istanbul ignore next */
+    /**
+     * Refresh the UI for all squares.  Must be implemented by
+     * subclasses.
+     */
+    $ui() {
+      throw new Error("Pure virtual");
+    }
 
-		/**
-		 * Refresh the UI for all squares on the surface.
-		 */
-		$refresh() {
-			this.forEachSquare(s => s.$refresh());
-		}
-	}
+    /**
+     * Refresh the UI for all squares on the surface.
+     */
+    $refresh() {
+      this.forEachSquare(s => s.$refresh());
+    }
+  }
 
-	return Surface;
+  return Surface;
 });
 </code></pre>
         </article>
@@ -227,13 +227,13 @@ define("game/Surface", [
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#allow">allow</a></li><li><a href="global.html#challenge">challenge</a></li><li><a href="global.html#confirmGameOver">confirmGameOver</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jul 22 2022 08:21:05 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Sun Jul 24 2022 15:05:35 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

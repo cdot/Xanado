@@ -3,19 +3,22 @@
 The installation has subdirectories as follows:
 * `audio` contains audio samples
 * `css` contains style sheets
+    * `css/default` contains the default theme
 * `dictionaries` contains all the dictionaries
 * `editions` contains the edition specifications
-* `games` contains the database of games
-* `html` has the html for the user interfaces, `games.html` for the control panel, `createGame.html` for the new game page, and `game.html` for the game itself.
-* `i18n` contains the master English `en.json` and any other contributed translations of the interface.
+* `games` contains the database of games (initially empty)
+* `html` has the html for the user interfaces, `games.html` for the control panel, and `game.html` for the game itself.
+* `i18n` contains the master English `en.json`, qqq documentation, and any other contributed translations of the interface.
 * `images` contains images used by the game
 * `js` has all the source code
-	* `js/browser` is the browser code
+    * `js/common` has generic code shared between server and browser
 	* `js/dawg` is generation and management of DAWGs
 	* `js/design` is the Valett program
-	* `js/game` has the platform-independent game engine
+	* `js/game` has game code shared between browser and server
 	* `js/i18n` has the translations checker
+	* `js/browser` is the browser code
 	* `js/server` has the server code
+* `test` has all the unit tests and fixtures
 
 ## Building your own dictionary
 
@@ -41,59 +44,58 @@ the server starts. It will affect the performance of the dictionary,
 so you are recommended to run the compressor every so often to
 incorporate those words.
 
-## Internationalisation
-The UI uses the [Wikimedia jQuery.i18n framework](https://github.com/wikimedia/jquery.i18n) to support translations. Currently translation files are provided for English, (une très mauvaise traduction en) French, and (eine schlechte Übersetzung ins) German. To generate your own translation (or improve on Google's), copy `/i18n/en.json` to a file using your language code (e.g. `it` for Italian) and edit the new file to provide the translation. You can use `npm run tx` to check the completeness of your translations (requires an installation of `perl`).
-
 ## Flow of Control
 
-Players access the `/index.html` at the root of the distribution. This will
-load the `games` interface, which is used to view available games and create
-new games.
+Players access `/` on the server. This will load the `games`
+interface, which is used to view available games and create new games.
 
 A game is joined by opening a URL which identifies the game
 and player (`GET /join/gameKey/playerKey`). The server adds the
 player to the game and responds with the gameKey and playerKey. The 
 `games` interface then opens a new window on `html/game.html`, which
 loads the UI. When the document is ready, it executes `/js/game.js`,
-which instantiates an object of the `Ui` class.
+which creates the UI.
 
-Construction of the Ui object asks the server for the state of the
+Construction of the UI object asks the server for the state of the
 game using a `GET /game/gameKey` URI. The server recognises this as a
 request for JSON, and serves up the game, as serialised by
 `js/game/Freeze.js`.  The UI thaws this data and loads the game, then
 manually connects the `WebSocket`, attaching handlers for managing the
-socket (see Ui.attachSocketListeners).
+socket.
  
-Once construction is complete, the Ui will listen for events coming
-over the socket from the server and modify the Ui accordingly. These
-are `turn`, `tick`, `gameOverConfimed`, `nextGame`, `message`, and
-`connections`, that the server will send. With the exception of
-`message` these are all broadcast events, sent to all players. It will
-also listen for events coming from the user, and will POST messages
-using the `/command` route to reflect user actions: `makeMove`,
-`challenge`, `swap`, `takeBack`, `pass`, `confirmGameOver`, `pause`
-and `unpause`. The server will pass these on to `js/game/Game.js` for
-handling.
+Once construction is complete, the UI will listen for events coming
+over the socket from the server and modify the client local copy of
+the game accordingly. It will also listen for events coming from the
+user, and will POST messages using the `/command` route to reflect
+user actions: `makeMove`, `challenge`, `swap`, `takeBack`, `pass`,
+`confirmGameOver`, `pause` and `unpause`.
 
 Information about a play is passed to the server in a `Move` object,
 and results are broadcast asynchronously as `turn` events
 parameterised by `Turn` objects. A single play will usually result in
 a single `Turn` object being broadcast, but there is no theoretical
 limit on the number of `Turn` objects that might be broadcast for a
-single interactive play. For example, a following robot play will
-result in a sequence of turns. `Turn` objects are recorded in the game
-history, allowing a full replay of game events at a later date
-(e.g. when refreshing the Ui.)
+single interactive play. For example, a robot play following a human
+play will result in a sequence of turns. `Turn` objects are recorded
+in the game history, allowing a full replay of game events at a later
+date (e.g. when refreshing the Ui.)
 
 ## Testing
 The `test` subdirectory contains unit tests for the server
 written using the `mocha` framework. Run them using `npm run test`.
-Also supported is test coverage analysis using `istanbul`; run `npm run coverage`.
-Coverage statistics are outout in the `coverage` directory. You can also run `eslint` on the code using `npm run lint`.
+
+Also supported is test coverage analysis using `istanbul`; run
+`npm run coverage`.
+Coverage statistics are outout in the `coverage` directory.
+
+You can also run `eslint` on the code using `npm run lint`.
+
+## Internationalisation
+Xanado uses the [Wikimedia jQuery.i18n framework](https://github.com/wikimedia/jquery.i18n) to support translations. Currently translation files are provided for English, (une très mauvaise traduction en) French, and (eine schlechte Übersetzung ins) German. To generate your own translation, copy `/i18n/en.json` to a file using your language code (e.g. `it` for Italian) and edit the new file to provide the translation. You can use `npm run tx` to check the completeness of your translations.
 
 ## Documentation
 The code is documented using `jsdoc`. The documentation is automatically
-built when a new version is pushed to github, and can be found on <a href="https://cdot.github.io/CrosswordGame/">github pages</a>.
+built when a new version is pushed to github, and can be found on <a href="https://cdot.github.io/Xanado/">github pages</a>.
 
 For development, `npm run doc` will generate the documentation in the `doc`
 subdirectory.
@@ -110,7 +112,8 @@ will build an image using `Dockerfile`
 ```
 $ docker run -p9093:9093 xword
 ```
-will run the image, mapping `localhost` port 9093 to port 9093 on the docker image
+will run the image, mapping `localhost` port 9093 to port 9093 on the docker image. The docker image is automatically built when a new version is checked in
+to github.
 
 ## Ideas
 
@@ -141,6 +144,6 @@ The DAWG support is designed to be reusable in other games. It might be fun to i
 ### Public Server
 It would be nice to see a truly public server that anyone could sign in to and play against other random people. However this would have to be done with great care.
 
-- there are already a number of security features, such as simple XSS avoidance (thanks to @pkolano) and use of HTTPS, but it has some potential holes that might be exploited by an evil person. An audit it required.
+- there are already a number of security features, such as simple XSS avoidance (thanks to @pkolano) and use of HTTPS, but it has some potential holes that might be exploited by an evil person. An audit is required.
 - would also have to address things like the size and performance of the database, and the performance of the robot.
 - the games interface would be unusable without some sort of grouping of users and/or games - for example, into "rooms".

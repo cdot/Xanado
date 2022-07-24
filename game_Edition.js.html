@@ -31,48 +31,54 @@
   and license information. Author Crawford Currie http://c-dot.co.uk*/
 /* eslint-env amd */
 
-define("game/Edition", () => {
-	// Static DB of loaded Editions, indexed by name
-	const editions = {};
+define(() => {
+  // Static DB of loaded Editions, indexed by name
+  const editions = {};
 
   /**
    * @typedef {object} BagLetter
    * @param {string} BagLetter.letter - a code point (undefined for blank)
-	 * @param {number} BagLetter.score - score for this letter
-	 * @param {number} BagLetter.count - number of tiles for this letter
+   * @param {number} BagLetter.score - score for this letter
+   * @param {number} BagLetter.count - number of tiles for this letter
    */
 
-	/**
-	 * A Scrabble-like crossword game edition.
-	 *
-	 * Editions define the board layout and letter bag for a specific
-	 * Scrabble-like crossword game - Scrabble, Words With Friends, Lexulous,
-	 * or a game you've made yourself.
-	 *
-	 * Editions are only loaded once, and are subsequently kept in memory.
-	 * They are referred to by name in comms between the server and players,
-	 * and are not sent to the browser.
-	 */
-	class Edition {
-		/**
+  /**
+   * A Scrabble-like crossword game edition.
+   *
+   * Editions define the board layout and letter bag for a specific
+   * Scrabble-like crossword game - Scrabble, Words With Friends, Lexulous,
+   * or a game you've made yourself.
+   *
+   * Editions are only loaded once, and are subsequently kept in memory.
+   * They are referred to by name in comms between the server and players,
+   * and are not sent to the browser.
+   */
+  class Edition {
+    /**
+     * Name of the edition
+     * @member {string}
+     */
+    name;
+
+    /**
      * The initial bag of letters at
-		 * the start of a game. Note that the ordering is unimportant
-		 * but if a dictionary is used, then there has to be a 1:1
-		 * correspondence between the alphabet used to generate the
-		 * DAWG and the letters in the bag.
+     * the start of a game. Note that the ordering is unimportant
+     * but if a dictionary is used, then there has to be a 1:1
+     * correspondence between the alphabet used to generate the
+     * DAWG and the letters in the bag.
      * @member {BagLetter[]}
      */
     bag;
 
     /**
      * A quarter-board, where each entry
-		 * represents a row of the Lower-right quadrant of the
-		 * board, so 0,0 is the middle. Each character in the strings
-		 * represents the scoring for that square encoded as follows:
-		 * d = double letter, D = double word
-		 * t = triple letter, T = triple word
-		 *  q = quad letter, Q = quad word
-		 * _ = normal
+     * represents a row of the Lower-right quadrant of the
+     * board, so 0,0 is the middle. Each character in the strings
+     * represents the scoring for that square encoded as follows:
+     * d = double letter, D = double word
+     * t = triple letter, T = triple word
+     *  q = quad letter, Q = quad word
+     * _ = normal
      * @member {string[]}
      */
     layout;
@@ -108,106 +114,109 @@ define("game/Edition", () => {
      * @member {object.&lt;string,number>}
      * @private
      */
-		scores;
+    scores;
 
     /**
      * Number of rows on the board (computed)
      * @member {string[]}
      */
-		rows;
+    rows;
 
     /**
      * Number of columns on the board (computed)
      * @member {string[]}
      */
-		cols;
+    cols;
 
     /**
-     * List of the letters in the bag (computed)
+     * Sorted list of the unique non-blank letters in the bag (computed)
      * @member {string[]}
      */
-		alphabeta;
-
-    /**
-     * String containing all the letters in the bag, sorted (computed).
-     * @member {string[]}
-     */
-		alphabet;
+    alphabet;
 
     /**
      * @param {object} spec the specification for the edition. This is an
      * object that contains all the non-computed fields of an edition.
-		 */
-		constructor(spec) {
-			Object.getOwnPropertyNames(spec).forEach(
-				p => this[p] = spec[p]);
-			this.bonuses = spec.bonuses;
+     */
+    constructor(spec) {
+      Object.getOwnPropertyNames(spec).forEach(
+        p => this[p] = spec[p]);
+      this.bonuses = spec.bonuses;
 
-			this.scores = { }; // map letter->score
+      this.scores = { }; // map letter->score
 
-			this.rows = 2 * this.layout.length - 1;
-			this.cols = this.rows;
+      this.rows = 2 * this.layout.length - 1;
+      this.cols = this.rows;
 
-			this.alphabeta = [];
-			for (let tile of this.bag) {
-				if (tile.letter)
-					this.alphabeta.push(tile.letter);
-				else {
-					tile.letter = " "; // blank
-					tile.isBlank = true;
-				}
-				this.scores[tile.letter] = tile.score || 0;
-			}
-			this.alphabet = this.alphabeta.sort().join("");
-		}
+      const alph = [];
+      for (let tile of this.bag) {
+        if (tile.letter)
+          alph.push(tile.letter);
+        else {
+          tile.letter = " "; // blank
+          tile.isBlank = true;
+        }
+        this.scores[tile.letter] = tile.score || 0;
+      }
+      this.alphabet = alph.sort();
+    }
 
-		/**
-		 * Promise to load this edition
+    /**
+     * Promise to load this edition
      * @param {string} name what to call the edition
-		 * @return {Promise} resolves to the Edition
-		 */
-		static load(name) {
-			if (editions[name])
-				return Promise.resolve(editions[name]);
+     * @return {Promise} resolves to the Edition
+     */
+    static load(name) {
+      if (editions[name])
+        return Promise.resolve(editions[name]);
 
-			// Use requirejs to support dependencies in the edition
-			// files
-			return new Promise(resolve => {
-				requirejs([ `editions/${name}` ], data => {
-					editions[name] = new Edition(data);
-					editions[name].name = name;
-					//console.log(`Loaded edition ${name}`);
-					resolve(editions[name]);
-				});
-			});
-		}
+      // Use requirejs to support dependencies in the edition
+      // files
+      return new Promise(resolve => {
+        requirejs([ `editions/${name}` ], spec => {
+          spec.name = name;
+          editions[name] = new Edition(spec);
+          //console.log(`Loaded edition ${name}`);
+          resolve(editions[name]);
+        });
+      });
+    }
 
-		/**
-		 * Get the 'type' of a square on the board
-		 * @param {number} col - 0-based column
-		 * @param {number} row - 0-based row
-		 * @return one of d = double letter, D = double word
-		 * t = triple letter, T = triple word
-		 * q = quad letter, Q = quad word
-		 * _ = normal
-		 */
-		squareType(col, row) {
-			const coli = Math.abs(col - Math.floor(this.cols / 2));
-			const rowi = Math.abs(row - Math.floor(this.rows / 2));
-			return this.layout[coli].charAt(rowi);
-		}
+    /**
+     * Get the 'type' of a square on the board
+     * @param {number} col - 0-based column
+     * @param {number} row - 0-based row
+     * @return one of d = double letter, D = double word
+     * t = triple letter, T = triple word
+     * q = quad letter, Q = quad word
+     * _ = normal
+     */
+    squareType(col, row) {
+      const coli = Math.abs(col - Math.floor(this.cols / 2));
+      const rowi = Math.abs(row - Math.floor(this.rows / 2));
+      return this.layout[coli].charAt(rowi);
+    }
 
-		/**
-		 * Get the score of a tile with the given letter
-		 * @param {string} l letter to look up
-		 * @return score of the letter, or 0 if not found
-		 */
-		letterScore(l) {
-			return this.scores[l] ? this.scores[l] : 0;
-		}
-	}
+    /**
+     * Get the score of a tile with the given letter
+     * @param {string} l letter to look up
+     * @return score of the letter, or 0 if not found
+     */
+    letterScore(l) {
+      return this.scores[l] ? this.scores[l] : 0;
+    }
 
-	return Edition;
+    /**
+     * Calculate any bonus afforded to plays of this length
+     * @param {number} tilesPaced number of tiles placed
+     * @return points bonus
+     */
+    calculateBonus(tilesPlaced) {
+      return this.bonuses ? (this.bonuses[tilesPlaced] || 0) : 0;
+    }
+  }
+
+  return Edition;
 });
 </code></pre>
         </article>
@@ -219,13 +228,13 @@ define("game/Edition", () => {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#allow">allow</a></li><li><a href="global.html#challenge">challenge</a></li><li><a href="global.html#confirmGameOver">confirmGameOver</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jul 22 2022 08:21:05 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Sun Jul 24 2022 15:05:35 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

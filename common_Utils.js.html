@@ -35,71 +35,76 @@
  * Common utilities used on browser and server side
  * @return {string}
  */
-define("common/Utils", [ "platform" ], Platform => {
+define([ "platform" ], Platform => {
 
-	class Utils {
+  class Utils {
 
-		/**
-		 * Generate a unique 16-character key using a-z0-9
-		 * @param {string[]?} miss optional array of pregenerated keys to miss
-		 * @return {string} a key not already in miss
-		 */
-		static genKey(miss) {
-			const chs = "0123456789abcdef".split("");
-			if (miss) {
-				let key;
-				do {
-					key = Utils.genKey();
-				} while (key in miss);
-				return key;
-			}
-			const s = [];
-			for (let i = 0; i &lt; 16; i++)
-				s.push(chs[Math.floor(Math.random() * 16)]);
-			return s.join("");
-		}
+    /**
+     * Generate a unique 16-character key using a-z0-9
+     * @param {string[]?} miss optional array of pregenerated keys to miss
+     * @return {string} a key not already in miss
+     */
+    static genKey(miss) {
+      const chs = "0123456789abcdef".split("");
+      if (miss) {
+        let key;
+        do {
+          key = Utils.genKey();
+        } while (key in miss);
+        return key;
+      }
+      const s = [];
+      for (let i = 0; i &lt; 16; i++)
+        s.push(chs[Math.floor(Math.random() * 16)]);
+      return s.join("");
+    }
 
-		/**
-		 * Format a time interval in seconds for display in a string e.g
-		 * `formatTimeInterval(601)` -> `"10:01"`
-		 * Maximum ordinal is days.
-		 * @param {number} t time period in seconds
-		 */
-		static formatTimeInterval(t) {
-			const neg = (t &lt; 0) ? "-" : "";
-			t = Math.abs(t);
-			const s = `0${t % 60}`.slice(-2);
-			t = Math.floor(t / 60);
-			const m = `0${t % 60}`.slice(-2);
-			t = Math.floor(t / 60);
-			if (t === 0) return `${neg}${m}:${s}`;
-			const h = `0${t % 24}`.slice(-2);
-			t = Math.floor(t / 24);
-			if (t === 0) return `${neg}${h}:${m}:${s}`;
-			return `${neg}${t}:${h}:${m}:${s}`;
-		}
+    /**
+     * Format a time interval in seconds for display in a string e.g
+     * `formatTimeInterval(601)` -> `"10:01"`
+     * Maximum ordinal is days.
+     * @param {number} t time period in seconds
+     */
+    static formatTimeInterval(t) {
+      const neg = (t &lt; 0) ? "-" : "";
+      t = Math.abs(t);
+      const s = `0${t % 60}`.slice(-2);
+      t = Math.floor(t / 60);
+      const m = `0${t % 60}`.slice(-2);
+      t = Math.floor(t / 60);
+      if (t === 0) return `${neg}${m}:${s}`;
+      const h = `0${t % 24}`.slice(-2);
+      t = Math.floor(t / 24);
+      if (t === 0) return `${neg}${h}:${m}:${s}`;
+      return `${neg}${t}:${h}:${m}:${s}`;
+    }
 
-		/**
-		 * Construct a test string giving a friendly description of a list
-		 * of "things" e.g. `andList(["A","B","C"])` will return `A, B and C`
-		 */
-		static andList(list) {
-			if (list.length == 0)
-				return "";
-			if (list.length == 1)
-				return list[0];
+    /**
+     * Construct a test string giving a friendly description of a list
+     * of "things" e.g. `andList(["A","B","C"])` will return `A, B and C`
+     */
+    static andList(list) {
+      if (list.length == 0)
+        return "";
+      if (list.length == 1)
+        return list[0];
 
-			return Platform.i18n("$1 and $2",
-							             list.slice(0, list.length - 1).join(", "),
-							             list[list.length - 1]);
-		}
+      return Platform.i18n("$1 and $2",
+                           list.slice(0, list.length - 1).join(", "),
+                           list[list.length - 1]);
+    }
 
+    /**
+     * Generate readable (though not parseable) representation of object,
+     * for use in debugging. Easier to read than JSON.stringify. Used instead
+     * of toString() and valueOf() which are inconsistent between platforms.
+     */
     static stringify(value) {
+      // Based on Crockford's polyfill for JSON.stringify.
 
-      // Produce a string from holder[key]
       switch (typeof value) {
       case "undefined":
-        return "undef";
+        return "?";
       case "string":
         return `"${value}"`;
       case "number":
@@ -113,7 +118,16 @@ define("common/Utils", [ "platform" ], Platform => {
       if (!value)
         return "null";
 
+      // Use the stringify function, if the object has one.
+      if (typeof value === "object"
+          &amp;&amp; typeof value.stringify === "function")
+        return value.stringify();
+
       const partial = [];
+
+      // Built-in types
+      if (value instanceof Date)
+        return value.toISOString();
 
       // Is the value an array?
       if (Object.prototype.toString.apply(value) === "[object Array]") {
@@ -131,14 +145,11 @@ define("common/Utils", [ "platform" ], Platform => {
             partial.push(`${k}:${v}`);
         }
       }
-
-      // Join all of the member texts together, separated with commas,
-      // and wrap them in braces.
       return `{${partial.join(",")}}`;
     }
-	}
+  }
 
-	return Utils;
+  return Utils;
 });
 </code></pre>
         </article>
@@ -150,13 +161,13 @@ define("common/Utils", [ "platform" ], Platform => {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#allow">allow</a></li><li><a href="global.html#challenge">challenge</a></li><li><a href="global.html#confirmGameOver">confirmGameOver</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jul 22 2022 08:21:05 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Sun Jul 24 2022 15:05:35 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

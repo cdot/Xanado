@@ -31,10 +31,10 @@
   and license information. Author Crawford Currie http://c-dot.co.uk*/
 /* eslint-env amd */
 
-define("game/Undo", [
-	"platform", "game/Types", "game/Tile"
+define([
+  "platform", "common/Utils", "game/Types", "game/Tile"
 ], (
-	Platform, Types, Tile
+  Platform, Utils, Types, Tile
 ) => {
 
   const Turns  = Types.Turns;
@@ -42,7 +42,8 @@ define("game/Undo", [
   const Notify = Types.Notify;
 
   /**
-   * Mixin that provides Undo functionality for Game
+   * Platform independent mixin that provides undo/redo functionality for
+   * {@linkcode Game}
    * @mixin Undo
    */
   return {
@@ -50,14 +51,15 @@ define("game/Undo", [
     /**
      * Take tiles out of the letter bag and put them back on the rack
      * @function
+     * @instance
      * @memberof Undo
      * @param {Tile[]} tiles list of tiles
      * @param {Rack} rack to put the tiles on
      */
     bag2rack(tiles, rack) {
-			for (const tile of tiles) {
-	      const removed = this.letterBag.removeTile(tile);
-        Platform.assert(removed, `${tile.toString()} missing from bag`);
+      for (const tile of tiles) {
+        const removed = this.letterBag.removeTile(tile);
+        Platform.assert(removed, `${Utils.stringify(tile)} missing from bag`);
         rack.addTile(removed);
       }
     },
@@ -65,6 +67,7 @@ define("game/Undo", [
     /**
      * Move tiles from the board back to the rack
      * @function
+     * @instance
      * @memberof Undo
      * @param {Tile[]} tiles list of tiles
      * @param {Rack} rack to put the tiles on
@@ -81,6 +84,7 @@ define("game/Undo", [
     /**
      * Move tiles from the rack to the board
      * @function
+     * @instance
      * @memberof Undo
      * @param {Tile[]} tiles list of tiles
      * @param {Rack} rack to get the tiles from
@@ -88,22 +92,23 @@ define("game/Undo", [
     rack2board(tiles, rack) {
       // Move tiles from the rack back onto the board
       for (const place of tiles) {
-				const tile = rack.removeTile(place);
+        const tile = rack.removeTile(place);
         Platform.assert(tile);
-				const square = this.board.at(place.col, place.row);
+        const square = this.board.at(place.col, place.row);
         Platform.assert(square &amp;&amp; !square.tile);
-				square.placeTile(tile, true);
+        square.placeTile(tile, true);
       }
     },
 
     /**
      * Undo a swap. Resets the game state as if it had never happened.
      * @function
+     * @instance
      * @memberof Undo
      * @param {Turn} turn the Turn to unplay
-     * @private
+     * @param {boolean?} isClient if true, updates the UI associated with the board
      */
-    unswap(turn) {
+    unswap(turn, isClient) {
       this.state = State.PLAYING;
       const player = this.getPlayerWithKey(turn.playerKey);
       const racked = player.rack.removeTiles(turn.replacements);
@@ -111,51 +116,50 @@ define("game/Undo", [
       this.letterBag.returnTiles(racked);
       player.passes--;
       this.whosTurnKey = player.key;
-      // TODO: notify
+      if (isClient)
+        player.rack.$refresh();
     },
 
     /**
      * Undo a play. Resets the game state as if it had never happened.
      * @function
+     * @instance
      * @memberof Undo
      * @param {Turn} turn the Turn to unplay
-     * @private
+     * @param {boolean?} isClient if true, updates the UI associated with the board
      */
-    unplay(turn) {
-      this._debug("unplay");
+    unplay(turn, isClient) {
       this.state = State.PLAYING;
       const player = this.getPlayerWithKey(turn.playerKey);
       const racked = player.rack.removeTiles(turn.replacements);
       this.board2rack(turn.placements, player.rack);
       this.letterBag.returnTiles(racked);
-			player.score -= turn.score;
-			player.passes = turn.prepasses || 0;
+      player.score -= turn.score;
+      player.passes = turn.prepasses || 0;
       this.whosTurnKey = player.key;
-
-      // TODO: notify
+      if (isClient) {
+        player.rack.$refresh();
+        this.board.$refresh();
+      }
     },
 
     /**
      * Undo a game over confirmation.
      * Resets the game state as if it had never happened.
      * @function
+     * @instance
      * @memberof Undo
      * @param {Turn} turn the Turn to unplay
-     * @private
+     * @param {boolean?} isClient if true, updates the UI associated with the board
      */
-    unconfirmGameOver(turn) {
-      this._debug("\tend state", turn);
+    unconfirmGameOver(turn, isClient) {
       // Re-adjustscores from the delta
-      let pointsGainedFromRacks = 0;
-      for (const key of Object.keys(turn.score)) {
+      for (const key in turn.score) {
         const delta = turn.score[key];
         const player = this.getPlayerWithKey(key);
         Platform.assert(player, key);
         player.score -= (delta.time || 0) + (delta.tiles || 0);
-        pointsGainedFromRacks += Math.abs(delta.tiles);
       }
-			const winner = this.getWinner();
-      winner.score -= pointsGainedFromRacks;
       this.state = State.PLAYING;
       // TODO: Notify
       // TODO: reset the clock
@@ -165,11 +169,12 @@ define("game/Undo", [
      * Undo a TOOK_BACK or CHALLENGE_WON.
      * Resets the game state as if it had never happened.
      * @function
+     * @instance
      * @memberof Undo
      * @param {Turn} turn the Turn to unplay
-     * @private
+     * @param {boolean?} isClient if true, updates the UI associated with the board
      */
-    untakeBack(turn) {
+    untakeBack(turn, isClient) {
       this.state = State.PLAYING;
       const player = this.getPlayerWithKey(turn.playerKey);
       this.rack2board(turn.placements, player.rack);
@@ -177,18 +182,21 @@ define("game/Undo", [
       player.score -= turn.score;
       this.whosTurnKey = this.nextPlayer(player).key;
       this._debug(`\tplayer now ${this.whosTurnKey}`,turn);
-      // TODO: Notify
+      if (isClient) {
+        player.rack.$refresh();
+        this.board.$refresh();
+      }
     },
 
     /**
      * Undo a pass. Resets the game stat as if it had never happened.
      * @function
+     * @instance
      * @memberof Undo
      * @param {Turn} turn the Turn to unplay
-     * @private
+     * @param {boolean?} isClient if true, updates the UI associated with the board
      */
-    unpass(turn) {
-      this._debug("unpass ", turn.type);
+    unpass(turn, isClient) {
       this.state = State.PLAYING;
       const player = this.getPlayerWithKey(turn.playerKey);
       player.passes--;
@@ -200,13 +208,14 @@ define("game/Undo", [
      * Unplay a LOST challenge (won challenges are handled in untakeBack).
      * Resets the game state as if it had never happened.
      * @function
+     * @instance
      * @memberof Undo
      * @param {Turn} turn the Turn to unplay
-     * @private
+     * @param {boolean?} isClient if true, updates the UI associated with the board
      */
-    unchallenge(turn) {
+    unchallenge(turn, isClient) {
       const player = this.getPlayerWithKey(turn.challengerKey);
-      this._debug("\t", player.toString(), "regained", turn.score);
+      this._debug("\t", Utils.stringify(player), "regained", turn.score);
       player.score -= turn.score;
       // TODO: Notify
     },
@@ -216,34 +225,43 @@ define("game/Undo", [
      * happened. Sends a Notify.UNDONE to all listeners, passing the Turn
      * that was unplayed.
      * @function
+     * @instance
      * @memberof Undo
-     * @param {boolean?} nosave disables saving after undo.
+     * @param {boolean?} isClient if true, updates the UI associated with the board
+     * and rack. If false, saves the game.
      * @return {Promise} promise resolving to undefined
      */
-    undo(nosave) {
-      const turn = this.turns.pop();
-      Platform.assert(turn);
+    undo(isClient) {
+      Platform.assert(this.turnCount() > 0);
+      const turn = this.popTurn();
       this._debug(`un-${turn.type}`);
       switch (turn.type) {
-		  case Turns.SWAPPED:
-        this.unswap(turn); break;
-		  case Turns.PASSED:
-		  case Turns.TIMED_OUT:
-        this.unpass(turn); break;
-		  case Turns.PLAYED:
-        this.unplay(turn); break;
-		  case Turns.TOOK_BACK:
-		  case Turns.CHALLENGE_WON:
-        this.untakeBack(turn); break;
-		  case Turns.GAME_ENDED:
-        this.unconfirmGameOver(turn); break;
-		  case Turns.CHALLENGE_LOST:
-        this.unchallenge(turn); break;
+      case Turns.SWAPPED:
+        this.unswap(turn, isClient);
+        break;
+      case Turns.PASSED:
+      case Turns.TIMED_OUT:
+        this.unpass(turn, isClient);
+        break;
+      case Turns.PLAYED:
+        this.unplay(turn, isClient);
+        break;
+      case Turns.TOOK_BACK:
+      case Turns.CHALLENGE_WON:
+        this.untakeBack(turn, isClient);
+        break;
+      case Turns.GAME_ENDED:
+        this.unconfirmGameOver(turn, isClient);
+        break;
+      case Turns.CHALLENGE_LOST:
+        this.unchallenge(turn, isClient);
+        break;
       default:
-        Platform.fail(`Unkown turn type '${turn.type}'`);
+        Platform.fail(`Unknown turn type '${turn.type}'`);
       }
-      if (nosave)
+      if (isClient)
         return Promise.resolve();
+
       return this.save()
       .then(() => this.notifyAll(Notify.UNDONE, turn));
     },
@@ -251,6 +269,7 @@ define("game/Undo", [
     /**
      * Replay the given turn back into the game
      * @function
+     * @instance
      * @memberof Undo
      * @return {Promise} promise resolving to undefined
      */
@@ -258,35 +277,37 @@ define("game/Undo", [
       const player = this.getPlayerWithKey(turn.playerKey);
       this._debug("REDO", turn.type, new Date(turn.timestamp).toISOString());
       switch (turn.type) {
-		  case Turns.SWAPPED:
-        // Remove and return the tiles to the the unshaken bag
-        // to ensure replayability
+      case Turns.SWAPPED:
+        // Remove and return the expected tiles to the the unshaken bag
+        // to ensure replay order. We have to do this so the next play on the
+        // undo stack is also redoable.
         this.letterBag.predictable = true;
         this.letterBag.removeTiles(turn.replacements);
-        this.letterBag.returnTiles(turn.replacements);
+        this.letterBag.returnTiles(turn.replacements.map(t => new Tile(t)));
         this._debug("\t-- swap");
         return this.swap(player, turn.placements)
         .then(() => delete this.letterBag.predictable);
-		  case Turns.PLAYED:
+      case Turns.PLAYED:
         this.letterBag.predictable = true;
+        // Remove and return
         this.letterBag.removeTiles(turn.replacements);
-        this.letterBag.returnTiles(turn.replacements);
+        this.letterBag.returnTiles(turn.replacements.map(t => new Tile(t)));
         this._debug("\t-- play");
         return this.play(player, turn)
         .then(() => delete this.letterBag.predictable);
-		  case Turns.PASSED:
-		  case Turns.TIMED_OUT:
+      case Turns.PASSED:
+      case Turns.TIMED_OUT:
         this._debug("\t-- pass");
         return this.pass(player, turn.type);
-		  case Turns.TOOK_BACK:
+      case Turns.TOOK_BACK:
         this._debug("\t-- takeBack");
         return this.takeBack(player, turn.type);
-		  case Turns.CHALLENGE_WON:
-		  case Turns.CHALLENGE_LOST:
+      case Turns.CHALLENGE_WON:
+      case Turns.CHALLENGE_LOST:
         this._debug("\t-- challenge");
         return this.challenge(
           this.getPlayerWithKey(turn.challengerKey), player);
-		  case Turns.GAME_ENDED:
+      case Turns.GAME_ENDED:
         this._debug("\t-- confirmGameOver");
         return this.confirmGameOver(player, turn.endState);
       }
@@ -305,13 +326,13 @@ define("game/Undo", [
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#allow">allow</a></li><li><a href="global.html#challenge">challenge</a></li><li><a href="global.html#confirmGameOver">confirmGameOver</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jul 22 2022 08:21:05 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Sun Jul 24 2022 15:05:35 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -42,135 +42,135 @@
 const requirejs = require('requirejs');
 
 requirejs.config({
-	baseUrl: `${__dirname}/..`
+  baseUrl: `${__dirname}/..`
 });
 
 requirejs(['node-getopt', 'fs', 'design/ValettCore'], (Getopt, fs, Valett) => {
-	const Fs = fs.promises;
-	let config = { // default config for Scrabble(R)
-		weights: {
-			frequency: .34,
-			frequencyByLength: .33,
-			entropy: .33
-		},
-		frequencyByLengthWeights: [
-			0, 50, 25, 5, 2.5, 1.25, 0.625, 25, 12.5, 2.5, 1.25
-		],
-		entropyWeights: [ .5, .5 ],
-		minPoints: 1,
-		maxPoints: 10,
-		tileCount: 98
-	};
-	
-	const DESCRIPTION = [
-		'USAGE',
-		`node ${process.argv[1].replace(/.*\//, '')} [options] &lt;wordfile>`,
-		'Analyse a set of words. Output is in the form of a bag definition',
-		'for use in an Edition.',
-		'Optional config is a JSON file allowing you to override the following:',
-		'{',
-		'  minPoints: minimum point value for a tile.',
-		`    Default: ${config.minPoints}`,
-		'  maxPoints: maximum point value for a tile.',
-		`    Default: ${config.maxPoints}`,
-		'  tileCount: number of tiles in the initial bag, not including blanks.',
-		`    Default: ${config.tileCount}`,
-		'  weights: relative weighting of frequency, frequency by length, and',
-		'    entropy when calculating letter values. Fields should sum to 1.',
-		`    Default: ${JSON.stringify(config.weights)}`,
-		'  frequencyByLengthWeights: relative value of a letter\'s occurrence',
-		'    in words of different length. For example, in Scrabble',
-		'    it is particularly valuable for a letter to appear in 2,',
-		'    3, 7 and 8 tile words.',
-		`    Default: ${JSON.stringify(config.frequencyByLengthWeights)}`,
-		'  entropyWeights: relative value of the ease of transitioning into',
-		'    a letter (how evenly the transition probabilities toward',
-		'    a letter are distributed) and out of a letter. For example,',
-		'    Q has a low entropy out since its transition probability',
-		'    distribution is highly peaked at U.',
-		`    Default: [${config.entropyWeights}]`,
-		'}'
-	].join('\n');
+  const Fs = fs.promises;
+  let config = { // default config for Scrabble(R)
+    weights: {
+      frequency: .34,
+      frequencyByLength: .33,
+      entropy: .33
+    },
+    frequencyByLengthWeights: [
+      0, 50, 25, 5, 2.5, 1.25, 0.625, 25, 12.5, 2.5, 1.25
+    ],
+    entropyWeights: [ .5, .5 ],
+    minPoints: 1,
+    maxPoints: 10,
+    tileCount: 98
+  };
+  
+  const DESCRIPTION = [
+    'USAGE',
+    `node ${process.argv[1].replace(/.*\//, '')} [options] &lt;wordfile>`,
+    'Analyse a set of words. Output is in the form of a bag definition',
+    'for use in an Edition.',
+    'Optional config is a JSON file allowing you to override the following:',
+    '{',
+    '  minPoints: minimum point value for a tile.',
+    `    Default: ${config.minPoints}`,
+    '  maxPoints: maximum point value for a tile.',
+    `    Default: ${config.maxPoints}`,
+    '  tileCount: number of tiles in the initial bag, not including blanks.',
+    `    Default: ${config.tileCount}`,
+    '  weights: relative weighting of frequency, frequency by length, and',
+    '    entropy when calculating letter values. Fields should sum to 1.',
+    `    Default: ${JSON.stringify(config.weights)}`,
+    '  frequencyByLengthWeights: relative value of a letter\'s occurrence',
+    '    in words of different length. For example, in Scrabble',
+    '    it is particularly valuable for a letter to appear in 2,',
+    '    3, 7 and 8 tile words.',
+    `    Default: ${JSON.stringify(config.frequencyByLengthWeights)}`,
+    '  entropyWeights: relative value of the ease of transitioning into',
+    '    a letter (how evenly the transition probabilities toward',
+    '    a letter are distributed) and out of a letter. For example,',
+    '    Q has a low entropy out since its transition probability',
+    '    distribution is highly peaked at U.',
+    `    Default: [${config.entropyWeights}]`,
+    '}'
+  ].join('\n');
 
-	const opt = Getopt.create([
-		['c', 'config=ARG', 'Config file (JSON) - see above']
-	])
+  const opt = Getopt.create([
+    ['c', 'config=ARG', 'Config file (JSON) - see above']
+  ])
         .bindHelp()
         .setHelp(`${DESCRIPTION}\nOPTIONS\n[[OPTIONS]]`)
-		    .parseSystem();
+        .parseSystem();
 
-	//console.log(opt);
+  //console.log(opt);
   if (opt.argv.length == 0) {
     opt.showHelp();
     throw 'No word corpus filename given';
   }
-	const infile = opt.argv.shift();
+  const infile = opt.argv.shift();
 
   let premonition;
-	if (opt.options.config) {
-		// Read config from file (JSON)
-		console.log(`Config from ${opt.options.config}`);
-		premonition = Fs.readFile(opt.options.config)
-		.then(json => config = JSON.parse(json));
-	}
+  if (opt.options.config) {
+    // Read config from file (JSON)
+    console.log(`Config from ${opt.options.config}`);
+    premonition = Fs.readFile(opt.options.config)
+    .then(json => config = JSON.parse(json));
+  }
   else
     premonition = Promise.resolve();
 
 
-	premonition
+  premonition
   .then(() => {
-	  console.log(`Analyse ${infile}`);
-	  console.log(config);
+    console.log(`Analyse ${infile}`);
+    console.log(config);
 
     return Fs.readFile(infile);
   })
-	.then(data => {
-		const words = data.toString().toUpperCase().split(/\r?\n/);
-		// Extract the alphabet from the corpus
-		const chars = {};
-		words.forEach(
-			w => w.split('').forEach(
-				c => chars[c] = true));
-		const letters = Object.keys(chars);
-		letters.sort();
-		
-		const v = new Valett(words, letters); 
-		const values = v.analyze(config.maxPoints - config.minPoints,
-				                     config.weights,
-				                     config.frequencyByLengthWeights,
-				                     config.entropyWeights);
-		let sum;
-		const count = [];
-		let factor = config.tileCount;
-		while (config.tileCount > 0) {
-			sum = 0;
-			for (let letter of letters) {
-				let n = values[v.hash[letter]].count * factor;
-				if (n &lt; 1)
-					n = 1;
-				else
-					n = Math.round(n);
-				count[letter] = n;
-				sum += n;
-			}
-			if (sum &lt;= config.tileCount)
-				break;
-			factor -= 0.01;
-		}
-		sum = 0;
-		for (let letter of letters) {
-			const score = values[v.hash[letter]].score + config.minPoints;
-			const num = count[letter];
-			sum += num;
-			console.log(`{ letter: '${letter}', score: ${score}, count: ${num} }`);
-		}
-		console.log(`Total ${sum} tiles`);
+  .then(data => {
+    const words = data.toString().toUpperCase().split(/\r?\n/);
+    // Extract the alphabet from the corpus
+    const chars = {};
+    words.forEach(
+      w => w.split('').forEach(
+        c => chars[c] = true));
+    const letters = Object.keys(chars);
+    letters.sort();
+    
+    const v = new Valett(words, letters); 
+    const values = v.analyze(config.maxPoints - config.minPoints,
+                             config.weights,
+                             config.frequencyByLengthWeights,
+                             config.entropyWeights);
+    let sum;
+    const count = [];
+    let factor = config.tileCount;
+    while (config.tileCount > 0) {
+      sum = 0;
+      for (let letter of letters) {
+        let n = values[v.hash[letter]].count * factor;
+        if (n &lt; 1)
+          n = 1;
+        else
+          n = Math.round(n);
+        count[letter] = n;
+        sum += n;
+      }
+      if (sum &lt;= config.tileCount)
+        break;
+      factor -= 0.01;
+    }
+    sum = 0;
+    for (let letter of letters) {
+      const score = values[v.hash[letter]].score + config.minPoints;
+      const num = count[letter];
+      sum += num;
+      console.log(`{ letter: '${letter}', score: ${score}, count: ${num} }`);
+    }
+    console.log(`Total ${sum} tiles`);
 
-	})
-	.catch(e => {
-		console.log(e);
-		console.log(DESCRIPTION);
-	});
+  })
+  .catch(e => {
+    console.log(e);
+    console.log(DESCRIPTION);
+  });
 });
 </code></pre>
         </article>
@@ -182,13 +182,13 @@ requirejs(['node-getopt', 'fs', 'design/ValettCore'], (Getopt, fs, Valett) => {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#allow">allow</a></li><li><a href="global.html#challenge">challenge</a></li><li><a href="global.html#confirmGameOver">confirmGameOver</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jul 22 2022 08:21:05 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Sun Jul 24 2022 15:05:35 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

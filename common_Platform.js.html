@@ -31,165 +31,124 @@
   and license information. Author Crawford Currie http://c-dot.co.uk*/
 /* eslint-env amd */
 
-define("common/Platform", () => {
+define(() => {
 
-	/**
-	 * Interface to the server-side games database to allow for
-	 * plugging other database implementations.
-	 */
-	class Database {
-    /* istanbul ignore next */
-		/**
-		 * @param {string} id a /-separated path name that will be used
-		 * as the name of a DB. How this is interpreted is up to the
-		 * implementation, but most will treat it as a directory or file path.
-		 * @param {string} type identifier used to distinguish keys
-		 * relevant to this DB from other data that may be co-located
-		 * @abstract
-		 */
-		constructor(id, type) {}
+  /**
+   * Interface isolating platform details from the rest of
+   * the code. The purpose is to allow common code to run on
+   * both browser and server.
+   */
+  class Platform {
 
     /* istanbul ignore next */
-		/**
-		 * Promise to get a list of keys in the DB
-		 * @return {Promise} resolves to a `string[]` list of key names
-		 * @abstract
-		 */
-		keys() {}
-
-    /* istanbul ignore next */
-		/**
-		 * Promise to set a key value
-		 * @param {string} key the entry key
-		 * @param {object} data the data to store
-		 * @return {Promise} resolves to undefined
-		 * @abstract
-		 */
-		set(key, data) {}
-
-    /* istanbul ignore next */
-		/**
-		 * Promise to get a key value
-		 * @param {string} key the entry key
-		 * @param {Object[]} classes list of classes that may occur in the
-		 * data, as passed to {@linkcode Fridge#thaw|Fridge.thaw}
-		 * @return {Promise} resolves to the key value
-		 * @abstract
-		 */
-		get(key, classes) {}
-
-    /* istanbul ignore next */
-		/**
-		 * Remove a key and all associated data
-		 * @param {string} key the entry key
-		 * @return {Promise} resolves to undefined
-		 * @abstract
-		 */
-		rm(key) {}
-	}
-
-	/**
-	 * Interface isolating platform details from the rest of
-	 * the code. The purpose is to allow common code to run on
-	 * both browser and server.
-	 */
-	class Platform {
-
-		/* istanbul ignore next */
-		/**
+    /**
      * Platform-specific assert
      * @param {boolean} condition must be true or will throw an Error
      * @param {string} descr Error description
      */
     static assert(condition, descr) {}
 
-		/* istanbul ignore next */
+    /* istanbul ignore next */
     /**
      * assert(false)
      * @param {string} descr Error description
      */
     static fail(descr) {}
 
-		/* istanbul ignore next */
-		/**
-		 * Emit the given event for handling by the platform's event system
-		 * @param {string} event name of event to emit
-		 * @param {object[]} args array of arguments to pass to the
-		 * event handler
-		 * @abstract
-		 */
-		static trigger(event, args) {
-			throw new Error("Pure virtual");
-		}
+    /* istanbul ignore next */
+    /**
+     * Emit the given event for handling by the platform's event system
+     * @param {string} event name of event to emit
+     * @param {object[]} args array of arguments to pass to the
+     * event handler
+     * @abstract
+     */
+    static trigger(event, args) {
+      throw new Error("Pure virtual");
+    }
 
-		/**
-		 * @callback Platform~bestMoveCallback
-		 * @param {(Move|string)} best move found so far, or a
-		 * progress string for debug (only intended for developer)
-		 */
+    /**
+     * @callback Platform~bestMoveCallback
+     * @param {(Move|string)} best move found so far, or a
+     * progress string for debug (only intended for developer)
+     */
 
-		/* istanbul ignore next */
-		/**
-		 * If available, find the best play. This is used to abstract
-		 * the best play controller from the rest of the server code,
-		 * so it can be invoked either directly or asynchronously.
-		 * @param {Game} game the Game
-		 * @param {Tile[]} rack rack in the form of a simple list of Tile
-		 * @param {Platform~bestMoveCallback} cb accepts a best play
-		 * whenever a new one is found, or a string containing a
-		 * message
-		 * @param {string?} dictpath path to dictionaries to override
-		 * the default
-		 * @param {string?} dictionary name of dictionary to override the
-		 * game dictionary
-		 * @return {Promise} Promise that resolves when all best moves
-		 * have been tried
-		 * @abstract
-		 */
-		static findBestPlay(game, rack, cb, dictpath, dictionary) {
-			throw new Error("Pure virtual");
-		}
+    /* istanbul ignore next */
+    /**
+     * If available, find the best play. This is used to abstract
+     * the best play controller from the rest of the server code,
+     * so it can be invoked either directly or asynchronously.
+     * @param {Game} game the Game
+     * @param {Tile[]} rack rack in the form of a simple list of Tile
+     * @param {Platform~bestMoveCallback} cb accepts a best play
+     * whenever a new one is found, or a string containing a
+     * message
+     * @param {string?} dictionary name of (or path to) dictionary to
+     * override the game dictionary
+     * @return {Promise} Promise that resolves when all best moves
+     * have been tried
+     * @abstract
+     */
+    static findBestPlay(game, rack, cb, dictionary) {
+      throw new Error("Pure virtual");
+    }
 
-		/* istanbul ignore next */
-		/**
-		 * Get the absolute path to a file or directory within the
-		 * installation.
-		 * @param {string} p a path relative to the root of the installation
-		 * @abstract
-		 */
-		static getFilePath(p) {
-			throw new Error("Pure virtual");
-		}
+    /* istanbul ignore next */
+    /**
+     * Signature as {@link https://nodejs.org/api/path.html#pathformatpathobject|path.parse}
+     * @param {string} p a path to split
+     * @return {object}
+     * @abstract
+     */
+    static parsePath(p) {
+      throw new Error("Pure virtual");
+    }
 
-		/* istanbul ignore next */
-		/**
-		 * Read a file
-		 * @return {Promise} resolves to the file contents
-		 * @abstract
-		 */
-		static readFile(path) {
-			throw new Error("Pure virtual");
-		}
+    /* istanbul ignore next */
+    /**
+     * Signature as {@link https://nodejs.org/api/path.html#pathformatpathobject|path.format}
+     * @param {object} p a path object
+     * @return {string}
+     * @abstract
+     */
+    static formatPath(p) {
+      throw new Error("Pure virtual");
+    }
 
-		/* istanbul ignore next */
-		/**
-		 * Read a gz file
-		 * @return {Promise} resolves to the file contents
-		 * @abstract
-		 */
-		static readZip(path) {
-			throw new Error("Pure virtual");
-		}
-	}
+    /* istanbul ignore next */
+    /**
+     * Get the absolute path to a file or directory within the
+     * installation. This can be a file path or a URL path, depending
+     * on the context.
+     * @param {string} p a path relative to the root of the installation
+     * @abstract
+     */
+    static getFilePath(p) {
+      throw new Error("Pure virtual");
+    }
 
-	/**
-	 * Implementation of {@linkcode Database} for this platform
-	 * @member {Database}
-	 * @memberof Platform
-	 */
-	Platform.Database = Database;
+    /* istanbul ignore next */
+    /**
+     * Read a file
+     * @return {Promise} resolves to the file contents
+     * @abstract
+     */
+    static readFile(path) {
+      throw new Error("Pure virtual");
+    }
 
-	return Platform;
+    /* istanbul ignore next */
+    /**
+     * Read a gz file
+     * @return {Promise} resolves to the file contents
+     * @abstract
+     */
+    static readZip(path) {
+      throw new Error("Pure virtual");
+    }
+  }
+
+  return Platform;
 });
 </code></pre>
         </article>
@@ -201,13 +160,13 @@ define("common/Platform", () => {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#allow">allow</a></li><li><a href="global.html#challenge">challenge</a></li><li><a href="global.html#confirmGameOver">confirmGameOver</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jul 22 2022 08:21:05 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Sun Jul 24 2022 15:05:35 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

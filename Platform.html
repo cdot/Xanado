@@ -95,7 +95,7 @@ both browser and server.</p></div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_Platform.js.html">common/Platform.js</a>, <a href="common_Platform.js.html#line68">line 68</a>
+        <a href="common_Platform.js.html">common/Platform.js</a>, <a href="common_Platform.js.html#line13">line 13</a>
     </li></ul></dd>
     
 
@@ -140,82 +140,6 @@ both browser and server.</p></div>
 
     
 
-    
-        <h3 class="subsection-title">Members</h3>
-
-        
-            
-<h4 class="name" id=".Database"><span class="type-signature">(static) </span>Database<span class="type-signature"> :<a href="Database.html">Database</a></span></h4>
-
-
-
-
-<div class="description">
-    <p>Implementation of <a href="Database.html"><code>Database</code></a> for this platform</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type"><a href="Database.html">Database</a></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_Platform.js.html">common/Platform.js</a>, <a href="common_Platform.js.html#line162">line 162</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
     
 
     
@@ -351,7 +275,7 @@ both browser and server.</p></div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_Platform.js.html">common/Platform.js</a>, <a href="common_Platform.js.html#line76">line 76</a>
+        <a href="common_Platform.js.html">common/Platform.js</a>, <a href="common_Platform.js.html#line21">line 21</a>
     </li></ul></dd>
     
 
@@ -488,7 +412,7 @@ both browser and server.</p></div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_Platform.js.html">common/Platform.js</a>, <a href="common_Platform.js.html#line83">line 83</a>
+        <a href="common_Platform.js.html">common/Platform.js</a>, <a href="common_Platform.js.html#line28">line 28</a>
     </li></ul></dd>
     
 
@@ -524,7 +448,7 @@ both browser and server.</p></div>
     
 
     
-    <h4 class="name" id=".findBestPlay"><span class="type-signature">(abstract, static) </span>findBestPlay<span class="signature">(game, rack, cb, dictpath<span class="signature-attributes">nullable</span>, dictionary<span class="signature-attributes">nullable</span>)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+    <h4 class="name" id=".findBestPlay"><span class="type-signature">(abstract, static) </span>findBestPlay<span class="signature">(game, rack, cb, dictionary<span class="signature-attributes">nullable</span>)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
     
 
     
@@ -667,40 +591,6 @@ message</p></td>
 
         <tr>
             
-                <td class="name"><code>dictpath</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-                    &lt;nullable><br>
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>path to dictionaries to override
-the default</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
                 <td class="name"><code>dictionary</code></td>
             
 
@@ -727,8 +617,8 @@ the default</p></td>
 
             
 
-            <td class="description last"><p>name of dictionary to override the
-game dictionary</p></td>
+            <td class="description last"><p>name of (or path to) dictionary to
+override the game dictionary</p></td>
         </tr>
 
     
@@ -769,7 +659,7 @@ game dictionary</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_Platform.js.html">common/Platform.js</a>, <a href="common_Platform.js.html#line121">line 121</a>
+        <a href="common_Platform.js.html">common/Platform.js</a>, <a href="common_Platform.js.html#line64">line 64</a>
     </li></ul></dd>
     
 
@@ -828,6 +718,161 @@ have been tried</p>
     
 
     
+    <h4 class="name" id=".formatPath"><span class="type-signature">(abstract, static) </span>formatPath<span class="signature">(p)</span><span class="type-signature"> &rarr; {string}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Signature as <a href="https://nodejs.org/api/path.html#pathformatpathobject">path.format</a></p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>p</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>a path object</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="common_Platform.js.html">common/Platform.js</a>, <a href="common_Platform.js.html#line86">line 86</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
     <h4 class="name" id=".getFilePath"><span class="type-signature">(abstract, static) </span>getFilePath<span class="signature">(p)</span><span class="type-signature"></span></h4>
     
 
@@ -837,7 +882,8 @@ have been tried</p>
 
 <div class="description">
     <p>Get the absolute path to a file or directory within the
-installation.</p>
+installation. This can be a file path or a URL path, depending
+on the context.</p>
 </div>
 
 
@@ -930,7 +976,7 @@ installation.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_Platform.js.html">common/Platform.js</a>, <a href="common_Platform.js.html#line132">line 132</a>
+        <a href="common_Platform.js.html">common/Platform.js</a>, <a href="common_Platform.js.html#line98">line 98</a>
     </li></ul></dd>
     
 
@@ -955,6 +1001,161 @@ installation.</p>
 
 
 
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".parsePath"><span class="type-signature">(abstract, static) </span>parsePath<span class="signature">(p)</span><span class="type-signature"> &rarr; {object}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Signature as <a href="https://nodejs.org/api/path.html#pathformatpathobject">path.parse</a></p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>p</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>a path to split</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="common_Platform.js.html">common/Platform.js</a>, <a href="common_Platform.js.html#line75">line 75</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">object</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
@@ -1018,7 +1219,7 @@ installation.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_Platform.js.html">common/Platform.js</a>, <a href="common_Platform.js.html#line142">line 142</a>
+        <a href="common_Platform.js.html">common/Platform.js</a>, <a href="common_Platform.js.html#line108">line 108</a>
     </li></ul></dd>
     
 
@@ -1128,7 +1329,7 @@ installation.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_Platform.js.html">common/Platform.js</a>, <a href="common_Platform.js.html#line152">line 152</a>
+        <a href="common_Platform.js.html">common/Platform.js</a>, <a href="common_Platform.js.html#line118">line 118</a>
     </li></ul></dd>
     
 
@@ -1311,7 +1512,7 @@ event handler</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_Platform.js.html">common/Platform.js</a>, <a href="common_Platform.js.html#line93">line 93</a>
+        <a href="common_Platform.js.html">common/Platform.js</a>, <a href="common_Platform.js.html#line38">line 38</a>
     </li></ul></dd>
     
 
@@ -1454,7 +1655,7 @@ progress string for debug (only intended for developer)</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_Platform.js.html">common/Platform.js</a>, <a href="common_Platform.js.html#line97">line 97</a>
+        <a href="common_Platform.js.html">common/Platform.js</a>, <a href="common_Platform.js.html#line42">line 42</a>
     </li></ul></dd>
     
 
@@ -1498,13 +1699,13 @@ progress string for debug (only intended for developer)</p></td>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#allow">allow</a></li><li><a href="global.html#challenge">challenge</a></li><li><a href="global.html#confirmGameOver">confirmGameOver</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jul 22 2022 08:21:05 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Sun Jul 24 2022 15:05:35 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

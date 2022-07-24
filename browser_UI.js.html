@@ -31,172 +31,172 @@
   and license information. Author Crawford Currie http://c-dot.co.uk*/
 /* eslint-env browser, jquery */
 
-define("browser/UI", [
-	"socket.io-client",  "browser/Dialog", "platform",
+define([
+  "socket.io-client",  "browser/Dialog", "platform", "common/Utils",
 
-	"jquery",
-	"jqueryui",
-	"i18n",
-	"i18n_emitter",
-	"i18n_fallbacks",
-	"i18n_language",
-	"i18n_messagestore",
-	"i18n_parser",
+  "jquery",
+  "jqueryui",
+  "i18n",
+  "i18n_emitter",
+  "i18n_fallbacks",
+  "i18n_language",
+  "i18n_messagestore",
+  "i18n_parser",
   "cldrpluralruleparser"
 ], (
-	Sockets, Dialog, Platform
+  Sockets, Dialog, Platform, Utils
 ) => {
 
-	/**
-	 * Common code shared between game and games interfaces
-	 */
-	class UI {
+  /**
+   * Common code shared between game and games interfaces
+   */
+  class UI {
 
-		constructor() {
-			/**
-			 * Are we using https?
-			 * @member {boolean}
-			 */
-			this.usingHttps = document.URL.indexOf("https:") === 0;
+    constructor() {
+      /**
+       * Are we using https?
+       * @member {boolean}
+       */
+      this.usingHttps = document.URL.indexOf("https:") === 0;
 
-			/**
-			 * Session object describing signed-in user
-			 * @member {object}
-			 */
-			this.session = undefined;
+      /**
+       * Session object describing signed-in user
+       * @member {object}
+       */
+      this.session = undefined;
 
-			/**
-			 * Cache of defaults object, lateinit in build()
-			 */
-			this.defaults = undefined;
+      /**
+       * Cache of defaults object, lateinit in build()
+       */
+      this.defaults = undefined;
 
-			/**
-			 * Cache of Audio objects, indexed by name of clip.
-			 * Empty until a clip is played.
-			 */
-			this.soundClips = {};
-		}
+      /**
+       * Cache of Audio objects, indexed by name of clip.
+       * Empty until a clip is played.
+       */
+      this.soundClips = {};
+    }
 
-		/**
-		 * Report an error returned from an ajax request.
-		 * @param {string|Error|array|jqXHR} args This will either be a
-		 * simple i18n string ID, or an array containing an i18n ID and a
-		 * series of arguments, or a jqXHR.
-		 */
-		static report(args) {
-			// Handle a jqXHR
-			if (typeof args === "object") {
-				if (args.responseJSON)
-					args = args.responseJSON;
-				else if (args.statusText)
-					args = `Network error: ${args.statusText}`;
-			}
+    /**
+     * Report an error returned from an ajax request.
+     * @param {string|Error|array|jqXHR} args This will either be a
+     * simple i18n string ID, or an array containing an i18n ID and a
+     * series of arguments, or a jqXHR.
+     */
+    static report(args) {
+      // Handle a jqXHR
+      if (typeof args === "object") {
+        if (args.responseJSON)
+          args = args.responseJSON;
+        else if (args.statusText)
+          args = `Network error: ${args.statusText}`;
+      }
 
-			let message;
-			if (typeof(args) === "string") // simple string
-				message = $.i18n(args);
-			else if (args instanceof Error) // Error object
-				message = args.toString();
-			else if (args instanceof Array) { // First element i18n code
-				message = $.i18n.apply($.i18n, args);
-			} else // something else
-				message = args.toString();
+      let message;
+      if (typeof(args) === "string") // simple string
+        message = $.i18n(args);
+      else if (args instanceof Error) // Error object
+        message = Utils.stringify(args);
+      else if (args instanceof Array) { // First element i18n code
+        message = $.i18n.apply($.i18n, args);
+      } else // something else
+        message = Utils.stringify(args);
 
-			$("#alertDialog")
-			.dialog({
-				modal: true,
-				title: $.i18n("XANADO problem")
-			})
-			.append(`&lt;p>${message}&lt;/p>`);
-		}
+      $("#alertDialog")
+      .dialog({
+        modal: true,
+        title: $.i18n("XANADO problem")
+      })
+      .append(`&lt;p>${message}&lt;/p>`);
+    }
 
-		/**
-		 * Play an audio clip, identified by id. Clips must be
-		 * pre-loaded in the HTML. Note that most (all?) browsers require
-		 * some sort of user interaction before they will play audio
-		 * embedded in the page.
-		 * @param {string} id name of the clip to play (no extension). Clip
-		 * must exist as an mp3 file in the /audio directory.
-		 */
-		playAudio(id) {
-			let audio = this.soundClips[id];
+    /**
+     * Play an audio clip, identified by id. Clips must be
+     * pre-loaded in the HTML. Note that most (all?) browsers require
+     * some sort of user interaction before they will play audio
+     * embedded in the page.
+     * @param {string} id name of the clip to play (no extension). Clip
+     * must exist as an mp3 file in the /audio directory.
+     */
+    playAudio(id) {
+      let audio = this.soundClips[id];
 
-			if (!audio) {
-				audio = new Audio(`/audio/${id}.mp3`);
-				this.soundClips[id] = audio;
-			}
+      if (!audio) {
+        audio = new Audio(`/audio/${id}.mp3`);
+        this.soundClips[id] = audio;
+      }
 
-			if (audio.playing)
-				audio.pause();
+      if (audio.playing)
+        audio.pause();
 
-			audio.play()
-			.catch(() => {
+      audio.play()
+      .catch(() => {
         // play() can throw if the audio isn't loaded yet. Catching
         // canplaythrough might help (though it's really a bit of
         // overkill, as none of Xanado's audio is "important")
-				$(audio).on(
+        $(audio).on(
           "canplaythrough", 
-					() => {
-						$(audio).off("canplaythrough");
+          () => {
+            $(audio).off("canplaythrough");
             audio.play()
             .catch(() => {
               // Probably no interaction yet
             });
-					}, true);
-			});
+          }, true);
+      });
     }
 
-		/**
-		 * Complete construction using promises
-		 * @return {Promise} promise that resolves when the UI is ready
-		 * @protected
-		 */
-		create() {
+    /**
+     * Complete construction using promises
+     * @return {Promise} promise that resolves when the UI is ready
+     * @protected
+     */
+    create() {
       // Set up translations
-			return Promise.all([
-				$.get("/locales")
-				.then(locales => {
-					const params = {};
-					locales.forEach(locale => {
-						params[locale] = `/i18n/${locale}.json`;
-					});
-					// Note: without other guidance, i18n will use the locale
-					// already in the browser - which is fine by us!
-					return $.i18n().load(params).then(() => locales);
-				})
-				.then(locales => {
-					console.log("Locales available", locales.join(", "));
-					// Expand/translate strings in the HTML
-					return new Promise(resolve => {
-						$(document).ready(() => {
-							console.log("Translating HTML to", $.i18n().locale);
-							$("body").i18n();
-							resolve(locales);
-						});
-					});
-				}),
-				$.get("/defaults")
-				.then(defaults => this.defaults = defaults)
-			])
-			.then(() => {
+      return Promise.all([
+        $.get("/locales")
+        .then(locales => {
+          const params = {};
+          locales.forEach(locale => {
+            params[locale] = `/i18n/${locale}.json`;
+          });
+          // Note: without other guidance, i18n will use the locale
+          // already in the browser - which is fine by us!
+          return $.i18n().load(params).then(() => locales);
+        })
+        .then(locales => {
+          console.log("Locales available", locales.join(", "));
+          // Expand/translate strings in the HTML
+          return new Promise(resolve => {
+            $(document).ready(() => {
+              console.log("Translating HTML to", $.i18n().locale);
+              $("body").i18n();
+              resolve(locales);
+            });
+          });
+        }),
+        $.get("/defaults")
+        .then(defaults => this.defaults = defaults)
+      ])
+      .then(() => {
         $("button").button();
-			  $(document)
-			  .tooltip({
-				  items: "[data-i18n-tooltip]",
-				  content: function() {
-					  return $.i18n($(this).data("i18n-tooltip"));
-				  }
-			  });
+        $(document)
+        .tooltip({
+          items: "[data-i18n-tooltip]",
+          content: function() {
+            return $.i18n($(this).data("i18n-tooltip"));
+          }
+        });
       })
       .then(() => this.handleURLArguments())
       .then(() => {
-			  console.debug("Connecting to socket");
+        console.debug("Connecting to socket");
         // The server URL will be deduced from the request
-			  this.socket = Sockets.connect();
-			  this.attachSocketListeners();
+        this.socket = Sockets.connect();
+        this.attachSocketListeners();
       })
       .then(() => this.attachHandlers());
-		}
+    }
 
     /**
      * Parse the URL used to load this page to extract parameters.
@@ -216,219 +216,217 @@ define("browser/UI", [
       return Promise.resolve(urlArgs);
     }
 
-		/**
-		 * Attach handlers for jquery and game events. This must NOT
+    /**
+     * Attach handlers for jquery and game events. This must NOT
      * attach socket handlers, just DOM object handlers.  Subclasses
      * should override this calling to super.attachHandlers() last.
-		 */
-		attachHandlers() {
-			// gear button
-			$(".settingsButton")
-			.on("click", () => {
-				const curTheme = this.getSetting("theme");
-				Dialog.open("SettingsDialog", {
-					ui: this,
-					postAction: "/session-settings",
-					postResult: settings => {
-						if (settings.theme === curTheme)
-							this.setSettings(settings);
-						else
-							window.location.reload();
-					},
-					error: UI.report
-				});
-			});
+     */
+    attachHandlers() {
+      // gear button
+      $(".settingsButton")
+      .on("click", () => {
+        const curTheme = this.getSetting("theme");
+        Dialog.open("SettingsDialog", {
+          ui: this,
+          postAction: "/session-settings",
+          postResult: settings => {
+            this.session.settings = settings;
+            window.location.reload();
+          },
+          error: UI.report
+        });
+      });
 
-			$(".user-interface").show();
-		}
+      $(".user-interface").show();
+    }
 
-		/**
-		 * Called when a connection to the server is reported by the
-		 * socket. Use to update the UI to reflect the game state.
-		 * Implement in subclasses.
+    /**
+     * Called when a connection to the server is reported by the
+     * socket. Use to update the UI to reflect the game state.
+     * Implement in subclasses.
      * @abstract
-		 */
-		readyToListen() {
-			return Promise.reject("Not implemented");
-		}
+     */
+    readyToListen() {
+      return Promise.reject("Not implemented");
+    }
 
-		/**
-		 * Attach socket communications listeners. Override in subclasses,
+    /**
+     * Attach socket communications listeners. Override in subclasses,
      * making sure to call super.attachSocketListeners()
-		 */
-		attachSocketListeners() {
+     */
+    attachSocketListeners() {
 
       Platform.assert(!this._socketListenersAttached);
       this._socketListenersAttached = true;
 
-			let $reconnectDialog = null;
+      let $reconnectDialog = null;
 
-			// socket.io events 'new_namespace', 'disconnecting',
-			// 'initial_headers', 'headers', 'connection_error' are not handled
+      // socket.io events 'new_namespace', 'disconnecting',
+      // 'initial_headers', 'headers', 'connection_error' are not handled
 
-			this.socket
+      this.socket
 
-			.on("connect", skt => {
-				// Note: "connect" is synonymous with "connection"
-				// Socket has connected to the server
-				console.debug("--> connect");
-				if ($reconnectDialog) {
-					$reconnectDialog.dialog("close");
-					$reconnectDialog = null;
-				}
-				this.readyToListen();
-			})
+      .on("connect", skt => {
+        // Note: "connect" is synonymous with "connection"
+        // Socket has connected to the server
+        console.debug("--> connect");
+        if ($reconnectDialog) {
+          $reconnectDialog.dialog("close");
+          $reconnectDialog = null;
+        }
+        this.readyToListen();
+      })
 
-			.on("disconnect", skt => {
-				// Socket has disconnected for some reason
-				// (server died, maybe?) Back off and try to reconnect.
-				console.debug(`--> disconnect`);
-				const mess = $.i18n("Server disconnected, trying to reconnect");
-				$reconnectDialog = $("#alertDialog")
-				.text(mess)
-				.dialog({
-					title: $.i18n("XANADO problem"),
-					modal: true
-				});
-				setTimeout(() => {
-					// Try and rejoin after a 3s timeout
-					this.readyToListen()
-					.catch(e => {
-						console.debug(e);
-						if (!$reconnectDialog)
-							UI.report(mess);
-					});
-				}, 3000);
-			});
-		}
+      .on("disconnect", skt => {
+        // Socket has disconnected for some reason
+        // (server died, maybe?) Back off and try to reconnect.
+        console.debug(`--> disconnect`);
+        const mess = $.i18n("Server disconnected, trying to reconnect");
+        $reconnectDialog = $("#alertDialog")
+        .text(mess)
+        .dialog({
+          title: $.i18n("XANADO problem"),
+          modal: true
+        });
+        setTimeout(() => {
+          // Try and rejoin after a 3s timeout
+          this.readyToListen()
+          .catch(e => {
+            console.debug(e);
+            if (!$reconnectDialog)
+              UI.report(mess);
+          });
+        }, 3000);
+      });
+    }
 
-		/**
-		 * Identify the logged-in user
-		 * @return {Promise} a promise that resolves to the (redacted)
-		 * session object if someone is logged in, or undefined otherwise.
-		 */
-		getSession() {
-			$(".logged-in,.not-logged-in").hide();
-			return $.get("/session")
-			.then(session => {
- 				console.debug(`Signed in as '${session.name}'`);
-				$(".not-logged-in").hide();
-				$(".logged-in")
-				.show()
-				.find("span")
-				.first()
-				.text(session.name);
-				this.session = session;
-				return session;
-			})
-			.catch(e => {
-				$(".logged-in").hide();
-				$(".not-logged-in").show();
+    /**
+     * Identify the logged-in user
+     * @return {Promise} a promise that resolves to the (redacted)
+     * session object if someone is logged in, or undefined otherwise.
+     */
+    getSession() {
+      $(".logged-in,.not-logged-in").hide();
+      return $.get("/session")
+      .then(session => {
+         console.debug(`Signed in as '${session.name}'`);
+        $(".not-logged-in").hide();
+        $(".logged-in")
+        .show()
+        .find("span")
+        .first()
+        .text(session.name);
+        this.session = session;
+        return session;
+      })
+      .catch(e => {
+        $(".logged-in").hide();
+        $(".not-logged-in").show();
         if (typeof this.observer === "string")
           $(".observer").show().text($.i18n(
             "Observer '$1'", this.observer));
-				$(".not-logged-in>button")
-				.on("click", () => Dialog.open("LoginDialog", {
-					postResult: () => location.replace(location),
-					error: UI.report
-				}));
-				return undefined;
-			});
-		}
+        $(".not-logged-in>button")
+        .on("click", () => Dialog.open("LoginDialog", {
+          postResult: () => window.location.reload(),
+          error: UI.report
+        }));
+        return undefined;
+      });
+    }
 
-		/**
-		 * Get the current value for a setting. If a user is logged in, the
-		 * value will be taken from their session (and will default if it
-		 * is not defined).
-		 * @param {string} key setting to retrieve
-		 * @return {string|number|boolean} setting value
-		 */
-		getSetting(key) {
-			return (this.session &amp;&amp; this.session.settings
-					    &amp;&amp; typeof this.session.settings[key] !== "undefined")
-			? this.session.settings[key]
-			: this.defaults[key];
-		}
+    /**
+     * Get the current value for a setting. If a user is logged in, the
+     * value will be taken from their session (and will default if it
+     * is not defined).
+     * @param {string} key setting to retrieve
+     * @return {string|number|boolean} setting value
+     */
+    getSetting(key) {
+      return (this.session &amp;&amp; this.session.settings
+              &amp;&amp; typeof this.session.settings[key] !== "undefined")
+      ? this.session.settings[key]
+      : this.defaults[key];
+    }
 
-		getSettings() {
-			return this.session &amp;&amp; this.session.settings
-			? this.session.settings
-			: this.defaults;
-		}
+    getSettings() {
+      return this.session &amp;&amp; this.session.settings
+      ? this.session.settings
+      : this.defaults;
+    }
 
-		/**
-		 * Promise to check if we have been granted permission to
-		 * create Notifications.
-		 * @return {Promise} Promise that resolves to undefined if we can notify
-		 */
-		canNotify() {
-			if (!(this.usingHttps
-				    &amp;&amp; this.getSetting("notification")
-				    &amp;&amp; "Notification" in window))
-				return Promise.reject();
+    /**
+     * Promise to check if we have been granted permission to
+     * create Notifications.
+     * @return {Promise} Promise that resolves to undefined if we can notify
+     */
+    canNotify() {
+      if (!(this.usingHttps
+            &amp;&amp; this.getSetting("notification")
+            &amp;&amp; "Notification" in window))
+        return Promise.reject();
 
-			switch (Notification.permission) {
-			case "denied":
-				return Promise.reject();
-			case "granted":
-				return Promise.resolve();
-			default:
-				return new Promise((resolve, reject) => {
-					return Notification.requestPermission()
-					.then(result => {
-						if (result === "granted")
-							resolve();
-						else
-							reject();
-					});
-				});
-			}
-		}
+      switch (Notification.permission) {
+      case "denied":
+        return Promise.reject();
+      case "granted":
+        return Promise.resolve();
+      default:
+        return new Promise((resolve, reject) => {
+          return Notification.requestPermission()
+          .then(result => {
+            if (result === "granted")
+              resolve();
+            else
+              reject();
+          });
+        });
+      }
+    }
 
-		/**
-		 * Generate a notification using the HTML5 notifications API
-		 * @param {string} id notification id
-		 */
-		notify() {
-			const args = Array.from(arguments);
-			const id = args[0];
-			args[0] = `ui-notify-title-${id}`;
-			const title = $.i18n.call(args);
-			args[0] = `ui-notify-body-${id}`;
-			const body = $.i18n.call(args);
-			this.canNotify()
-			.then(() => {
-				this.cancelNotification();
-				const notification = new Notification(
-					title,
-					{
-						icon: "/images/favicon.ico",
-						body: body
-					});
-				this._notification = notification;
-				$(notification)
-				.on("click", function () {
-					this.cancel();
-				})
-				.on("close", () => {
-					delete this._notification;
-				});
-			})
-			.catch(() => {});
-		}
+    /**
+     * Generate a notification using the HTML5 notifications API
+     * @param {string} id notification id
+     */
+    notify() {
+      const args = Array.from(arguments);
+      const id = args[0];
+      args[0] = `ui-notify-title-${id}`;
+      const title = $.i18n.call(args);
+      args[0] = `ui-notify-body-${id}`;
+      const body = $.i18n.call(args);
+      this.canNotify()
+      .then(() => {
+        this.cancelNotification();
+        const notification = new Notification(
+          title,
+          {
+            icon: "/images/favicon.ico",
+            body: body
+          });
+        this._notification = notification;
+        $(notification)
+        .on("click", function () {
+          this.cancel();
+        })
+        .on("close", () => {
+          delete this._notification;
+        });
+      })
+      .catch(() => {});
+    }
 
-		/**
-		 * Cancel any outstanding Notification
-		 */
-		cancelNotification() {
-			if (this._notification) {
-				this._notification.close();
-				delete this._notification;
-			}
-		}
-	}
+    /**
+     * Cancel any outstanding Notification
+     */
+    cancelNotification() {
+      if (this._notification) {
+        this._notification.close();
+        delete this._notification;
+      }
+    }
+  }
 
-	return UI;
+  return UI;
 });
 </code></pre>
         </article>
@@ -440,13 +438,13 @@ define("browser/UI", [
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#allow">allow</a></li><li><a href="global.html#challenge">challenge</a></li><li><a href="global.html#confirmGameOver">confirmGameOver</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jul 22 2022 08:21:05 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Sun Jul 24 2022 15:05:35 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

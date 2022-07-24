@@ -30,61 +30,61 @@
   License MIT. See README.md at the root of this distribution for full copyright
   and license information. Author Crawford Currie http://c-dot.co.uk*/
 
-define("game/Tile", () => {
-	/**
-	 * A tile in a LetterBag, on a Board, or on a Rack, or during best move
-	 * computation.
-	 */
-	class Tile {
+define(() => {
+  /**
+   * A tile in a LetterBag, on a Board, or on a Rack, or during best move
+   * computation.
+   */
+  class Tile {
 
-		/**
-		 * @param {Tile|object} spec optional Tile to copy or spec of tile
-		 * @param {string} spec.letter character(s) represented by this tile
-		 * @param {boolean?} spec.isBlank true if this tile is a blank
+    /**
+     * @param {Tile|object} spec optional Tile to copy or spec of tile
+     * @param {string} spec.letter character(s) represented by this tile
+     * @param {boolean?} spec.isBlank true if this tile is a blank
      * (irresepective of letter)
-		 * @param {number?} spec.score value of this tile, default 0
-		 * @param {number?} spec.col optional column where the tile is placed
-		 * @param {number?} spec.row optional row where the tile is placed
-		 */
-		constructor(spec) {
+     * @param {number?} spec.score value of this tile, default 0
+     * @param {number?} spec.col optional column where the tile is placed
+     * @param {number?} spec.row optional row where the tile is placed
+     */
+    constructor(spec) {
       
-		  /**
-		   * Character(s) represented by this tile.
-		   * Caution; during gameplay, `letter` for a blank will be set
-		   * to a letter chosen by the player. When the tile is returned
-		   * to the rack, the letter will be reset to " " as isBlank is true.
-		   * However the letter will stick to the Tile when it is sent to
-		   * the server as part of a move. Henceforward that Tile will
-		   * be locked to the chosen letter on the server side.
-		   * @member {string}
-		   */
-		  this.letter = spec.letter;
+      /**
+       * Character(s) represented by this tile.
+       * Caution; during gameplay, `letter` for a blank will be set
+       * to a letter chosen by the player. When the tile is returned
+       * to the rack, the letter will be reset to " " as isBlank is true.
+       * However the letter will stick to the Tile when it is sent to
+       * the server as part of a move. Henceforward that Tile will
+       * be locked to the chosen letter on the server side.
+       * @member {string}
+       */
+      this.letter = spec.letter;
 
-		  /**
-		   * Value of this tile
-		   * @member {number}
-		   */
-		  this.score = spec.score || 0;
+      /**
+       * Value of this tile
+       * @member {number}
+       */
+      this.score = spec.score || 0;
 
       if (typeof spec.col !== "undefined")
-		    /**
-		     * Column where the tile is placed
-		     * @member {number?}
-		     */
+        /**
+         * Column where the tile is placed
+         * @member {number?}
+         */
         this.col = spec.col;
 
       if (typeof spec.row !== "undefined")
-		    /**
-		     * Row where the tile is placed
-		     * @member {number?}
-		     */
+        /**
+         * Row where the tile is placed
+         * @member {number?}
+         */
         this.row = spec.row;
 
       if (spec.isBlank)
-		    /**
-		     * True if this tile is a blank (irresepective of letter)
-		     * @member {boolean}
-		     */
+        /**
+         * True if this tile is a blank (irresepective of letter)
+         * @member {boolean}
+         */
         this.isBlank = true;
     }
 
@@ -94,27 +94,27 @@ define("game/Tile", () => {
      * @return {Tile} this
      */
     reset() {
-			delete this.row;
-			delete this.col;
+      delete this.row;
+      delete this.col;
       if (this.isBlank)
         this.letter = " ";
       return this;
     }
 
     /* istanbul ignore next */
-		/**
-		 * @override
-		 */
-		toString(showPos) {
-			let pl = "";
+    /**
+     * String representation for debugging
+     */
+    stringify(showPos) {
+      let pl = "";
       if (typeof this.row === "number") {
         pl = typeof this.col === "number" ? `[${this.col}` : ""
         + `,${this.row}`;
       }
       pl += "]";
-      const b = this.isBlank ? "-" : "";
-			return `[${this.letter}${b}${pl}`;//(${this.score})]`;
-		}
+      const l = this.isBlank ? this.letter.toLowerCase() : this.letter;
+      return `[${l}${pl}`;
+    }
   }
 
   /**
@@ -133,7 +133,7 @@ define("game/Tile", () => {
     return 0;
   };
 
-	return Tile;
+  return Tile;
 });
 </code></pre>
         </article>
@@ -145,13 +145,13 @@ define("game/Tile", () => {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#allow">allow</a></li><li><a href="global.html#challenge">challenge</a></li><li><a href="global.html#confirmGameOver">confirmGameOver</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jul 22 2022 08:21:05 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Sun Jul 24 2022 15:05:35 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

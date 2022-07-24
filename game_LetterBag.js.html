@@ -31,53 +31,53 @@
   and license information. Author Crawford Currie http://c-dot.co.uk*/
 /* eslint-env amd */
 
-define("game/LetterBag", [
+define([
   "platform", "game/Tile"
 ], (Platform, Tile) => {
 
-	/**
-	 * The bag of letters during a game.
-	 */
-	class LetterBag {
+  /**
+   * The bag of letters during a game.
+   */
+  class LetterBag {
 
     /**
      * Array of Tiles in the bag
      * @member {Tile[]}
      */
-		tiles = [];
+    tiles = [];
 
-		/**
+    /**
      * Array of all the letters in the bag, excluding blank.
      * @member {string}
      */
-		legalLetters = [];
+    legalLetters = [];
 
-		/**
-		 * Construct a new letter bag using the distribution for the
-		 * given edition
-		 * @param {Edition} edition the Edition defining the bag contents
+    /**
+     * Construct a new letter bag using the distribution for the
+     * given edition
+     * @param {Edition} edition the Edition defining the bag contents
      * @param {boolean?} predictable set to turn off sshuffling the
      * bag contents (for testing)
-		 */
-		constructor(edition, predictable) {
-			for (let letter of edition.bag) {
+     */
+    constructor(edition, predictable) {
+      for (let letter of edition.bag) {
         // legalLetters is an array, not a string, to support
         // multi-character tiles
-				if (!letter.isBlank)
-					// Not blank
-					this.legalLetters.push(letter.letter);
+        if (!letter.isBlank)
+          // Not blank
+          this.legalLetters.push(letter.letter);
 
-				const count = Math.floor(letter.count);
-				for (let n = 0; n &lt; count; ++n) {
-					const tile = new Tile({
-						letter:	letter.letter,
-						score: letter.score
-					});
-					if (letter.isBlank)
-						tile.isBlank = true;
-					this.tiles.push(tile);
-				}
-			}
+        const count = Math.floor(letter.count);
+        for (let n = 0; n &lt; count; ++n) {
+          const tile = new Tile({
+            letter:  letter.letter,
+            score: letter.score
+          });
+          if (letter.isBlank)
+            tile.isBlank = true;
+          this.tiles.push(tile);
+        }
+      }
 
       /* istanbul ignore if */
       if (predictable)
@@ -89,87 +89,87 @@ define("game/LetterBag", [
          */
         this.predictable = predictable;
 
-			this.shake();
-		}
+      this.shake();
+    }
 
-		/**
-		 * Test bag for emptiness
-		 * @return {boolean} true if there are no tiles in the bag
-		 */
-		isEmpty() {
-			return this.tiles.length === 0;
-		}
+    /**
+     * Test bag for emptiness
+     * @return {boolean} true if there are no tiles in the bag
+     */
+    isEmpty() {
+      return this.tiles.length === 0;
+    }
 
-		/**
-		 * Randomize tiles in-place using Durstenfeld shuffle. Randomness
+    /**
+     * Randomize tiles in-place using Durstenfeld shuffle. Randomness
      * can be disabled by setting {@linkcode LetterBag#predictable}
-		 */
-		shake() {
+     */
+    shake() {
       if (this.predictable)
         return;
 
-			for (let i = this.tiles.length - 1; i > 0; i--) {
-				const j = Math.floor(Math.random() * (i + 1));
-				const temp = this.tiles[i];
-				this.tiles[i] = this.tiles[j];
-				this.tiles[j] = temp;
-			}
-		}
+      for (let i = this.tiles.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = this.tiles[i];
+        this.tiles[i] = this.tiles[j];
+        this.tiles[j] = temp;
+      }
+    }
 
-		/**
-		 * Get a single random tile from the bag. Assumes the bag is
-		 * already randomised, and there is no need to shuffle it
-		 * again.
-		 * @return {Tile} a Tile or null if there are no tiles left
-		 */
-		getRandomTile() {
-			if (this.tiles.length > 0)
-				return this.tiles.pop();
-			return null;
-		}
+    /**
+     * Get a single random tile from the bag. Assumes the bag is
+     * already randomised, and there is no need to shuffle it
+     * again.
+     * @return {Tile} a Tile or null if there are no tiles left
+     */
+    getRandomTile() {
+      if (this.tiles.length > 0)
+        return this.tiles.pop();
+      return null;
+    }
 
-		/**
-		 * Remove count random tiles from the bag. Assumes the bag is
-		 * already randomised, and there is no need to shuffle it
-		 * again.
-		 * @return {Tile[]} 'count' Tile. If there aren't enough
-		 * tiles in the bag, may return a shorter array.
-		 */
-		getRandomTiles(count) {
-			const tiles = [];
-			Platform.assert(count >= 0);
-			for (let i = 0; this.tiles.length > 0 &amp;&amp; i &lt; count; i++)
-				tiles.push(this.tiles.pop());
-			return tiles;
-		}
+    /**
+     * Remove count random tiles from the bag. Assumes the bag is
+     * already randomised, and there is no need to shuffle it
+     * again.
+     * @return {Tile[]} 'count' Tile. If there aren't enough
+     * tiles in the bag, may return a shorter array.
+     */
+    getRandomTiles(count) {
+      const tiles = [];
+      Platform.assert(count >= 0);
+      for (let i = 0; this.tiles.length > 0 &amp;&amp; i &lt; count; i++)
+        tiles.push(this.tiles.pop());
+      return tiles;
+    }
 
-		/**
-		 * Return a tile to the bag, and give it a shoogle so the same
-		 * tile doesn't always re-emerge next.
-		 * @param {Tile} tile tile to return to bag
-		 */
-		returnTile(tile) {
-			this.tiles.push(tile.reset());
-			this.shake();
-		}
+    /**
+     * Return a tile to the bag, and give it a shoogle so the same
+     * tile doesn't always re-emerge next.
+     * @param {Tile} tile tile to return to bag
+     */
+    returnTile(tile) {
+      this.tiles.push(tile.reset());
+      this.shake();
+    }
 
-		/**
-		 * Return an array of tiles to the bag, and give it a shimmy
-		 * @param {Tile[]} tiles tiles to return to bag
-		 */
-		returnTiles(tiles) {
-			for (const tile of tiles)
+    /**
+     * Return an array of tiles to the bag, and give it a shimmy
+     * @param {Tile[]} tiles tiles to return to bag
+     */
+    returnTiles(tiles) {
+      for (const tile of tiles)
         this.tiles.push(tile.reset());
-			this.shake();
-		}
+      this.shake();
+    }
 
-		/**
-		 * Remove a matching tile from the bag. Either the exact tile
+    /**
+     * Remove a matching tile from the bag. Either the exact tile
      * will be matched or a tile that represents the same letter.
      * Blanks only match blanks.
-		 * @param {Tile} tile tile to match in the bag
+     * @param {Tile} tile tile to match in the bag
      * @return {Tile?} the tile removed, or undefined if it wasn't found
-		 */
+     */
     removeTile(tile) {
       for (let i = 0; i &lt; this.tiles.length; i++) {
         const t = this.tiles[i];
@@ -190,36 +190,35 @@ define("game/LetterBag", [
      */
     removeTiles(tiles) {
       const unbagged = [];
-			for (const tile of tiles)
-	      unbagged.push(this.removeTile(tile));
+      for (const tile of tiles)
+        unbagged.push(this.removeTile(tile));
       return unbagged;
     }
 
-		/**
-		 * How many tiles remain?
-		 * @return {number} number of tiles still in the bag
-		 */
-		remainingTileCount() {
-			return this.tiles.length;
-		}
+    /**
+     * How many tiles remain?
+     * @return {number} number of tiles still in the bag
+     */
+    remainingTileCount() {
+      return this.tiles.length;
+    }
 
-		/**
-		 * Return an unsorted list of letters in the bag
-		 */
-		letters() {
-			return this.tiles.map(tile => tile.letter);
-		}
+    /**
+     * Return an unsorted list of letters in the bag
+     */
+    letters() {
+      return this.tiles.map(tile => tile.letter);
+    }
 
     /* istanbul ignore next */
-		/**
-		 * Generate a simple string representation of the player
-     * @override
-		 */
-		toString() {
+    /**
+     * Generate a simple string representation of the bag
+     */
+    stringify() {
       return "(" + this.letters().sort().join("") + ")";
     }
-	}
-	return LetterBag;
+  }
+  return LetterBag;
 });
 </code></pre>
         </article>
@@ -231,13 +230,13 @@ define("game/LetterBag", [
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#allow">allow</a></li><li><a href="global.html#challenge">challenge</a></li><li><a href="global.html#confirmGameOver">confirmGameOver</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jul 22 2022 08:21:05 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Sun Jul 24 2022 15:05:35 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

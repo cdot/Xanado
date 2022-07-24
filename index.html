@@ -47,23 +47,29 @@
 <p>The installation has subdirectories as follows:</p>
 <ul>
 <li><code>audio</code> contains audio samples</li>
-<li><code>css</code> contains style sheets</li>
+<li><code>css</code> contains style sheets
+<ul>
+<li><code>css/default</code> contains the default theme</li>
+</ul>
+</li>
 <li><code>dictionaries</code> contains all the dictionaries</li>
 <li><code>editions</code> contains the edition specifications</li>
-<li><code>games</code> contains the database of games</li>
-<li><code>html</code> has the html for the user interfaces, <code>games.html</code> for the control panel, <code>createGame.html</code> for the new game page, and <code>game.html</code> for the game itself.</li>
-<li><code>i18n</code> contains the master English <code>en.json</code> and any other contributed translations of the interface.</li>
+<li><code>games</code> contains the database of games (initially empty)</li>
+<li><code>html</code> has the html for the user interfaces, <code>games.html</code> for the control panel, and <code>game.html</code> for the game itself.</li>
+<li><code>i18n</code> contains the master English <code>en.json</code>, qqq documentation, and any other contributed translations of the interface.</li>
 <li><code>images</code> contains images used by the game</li>
 <li><code>js</code> has all the source code
 <ul>
-<li><code>js/browser</code> is the browser code</li>
+<li><code>js/common</code> has generic code shared between server and browser</li>
 <li><code>js/dawg</code> is generation and management of DAWGs</li>
 <li><code>js/design</code> is the Valett program</li>
-<li><code>js/game</code> has the platform-independent game engine</li>
+<li><code>js/game</code> has game code shared between browser and server</li>
 <li><code>js/i18n</code> has the translations checker</li>
+<li><code>js/browser</code> is the browser code</li>
 <li><code>js/server</code> has the server code</li>
 </ul>
 </li>
+<li><code>test</code> has all the unit tests and fixtures</li>
 </ul>
 <h2>Building your own dictionary</h2>
 <p>Dictionaries are stored in the <code>dictionaries</code> directory in the form of
@@ -84,51 +90,48 @@ it will be read and the words in it loaded into the dictionary when
 the server starts. It will affect the performance of the dictionary,
 so you are recommended to run the compressor every so often to
 incorporate those words.</p>
-<h2>Internationalisation</h2>
-<p>The UI uses the <a href="https://github.com/wikimedia/jquery.i18n">Wikimedia jQuery.i18n framework</a> to support translations. Currently translation files are provided for English, (une très mauvaise traduction en) French, and (eine schlechte Übersetzung ins) German. To generate your own translation (or improve on Google's), copy <code>/i18n/en.json</code> to a file using your language code (e.g. <code>it</code> for Italian) and edit the new file to provide the translation. You can use <code>npm run tx</code> to check the completeness of your translations (requires an installation of <code>perl</code>).</p>
 <h2>Flow of Control</h2>
-<p>Players access the <code>/index.html</code> at the root of the distribution. This will
-load the <code>games</code> interface, which is used to view available games and create
-new games.</p>
+<p>Players access <code>/</code> on the server. This will load the <code>games</code>
+interface, which is used to view available games and create new games.</p>
 <p>A game is joined by opening a URL which identifies the game
 and player (<code>GET /join/gameKey/playerKey</code>). The server adds the
 player to the game and responds with the gameKey and playerKey. The
 <code>games</code> interface then opens a new window on <code>html/game.html</code>, which
 loads the UI. When the document is ready, it executes <code>/js/game.js</code>,
-which instantiates an object of the <code>Ui</code> class.</p>
-<p>Construction of the Ui object asks the server for the state of the
+which creates the UI.</p>
+<p>Construction of the UI object asks the server for the state of the
 game using a <code>GET /game/gameKey</code> URI. The server recognises this as a
 request for JSON, and serves up the game, as serialised by
 <code>js/game/Freeze.js</code>.  The UI thaws this data and loads the game, then
 manually connects the <code>WebSocket</code>, attaching handlers for managing the
-socket (see Ui.attachSocketListeners).</p>
-<p>Once construction is complete, the Ui will listen for events coming
-over the socket from the server and modify the Ui accordingly. These
-are <code>turn</code>, <code>tick</code>, <code>gameOverConfimed</code>, <code>nextGame</code>, <code>message</code>, and
-<code>connections</code>, that the server will send. With the exception of
-<code>message</code> these are all broadcast events, sent to all players. It will
-also listen for events coming from the user, and will POST messages
-using the <code>/command</code> route to reflect user actions: <code>makeMove</code>,
-<code>challenge</code>, <code>swap</code>, <code>takeBack</code>, <code>pass</code>, <code>confirmGameOver</code>, <code>pause</code>
-and <code>unpause</code>. The server will pass these on to <code>js/game/Game.js</code> for
-handling.</p>
+socket.</p>
+<p>Once construction is complete, the UI will listen for events coming
+over the socket from the server and modify the client local copy of
+the game accordingly. It will also listen for events coming from the
+user, and will POST messages using the <code>/command</code> route to reflect
+user actions: <code>makeMove</code>, <code>challenge</code>, <code>swap</code>, <code>takeBack</code>, <code>pass</code>,
+<code>confirmGameOver</code>, <code>pause</code> and <code>unpause</code>.</p>
 <p>Information about a play is passed to the server in a <code>Move</code> object,
 and results are broadcast asynchronously as <code>turn</code> events
 parameterised by <code>Turn</code> objects. A single play will usually result in
 a single <code>Turn</code> object being broadcast, but there is no theoretical
 limit on the number of <code>Turn</code> objects that might be broadcast for a
-single interactive play. For example, a following robot play will
-result in a sequence of turns. <code>Turn</code> objects are recorded in the game
-history, allowing a full replay of game events at a later date
-(e.g. when refreshing the Ui.)</p>
+single interactive play. For example, a robot play following a human
+play will result in a sequence of turns. <code>Turn</code> objects are recorded
+in the game history, allowing a full replay of game events at a later
+date (e.g. when refreshing the Ui.)</p>
 <h2>Testing</h2>
 <p>The <code>test</code> subdirectory contains unit tests for the server
-written using the <code>mocha</code> framework. Run them using <code>npm run test</code>.
-Also supported is test coverage analysis using <code>istanbul</code>; run <code>npm run coverage</code>.
-Coverage statistics are outout in the <code>coverage</code> directory. You can also run <code>eslint</code> on the code using <code>npm run lint</code>.</p>
+written using the <code>mocha</code> framework. Run them using <code>npm run test</code>.</p>
+<p>Also supported is test coverage analysis using <code>istanbul</code>; run
+<code>npm run coverage</code>.
+Coverage statistics are outout in the <code>coverage</code> directory.</p>
+<p>You can also run <code>eslint</code> on the code using <code>npm run lint</code>.</p>
+<h2>Internationalisation</h2>
+<p>Xanado uses the <a href="https://github.com/wikimedia/jquery.i18n">Wikimedia jQuery.i18n framework</a> to support translations. Currently translation files are provided for English, (une très mauvaise traduction en) French, and (eine schlechte Übersetzung ins) German. To generate your own translation, copy <code>/i18n/en.json</code> to a file using your language code (e.g. <code>it</code> for Italian) and edit the new file to provide the translation. You can use <code>npm run tx</code> to check the completeness of your translations.</p>
 <h2>Documentation</h2>
 <p>The code is documented using <code>jsdoc</code>. The documentation is automatically
-built when a new version is pushed to github, and can be found on <a href="https://cdot.github.io/CrosswordGame/">github pages</a>.</p>
+built when a new version is pushed to github, and can be found on <a href="https://cdot.github.io/Xanado/">github pages</a>.</p>
 <p>For development, <code>npm run doc</code> will generate the documentation in the <code>doc</code>
 subdirectory.
 You can read the doc in a browser by opening <code>file:///..../doc/index.html</code>
@@ -141,7 +144,8 @@ a docker server running).</p>
 <p>will build an image using <code>Dockerfile</code></p>
 <pre class="prettyprint source"><code>$ docker run -p9093:9093 xword
 </code></pre>
-<p>will run the image, mapping <code>localhost</code> port 9093 to port 9093 on the docker image</p>
+<p>will run the image, mapping <code>localhost</code> port 9093 to port 9093 on the docker image. The docker image is automatically built when a new version is checked in
+to github.</p>
 <h2>Ideas</h2>
 <p>The github repository has a list of issues that need to be addressed, including
 a number of enhancements. Here are some other enhancements that you might like
@@ -166,7 +170,7 @@ can be any big list of words, or it can simply be a lexicon). Run the program
 <h3>Public Server</h3>
 <p>It would be nice to see a truly public server that anyone could sign in to and play against other random people. However this would have to be done with great care.</p>
 <ul>
-<li>there are already a number of security features, such as simple XSS avoidance (thanks to @pkolano) and use of HTTPS, but it has some potential holes that might be exploited by an evil person. An audit it required.</li>
+<li>there are already a number of security features, such as simple XSS avoidance (thanks to @pkolano) and use of HTTPS, but it has some potential holes that might be exploited by an evil person. An audit is required.</li>
 <li>would also have to address things like the size and performance of the database, and the performance of the robot.</li>
 <li>the games interface would be unusable without some sort of grouping of users and/or games - for example, into &quot;rooms&quot;.</li>
 </ul></article>
@@ -180,13 +184,13 @@ can be any big list of words, or it can simply be a lexicon). Run the program
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_compressor.html">dawg/compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-game_findBestPlay.html">game/findBestPlay</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#allow">allow</a></li><li><a href="global.html#challenge">challenge</a></li><li><a href="global.html#confirmGameOver">confirmGameOver</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Jul 22 2022 08:21:05 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Sun Jul 24 2022 15:05:35 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

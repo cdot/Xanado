@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: browser/Square.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: browser/Square.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*Copyright (C) 2019-2022 The Xanado Project https://github.com/cdot/Xanado
+  License MIT. See README.md at the root of this distribution for full copyright
+  and license information. Author Crawford Currie http://c-dot.co.uk*/
+/* eslint-env amd, browser, jquery */
+
+define([ "platform" ], Platform => {
+
+  /**
+   * Browser-side mixin for {@linkcode Square}
+   * @mixin BrowserSquare
+   */
+  const BrowserSquare = {
+
+    /**
+     * Create the jquery representation
+     * @function
+     * @instance
+     * @memberof BrowserSquare
+     * @param {string} base for id='s
+     */
+    $ui() {
+      const $td = $(`&lt;td>&lt;/td>`);
+      $td.addClass(`square-${this.type}`);
+      const $div = $(`&lt;div id="${this.id}">&lt;a>&lt;/a>&lt;/div>`);
+      // Associate the square with the div for dragging
+      $div.data("square", this);
+      $td.append($div);
+      return $td;
+    },
+
+    /**
+     * Refresh the UI
+     * @function
+     * @instance
+     * @memberof BrowserSquare
+     */
+    $refresh() {
+      const $div = $(`#${this.id}`);
+
+      /* istanbul ignore if */
+      if ($div.length === 0)
+        // No visual representation for this square - for
+        // example, might be a square in another player's rack
+        return;
+
+      $div.removeClass("selected")
+      .removeClass("temporary")
+      .off("click");
+
+      if (this.tile)
+        this.refreshOccupied($div);
+      else
+        this.refreshEmpty($div);
+    },
+
+    /**
+     * Set the underlay
+     * @function
+     * @instance
+     * @memberof BrowserSquare
+     * @param {boolean} sel 
+     */
+    setUnderlay(ch) {
+      this.underlay = ch;
+    },
+
+    /**
+     * Set the square as (un)selected
+     * @function
+     * @instance
+     * @memberof BrowserSquare
+     * @param {boolean} sel 
+     */
+    setSelected(sel) {
+      /* istanbul ignore if */
+      if (sel &amp;&amp; this.tile) {
+        Platform.assert(!this.tileLocked, "Attempt to select locked tile");
+        $(`#${this.id}`).addClass("selected");
+      } else
+        $(`#${this.id}`).removeClass("selected");
+    },
+
+    /**
+     * Update a square that has a Tile dropped on it
+     * @function
+     * @instance
+     * @memberof BrowserSquare
+     * @param {jQuery} $div the &lt;div> for the square
+     * @private
+     */
+    refreshOccupied($div) {
+      if ($div.hasClass("ui-droppable"))
+        /* istanbul ignore next */
+        $div.droppable("destroy");
+
+      $div
+      .removeClass("empty-square")
+      .addClass("tiled-square");
+
+      if (this.tile.isBlank)
+        $div.addClass("blank-letter");
+      else
+        $div.removeClass("blank-letter");
+
+      if (this.tileLocked) {
+        $div.addClass("Locked");
+        if ($div.hasClass("ui-draggable"))
+          /* istanbul ignore next */
+          $div.draggable("destroy");
+      } else {
+        // tile isn't locked, valid drag source
+        $div.removeClass("Locked");
+        /* istanbul ignore next */
+        $div
+        .addClass("temporary")
+        .on("click", () => Platform.trigger("SelectSquare", [ this ]));
+
+        /* istanbul ignore next */
+        $div.draggable({
+          revert: "invalid",
+          opacity: 1,
+          helper: "clone",
+
+          start: (event, jui) => {
+            $div.css({ opacity: 0.5 });
+            // Clear selection
+            Platform.trigger("SelectSquare");
+            // Configure drag helper
+            $(jui.helper)
+            .animate({"font-size" : "120%"}, 300)
+            .addClass("drag-border");
+          },
+
+          drag: (event, jui) => $(jui.helper).addClass("drag-border"),
+
+          stop: () => $div.css({ opacity: 1 })
+        });
+      }
+
+      const letter = this.tile.letter;
+      const score = this.tile.score;
+      const $a = $("&lt;a>&lt;/a>");
+      $a.append(`&lt;span class="letter">${letter}&lt;/span>`);
+      $a.append(`&lt;span class="score">${score}&lt;/span>`);
+      $div.empty().append($a);
+    },
+
+    /**
+     * Update a square that doesn't have a Tile dropped on it
+     * @function
+     * @instance
+     * @memberof BrowserSquare
+     * @param {jQuery} $div the &lt;div> for the square
+     * @private
+     */
+    refreshEmpty($div) {
+
+      // Not draggable
+      if ($div.hasClass("ui-draggable"))
+        /* istanbul ignore next */
+        $div.draggable("destroy");
+
+      // no tile on the square, valid drop target
+      $div
+      .removeClass("tiled-square")
+      .removeClass("blank-letter")
+      .removeClass("Locked")
+      .addClass("empty-square");
+
+      /* istanbul ignore next */
+      $div.on("click", () => Platform.trigger("SelectSquare", [ this ]))
+      // Handle something dropping on us
+      .droppable({
+        hoverClass: "drop-active",
+        drop: (event, jui) => {
+          const source = $(jui.draggable).data("square");
+          // Tell the main UI about it
+          Platform.trigger("DropSquare", [ source, this ]);
+        }
+      });
+
+      const text = Platform.i18n(`square-${this.type}`);
+      $div.empty().append($("&lt;a>&lt;/a>").text(text));
+
+      if (typeof this.underlay !== "undefined")
+        $div.append(`&lt;div class="underlay">${this.underlay}&lt;/div>`);
+    }
+  };
+
+  return BrowserSquare;
+});
+
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Sun Jul 24 2022 15:05:35 GMT+0000 (Coordinated Universal Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
