@@ -3,7 +3,8 @@
 The installation has subdirectories as follows:
 * `audio` contains audio samples
 * `css` contains style sheets
-    * `css/default` contains the default theme
+    * `css/default` contains the default theme. Other subdirectories
+      contain files that can override all or some of the default css.
 * `dictionaries` contains all the dictionaries
 * `editions` contains the edition specifications
 * `games` contains the database of games (initially empty)
