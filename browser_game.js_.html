@@ -317,15 +317,6 @@ define([
      */
     handle_TURN(turn) {
       console.debug("--> turn ", turn);
-      // Take back any locally placed tiles from the board before
-      // we update it with the incoming turn. Doesn't touch the
-      // swap rack.
-      this.game.board.forEachSquare(
-        boardSquare => {
-          if (this.takeBackTile(boardSquare))
-            this.placedCount--;
-          return false;
-        });
 
       this.game.pushTurn(turn);
 
@@ -360,30 +351,24 @@ define([
 
       this.$log(true, this.game.describeTurn(turn, this.player, true));
 
-      // Was the play intiated by, or primarily affecting, us
-      const wasUs = this.isThisPlayer(turn.playerKey);
+      // Was the play initiated by, or primarily affecting, us
+      const wasUs = (player === this.player);
 
       switch (turn.type) {
       case Turns.CHALLENGE_WON:
       case Turns.TOOK_BACK:
+        if (wasUs)
+          this.takeBackTiles();
+
         // Move new tiles out of challenged player's rack
         // into the bag
         if (turn.replacements)
-          for (let newTile of turn.replacements) {
-            const tile = player.rack.removeTile(newTile);
-            this.game.letterBag.returnTile(tile);
-          }
+          this.game.rackToBag(turn.replacements, player);
 
         // Take back the placements from the board into the
         // challenged player's rack
         if (turn.placements)
-          for (const placement of turn.placements) {
-            const square = this.game.at(
-              placement.col, placement.row);
-            const recoveredTile = square.tile;
-            square.unplaceTile();
-            player.rack.addTile(recoveredTile);
-          }
+          this.game.boardToRack(turn.placements, player);
 
         // Was it us?
         if (wasUs) {
@@ -418,50 +403,47 @@ define([
             /*i18n*/"$1 challenged your turn, but the dictionary backed you up",
             player.name);
         }
+
         break;
 
       case Turns.PLAYED:
         if (wasUs)
-          this.placedCount = 0;
+          this.takeBackTiles();
 
         // Take the placed tiles out of the players rack and
         // lock them onto the board.
-        for (let i = 0; i &lt; turn.placements.length; i++) {
-          const placement = turn.placements[i];
-          const square = this.game.at(placement.col, placement.row);
-          const tile = player.rack.removeTile(placement);
-          square.placeTile(tile, true);
-          if (!wasUs)
-            // Highlight the tile as "just placed"
-            $(`#${square.id} .Tile`).addClass("last-placement");
-        }
+        if (wasUs)
+          this.game.rackToBoard(turn.placements, player);
+        else
+          this.game.rackToBoard(
+            turn.placements, player,
+            tile => // Highlight the tile as "just placed"
+            tile.$tile.addClass("last-placement"));
 
-        // Shrink the bag by the number of new
-        // tiles. This is purely to keep the counts in
-        // synch, we never use tiles taken from the bag on
-        // the client side.
+        // Remove the new tiles from our copy of the bag and put them
+        // on the rack.
         if (turn.replacements)
-          this.game.letterBag.getRandomTiles(
-            turn.replacements.length);
+          this.game.bagToRack(turn.replacements, player);
 
-        // Deliberate fall-through to Turns.SWAPPED to get the
-        // replacements onto the rack
+        break;
 
       case Turns.SWAPPED:
-        // Add replacement tiles to the player's rack. Number of tiles
-        // in letter bag doesn't change.
-        if (turn.replacements) {
-          for (const newTile of turn.replacements)
-            player.rack.addTile(new Tile(newTile));
-        }
+        if (wasUs)
+          this.takeBackTiles();
+        // If it was our swap, then the rack was cleared when the command
+        // was sent. We have to put the swapped tiles (turn.placements)
+        // back in the bag, draw the turn.replacements, and put them on
+        // the rack.
+        this.game.rackToBag(turn.placements, player);
+        this.game.bagToRack(turn.replacements, player);
 
         break;
 
       case Turns.GAME_ENDED:
         // End of game has been accepted
+        if (wasUs)
+          this.takeBackTiles();
         this.game.state = State.GAME_OVER;
-        // unplace any pending move
-        this.takeBackTiles();
         this.setAction("action_anotherGame", /*i18n*/"Another game?");
         this.enableTurnButton(true);
         this.notify(
@@ -1523,9 +1505,10 @@ define([
      * Handler for the 'Swap' button clicked. Invoked via 'click_turnButton'.
      */
     action_swap() {
-      // We have to copy the tiles so they can be stringified
-      const tiles = this.swapRack.tiles();
-      this.swapRack.empty();
+      const tiles = this.swapRack.empty();
+      // Move the swapRack tiles back to the playRack until the play
+      // is confirmed
+      this.player.rack.addTiles(tiles);
       this.sendCommand(Command.SWAP, tiles);
     }
 
@@ -1566,19 +1549,22 @@ define([
     /**
      * Handler for a click on the 'Take Back' button, to pull
      * back tiles from the board and swap rack
+     * @param {boolean} noswap true to not take tiles back from
+     * the swap rack.
      */
-    takeBackTiles() {
+    takeBackTiles(noswap) {
       this.game.board.forEachSquare(
         boardSquare => {
           if (this.takeBackTile(boardSquare))
             this.placedCount--;
           return false;
         });
-      this.swapRack.forEachSquare(
-        swapSquare => {
-          this.takeBackTile(swapSquare);
-          return false;
-        });
+      if (!noswap)
+        this.swapRack.forEachSquare(
+          swapSquare => {
+            this.takeBackTile(swapSquare);
+            return false;
+          });
       this.updateGameStatus();
     }
 
@@ -1638,7 +1624,7 @@ define([
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Thu Aug 04 2022 12:41:58 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Thu Aug 04 2022 18:32:05 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>
