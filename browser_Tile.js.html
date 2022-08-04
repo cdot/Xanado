@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: server/FileDatabase.js</title>
+    <title>JSDoc: Source: browser/Tile.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: server/FileDatabase.js</h1>
+    <h1 class="page-title">Source: browser/Tile.js</h1>
 
     
 
@@ -29,96 +29,111 @@
             <pre class="prettyprint source linenums"><code>/*Copyright (C) 2019-2022 The Xanado Project https://github.com/cdot/Xanado
   License MIT. See README.md at the root of this distribution for full copyright
   and license information. Author Crawford Currie http://c-dot.co.uk*/
-/* eslint-env node */
+/* eslint-env amd, browser, jquery */
 
-/**
- * This is the node.js implementation of common/Database.
- */
-define([
-  "assert", "fs", "path",
-  "proper-lockfile", "node-gzip",
-  "common/Fridge", "common/Database"
-], (
-  Assert, fs, Path,
-  Lock, Gzip,
-  Fridge, Database
-) => {
-  const Fs = fs.promises;
+define([ "platform", "common/Types" ], (Platform, Types) => {
+
+  const UIEvents = Types.UIEvents;
 
   /**
-   * Simple file database implementing {@linkcode Database} for use
-   * server-side, where data is stored in files named the same as
-   * the key. There are some basic assumptions here:
-   * 1. Callers will filter the set of keys based on their requirements
-   * 2. Keys starting with . are forbidden
-   * 3. Key names must be valid file names
-    */
-  class FileDatabase extends Database {
+   * Browser-side mixin for {@linkcode Tile}
+   * @mixin BrowserTile
+   */
+  const BrowserTile = {
 
     /**
-     * @param {string} path name of a pre-existing
-     * directory to store games in, relative to requirejs.toUrl.
-     * @param {string} type will be used as the extension on file names
+     * Create or refresh the jQuery representation of the tile.
+     * @function
+     * @instance
+     * @memberof BrowserTile
+     * @param {Square?} square where this tile is placed. If the
+     * tile is currently unplaced, this can be undefined.
      */
-    constructor(path, type) {
-      super(path, type);
-      this.directory = Path.normalize(requirejs.toUrl(path || ""));
-      this.type = type;
-      this.re = new RegExp(`\\.${type}$`);
-      this.locks = {};
+    $ui(square) {
+      if (this.$tile) {
+        if (this.isBlank)
+          this.$tile.find(".letter").text(this.letter);
+      }
+      else {
+        const $glyph = $("&lt;div>&lt;/div>")
+              .addClass("glyph")
+              .append(`&lt;span class="letter">${this.letter}&lt;/span>`)
+              .append(`&lt;span class="score">${this.score}&lt;/span>`);
+        this.$tile = $("&lt;div>&lt;/div>")
+        .addClass("Tile")
+        .append($glyph);
+      }
+
+      // Associate the square passed with the tile UI. This is only
+      // used when dragging the tile away from the square, so we know
+      // where it was previously placed. Note that this creates a
+      // circular dependency, which has to be broken when generting
+      // JSON.
+      this.$tile.data("Square", square);
+
+      // Attach the tile to the DOM so it is available for clicks
+      this.$tile.data("Tile", this);
+
+      if (this.isBlank)
+        this.$tile.addClass("blank-letter");
+
+      if (this.isLocked) {
+        if (this.$tile.hasClass("ui-draggable"))
+          this.$tile.draggable("destroy");
+        this.$tile
+        .removeClass("unlocked-tile")
+        .addClass("locked-tile");
+      }
+      else {
+        // tile isn't locked, make sure it's draggable. It might be
+        // a new UI, or it may have lost its draggability when it was
+        // locked onto the board, and is being unlocked by an undo.
+        if (!this.$tile.hasClass("ui-draggable")) {
+          /* istanbul ignore next */
+          this.$tile
+          .draggable({
+            revert: "invalid",
+            opacity: 1,
+            helper: "clone",
+            appendTo: 'body',
+            start: (event, jui) => {
+              Platform.trigger(UIEvents.CLEAR_SELECT);
+              // Highlight drag source
+              this.$tile.css({ opacity: 0.5 });
+              $(jui.helper)
+              .animate({"font-size" : "110%"}, 300)
+              .addClass("being-dragged");
+            },
+            drag: (event, jui) => $(jui.helper).addClass("being-dragged"),
+            stop: (event, jui) => this.$tile.css({ opacity: 1 })
+          });
+        }
+        this.$tile
+        .removeClass("locked-tile")
+        .addClass("unlocked-tile");
+      }
+
+      return this.$tile;
+    },
+
+    /**
+     * Change the visual representation of the tile to show it as
+     * (un)selected
+     * @function
+     * @instance
+     * @memberof BrowserTile
+     * @param {boolean} sel whether to select or deselect
+     */
+    showSelected(sel) {
+      if (sel) {
+        this.$tile.addClass("selected");
+      } else
+        this.$tile.removeClass("selected");
     }
+  };
 
-    /** See {@linkcode Database#keys|Database.keys} for documentation */
-    keys() {
-      return Fs.readdir(this.directory)
-      .then(list =>
-            list.filter(f => this.re.test(f))
-            .map(fn => fn.replace(this.re, "")));
-    }
-
-    /** See {@linkcode Database#set|Database.set} for documentation */
-    set(key, data) {
-      Assert(!/^\./.test(key));
-      const fn = Path.join(this.directory, `${key}.${this.type}`);
-      const s = JSON.stringify(Fridge.freeze(data), null, 1);
-      //console.log("Writing", fn);
-      return Fs.access(fn)
-      .then(acc => { // file exists
-        return Lock.lock(fn)
-        .then(release => Fs.writeFile(fn, s)
-              .then(() => release()));
-      })
-      .catch(e => Fs.writeFile(fn, s)); // file does not exist
-    }
-
-    /** See {@linkcode Database#get|Database.get} for documentation */
-    get(key, classes) {
-      const fn = Path.join(this.directory, `${key}.${this.type}`);
-
-      return Lock.lock(fn)
-      .catch(e => {
-        console.error("LOCK FAILURE", key, e);
-        return Promise.resolve();
-      })
-      .then(release => {
-        return Fs.readFile(fn)
-        .then(data => {
-          if (typeof release === "function")
-            release();
-          return Fridge.thaw(JSON.parse(data), classes);
-        });
-      });
-    }
-
-    /** See {@linkcode Database#rm|Database.rm} for documentation */
-    rm(key) {
-      return Fs.unlink(Path.join(this.directory, `${key}.${this.type}`));
-    }
-  }
-
-  return FileDatabase;
+  return BrowserTile;
 });
-
 </code></pre>
         </article>
     </section>

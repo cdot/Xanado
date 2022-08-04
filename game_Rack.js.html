@@ -72,7 +72,7 @@ define([
         });
       } else
         super(id, size, 1, () => "_");
-    
+
       if (typeof underlay !== "undefined") {
         let idx = 0;
         this.forEachSquare(square => {
@@ -150,14 +150,15 @@ define([
      * @return {Tile} the removed tile
      */
     removeTile(remove) {
-      const square = this.findSquare(remove.letter);
+      const letter = remove.letter;
+      const square = this.findSquare(letter);
       Platform.assert(square,
-      `Cannot find '${remove.letter}' on ${this.stringify()}`);
+      `Cannot find '${letter}' on ${this.stringify()}`);
       const tile = square.tile;
+      square.unplaceTile();
       // If the tile is a blank, set the letter to the remove letter
       if (tile.isBlank)
-        tile.letter = remove.letter;
-      square.unplaceTile();
+        tile.letter = letter;
       return tile;
     }
 
@@ -182,17 +183,21 @@ define([
      * @return {Rack} this
      */
     shuffle() {
-      const len = this.cols;
-      function random() {
-        return Math.floor(Math.random() * len);
+      const tiles = [];
+      let i;
+      for (i = 0; i &lt; this.cols; i++) {
+        const square = this.at(i);
+        if (square.tile)
+          tiles.push(square.unplaceTile());
       }
-      for (let i = 0; i &lt; 16; i++) {
-        const from = this.at(random());
-        const to = this.at(random());
-        const tmp = from.tile;
-        from.tile = to.tile;
-        to.tile = tmp;
+      for (i = tiles.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = tiles[i];
+        tiles[i] = tiles[j];
+        tiles[j] = temp;
       }
+      this.addTiles(tiles);
+
       return this;
     }
 
@@ -229,13 +234,13 @@ define([
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Jul 26 2022 11:07:17 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Thu Aug 04 2022 12:41:58 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

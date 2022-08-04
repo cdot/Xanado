@@ -37,7 +37,7 @@
 requirejs([
   "platform", "common/Utils",
   "browser/UI", "browser/Dialog",
-  "game/Types", "game/Player", "game/Game",
+  "common/Types", "game/Player", "game/Game",
   "jquery"
 ], (
   Platform, Utils,
@@ -125,7 +125,7 @@ requirejs([
         postResult: () => this.refresh().catch(UI.report),
         error: UI.report
       }));
-      
+
       super.attachHandlers();
     }
 
@@ -169,12 +169,12 @@ requirejs([
           const left = $.i18n("$1s left to play", player.clock);
           $tr.append(`&lt;td>${left}&lt;/td>`);
         }
-        
+
       } else {
         const winningScore = game.getPlayers().reduce(
           (max, p) =>
           Math.max(max, p.score), 0);
-        
+
         if (player.score === winningScore) {
           $tr.append('&lt;td class="ui-icon icon-winner">&lt;/td>');
         }
@@ -194,7 +194,7 @@ requirejs([
           $("&lt;button name='join' title=''>&lt;/button>")
           .button({ label: $.i18n("Open game") })
           .tooltip({
-            content: $.i18n("tooltip-open-game")
+            content: $.i18n("Open this game in a new window.")
           }) .on("click", () => {
             console.log(`Join game ${game.key}/${this.session.key}`);
             $.post(`/join/${game.key}`)
@@ -211,7 +211,7 @@ requirejs([
           $("&lt;button name='leave' title='' class='risky'>&lt;/button>")
           .button({ label: $.i18n("Leave game") })
           .tooltip({
-            content: $.i18n("tooltip-leave-game")
+            content: $.i18n("If you leave the game your score will still count towards the leader board.")
           })
           .on("click", () => {
             console.log(`Leave game ${game.key}`);
@@ -227,7 +227,7 @@ requirejs([
           $("&lt;button name='removeRobot' title=''>&lt;/button>")
           .button({ label: $.i18n("Remove robot") })
           .tooltip({
-            content: $.i18n("tooltip-remove-robot")
+            content: $.i18n("Remove the robot from this game.")
           })
           .on("click", () => {
             console.log(`Remove robot from ${game.key}`);
@@ -246,7 +246,7 @@ requirejs([
           $("&lt;button name='email' title=''>&lt;/button>")
           .button({ label: $.i18n("Send reminder") })
           .tooltip({
-            content: $.i18n("tooltip-email-reminder")
+            content: $.i18n("Email a reminder to player whose turn it is.")
           })
           .on("click", () => {
             console.log("Send reminder");
@@ -280,7 +280,7 @@ requirejs([
 
       const isActive = (game.state === State.PLAYING
                         || game.state === State.WAITING);
-      
+
       const $h = $("&lt;span>&lt;/span>")
       .addClass("headline")
       .text(headline.join(", "));
@@ -322,7 +322,7 @@ requirejs([
           this.isUntwisted[game.key] = false;
         }
       };
-      
+
       showHideTwist(this.isUntwisted &amp;&amp; this.isUntwisted[game.key]);
 
       $box
@@ -404,7 +404,7 @@ requirejs([
           $join
           .button({ label: $.i18n("Join game") })
           .tooltip({
-            content: $.i18n("tooltip-join-game")
+            content: $.i18n("Join the game and open it in a new window.")
           })
           .on("click", () => {
             console.log(`Join game ${game.key}`);
@@ -422,7 +422,7 @@ requirejs([
             $(`&lt;button name='robot' title=''>&lt;/button>`)
             .button({ label: $.i18n("Add robot") })
             .tooltip({
-              content: $.i18n("tooltip-add-robot")
+              content: $.i18n("Add a robot player to this game.")
             })
             .on("click", () =>
                 Dialog.open("AddRobotDialog", {
@@ -433,14 +433,14 @@ requirejs([
                 })));
         }
       }
-      
+
       if (this.session) {
         if (isActive &amp;&amp; this.getSetting("canEmail")) {
           $twist.append(
             $("&lt;button name='invite' title=''>&lt;/button>")
             .button({ label: $.i18n("Invite players")})
             .tooltip({
-              content: $.i18n("tooltip-invite-players")
+              content: $.i18n("Send emails to invite people to join the game.")
             })
             .on("click", () => Dialog.open("InvitePlayersDialog", {
               postAction: `/invitePlayers/${game.key}`,
@@ -469,7 +469,7 @@ requirejs([
         $twist.append(
           $("&lt;button name='delete' title='' class='risky'>&lt;/button>")
           .tooltip({
-            content: $.i18n("tooltip-delete-game")
+            content: $.i18n("CAREFUL! This cannot be undone!")
           })
           .button({ label: $.i18n("Delete") })
           .on("click", () => $.post(`/deleteGame/${game.key}`)
@@ -485,7 +485,7 @@ requirejs([
         $("&lt;button name='observe' title=''>&lt;/button>")
         .button({ label: obs })
         .tooltip({
-          content: $.i18n("tooltip-observe-game")
+          content: $.i18n("Open a board to watch the game, but not play.")
         })
         .on("click", () => $("#observeDialog")
             .dialog({
@@ -513,7 +513,6 @@ requirejs([
       return $box;
     }
 
-    
     /**
      * Refresh the display of a single game
      * @param {Game|object} game a Game or Game.simple
@@ -607,7 +606,7 @@ requirejs([
           $gt.empty();
           data.forEach(player => {
             const s = $.i18n(
-              "games-scores", n++, player.name, player.score,
+              "$1: &lt;b>$2&lt;/b>: $3 ($5 win{{PLURAL:$5||s}} from $4 game{{PLURAL:$4||s}})", n++, player.name, player.score,
               player.games, player.wins);
             $gt.append(`&lt;div class="player-cumulative">${s}&lt;/div>`);
           });
@@ -628,13 +627,13 @@ requirejs([
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Jul 26 2022 11:07:17 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Thu Aug 04 2022 12:41:58 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

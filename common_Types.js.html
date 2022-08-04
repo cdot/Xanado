@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: game/Types.js</title>
+    <title>JSDoc: Source: common/Types.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: game/Types.js</h1>
+    <h1 class="page-title">Source: common/Types.js</h1>
 
     
 
@@ -31,11 +31,14 @@
   and license information. Author Crawford Currie http://c-dot.co.uk*/
 /* eslint-env amd */
 
+/**
+ * Grouping together enumerated types
+ */
 define(() => {
 
   /**
    * See {@linkcode https://nodejs.org/api/http.html|http.ServerRequest}
-   * @typedef {http.SereverRequest} Request
+   * @typedef {http.ServerRequest} Request
    */
 
   /**
@@ -59,14 +62,14 @@ define(() => {
    * @typedef {WAITING|PLAYING|GAME_OVER|TWO_PASSES|FAILED_CHALLENGE|TIMED_OUT} State
    */
   const State = {
-     WAITING:          /*i18n*/"Waiting for players",
+    WAITING:          /*i18n*/"Waiting for players",
     PLAYING:          /*i18n*/"Playing",
     GAME_OVER:        /*i18n*/"Game over",
     TWO_PASSES:       /*i18n*/"All players passed twice",
     FAILED_CHALLENGE: /*i18n*/"Challenge failed",
     TIMED_OUT:        /*i18n*/"Timed out"
   };
-  
+
   /**
    * Commands that can be sent from the UI to the Server.
    * @typedef {UNPAUSE|PAUSE|CHALLENGE|PLAY|TAKE_BACK|PASS|GAME_OVER|SWAP} Command
@@ -176,7 +179,7 @@ define(() => {
    * Ways to check played words.
    * * NONE - don't check played words
    * * AFTER - report to player (only) if played words were in dictionary
-   * * REJECT - refuse to accept words not in the dictionary. A bad play 
+   * * REJECT - refuse to accept words not in the dictionary. A bad play
    *   in this case does not result in a penalty, it just won't accept
    *   the play.
    * @typedef {NONE|AFTER|REJECT} WordCheck
@@ -187,7 +190,29 @@ define(() => {
     REJECT:  /*i18n*/"Reject unknown words"
   };
 
-  // ordered types for &lt;select> in UI
+  /**
+   * Events issued by the game code to update the UI - ignored on server side
+   * * PLACE_TILE - a tile has just been placed on the square passed
+   * * UNPLACE_TILE - a tile has just been removed from the square passed. The
+   *   square and the removed tile are passed.
+   * * SELECT_SQUARE - the square passed has been selected. This will
+   *   either delegate to the tile placed on the square, or enable the
+   *   typing cursor on an empty square.
+   * * CLEAR_SELECT - clear the current selection (deselect selected tile,
+   *   and/or disable the typing cursor)
+   * * DROP_TILE - a tile has been drag/dropped on the square passed. The
+   *   source and destination squares are passed.
+   * @typedef {PLACE_TILE|UNPLACE_TILE|SELECT_SQUARE|CLEAR_SELECT|DROP_TILE} UIEvents
+   */
+  const UIEvents = {
+    CLEAR_SELECT:  "ClearSelect",
+    DROP_TILE:     "DropTile",
+    PLACE_TILE:    "PlaceTile",
+    SELECT_SQUARE: "SelectSquare",
+    UNPLACE_TILE:  "UnplaceTile"
+  };
+
+  // ordered types for &lt;select>s in UI
   Timer._types = [
     Timer.NONE, Timer.TURN, Timer.GAME
   ];
@@ -202,12 +227,13 @@ define(() => {
   ];
 
   return {
-    State: State,
     Command: Command,
     Notify: Notify,
-    Timer: Timer,
     Penalty: Penalty,
+    State: State,
+    Timer: Timer,
     Turns: Turns,
+    UIEvents: UIEvents,
     WordCheck: WordCheck
   };
 });
@@ -221,13 +247,13 @@ define(() => {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Jul 26 2022 11:07:17 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Thu Aug 04 2022 12:41:58 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

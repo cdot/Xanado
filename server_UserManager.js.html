@@ -156,7 +156,7 @@ define([
 
       app.use(Passport.initialize());
 
-      // Same as app.use(passport.authenticate("session")); 
+      // Same as app.use(passport.authenticate("session"));
       app.use(Passport.session());
 
       Passport.serializeUser((userObject, done) => {
@@ -241,12 +241,12 @@ define([
           return this.passportLogin(req, res, req.userObject)
           .then(() => this.sendResult(res, 200, []));
         });
-      
+
       /* istanbul ignore next */
       app.get(
         "/oauth2-providers",
         (req, res) => this.handle_oauth2_providers(req, res));
-      
+
       // Log out the current signed-in user
       app.post(
         "/logout",
@@ -378,18 +378,18 @@ define([
             if (typeof uo.pass === "undefined") {
               if (desc.pass === uo.pass)
                 return uo;
-              throw new Error(/*i18n*/"um-bad-pass");
+              throw new Error(/*i18n*/"Wrong password for '$1'");
             }
             return pw_compare(desc.pass, uo.pass)
             .then(ok => {
               if (ok)
                 return uo;
-              throw new Error(/*i18n*/"um-bad-pass");
+              throw new Error(/*i18n*/"Wrong password for '$1'");
             })
             .catch(e => {
               this._debug("getUser", desc,
                           "failed; bad pass", e);
-              throw new Error(/*i18n*/"um-bad-pass");
+              throw new Error(/*i18n*/"Wrong password for '$1'");
             });
           }
 
@@ -398,7 +398,8 @@ define([
             return uo;
         }
         this._debug("getUser", desc, "failed; no such user");
-        throw new Error(/*i18n*/"um-no-such-user");
+        throw new Error(
+          /*i18n*/"Player '$1' is not known. Use the 'Sign up' tab to register.");
       });
     }
 
@@ -539,11 +540,11 @@ define([
       const pass = req.body.register_password;
       if (!username)
         return this.sendResult(
-          res, 403, [ /*i18n*/"um-bad-user", username ]);
+          res, 403, [ /*i18n*/"Bad username '$1'", username ]);
       return this.getUser({name: username }, true)
       .then(() => {
         this.sendResult(
-          res, 403, [ /*i18n*/"um-user-exists", username ]);
+          res, 403, [ /*i18n*/"'$1' is already registered", username ]);
       })
       .catch(() => {
         // New user
@@ -571,10 +572,10 @@ define([
         this._debug("Logging out", departed);
         return new Promise(resolve => req.logout(resolve))
         .then(() => this.sendResult(res, 200, [
-          /*i18n*/"um-logged-out", departed ]));
+          /*i18n*/"$1 signed out", departed ]));
       }
       return this.sendResult(
-        res, 401, [ /*i18n*/"um-not-logged-in" ]);
+        res, 401, [ /*i18n*/"Not signed in" ]);
     }
 
     /**
@@ -593,7 +594,7 @@ define([
         })));
 
       return this.sendResult(
-        res, 401, [ /*i18n*/"um-not-logged-in" ]);
+        res, 401, [ /*i18n*/"Not signed in" ]);
     }
 
     /**
@@ -617,11 +618,11 @@ define([
         })
         .then(() => this.writeDB())
         .then(() => this.sendResult(res, 200, [
-          /*i18n*/"um-pass-changed",
+          /*i18n*/"Password for $1 changed",
           req.session.passport.user.name ]));
       }
       return this.sendResult(
-        res, 401, [ /*i18n*/"um-not-logged-in" ]);
+        res, 401, [ /*i18n*/"Not signed in" ]);
     }
 
     /**
@@ -644,22 +645,24 @@ define([
           /* istanbul ignore if */
           if (!this.config.mail)
             return this.sendResult(res, 500, [
-              /*i18n*/"um-mail-not-configured" ]);
+              /*i18n*/"Sorry, but email is not available on this server. You will have to ask the server admin for your password." ]);
           return this.config.mail.transport.sendMail({
             from: this.config.mail.sender,
             to:  user.email,
-            subject: Platform.i18n("um-password-reset"),
-            text: Platform.i18n("um-reset-text") + url,
-            html: Platform.i18n("um-reset-html", url)
+            subject: Platform.i18n("Password reset"),
+            text: Platform.i18n(
+              "Follow this link to reset your password: $1", url),
+            html: Platform.i18n(
+              "Click &lt;a href='$1'>here&lt;/a> to reset your password.", url)
           })
           .then(() => this.sendResult(
-            res, 200, [ /*i18n*/"um-reset-sent", user.name ]))
+            res, 200, [ /*i18n*/"Password reset email has been sent", user.name ]))
           .catch(
             /* istanbul ignore next */
             e => {
               console.error("WARNING: Mail misconfiguration?", e);
               return this.sendResult(
-                res, 500, [  /*i18n*/"um-mail-not-configured" ]);
+                res, 500, [  /*i18n*/"Sorry, but email is not available on this server. You will have to ask the server admin for your password." ]);
             });
         });
       })
@@ -682,7 +685,7 @@ define([
           key: req.user.key,
           settings: req.user.settings
         });
-      return this.sendResult(res, 401, [  /*i18n*/"um-not-logged-in" ]);
+      return this.sendResult(res, 401, [  /*i18n*/"Not signed in" ]);
     }
 
     /**
@@ -703,7 +706,7 @@ define([
         });
       }
       /* istanbul ignore next */
-      return this.sendResult(res, 401, [  /*i18n*/"um-not-logged-in" ]);
+      return this.sendResult(res, 401, [  /*i18n*/"Not signed in" ]);
     }
 
     /**
@@ -716,7 +719,7 @@ define([
     checkLoggedIn(req, res, next) {
       if (req.isAuthenticated())
         return next();
-      return this.sendResult(res, 401, [ /*i18n*/"um-not-logged-in" ]);
+      return this.sendResult(res, 401, [ /*i18n*/"Not signed in" ]);
     }
   }
 
@@ -732,13 +735,13 @@ define([
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Jul 26 2022 11:07:17 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Thu Aug 04 2022 12:41:58 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

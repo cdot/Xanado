@@ -33,18 +33,11 @@
 
 define([
   "platform",
+  "common/Types",
   requirejs.isBrowser ? "browser/Square" : "common/Mixin"
-], (Platform, Mixin) => {
+], (Platform, Types, Mixin) => {
 
-  // CSS classes; only required to keep npm run tx happy
-  // /*i18n*/"square-D"
-  // /*i18n*/"square-M"
-  // /*i18n*/"square-Q"
-  // /*i18n*/"square-T"
-  // /*i18n*/"square-_"
-  // /*i18n*/"square-d"
-  // /*i18n*/"square-q"
-  // /*i18n*/"square-t"
+  const UIEvents = Types.UIEvents;
 
   /**
    * A square on the game board or rack. A Tile holder with some
@@ -103,16 +96,6 @@ define([
          * @member {Tile?}
          */
         this.tile = spec.tile;
-
-        if (spec.tileLocked)
-          /**
-           * True if the placed tile cannot be moved i.e. it was
-           * placed in a prior move. Locked tiles don't gather
-           * bonuses.
-           * @member {boolean}
-           * @private
-           */
-          this.tileLocked = true;
       }
 
       if (spec.underlay)
@@ -158,7 +141,8 @@ define([
      * @return {boolean} true if a tile is placed and it is locked
      */
     isLocked() {
-      return this.tile &amp;&amp; this.tileLocked;
+      // this.tileLocked for old game compatibility
+      return this.tile &amp;&amp; (this.tile.isLocked || this.tileLocked);
     }
 
     /**
@@ -167,25 +151,20 @@ define([
      * @param {Tile} tile the tile to place
      * @param {boolean} [lock] whether the tile is to be locked to
      * the square (fixed on the board).
-     * @return {Tile?} tile unplaced from the square, if any
      */
     placeTile(tile, lock) {
-      Platform.assert(!this.tile || tile !== this.tile,
-                      `Square already occupied: ${this.stringify()} placing ${tile.stringify()}`);
+      Platform.assert(
+        !this.tile || tile !== this.tile, "Square already occupied");
 
-      const oldTile = this.tile;
       tile.col = this.col;
       if (typeof this.row !== "undefined")
         tile.row = this.row;
+      tile.isLocked = lock;
+      if (tile === this.tile)
+        return; // Tile hasn't changed
       this.tile = tile;
-
-      if (lock)
-        this.tileLocked = true;
-
-      // Used in the UI to update the square
-      Platform.trigger("SquareChanged", [ this ]);
-
-      return oldTile;
+      // Signal to get the Tile UI attached to the Square UI
+      Platform.trigger(UIEvents.PLACE_TILE, [ this ]);
     }
 
     /**
@@ -198,15 +177,10 @@ define([
       // the tile letter be reset.
       const unplaced = this.tile;
       if (unplaced) {
-        if (this.tileLocked) {
-          unplaced.reset(); // clear letter
-          delete this.tileLocked;
-        }
-        delete unplaced.col;
-        delete unplaced.row;
+        unplaced.reset(); // clear letter and lock
         delete this.tile;
 
-        Platform.trigger("SquareChanged", [ this ]);
+        Platform.trigger(UIEvents.UNPLACE_TILE, [ this, unplaced ]);
         return unplaced;
       }
       return undefined;
@@ -223,11 +197,8 @@ define([
       if (this.row >= 0)
         string += "," + this.row;
 
-      if (this.tile) {
+      if (this.tile)
         string += ` => ${this.tile}`;
-        if (this.tileLocked)
-          string += " (Locked)";
-      }
       return string;
     }
   }
@@ -247,13 +218,13 @@ define([
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Jul 26 2022 11:07:17 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Thu Aug 04 2022 12:41:58 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Module: design/valett</title>
+    <title>JSDoc: Mixin: BrowserTile</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Module: design/valett</h1>
+    <h1 class="page-title">Mixin: BrowserTile</h1>
 
     
 
@@ -28,8 +28,7 @@
 
 <header>
     
-        
-            
+        <h2>BrowserTile</h2>
         
     
 </header>
@@ -38,14 +37,90 @@
     <div class="container-overview">
     
         
-            <div class="description"><p>Command-line invocation of the Valett word corpus analyser
-Based on code from https://github.com/jmlewis/valett</p>
-<p><code>node js/design/valett.js</code> will tell you how to use it.</p></div>
+            <div class="description"><p>Browser-side mixin for <a href="Tile.html"><code>Tile</code></a></p></div>
         
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="browser_Tile.js.html">browser/Tile.js</a>, <a href="browser_Tile.js.html#line10">line 10</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
 
         
             
 
+    
+
+    
+    <h4 class="name" id="$ui"><span class="type-signature"></span>$ui<span class="signature">(square<span class="signature-attributes">nullable</span>)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Create or refresh the jQuery representation of the tile.</p>
+</div>
 
 
 
@@ -54,6 +129,67 @@ Based on code from https://github.com/jmlewis/valett</p>
 
 
 
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>square</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Square.html">Square</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>where this tile is placed. If the
+tile is currently unplaced, this can be undefined.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -89,7 +225,7 @@ Based on code from https://github.com/jmlewis/valett</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="design_valett.js.html">design/valett.js</a>, <a href="design_valett.js.html#line7">line 7</a>
+        <a href="browser_Tile.js.html">browser/Tile.js</a>, <a href="browser_Tile.js.html#line24">line 24</a>
     </li></ul></dd>
     
 
@@ -120,8 +256,85 @@ Based on code from https://github.com/jmlewis/valett</p>
 
 
         
+            
+
     
-    </div>
+
+    
+    <h4 class="name" id="showSelected"><span class="type-signature"></span>showSelected<span class="signature">(sel)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Change the visual representation of the tile to show it as
+(un)selected</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>sel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>whether to select or deselect</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
 
     
 
@@ -137,6 +350,50 @@ Based on code from https://github.com/jmlewis/valett</p>
 
     
 
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="browser_Tile.js.html">browser/Tile.js</a>, <a href="browser_Tile.js.html#line99">line 99</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
     
 
     
