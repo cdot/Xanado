@@ -54,7 +54,7 @@ A game is joined by opening a URL which identifies the game
 and player (`GET /join/gameKey/playerKey`). The server adds the
 player to the game and responds with the gameKey and playerKey. The 
 `games` interface then opens a new window on `html/game.html`, which
-loads the UI. When the document is ready, it executes `/js/game.js`,
+loads the UI. When the document is ready, it executes `js/game.js`,
 which creates the UI.
 
 Construction of the UI object asks the server for the state of the
@@ -81,15 +81,18 @@ play will result in a sequence of turns. `Turn` objects are recorded
 in the game history, allowing a full replay of game events at a later
 date (e.g. when refreshing the Ui.)
 
+A complete list of the routes handled by the server can be found in
+the code documentation for the `Server` class.
+
 ## Testing
 The `test` subdirectory contains unit tests for the server
-written using the `mocha` framework. Run them using `npm run test`.
+written using the [mocha](https://mochajs.org/) framework. Run them using `npm run test`.
 
-Also supported is test coverage analysis using `istanbul`; run
+Also supported is test coverage analysis using [istanbul](https://istanbul.js.org/); run
 `npm run coverage`.
 Coverage statistics are outout in the `coverage` directory.
 
-You can also run `eslint` on the code using `npm run lint`.
+You can also run [eslint](https://eslint.org/) on the code using `npm run lint`.
 
 ## Internationalisation
 Xanado uses the [Wikimedia jQuery.i18n framework](https://github.com/wikimedia/jquery.i18n) to support translations. Currently translation files are provided for English, (une très mauvaise traduction en) French, and (eine schlechte Übersetzung ins) German. To generate your own translation, copy `/i18n/en.json` to a file using your language code (e.g. `it` for Italian) and edit the new file to provide the translation. You can use `npm run tx` to check the completeness of your translations.
@@ -99,7 +102,7 @@ The code is documented using `jsdoc`. The documentation is automatically
 built when a new version is pushed to github, and can be found on <a href="https://cdot.github.io/Xanado/">github pages</a>.
 
 For development, `npm run doc` will generate the documentation in the `doc`
-subdirectory.
+directory.
 You can read the doc in a browser by opening `file:///..../doc/index.html`
 or, if the game server is running, by loading `http://localhost:9093/doc/index.html` (adjust URL to suit your install)
 
@@ -123,7 +126,7 @@ a number of enhancements. Here are some other enhancements that you might like
 to explore.
 
 ### Designing your own game
-Game definitions can be found in the `/editions` directory. Each
+Game definitions can be found in the `editions` directory. Each
 definition describes the layout of the lower-right quadrant of the
 board (it is assumed to be mirrored), the contents of the bag, the
 number of tiles on the rack, the number of tiles that can be swapped
@@ -140,7 +143,7 @@ can be any big list of words, or it can simply be a lexicon). Run the program
 `node js/design/valett.js` for help.
 
 ### DAWG
-The DAWG support is designed to be reusable in other games. It might be fun to implement Wordle, for example, or the word search game often found in newspapers where you try to make as many words as possible from a 9 letter anagram. The `js/dawg/explore.js` is a basic command-line tool for exploring a DAWG.
+The DAWG support is designed to be reusable in other games. It might be fun to implement Wordle, for example, or the word search game often found in newspapers where you try to make as many words as possible from a 9 letter anagram. The `js/dawg/explore.js` program is a basic command-line tool for exploring a DAWG.
 
 ### Public Server
 It would be nice to see a truly public server that anyone could sign in to and play against other random people. However this would have to be done with great care.

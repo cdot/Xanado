@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: Trie</title>
+    <title>JSDoc: Class: LoginDialog</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Class: Trie</h1>
+    <h1 class="page-title">Class: LoginDialog</h1>
 
     
 
@@ -28,12 +28,7 @@
 
 <header>
     
-        <h2><span class="attribs"><span class="type-signature"></span></span>Trie<span class="signature">()</span><span class="type-signature"></span></h2>
-        
-            <div class="class-description"><p>Root of a tree of <a href="TrieNode.html"><code>TrieNode</code></a>, and operations thereon required
-to convert the Trie into an optimal Directed Acyclic Word Graph (DAWG).
-As such this is mis-named; the structure starts life as a Trie but
-may also represent a DAWG.</p></div>
+        <h2><span class="attribs"><span class="type-signature"></span></span>LoginDialog<span class="signature">()</span><span class="type-signature"></span></h2>
         
     
 </header>
@@ -44,20 +39,14 @@ may also represent a DAWG.</p></div>
         
 
     
-    <h2>Constructor</h2>
+
+    
+    <h4 class="name" id="LoginDialog"><span class="type-signature"></span>new LoginDialog<span class="signature">()</span><span class="type-signature"></span></h4>
     
 
     
-    <h4 class="name" id="Trie"><span class="type-signature"></span>new Trie<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
 
 
-
-<div class="description">
-    <p>Construct a Trie from a simple word list</p>
-</div>
 
 
 
@@ -86,6 +75,14 @@ may also represent a DAWG.</p></div>
     
 
     
+        <dt class="mixes">Mixes In:</dt>
+
+        <dd class="mixes"><ul>
+        
+            <li><a href="PasswordMixin.html">PasswordMixin</a></li>
+        
+        </ul></dd>
+    
 
     
 
@@ -100,7 +97,7 @@ may also represent a DAWG.</p></div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_Trie.js.html">dawg/Trie.js</a>, <a href="dawg_Trie.js.html#line14">line 14</a>
+        <a href="browser_LoginDialog.js.html">browser/LoginDialog.js</a>, <a href="browser_LoginDialog.js.html#line16">line 16</a>
     </li></ul></dd>
     
 
@@ -134,6 +131,17 @@ may also represent a DAWG.</p></div>
     </div>
 
     
+        <h3 class="subsection-title">Extends</h3>
+
+        
+
+
+    <ul>
+        <li><a href="Dialog.html">Dialog</a></li>
+    </ul>
+
+
+    
 
     
 
@@ -150,26 +158,16 @@ may also represent a DAWG.</p></div>
 
         
             
-<h4 class="name" id="_debug"><span class="type-signature"></span>_debug<span class="type-signature"> :function</span></h4>
+<h4 class="name" id="id"><span class="type-signature"></span>id<span class="type-signature"></span></h4>
 
 
 
 
 <div class="description">
-    <p>Debug function</p>
+    <p>Identifier for this dialog</p>
 </div>
 
 
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">function</span>
-
-
-        </li>
-    </ul>
 
 
 
@@ -183,6 +181,11 @@ may also represent a DAWG.</p></div>
 
     
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Dialog.html#id">Dialog#id</a>
+    </li></ul></dd>
     
 
     
@@ -204,7 +207,7 @@ may also represent a DAWG.</p></div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_Trie.js.html">dawg/Trie.js</a>, <a href="dawg_Trie.js.html#line53">line 53</a>
+        <a href="browser_Dialog.js.html">browser/Dialog.js</a>, <a href="browser_Dialog.js.html#line50">line 50</a>
     </li></ul></dd>
     
 
@@ -222,13 +225,13 @@ may also represent a DAWG.</p></div>
 
         
             
-<h4 class="name" id="numberOfNodes"><span class="type-signature"></span>numberOfNodes<span class="type-signature"> :number</span></h4>
+<h4 class="name" id="options"><span class="type-signature"></span>options<span class="type-signature"> :object</span></h4>
 
 
 
 
 <div class="description">
-    <p>Total number of nodes in this trie (count of all nodes)</p>
+    <p>Cache of settings</p>
 </div>
 
 
@@ -237,7 +240,7 @@ may also represent a DAWG.</p></div>
     <ul>
         <li>
             
-<span class="param-type">number</span>
+<span class="param-type">object</span>
 
 
         </li>
@@ -256,27 +259,9 @@ may also represent a DAWG.</p></div>
     
 
     
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_Trie.js.html">dawg/Trie.js</a>, <a href="dawg_Trie.js.html#line26">line 26</a>
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Dialog.html#options">Dialog#options</a>
     </li></ul></dd>
     
 
@@ -285,55 +270,6 @@ may also represent a DAWG.</p></div>
     
 
     
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="numberOfWords"><span class="type-signature"></span>numberOfWords<span class="type-signature"> :number</span></h4>
-
-
-
-
-<div class="description">
-    <p>Total number of words in this trie (count of end nodes)</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">number</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
 
     
 
@@ -348,7 +284,7 @@ may also represent a DAWG.</p></div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_Trie.js.html">dawg/Trie.js</a>, <a href="dawg_Trie.js.html#line20">line 20</a>
+        <a href="browser_Dialog.js.html">browser/Dialog.js</a>, <a href="browser_Dialog.js.html#line56">line 56</a>
     </li></ul></dd>
     
 
@@ -376,7 +312,7 @@ may also represent a DAWG.</p></div>
     
 
     
-    <h4 class="name" id="addWord"><span class="type-signature"></span>addWord<span class="signature">(word)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="canSubmit"><span class="type-signature"></span>canSubmit<span class="signature">()</span><span class="type-signature"></span></h4>
     
 
     
@@ -384,7 +320,8 @@ may also represent a DAWG.</p></div>
 
 
 <div class="description">
-    <p>Add a word to the Trie</p>
+    <p>Validate fields to determine if submit can be enabled.
+Override in subclasses.</p>
 </div>
 
 
@@ -393,55 +330,6 @@ may also represent a DAWG.</p></div>
 
 
 
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>word</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>word to add</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
 
 
 
@@ -456,6 +344,11 @@ may also represent a DAWG.</p></div>
 
     
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Dialog.html#canSubmit">Dialog#canSubmit</a>
+    </li></ul></dd>
     
 
     
@@ -477,7 +370,7 @@ may also represent a DAWG.</p></div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_Trie.js.html">dawg/Trie.js</a>, <a href="dawg_Trie.js.html#line74">line 74</a>
+        <a href="browser_Dialog.js.html">browser/Dialog.js</a>, <a href="browser_Dialog.js.html#line201">line 201</a>
     </li></ul></dd>
     
 
@@ -513,7 +406,7 @@ may also represent a DAWG.</p></div>
     
 
     
-    <h4 class="name" id="eachWord"><span class="type-signature"></span>eachWord<span class="signature">(cb)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="createDialog"><span class="type-signature">(protected) </span>createDialog<span class="signature">()</span><span class="type-signature"></span></h4>
     
 
     
@@ -521,7 +414,13 @@ may also represent a DAWG.</p></div>
 
 
 <div class="description">
-    <p>Visit all words in sorted order.</p>
+    <p>Handle dialog creation once the HTML has been loaded, mainly
+for associating handlers and loading background data. This is
+invoked on an <code>open</code> event rather than <code>create</code> so we can be
+sure all initialisation steps are complete before the dialog
+opens.
+Override in subclasses to attach handlers etc. Subclasses should
+return super.createDialog()</p>
 </div>
 
 
@@ -530,55 +429,6 @@ may also represent a DAWG.</p></div>
 
 
 
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>cb</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="TrieNode.html#~wordCallback">TrieNode~wordCallback</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>callback function</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
 
 
 
@@ -593,6 +443,11 @@ may also represent a DAWG.</p></div>
 
     
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Dialog.html#createDialog">Dialog#createDialog</a>
+    </li></ul></dd>
     
 
     
@@ -614,7 +469,7 @@ may also represent a DAWG.</p></div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_Trie.js.html">dawg/Trie.js</a>, <a href="dawg_Trie.js.html#line118">line 118</a>
+        <a href="browser_Dialog.js.html">browser/Dialog.js</a>, <a href="browser_Dialog.js.html#line114">line 114</a>
     </li></ul></dd>
     
 
@@ -650,7 +505,7 @@ may also represent a DAWG.</p></div>
     
 
     
-    <h4 class="name" id="encode"><span class="type-signature"></span>encode<span class="signature">()</span><span class="type-signature"> &rarr; {ArrayBuffer}</span></h4>
+    <h4 class="name" id="enableSubmit"><span class="type-signature">(protected) </span>enableSubmit<span class="signature">()</span><span class="type-signature"></span></h4>
     
 
     
@@ -658,7 +513,7 @@ may also represent a DAWG.</p></div>
 
 
 <div class="description">
-    <p>Convert a Trie (or DAWG) into a linear 32-bit integer array.</p>
+    <p>Enable submit if field values allow it.</p>
 </div>
 
 
@@ -682,6 +537,11 @@ may also represent a DAWG.</p></div>
     
 
     
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Dialog.html#enableSubmit">Dialog#enableSubmit</a>
+    </li></ul></dd>
+    
 
     
 
@@ -702,7 +562,244 @@ may also represent a DAWG.</p></div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_Trie.js.html">dawg/Trie.js</a>, <a href="dawg_Trie.js.html#line301">line 301</a>
+        <a href="browser_Dialog.js.html">browser/Dialog.js</a>, <a href="browser_Dialog.js.html#line209">line 209</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getFieldValues"><span class="type-signature"></span>getFieldValues<span class="signature">(p)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Populate a structure mapping field names to values.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>p</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>optional hash of param values, so subclasses
+can handle non-input type data.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Dialog.html#getFieldValues">Dialog#getFieldValues</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="browser_Dialog.js.html">browser/Dialog.js</a>, <a href="browser_Dialog.js.html#line219">line 219</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="openDialog"><span class="type-signature"></span>openDialog<span class="signature">()</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Subclass to set any dynamic values from context.
+Superclass must be called BEFORE subclass code.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="Dialog.html#openDialog">Dialog#openDialog</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="browser_Dialog.js.html">browser/Dialog.js</a>, <a href="browser_Dialog.js.html#line191">line 191</a>
     </li></ul></dd>
     
 
@@ -731,7 +828,7 @@ may also represent a DAWG.</p></div>
 
         
 <div class="param-desc">
-    <p>array of 32-bit integers</p>
+    <p>promise that resolves to undefined</p>
 </div>
 
 
@@ -742,102 +839,13 @@ may also represent a DAWG.</p></div>
     </dt>
     <dd>
         
-<span class="param-type">ArrayBuffer</span>
+<span class="param-type">Promise</span>
 
 
     </dd>
 </dl>
 
     
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="generateDAWG"><span class="type-signature"></span>generateDAWG<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Go through the steps to generate a DAWG from a Trie tree
-by merging duplicate sub-trees.</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="dawg_Trie.js.html">dawg/Trie.js</a>, <a href="dawg_Trie.js.html#line283">line 283</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

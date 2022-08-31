@@ -32,18 +32,19 @@
 /* eslint-env amd, node */
 
 define([
-  "fs", "proper-lockfile", "bcrypt",
+  "fs", "proper-lockfile", "async-lock", "bcrypt",
   "express-session",
   "passport", "passport-strategy",
   "platform", "common/Utils"
 ], (
-  fs, Lock, BCrypt,
+  fs, Lockfile, AsyncLock, BCrypt,
   ExpressSession,
   Passport, Strategy,
   Platform, Utils
 ) => {
 
   const Fs = fs.promises;
+  const dbLock = new AsyncLock();
 
   function pw_hash(pw) {
     if (typeof pw === "undefined")
@@ -102,21 +103,26 @@ define([
    * and Passport. User object will be kept in req, and contains
    * `{ name:, email:, key:, pass: }`
    *
-   * This makes no pretence of being secure, it is simply a means to manage
-   * simple player login to a game.
-   * Routes specific to Xanado users are:
-   * * `POST /register` register a new Xanado user
-   * * `POST /login` login a Xanado used
-   * * `POST /reset-password` request a password rest token. This won't invalidate
-   * the password.
-   * * `POST /change-password` (pass)
-   * * `GET /password-reset/:token`
-   * Routes relevant to all login session are:
-   * * `POST /logout` logout the current session. Note this won't discard any
-   * session cookies set by OAuth2 modules.
-   * * `GET /session` get the redacted user object for the logged-in player.
-   * This includes extra settings.
-   * * `GET /session-settings` set new extra settings in the session.
+   * This makes no pretence of being secure, it is simply a means to
+   * manage simple player login to a game. The following HTTP status
+   * codes are used in responses: 200, 401, 403, 500
+   *
+   * Routes specific to XANADO users are:
+   * * {@linkcode UserManager#POST_register|POST /register}
+   * * {@linkcode UserManager#POST_login|POST /login}
+   * * {@linkcode UserManager#POST_change_password|POST /change-password}
+   * * {@linkcode UserManager#POST_reset_password|GET /password-reset/:token}
+   * * {@linkcode UserManager#GET_users|GET /users}
+   *
+   * Routes relevant to all login sessions are:
+   * * {@linkcode UserManager#POST_logout|POST /logout}
+   * * {@linkcode UserManager#GET_session|GET /session}
+   * * {@linkcode UserManager#POST_session_settings|POST /session-settings}
+   *
+   * Routes relevant to OAuth2 providers are:
+   * * {@linkcode UserManager#GET_oauth2_providers|GET /oauth2-providers}
+   * * {@linkcode UserManager#GET_oauth2_login|GET /oauth2/login/:provider}
+   * * {@linkcode UserManager#GET_oauth2_callback|GET /oauth2/login/:provider}
    */
   class UserManager {
 
@@ -199,12 +205,12 @@ define([
       // See if there is a current session
       app.get(
         "/session",
-        (req, res) => this.handle_session(req, res));
+        (req, res) => this.GET_session(req, res));
 
       // Post a preference update
       app.post(
         "/session-settings",
-        (req, res) => this.handle_session_settings(req, res));
+        (req, res) => this.POST_session_settings(req, res));
 
       // Remember where we came from
       app.use((req, res, next) => {
@@ -219,13 +225,11 @@ define([
       app.post(
         "/register",
         (req, res, next) =>
-        this.handle_xanado_register(req, res, next));
+        this.POST_register(req, res, next));
 
-      // Return a list of known users. Only the user name and
-      // key are sent.
       app.get(
         "/users",
-        (req, res) => this.handle_users(req, res));
+        (req, res) => this.GET_users(req, res));
 
       // Log in a user
       app.post(
@@ -234,28 +238,22 @@ define([
           // Assign this property in req
           assignProperty: "userObject"
         }),
-        (req, res) => {
-          // error in passport will -> 401
-          req.userObject.provider = "xanado";
-          // Have to call .login or the cookie doesn't get set
-          return this.passportLogin(req, res, req.userObject)
-          .then(() => this.sendResult(res, 200, []));
-        });
+        (req, res) => this.POST_login(req, res));
 
       /* istanbul ignore next */
       app.get(
         "/oauth2-providers",
-        (req, res) => this.handle_oauth2_providers(req, res));
+        (req, res) => this.GET_oauth2_providers(req, res));
 
       // Log out the current signed-in user
       app.post(
         "/logout",
-        (req, res) => this.handle_logout(req, res));
+        (req, res) => this.POST_logout(req, res));
 
       // Send a password reset email to the user with the given email
       app.post(
         "/reset-password",
-        (req, res) => this.handle_xanado_reset_password(req, res));
+        (req, res) => this.POST_reset_password(req, res));
 
       // Receive a password reset from a link in email
       app.get(
@@ -274,7 +272,24 @@ define([
       // Change the password for the current user
       app.post(
         "/change-password",
-        (req, res) => this.handle_xanado_change_password(req, res));
+        (req, res) => this.POST_change_password(req, res));
+
+      // Login using oauth2 service
+      // Note: this route MUST be a GET and MUST come from an href and
+      // not an AJAX request, or CORS will foul up.
+      app.get(
+        "/oauth2/login/:provider",
+        (req, res) => this.GET_oauth2_login(req, res));
+
+      // oauth2 redirect target
+      app.get(
+        "/oauth2/callback/:provider",
+        (req, res, next) => {
+          const mw = Passport.authenticate(
+            req.params.provider, { assignProperty: "userObject" });
+          return mw(req, res, next);
+        },
+        (req, res) => this.GET_oauth2_callback(req, res));
     }
 
     /**
@@ -303,23 +318,26 @@ define([
      * @private
      */
     getDB() {
-      if (this.db)
-        return Promise.resolve(this.db);
+      return this.db
+      ? Promise.resolve(this.db)
 
-      return Lock.lock(this.config.auth.db_file)
-      .then(release => Fs.readFile(this.config.auth.db_file)
-            .then(data => release()
-                  .then(() => {
-                    return JSON.parse(data);
-                  })))
-      .then(db => {
-        this.db = db || [];
-        return db;
-      })
-      .catch(e => {
-        this.db = [];
-        return this.db;
-      });
+      // In an ideal world, proper-lockfile would wait for a lock
+      // to be released - but it doesn't, it just errors. So we have
+      // to wrap it in a concurrency lock.
+      : dbLock.acquire(
+        this.config.auth.db_file,
+        () => this.db
+        ? Promise.resolve(this.db)
+        : (Lockfile.lock(this.config.auth.db_file)
+           .then(release => Fs.readFile(this.config.auth.db_file)
+                 .then(buffer => release()
+                       .then(() => this.db = JSON.parse(buffer))))
+           .catch(e => {
+             // File is unreadable
+             this.db = [];
+           })
+          ))
+      .then(() => this.db);
     }
 
     /**
@@ -329,12 +347,14 @@ define([
      */
     writeDB() {
       const s = JSON.stringify(this.db, null, 1);
-      return Fs.access(this.config.auth.db_file)
-      .then(acc => Lock.lock(this.config.auth.db_file)
-            .then(release => Fs.writeFile(
-              this.config.auth.db_file, s)
-                  .then(() => release())))
-      .catch(e => Fs.writeFile(this.config.auth.db_file, s)); // file does not exist
+      return dbLock.acquire(
+        this.config.auth.db_file,
+        () => Fs.access(this.config.auth.db_file)
+        .then(acc => Lockfile.lock(this.config.auth.db_file))
+        .then(release => Fs.writeFile(
+          this.config.auth.db_file, s)
+              .then(() => release()))
+        .catch(e => Fs.writeFile(this.config.auth.db_file, s))); // file does not exist
     }
 
     /**
@@ -354,14 +374,14 @@ define([
     getUser(desc, ignorePass) {
       return this.getDB()
       .then(db => {
+        let uo;
         if (typeof desc.key !== "undefined") {
-          for (let uo of db) {
-            if (uo.key === desc.key)
-              return uo;
-          }
+          uo = db.find(uo => uo.key === desc.key);
+          if (uo)
+            return uo;
         }
 
-        for (let uo of db) {
+        for (uo of db) {
           if (typeof desc.token !== "undefined"
               &amp;&amp; uo.token === desc.token) {
             // One-time password change token
@@ -378,18 +398,18 @@ define([
             if (typeof uo.pass === "undefined") {
               if (desc.pass === uo.pass)
                 return uo;
-              throw new Error(/*i18n*/"Wrong password for '$1'");
+              throw new Error(/*i18n*/"wrong-pass");
             }
             return pw_compare(desc.pass, uo.pass)
             .then(ok => {
               if (ok)
                 return uo;
-              throw new Error(/*i18n*/"Wrong password for '$1'");
+              throw new Error(/*i18n*/"wrong-pass");
             })
             .catch(e => {
               this._debug("getUser", desc,
                           "failed; bad pass", e);
-              throw new Error(/*i18n*/"Wrong password for '$1'");
+              throw new Error(/*i18n*/"wrong-pass");
             });
           }
 
@@ -397,9 +417,10 @@ define([
               &amp;&amp; uo.email === desc.email)
             return uo;
         }
-        this._debug("getUser", desc, "failed; no such user");
+        this._debug("getUser", desc, "failed; no such user in",
+                    db.map(uo=>uo.key).join(";"));
         throw new Error(
-          /*i18n*/"Player '$1' is not known. Use the 'Sign up' tab to register.");
+          /*i18n*/"player-unknown");
       });
     }
 
@@ -442,43 +463,53 @@ define([
           .then(uo => done(null, uo));
           // uo will end up in userObject
         }));
-
-      // Login using oauth2 service
-      // Note: this route MUST be a GET and MUST come from an href and
-      // not an AJAX request, or CORS will foul up.
-      app.get(
-        `/oauth2/login/${provider}`,
-        Passport.authenticate(provider));
-
-      // oauth2 redirect target
-      app.get(
-        `/oauth2/callback/${provider}`,
-        Passport.authenticate(provider, { assignProperty: "userObject" }),
-        (req, res) => {
-          // error will -> 401
-          //this._debug("OAuth2 user is", Utils.stringify(req.userObject));
-          req.login(req.userObject, () => {
-            // Back to where we came from
-            //this._debug("Redirect to",req.session.origin);
-            res.redirect(req.session.origin);
-          });
-        });
     }
 
     /* istanbul ignore next */
     /**
-     * Get a list of oauth2 providers
+     * Get a list of oauth2 providers.
      * @param {Request} req
-     * @param {Response} res
+     * @param {Response} res Responds body will be a list of oauth2
+     * provider objects, each with the provider name and the logo URL
      * @private
      */
-    handle_oauth2_providers(req, res) {
+    GET_oauth2_providers(req, res) {
       const list = [];
       for (let name in this.config.auth.oauth2) {
         const cfg = this.config.auth.oauth2[name];
         list.push({ name: name, logo: cfg.logo });
       }
       this.sendResult(res, 200, list);
+    }
+
+    /* istanbul ignore next */
+    /**
+     * Log in to an oauth2 provider.
+     * @param {Request} req
+     * @param {string} req.provider the provider name
+     * @param {Response} res
+     * @private
+     */
+    GET_oauth2_login(req, res) {
+      return Passport.authenticate(req.params.provider)(req, res);
+    }
+
+    /* istanbul ignore next */
+    /**
+     * Callback used by an OAuth2 provider.
+     * @param {Request} req
+     * @param {string} req.provider the provider name
+     * @param {Response} res
+     * @private
+     */
+    GET_oauth2_callback(req, res) {
+      // error will -> 401
+      //this._debug("OAuth2 user is", Utils.stringify(req.userObject));
+      return req.login(req.userObject, () => {
+        // Back to where we came from
+        //this._debug("Redirect to",req.session.origin);
+        res.redirect(req.session.origin);
+      });
     }
 
     /**
@@ -506,9 +537,12 @@ define([
      * @return {Promise} resolve to user object, or reject if duplicate
      */
     addUser(desc) {
-      if (!desc.key)
-        desc.key = Utils.genKey(this.db.map(f => f.key));
-      return pw_hash(desc.pass)
+      return this.getDB()
+      .then(() => {
+        if (!desc.key)
+          desc.key = Utils.genKey(this.db.map(f => f.key));
+        return pw_hash(desc.pass);
+      })
       .then(pw => {
         if (typeof pw !== "undefined")
           desc.pass = pw;
@@ -530,21 +564,23 @@ define([
 
     /**
      * Handle registration of a user using Xanado password database
-     * @param {Request} req
+     * @param {Request} req The body of the
+     * request must contain `register_username` and may contain
+     * `register_email` and `register_password`.
      * @param {Response} res
      * @private
      */
-    handle_xanado_register(req, res, next) {
+    POST_register(req, res, next) {
       const username = req.body.register_username;
       const email = req.body.register_email;
       const pass = req.body.register_password;
       if (!username)
         return this.sendResult(
-          res, 403, [ /*i18n*/"Bad username '$1'", username ]);
+          res, 403, [ /*i18n*/"bad-user", username ]);
       return this.getUser({name: username }, true)
       .then(() => {
         this.sendResult(
-          res, 403, [ /*i18n*/"'$1' is already registered", username ]);
+          res, 403, [ /*i18n*/"already-registered", username ]);
       })
       .catch(() => {
         // New user
@@ -555,36 +591,37 @@ define([
           pass: pass
         })
         .then(userObject => this.passportLogin(req, res, userObject))
-        .then(() => this.handle_session(req, res));
+        .then(() => this.GET_session(req, res));
       });
     }
 
     /**
-     * Simply forgets the user, doesn't log OAuth2 users out from
-     * the provider.
+     * Simply forgets the currently logged-in user, doesn't log OAuth2
+     * users out from the provider.
      * @param {Request} req
      * @param {Response} res
      * @private
      */
-    handle_logout(req, res) {
+    POST_logout(req, res) {
       if (req.isAuthenticated()) {
         const departed = req.session.passport.user.name;
         this._debug("Logging out", departed);
         return new Promise(resolve => req.logout(resolve))
         .then(() => this.sendResult(res, 200, [
-          /*i18n*/"$1 signed out", departed ]));
+          /*i18n*/"signed-out", departed ]));
       }
       return this.sendResult(
         res, 401, [ /*i18n*/"Not signed in" ]);
     }
 
     /**
-     * Gets a list of known users, user name and player key only
-     * @param {Request} req
-     * @param {Response} res
+     * Gets a list of known users
+     * @param {Request} req request
+     * @param {Response} res Sends a list of users. Only the user name and
+     * key are sent.
      * @private
      */
-    handle_users(req, res) {
+    GET_users(req, res) {
       if (req.isAuthenticated())
         return this.getDB()
       .then(db => this.sendResult(
@@ -598,12 +635,29 @@ define([
     }
 
     /**
-     * Change the current users' password
-     * @param {Request} req
+     * Handle XANADO login.
+     * @param {Request} req The body of the request
+     * must contain `login_username` and `login_password`
+     * fields. BasicAuth is NOT supported.
+     * @param {Response} res response
+     * @private
+     */
+    POST_login(req, res) {
+      // error in passport will -> 401
+      req.userObject.provider = "xanado";
+      // Have to call .login or the cookie doesn't get set
+      return this.passportLogin(req, res, req.userObject)
+      .then(() => this.sendResult(res, 200, []));
+    }
+
+    /**
+     * Change the current users' password.
+     * @param {Request} req The request body must contain `password`,
+     * the new password
      * @param {Response} res
      * @private
      */
-    handle_xanado_change_password(req, res) {
+    POST_change_password(req, res) {
       if (req.session
           &amp;&amp; req.session.passport
           &amp;&amp; req.session.passport.user) {
@@ -618,7 +672,7 @@ define([
         })
         .then(() => this.writeDB())
         .then(() => this.sendResult(res, 200, [
-          /*i18n*/"Password for $1 changed",
+          /*i18n*/"pass-changed",
           req.session.passport.user.name ]));
       }
       return this.sendResult(
@@ -628,11 +682,11 @@ define([
     /**
      * Reset the password for the given email address. A reset token will
      * be mailed to the user that they can then use to log in.
-     * @param {Request} req
+     * @param {Request} req The request body must contain `reset_email`
      * @param {Response} res
      * @private
      */
-    handle_xanado_reset_password(req, res) {
+    POST_reset_password(req, res) {
       const email = req.body.reset_email;
       this._debug("/reset-password for", email);
       const surly = `${req.protocol}://${req.get("Host")}`;
@@ -645,24 +699,24 @@ define([
           /* istanbul ignore if */
           if (!this.config.mail)
             return this.sendResult(res, 500, [
-              /*i18n*/"Sorry, but email is not available on this server. You will have to ask the server admin for your password." ]);
+              /*i18n*/"text-no-email" ]);
           return this.config.mail.transport.sendMail({
             from: this.config.mail.sender,
             to:  user.email,
             subject: Platform.i18n("Password reset"),
             text: Platform.i18n(
-              "Follow this link to reset your password: $1", url),
+              "email-reset-plain", url),
             html: Platform.i18n(
-              "Click &lt;a href='$1'>here&lt;/a> to reset your password.", url)
+              "email-reset-body", url)
           })
           .then(() => this.sendResult(
-            res, 200, [ /*i18n*/"Password reset email has been sent", user.name ]))
+            res, 200, [ /*i18n*/"text-reset-sent", user.name ]))
           .catch(
             /* istanbul ignore next */
             e => {
               console.error("WARNING: Mail misconfiguration?", e);
               return this.sendResult(
-                res, 500, [  /*i18n*/"Sorry, but email is not available on this server. You will have to ask the server admin for your password." ]);
+                res, 500, [  /*i18n*/"text-no-email" ]);
             });
         });
       })
@@ -671,12 +725,17 @@ define([
 
     /**
      * Report who is logged in. This will return a redacted user
-     * object, with just the user name and uniqe key
+     * object, with just the user name and uniqe key.
      * @param {Request} req
-     * @param {Response} res
+     * @param {Response} res Response body will contain a redacted user
+     * object, with
+     * * name: the player name
+     * * key: the player unique key
+     * * provider: the login provider
+     * * settings: the cached user settings for the user
      * @private
      */
-    handle_session(req, res) {
+    GET_session(req, res) {
       if (req.user)
         // Return redacted user object
         return this.sendResult(res, 200, {
@@ -694,7 +753,7 @@ define([
      * @param {Response} res
      * @private
      */
-    handle_session_settings(req, res) {
+    POST_session_settings(req, res) {
       if (req.user) {
         req.user.settings = req.body;
         return this.getUser(req.user)
@@ -735,13 +794,13 @@ define([
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="BrowserSurface.html">BrowserSurface</a></li><li><a href="Database.html">Database</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameDialog.html">GameDialog</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="InvitePlayersDialog.html">InvitePlayersDialog</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="LoginDialog.html">LoginDialog</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Commands.html">Commands</a></li><li><a href="PasswordMixin.html">PasswordMixin</a></li><li><a href="Replay.html">Replay</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#createDialog">createDialog</a></li><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li><li><a href="global.html#step">step</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Aug 30 2022 14:43:41 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed Aug 31 2022 18:15:59 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

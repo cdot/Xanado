@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: dawg/Compressor.js</title>
+    <title>JSDoc: Source: browser/InvitePlayersDialog.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: dawg/Compressor.js</h1>
+    <h1 class="page-title">Source: browser/InvitePlayersDialog.js</h1>
 
     
 
@@ -29,59 +29,106 @@
             <pre class="prettyprint source linenums"><code>/*Copyright (C) 2019-2022 The Xanado Project https://github.com/cdot/Xanado
   License MIT. See README.md at the root of this distribution for full copyright
   and license information. Author Crawford Currie http://c-dot.co.uk*/
-/* eslint-env node */
+/* eslint-env browser, jquery */
 
-/**
- * AMD module defining the body of the 'compressor' command-line program
- */
-define([
-  "fs", "node-gzip", "dawg/Trie"
-], (
-  fs, Gzip, Trie
-) => {
-  const Fs = fs.promises;
+define(["browser/Dialog"], Dialog => {
 
-  class Compressor {
+  /**
+   * Dialog for inviting players to a game.
+   */
+  class InvitePlayersDialog extends Dialog {
 
-    /**
-     * Generate a compressed dictionary from the text file of words.
-     * @param {string} infile file of words, one per line, # for comments
-     * @param {string} outfile file for zipped dictionary
-     * @return {Promise} a promise to create the dictionary
-     */
-    static compress(infile, outfile, report) {
-      return Fs.readFile(infile, "utf8")
-      .then(async function(data) {
-        const lexicon = data
-              .toUpperCase()
-              .split(/\r?\n/)
-              .map(w => w.replace(/\s.*$/, "")) // comments
-              .filter(line => line.length > 0)
-              .sort();
+    constructor(options) {
+      super("InvitePlayersDialog", $.extend({
+        title: $.i18n("Invite players")
+      }, options));
 
-        // First step; generate a Trie from the words in the lexicon
-        const trie = new Trie(lexicon, report);
+      // Known users, got afresh from /users each time the
+      // dialog is opened
+      this.users = [];
+    }
 
-        // Second step; generate a DAWG from the Trie
-        trie.generateDAWG();
+    createDialog() {
+      const $email = this.$dlg.find("#playerEmail");
+      $email
+      .on('change', () => this.pick($email.val()));
 
-        // Generate an integer array for use with Dictionary
-        const buffer = trie.encode();
-        const dv = new DataView(buffer);
-        const z = await Gzip.gzip(dv);
-        report(`Compressed ${z.length} bytes`);
+      const $select = this.$dlg.find("#knownUserSelect");
+      $select
+      .on("selectmenuchange", () => this.pick($select.val()));
+      return super.createDialog();
+    }
 
-        // Write DAWG binary bytes
-        return Fs.writeFile(outfile, z)
-        .then(() => report(`Wrote DAWG to ${outfile}`));
-      })
-      .catch(e => {
-        report(e.toString());
+    openDialog() {
+      return super.openDialog()
+      .then(() => $.get("/users"))
+      .then(users => {
+        this.users = users;
+        const $select = this.$dlg.find("#knownUserSelect");
+        $select.empty();
+        users.forEach(uo => $select.append(
+          `&lt;option value="${uo.key}">${uo.name}&lt;/option>`));
+        $select
+        .selectmenu("refresh");
+        const $gk = this.$dlg.find("[name=gameKey]");
+        $gk.val(this.options.gameKey);
+        this.$dlg.find("#invitedPlayers").empty();
+        this.invitees = [];
+        this.$dlg.find("#removeText").hide();
       });
+    }
+
+    pick(name) {
+      if (!name)
+        return;
+      let known = this.users.find(uo => (
+        uo.name === name
+        || uo.email === name
+        || uo.key === name));
+      if (!known) {
+        known = { email: name };
+        this.users.push(known);
+      }
+
+      const $list = this.$dlg.find("#invitedPlayers");
+      let invited = false;
+      $(".invitee").each(() => {
+        if ($(this).data("uo") === known)
+          invited = true;
+      });
+      if (invited)
+        return;
+
+      const $removeText = this.$dlg.find("#removeText");
+      const $in = $(document.createElement("span"))
+            .addCLoass("invitee")
+            .text((known.name || known.email))
+            .data("uo", known)
+            .on('click', function() {
+              $(this).remove();
+              if ($list.children().length === 0)
+                $removeText.hide();
+            });
+      $list.append($in);
+
+      $removeText.show();
+    }
+
+    submit() {
+      const ps = [];
+      const $invitees = this.$dlg.find(".invitee");
+      if ($invitees.length === 0) {
+        this.$dlg.dialog("close");
+        return;
+      }
+      $invitees.each(function() {
+        ps.push($(this).data("uo"));
+      });
+      super.submit({ player: ps });
     }
   }
 
-  return Compressor;
+  return InvitePlayersDialog;
 });
 </code></pre>
         </article>

@@ -50,7 +50,7 @@ define([
    * commands.
    * @mixin Commands
    */
-  return {
+  class Commands {
 
     /**
      * Place tiles on the board.
@@ -134,7 +134,7 @@ define([
                 player, Notify.MESSAGE,
                 {
                   sender: /*i18n*/"Advisor",
-                  text: /*i18n*/"$1 not found in $2",
+                  text: /*i18n*/"word-not-found",
                   args: [ w.word, dict.name ]
                 });
             }
@@ -158,18 +158,17 @@ define([
       // Report the result of the turn
       const nextPlayer = this.nextPlayer();
       this.whosTurnKey = nextPlayer.key;
-      return this.finishTurn(new Turn(this, {
+      return this.finishTurn(player, {
         type: Turns.PLAYED,
-        playerKey: player.key,
         nextToGoKey: nextPlayer.key,
         score: move.score,
         placements: move.placements,
         replacements: replacements,
         words: move.words,
         passes: prepasses
-      }))
+      })
       .then(() => this.startTurn(nextPlayer));
-    },
+    }
 
     /**
      * Pause the game
@@ -191,7 +190,7 @@ define([
         timestamp: Date.now()
       });
       return this.save();
-    },
+    }
 
     /**
      * Unpause the game
@@ -214,7 +213,7 @@ define([
       this.pausedBy = undefined;
       this.startTheClock();
       return this.save();
-    },
+    }
 
     /**
      * Called when the game has been confirmed as over - the player
@@ -279,14 +278,12 @@ define([
         deltas[playerWithNoTiles.key].tiles = pointsRemainingOnRacks;
         this._debug(`${playerWithNoTiles.name} gains ${pointsRemainingOnRacks}`);
       }
-      const turn = new Turn(this, {
+      return this.finishTurn(player, {
         type: Turns.GAME_ENDED,
         endState: endState,
-        playerKey: this.whosTurnKey, // NOT the winning player
         score: deltas
       });
-      return this.finishTurn(turn);
-    },
+    }
 
     /**
      * Undo the last move. This might be as a result of a player request,
@@ -319,20 +316,19 @@ define([
 
       prevPlayer.score -= previousMove.score;
 
-      const turn = new Turn(this, {
+      const turn = {
         type: type,
         nextToGoKey: type === Turns.CHALLENGE_WON
         ? this.whosTurnKey : player.key,
         score: -previousMove.score,
         placements: previousMove.placements,
         replacements: previousMove.replacements
-      });
+      };
 
-      turn.playerKey = prevPlayer.key;
       if (type === Turns.CHALLENGE_WON)
         turn.challengerKey = player.key;
 
-      return this.finishTurn(turn)
+      return this.finishTurn(prevPlayer, turn)
       .then(() => {
         if (type === Turns.TOOK_BACK) {
           // Let the taking-back player go again,
@@ -344,7 +340,7 @@ define([
         // with their timer reset
         return Promise.resolve(this);
       });
-    },
+    }
 
     /**
      * Handler for 'pass' command.
@@ -366,14 +362,12 @@ define([
 
       const nextPlayer = this.nextPlayer();
 
-      return this.finishTurn(new Turn(
-        this, {
-          type: type || Turns.PASSED,
-          playerKey: player.key,
-          nextToGoKey: nextPlayer.key
-        }))
+      return this.finishTurn(player, {
+        type: type || Turns.PASSED,
+        nextToGoKey: nextPlayer.key
+      })
       .then(() => this.startTurn(nextPlayer));
-    },
+    }
 
     /**
      * Handler for 'challenge' command.
@@ -390,7 +384,7 @@ define([
       if (challenger.key === challenged.key)
         return Promise.reject("Cannot challenge your own play");
 
-      if (this.turnCount() === 0)
+      if (this.turns.length === 0)
         return Promise.reject("No previous move to challenge");
 
       let previousMove = this.lastTurn();
@@ -425,9 +419,8 @@ define([
           return this.takeBack(challenger, Turns.CHALLENGE_WON);
         }
 
-        // Challenge failed
+        this._debug("Challenge failed,", this.challengePenalty);
 
-        const prevPlayerKey = previousMove.playerKey;
         const currPlayerKey = this.getPlayer().key;
         const nextPlayer = this.nextPlayer();
 
@@ -448,19 +441,15 @@ define([
               this.getPlayer(), State.FAILED_CHALLENGE);
           // Otherwise issue turn type=Turns.CHALLENGE_LOST
 
-          const turn = new Turn(
-            this, {
-              type: Turns.CHALLENGE_LOST,
-              penalty: Penalty.MISS,
-              playerKey: prevPlayerKey,
-              challengerKey: challenger.key,
-              nextToGoKey: nextPlayer.key
-            });
-
           // Penalty for a failed challenge is miss a turn,
           // and the challenger is the current player, so their
           // turn is at an end.
-          return this.finishTurn(turn)
+          return this.finishTurn(challenged, {
+            type: Turns.CHALLENGE_LOST,
+            penalty: Penalty.MISS,
+            challengerKey: challenger.key,
+            nextToGoKey: nextPlayer.key
+          })
           .then(() => this.startTurn(nextPlayer));
         }
 
@@ -481,18 +470,16 @@ define([
         }
 
         challenger.score += lostPoints;
-        return this.finishTurn(new Turn(
-          this, {
-            type: Turns.CHALLENGE_LOST,
-            score: lostPoints,
-            playerKey: prevPlayerKey,
-            challengerKey: challenger.key,
-            nextToGoKey: currPlayerKey
-          }));
+        return this.finishTurn(challenged, {
+          type: Turns.CHALLENGE_LOST,
+          score: lostPoints,
+          challengerKey: challenger.key,
+          nextToGoKey: currPlayerKey
+        });
         // no startTurn, because the challenge is asynchronous and
         // shouldn't move the player on
       });
-    },
+    }
 
     /**
      * Handler for swap command.
@@ -532,19 +519,15 @@ define([
         player.rack.addTile(rep);
 
       const nextPlayer = this.nextPlayer();
-      const turn = new Turn(
-        this,
-        {
-          type: Turns.SWAPPED,
-          playerKey: player.key,
-          nextToGoKey: nextPlayer.key,
-          placements: tiles, // the tiles that were swapped out
-          replacements: replacements // the tiles that are replacing them
-        });
 
-      return this.finishTurn(turn)
+      return this.finishTurn(player, {
+        type: Turns.SWAPPED,
+        nextToGoKey: nextPlayer.key,
+        placements: tiles, // the tiles that were swapped out
+        replacements: replacements // the tiles that are replacing them
+      })
       .then(() => this.startTurn(nextPlayer));
-    },
+    }
 
     /**
      * Create another game the same, but with players re-ordered. The
@@ -563,6 +546,8 @@ define([
       // so rather than mucking around with requirejs simply use
       // this.constructor to get the class.
       const newGame = new (this.constructor)(this);
+      // Constructor will copy the old game key
+      newGame.key = Utils.genKey();
       return newGame.create()
       .then(() => newGame.onLoad(this._db))
       .then(() => this.nextGameKey = newGame.key)
@@ -595,7 +580,7 @@ define([
         timestamp: Date.now()
       }))
       .then(() => newGame);
-    },
+    }
 
     /**
      * Toggle advice on/off. All players are told using
@@ -618,12 +603,12 @@ define([
       if (player.wantsAdvice)
         this.notifyAll(Notify.MESSAGE, {
           sender: /*i18n*/"Advisor",
-          text: /*i18n*/"$1 has asked for advice from the robot",
+          text: /*i18n*/"advised",
           classes: "warning",
           args: [ player.name ],
           timestamp: Date.now()
         });
-    },
+    }
 
     /**
      * Asynchronously advise player as to what better play they
@@ -667,14 +652,14 @@ define([
           const words = bestPlay.words.map(w => w.word).join(",");
           const advice = {
             sender: /*i18n*/"Advisor",
-            text: /*i18n*/"$1 at row $2 column $3 would have scored $4",
+            text: /*i18n*/"possible-score",
             args: [  words, start.row + 1, start.col + 1,
                     bestPlay.score ]
           };
           this.notifyPlayer(player, Notify.MESSAGE, advice);
           this.notifyOthers(player, Notify.MESSAGE, {
             sender: /*i18n*/"Advisor",
-            text: /*i18n*/"$1 has received advice from the robot",
+            text: /*i18n*/"was-advised",
             classes: "warning",
             args: [ player.name ],
             timestamp: Date.now()
@@ -686,7 +671,7 @@ define([
         /* istanbul ignore next */
         console.error("Error", e);
       });
-    },
+    }
 
     /**
      * Handler for 'hint' request. This is NOT a turn handler.
@@ -724,7 +709,7 @@ define([
           sender: /*i18n*/"Advisor"
         };
         if (!bestPlay)
-          hint.text = /*i18n*/"Can't find a play";
+          hint.text = /*i18n*/"log-no-play";
         else {
           const start = bestPlay.placements[0];
           hint.text = "_hint_";
@@ -740,7 +725,7 @@ define([
         // Tell *everyone else* that they asked for a hint
         this.notifyOthers(player, Notify.MESSAGE, {
           sender: /*i18n*/"Advisor",
-          text: /*i18n*/"$1 asked for a hint",
+          text: /*i18n*/"hinted",
           classes: "warning",
           args: [ player.name ],
           timestamp: Date.now()
@@ -755,7 +740,7 @@ define([
           timestamp: Date.now()
         });
       });
-    },
+    }
 
     /**
      * Add a word to the dictionary whitelist, asynchronously
@@ -774,7 +759,7 @@ define([
             Notify.MESSAGE, {
               sender: /*i18n*/"Advisor",
               text:
-              /*i18n*/"$1 has added '$2' to $3",
+              /*i18n*/"log-word-added",
               args: [
                 player.name, word, dict.name
               ]
@@ -784,13 +769,15 @@ define([
             player,
             Notify.MESSAGE, {
               sender: /*i18n*/"Advisor",
-              text: /*i18n*/"'$1' is already in $2",
+              text: /*i18n*/"word-there",
               args: [ word, dict.name ]
             });
         }
       });
     }
-  };
+  }
+
+  return Commands;
 });
 
 </code></pre>
@@ -803,13 +790,13 @@ define([
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="BrowserSurface.html">BrowserSurface</a></li><li><a href="Database.html">Database</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameDialog.html">GameDialog</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="InvitePlayersDialog.html">InvitePlayersDialog</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="LoginDialog.html">LoginDialog</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Commands.html">Commands</a></li><li><a href="PasswordMixin.html">PasswordMixin</a></li><li><a href="Replay.html">Replay</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#createDialog">createDialog</a></li><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li><li><a href="global.html#step">step</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Aug 30 2022 14:43:41 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed Aug 31 2022 18:15:59 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

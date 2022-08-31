@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: dawg/Compressor.js</title>
+    <title>JSDoc: Source: browser/Surface.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: dawg/Compressor.js</h1>
+    <h1 class="page-title">Source: browser/Surface.js</h1>
 
     
 
@@ -26,62 +26,41 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>/*Copyright (C) 2019-2022 The Xanado Project https://github.com/cdot/Xanado
+            <pre class="prettyprint source linenums"><code>/*Copyright (C) 2022 The Xanado Project https://github.com/cdot/Xanado
   License MIT. See README.md at the root of this distribution for full copyright
   and license information. Author Crawford Currie http://c-dot.co.uk*/
-/* eslint-env node */
+/* eslint-env amd, browser, jquery */
 
-/**
- * AMD module defining the body of the 'compressor' command-line program
- */
-define([
-  "fs", "node-gzip", "dawg/Trie"
-], (
-  fs, Gzip, Trie
-) => {
-  const Fs = fs.promises;
+define([ "jquery" ], () => {
 
-  class Compressor {
-
+  /**
+   * Browser-side base class for {@linkcode Surface}
+   */
+  class BrowserSurface {
     /**
-     * Generate a compressed dictionary from the text file of words.
-     * @param {string} infile file of words, one per line, # for comments
-     * @param {string} outfile file for zipped dictionary
-     * @return {Promise} a promise to create the dictionary
+     * Create the UI representation
+     * @function
+     * @instance
+     * @memberof BrowserSurface
+     * @param {jQuery} $table table to populate
      */
-    static compress(infile, outfile, report) {
-      return Fs.readFile(infile, "utf8")
-      .then(async function(data) {
-        const lexicon = data
-              .toUpperCase()
-              .split(/\r?\n/)
-              .map(w => w.replace(/\s.*$/, "")) // comments
-              .filter(line => line.length > 0)
-              .sort();
-
-        // First step; generate a Trie from the words in the lexicon
-        const trie = new Trie(lexicon, report);
-
-        // Second step; generate a DAWG from the Trie
-        trie.generateDAWG();
-
-        // Generate an integer array for use with Dictionary
-        const buffer = trie.encode();
-        const dv = new DataView(buffer);
-        const z = await Gzip.gzip(dv);
-        report(`Compressed ${z.length} bytes`);
-
-        // Write DAWG binary bytes
-        return Fs.writeFile(outfile, z)
-        .then(() => report(`Wrote DAWG to ${outfile}`));
-      })
-      .catch(e => {
-        report(e.toString());
-      });
+    $populate($table) {
+      const $tbody = $(document.createElement("tbody"));
+      $table.append($tbody);
+      for (let row = 0; row &lt; this.rows; row++) {
+        const $tr = $(document.createElement("tr"));
+        $tbody.append($tr);
+        for (let col = 0; col &lt; this.cols; col++) {
+          const square = this.at(col, row);
+          const $td = $(document.createElement("td"));
+          $tr.append($td);
+          square.$populate($td);
+        }
+      }
     }
   }
 
-  return Compressor;
+  return BrowserSurface;
 });
 </code></pre>
         </article>

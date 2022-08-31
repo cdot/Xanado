@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: dawg/Compressor.js</title>
+    <title>JSDoc: Source: browser/LoginDialog.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: dawg/Compressor.js</h1>
+    <h1 class="page-title">Source: browser/LoginDialog.js</h1>
 
     
 
@@ -29,59 +29,92 @@
             <pre class="prettyprint source linenums"><code>/*Copyright (C) 2019-2022 The Xanado Project https://github.com/cdot/Xanado
   License MIT. See README.md at the root of this distribution for full copyright
   and license information. Author Crawford Currie http://c-dot.co.uk*/
-/* eslint-env node */
+/* eslint-env browser, jquery */
 
-/**
- * AMD module defining the body of the 'compressor' command-line program
- */
 define([
-  "fs", "node-gzip", "dawg/Trie"
+  "browser/Dialog", "browser/PasswordMixin"
 ], (
-  fs, Gzip, Trie
+  Dialog, PasswordMixin
 ) => {
-  const Fs = fs.promises;
 
-  class Compressor {
+  /**
+   * @extends Dialog
+   * @mixes PasswordMixin
+   */
+  class LoginDialog extends PasswordMixin(Dialog) {
 
-    /**
-     * Generate a compressed dictionary from the text file of words.
-     * @param {string} infile file of words, one per line, # for comments
-     * @param {string} outfile file for zipped dictionary
-     * @return {Promise} a promise to create the dictionary
-     */
-    static compress(infile, outfile, report) {
-      return Fs.readFile(infile, "utf8")
-      .then(async function(data) {
-        const lexicon = data
-              .toUpperCase()
-              .split(/\r?\n/)
-              .map(w => w.replace(/\s.*$/, "")) // comments
-              .filter(line => line.length > 0)
-              .sort();
+    constructor(options) {
+      options.onSubmit = () => {
+        this.options.postAction = this.getAction();
+      };
+      super("LoginDialog", $.extend({
+        title: $.i18n("Sign in")
+      }, options));
+    }
 
-        // First step; generate a Trie from the words in the lexicon
-        const trie = new Trie(lexicon, report);
+    enableSubmit() {
+      if (this.getAction() === "register") {
+        const user = this.$dlg.find("#register_username").val();
+        return (user
+                &amp;&amp; user !== $.i18n("Advisor")
+                &amp;&amp; user !== $.i18n("Robot"));
+      }
+      return true;
+    }
 
-        // Second step; generate a DAWG from the Trie
-        trie.generateDAWG();
+    getAction() {
+      const active = this.$dlg.find("#tabs").tabs("option", "active");
+      return {
+        0: "/login",
+        1: "/register",
+        2: "/reset-password"
+      }[active];
+    }
 
-        // Generate an integer array for use with Dictionary
-        const buffer = trie.encode();
-        const dv = new DataView(buffer);
-        const z = await Gzip.gzip(dv);
-        report(`Compressed ${z.length} bytes`);
+    createDialog() {
+      const $tabs = this.$dlg.find("#tabs");
+      $tabs.tabs();
 
-        // Write DAWG binary bytes
-        return Fs.writeFile(outfile, z)
-        .then(() => report(`Wrote DAWG to ${outfile}`));
+      const $las = this.$dlg.find(".logged-in-as");
+      if ($las.length > 0) {
+        $.get("/session")
+        .then(user => $las.text(
+          $.i18n("logged-in-as", user.name)));
+      }
+
+      this.$dlg.find(".forgotten-password")
+      .on("click", () => $tabs.tabs("option", "active", 2));
+
+      return $.get("/oauth2-providers")
+      .then(list => {
+        if (!list || list.length === 0)
+          return;
+        const $table = $(document.createElement("table"))
+              .attr("width", "100%");
+        for (let provider of list) {
+          const $td = $(document.createElement("td"))
+                .addClass("provider-logo")
+                .attr("title", $.i18n("sign-in-using", provider.name));
+          const $logo = $(`&lt;img src="${provider.logo}" />`);
+          // Note: this MUST be done using from an href and
+          // not an AJAX request, or CORS will foul up.
+          const $a = $(document.createElement("a"));
+          $a.attr("href", `/oauth2/login/${provider.name}?origin=${encodeURI(window.location)}`);
+          $a.append($logo);
+          $td.append($a);
+          $td.tooltip();
+          $table.append($td);
+        }
+        $("#login-tab")
+        .prepend($(`&lt;div class="sign-in-using">${$.i18n("Sign in using:")}&lt;/div>`)
+                 .append($table)
+                 .append(`&lt;br />&lt;div class="sign-in-using">${$.i18n("text-or-xanado")}&lt;/div>`));
       })
-      .catch(e => {
-        report(e.toString());
-      });
+      .then(() => super.createDialog());
     }
   }
 
-  return Compressor;
+  return LoginDialog;
 });
 </code></pre>
         </article>

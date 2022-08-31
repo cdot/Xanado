@@ -98,7 +98,7 @@ interface, which is used to view available games and create new games.</p>
 and player (<code>GET /join/gameKey/playerKey</code>). The server adds the
 player to the game and responds with the gameKey and playerKey. The
 <code>games</code> interface then opens a new window on <code>html/game.html</code>, which
-loads the UI. When the document is ready, it executes <code>/js/game.js</code>,
+loads the UI. When the document is ready, it executes <code>js/game.js</code>,
 which creates the UI.</p>
 <p>Construction of the UI object asks the server for the state of the
 game using a <code>GET /game/gameKey</code> URI. The server recognises this as a
@@ -121,20 +121,22 @@ single interactive play. For example, a robot play following a human
 play will result in a sequence of turns. <code>Turn</code> objects are recorded
 in the game history, allowing a full replay of game events at a later
 date (e.g. when refreshing the Ui.)</p>
+<p>A complete list of the routes handled by the server can be found in
+the code documentation for the <code>Server</code> class.</p>
 <h2>Testing</h2>
 <p>The <code>test</code> subdirectory contains unit tests for the server
-written using the <code>mocha</code> framework. Run them using <code>npm run test</code>.</p>
-<p>Also supported is test coverage analysis using <code>istanbul</code>; run
+written using the <a href="https://mochajs.org/">mocha</a> framework. Run them using <code>npm run test</code>.</p>
+<p>Also supported is test coverage analysis using <a href="https://istanbul.js.org/">istanbul</a>; run
 <code>npm run coverage</code>.
 Coverage statistics are outout in the <code>coverage</code> directory.</p>
-<p>You can also run <code>eslint</code> on the code using <code>npm run lint</code>.</p>
+<p>You can also run <a href="https://eslint.org/">eslint</a> on the code using <code>npm run lint</code>.</p>
 <h2>Internationalisation</h2>
 <p>Xanado uses the <a href="https://github.com/wikimedia/jquery.i18n">Wikimedia jQuery.i18n framework</a> to support translations. Currently translation files are provided for English, (une très mauvaise traduction en) French, and (eine schlechte Übersetzung ins) German. To generate your own translation, copy <code>/i18n/en.json</code> to a file using your language code (e.g. <code>it</code> for Italian) and edit the new file to provide the translation. You can use <code>npm run tx</code> to check the completeness of your translations.</p>
 <h2>Documentation</h2>
 <p>The code is documented using <code>jsdoc</code>. The documentation is automatically
 built when a new version is pushed to github, and can be found on <a href="https://cdot.github.io/Xanado/">github pages</a>.</p>
 <p>For development, <code>npm run doc</code> will generate the documentation in the <code>doc</code>
-subdirectory.
+directory.
 You can read the doc in a browser by opening <code>file:///..../doc/index.html</code>
 or, if the game server is running, by loading <code>http://localhost:9093/doc/index.html</code> (adjust URL to suit your install)</p>
 <h2>Docker</h2>
@@ -152,7 +154,7 @@ to github.</p>
 a number of enhancements. Here are some other enhancements that you might like
 to explore.</p>
 <h3>Designing your own game</h3>
-<p>Game definitions can be found in the <code>/editions</code> directory. Each
+<p>Game definitions can be found in the <code>editions</code> directory. Each
 definition describes the layout of the lower-right quadrant of the
 board (it is assumed to be mirrored), the contents of the bag, the
 number of tiles on the rack, the number of tiles that can be swapped
@@ -167,7 +169,7 @@ letter combinations encountered in the corpus based on probability (the corpus
 can be any big list of words, or it can simply be a lexicon). Run the program
 <code>node js/design/valett.js</code> for help.</p>
 <h3>DAWG</h3>
-<p>The DAWG support is designed to be reusable in other games. It might be fun to implement Wordle, for example, or the word search game often found in newspapers where you try to make as many words as possible from a 9 letter anagram. The <code>js/dawg/explore.js</code> is a basic command-line tool for exploring a DAWG.</p>
+<p>The DAWG support is designed to be reusable in other games. It might be fun to implement Wordle, for example, or the word search game often found in newspapers where you try to make as many words as possible from a 9 letter anagram. The <code>js/dawg/explore.js</code> program is a basic command-line tool for exploring a DAWG.</p>
 <h3>Public Server</h3>
 <p>It would be nice to see a truly public server that anyone could sign in to and play against other random people. However this would have to be done with great care.</p>
 <ul>
@@ -185,13 +187,13 @@ can be any big list of words, or it can simply be a lexicon). Run the program
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="BrowserSurface.html">BrowserSurface</a></li><li><a href="Database.html">Database</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameDialog.html">GameDialog</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="InvitePlayersDialog.html">InvitePlayersDialog</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="LoginDialog.html">LoginDialog</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Commands.html">Commands</a></li><li><a href="PasswordMixin.html">PasswordMixin</a></li><li><a href="Replay.html">Replay</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#createDialog">createDialog</a></li><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li><li><a href="global.html#step">step</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Aug 30 2022 14:43:41 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed Aug 31 2022 18:15:59 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

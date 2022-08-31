@@ -49,7 +49,7 @@ define([ "platform", "common/Types" ], (Platform, Types) => {
    * Browser-side mixin for {@linkcode Square}
    * @mixin BrowserSquare
    */
-  const BrowserSquare = {
+  class BrowserSquare {
 
     /**
      * Create the jquery representation of the square.
@@ -67,7 +67,7 @@ define([ "platform", "common/Types" ], (Platform, Types) => {
 
       if (typeof this.underlay !== "undefined") {
         // Simple underlay character i.e. SWAP
-        const $underlay = $("&lt;div>&lt;/div>").addClass("underlay");
+        const $underlay = $(document.createElement("div")).addClass("underlay");
         $td.append($underlay);
         $underlay.text(this.underlay);
       } else if (this.type !== "_") {
@@ -76,7 +76,7 @@ define([ "platform", "common/Types" ], (Platform, Types) => {
         // multiplier. data-long is for when the display resolution
         // is high, data-short for when it is tight e.g. on mobile
         // devices. The relevant string is selected in CSS.
-        const $underlay = $("&lt;div>&lt;/div>").addClass("underlay");
+        const $underlay = $(document.createElement("div")).addClass("underlay");
         $td.append($underlay);
         $underlay
         .attr("data-long", Platform.i18n(`long-${this.type}`))
@@ -92,7 +92,7 @@ define([ "platform", "common/Types" ], (Platform, Types) => {
         this.$unplaceTile($td);
 
       return $td;
-    },
+    }
 
     /**
      * A tile has been placed on this square and we have to adjust the
@@ -121,7 +121,7 @@ define([ "platform", "common/Types" ], (Platform, Types) => {
 
       const $tile = this.tile.$ui(this);
       $td.append($tile);
-    },
+    }
 
     /**
      * Remove the currently placed tile's UI from the square's
@@ -161,7 +161,7 @@ define([ "platform", "common/Types" ], (Platform, Types) => {
           Platform.trigger(UIEvents.DROP_TILE, [ from, this ]);
         }
       });
-    },
+    }
 
     /**
      * Set the underlay
@@ -172,7 +172,7 @@ define([ "platform", "common/Types" ], (Platform, Types) => {
      */
     setUnderlay(ch) {
       this.underlay = ch;
-    },
+    }
 
     /**
      * Change the visual representation of the square (or the tile on it)
@@ -189,11 +189,10 @@ define([ "platform", "common/Types" ], (Platform, Types) => {
       else if (sel)
         $(`#${this.id}`).prepend($tc.show());
     }
-  };
+  }
 
   return BrowserSquare;
 });
-
 </code></pre>
         </article>
     </section>
@@ -204,13 +203,13 @@ define([ "platform", "common/Types" ], (Platform, Types) => {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="BrowserSurface.html">BrowserSurface</a></li><li><a href="Database.html">Database</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameDialog.html">GameDialog</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="InvitePlayersDialog.html">InvitePlayersDialog</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="LoginDialog.html">LoginDialog</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Commands.html">Commands</a></li><li><a href="PasswordMixin.html">PasswordMixin</a></li><li><a href="Replay.html">Replay</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#createDialog">createDialog</a></li><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li><li><a href="global.html#step">step</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Aug 30 2022 14:43:41 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed Aug 31 2022 18:15:59 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

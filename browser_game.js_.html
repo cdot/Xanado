@@ -94,6 +94,14 @@ define([
     selectedSquare;
 
     /**
+     * Cache for CSS rules that will be modified in the resize handler
+     */
+    cssRules = {
+      ".Surface td": null,
+      ".Tile": null
+    };
+
+    /**
      * Board lock status
      * @member {boolean}
      * @private
@@ -105,11 +113,28 @@ define([
 
       /**
        * Undo stack. Head of the stack is the most recent undo.
-       * The undo stack is cleared when a normal play (swap, place, challenge etc)
-       * is executed. The only command that retains the stack is REDO.
+       * The undo stack is cleared when a normal play (swap, place,
+       * challenge etc) is executed.
        *
        */
       this.undoStack = [];
+    }
+
+    // @override
+    create() {
+      // Cache the rules we will edit during resize from the stylesheet
+      for (const sheet of document.styleSheets) {
+        try {
+          for (const rule of sheet.cssRules) {
+            if (rule instanceof CSSStyleRule
+                &amp;&amp; this.cssRules[rule.selectorText] === null)
+              this.cssRules[rule.selectorText] = rule;
+          }
+        } catch(e) {
+          // Not allowed to access cross-origin stylesheets
+        }
+      }
+      return super.create();
     }
 
     // @override
@@ -146,7 +171,8 @@ define([
      * @private
      */
     $log(interactive, mess, css) {
-      const $div = $("&lt;div class='message'>&lt;/div>");
+      const $div = $(document.createElement("div"))
+            .addClass("message");
       if (css)
         $div.addClass(css);
       $div.append(mess);
@@ -235,15 +261,15 @@ define([
 
       const sender = /^chat-/.test(message.sender)
             ? $.i18n(message.sender) : message.sender;
-      const $pn = $("&lt;span>&lt;/span>").addClass("chat-sender");
+      const $pn = $(document.createElement("span")).addClass("chat-sender");
       $pn.text(sender);
 
-      const $mess = $("&lt;div>&lt;/div>").addClass("chat-message");
+      const $mess = $(document.createElement("div")).addClass("chat-message");
       if (message.classes)
         $mess.addClass(message.classes);
       $mess.append($pn).append(": ");
 
-      const $msg =  $("&lt;span>&lt;/span>").addClass("chat-text");
+      const $msg =  $(document.createElement("span")).addClass("chat-text");
       $msg.text($.i18n.apply(null, args));
       $mess.append($msg);
 
@@ -282,23 +308,24 @@ define([
       const clocks = Utils.formatTimeInterval(remains);
 
       let extraClass = "tick-alert-none";
+      const allowedSecs = this.game.timeAllowed * 60;
       if (this.game.timerType === Timer.TURN) {
         if (this.player &amp;&amp; ticked.key === this.player.key
             &amp;&amp; remains &lt;= 10
             &amp;&amp; this.getSetting("warnings"))
           this.playAudio("tick");
 
-        if (remains &lt; this.game.timeLimit / 6)
+        if (remains &lt; allowedSecs / 6)
           extraClass = "tick-alert-high";
-        else if (remains &lt; this.game.timeLimit / 3)
+        else if (remains &lt; allowedSecs / 3)
           extraClass = "tick-alert-medium";
-        else if (remains &lt; this.game.timeLimit / 2)
+        else if (remains &lt; allowedSecs / 2)
           extraClass = "tick-alert-low";
       }
       else if (this.game.timerType === Timer.GAME) {
-        if (remains &lt; this.game.timeLimit / 10) // 2.5 mins
+        if (remains &lt; allowedSecs / 10)
           extraClass = "tick-alert-high";
-        else if (remains &lt; this.game.timeLimit / 5) // 5 mins
+        else if (remains &lt; allowedSecs / 5)
           extraClass = "tick-alert-medium";
       }
 
@@ -320,7 +347,7 @@ define([
 
       this.game.pushTurn(turn);
 
-      $(".undoButton").toggle(this.getSetting("undo_redo"));
+      $(".undoButton").toggle(this.game.allowUndo);
 
       this.removeMoveActionButtons();
       const player = this.game.getPlayerWithKey(turn.playerKey);
@@ -376,8 +403,8 @@ define([
             if (this.getSetting("warnings"))
               this.playAudio("oops");
             this.notify(
-              /*i18n*/"Challenge succeeded!",
-              /*i18n*/"$1 has successfully challenged your turn. You have lost the $2 points you scored, and the tiles you played are back on your rack",
+              /*i18n*/"not-chall-ok",
+              /*i18n*/"not-chall-won",
               this.game.getPlayerWithKey(turn.playerKey).name,
               -turn.score);
           }
@@ -386,7 +413,7 @@ define([
         if (turn.type == Turns.TOOK_BACK) {
           this.notify(
             /*i18n*/"Move retracted!",
-            /*i18n*/"$1 has taken back their turn",
+            /*i18n*/"took-back-turn",
             this.game.getPlayerWithKey(turn.playerKey).name);
         }
         break;
@@ -396,11 +423,11 @@ define([
           this.playAudio("oops");
         if (challenger === this.player) {
           // Our challenge failed
-          this.notify(/*i18n*/"Your challenge failed",
-            /*i18n*/"Your challenge failed");
+          this.notify(/*i18n*/"not-you-failed",
+            /*i18n*/"not-you-failed");
         } else {
           this.notify(/*.i18n*/"Failed challenge!",
-            /*i18n*/"$1 challenged your turn, but the dictionary backed you up",
+            /*i18n*/"log-play-ok",
             player.name);
         }
 
@@ -410,15 +437,16 @@ define([
         if (wasUs)
           this.takeBackTiles();
 
-        // Take the placed tiles out of the players rack and
+        // Take the placed tiles out of the player's rack and
         // lock them onto the board.
         if (wasUs)
           this.game.rackToBoard(turn.placements, player);
-        else
+        else {
           this.game.rackToBoard(
             turn.placements, player,
             tile => // Highlight the tile as "just placed"
             tile.$tile.addClass("last-placement"));
+        }
 
         // Remove the new tiles from our copy of the bag and put them
         // on the rack.
@@ -488,7 +516,7 @@ define([
             &amp;&amp; turn.type !== Turns.TOOK_BACK) {
           // It's our turn next, and we didn't just take back
           this.notify(/*i18n*/"Your turn",
-            /*i18n*/"$1 has taken their turn and now it is your turn",
+            /*i18n*/"now-your-turn",
             this.game.getPlayerWithKey(turn.playerKey).name);
         }
         this.game.whosTurnKey = turn.nextToGoKey;
@@ -526,7 +554,7 @@ define([
       if (this.getSetting("warnings"))
         this.playAudio("oops");
       this.$log(true, $.i18n(
-        "The word{{PLURAL:$1||s}} $2 {{PLURAL:$1|was|were}} not found in the dictionary",
+        "word-rejected",
         rejection.words.length,
         rejection.words.join(", ")), "turn-narrative");
     }
@@ -546,14 +574,14 @@ define([
       $(".Surface .letter").addClass("hidden");
       $(".Surface .score").addClass("hidden");
       $("#pauseDialog > .banner")
-      .text($.i18n("$1 has paused the game", params.name));
+      .text($.i18n("game-paused", params.name));
       $("#pauseDialog")
       .dialog({
         dialogClass: "no-close",
         modal: true,
         buttons: [
           {
-            text: $.i18n("Continue the game"),
+            text: $.i18n("label-unpause"),
             click: () => {
               this.sendCommand(Command.UNPAUSE);
               $("#pauseDialog").dialog("close");
@@ -582,24 +610,27 @@ define([
      * been undone on the server.
      */
     handle_UNDONE(turn) {
+      Platform.assert(this.game.allowUndo);
       this.undoStack.push(turn);
-      this.game.undo(true);
+      this.game.popTurn();
+      this.game.undo(turn, true);
       const isMyGo = this.isThisPlayer(this.game.whosTurnKey);
       this.updatePlayerTable();
       this.updateWhosTurn();
       this.updateGameStatus();
-      $(".redoButton").toggle(this.getSetting("undo_redo"));
+      $(".redoButton").show();
       $(".last-placement")
       .removeClass("last-placement");
-      if (this.game.turnCount() === 0)
+      if (this.game.turns.length === 0)
         $(".undoButton").hide();
       this.lockBoard(!isMyGo);
       this.enableTurnButton(isMyGo);
       this.$log(true, $.i18n(
-        "Undone $1, waiting for $2",
+        "undone",
         turn.type, this.game.getPlayer().name));
       $(".undoButton")
-      .toggle(this.game.turnCount() > 0 &amp;&amp; this.getSetting("undo_redo"));
+      .toggle(this.game.allowUndo
+              &amp;&amp; this.game.turns.length > 0);
     }
 
     /**
@@ -653,7 +684,7 @@ define([
         this.action_pass();
         break;
 
-      case "!": // Challenge
+      case "!": // Challenge / take back
         {
           const lastTurn = this.game.lastTurn();
           if (lastTurn &amp;&amp; lastTurn.type == Turns.PLAYED) {
@@ -706,7 +737,7 @@ define([
       if (obs.length > 0) {
         $("#scoresBlock > .observerCount")
         .show()
-        .text($.i18n("+ $1 observer{{PLURAL:$1||s}}",
+        .text($.i18n("observers",
                      obs.length));
       } else
         $("#scoresBlock > .observerCount").hide();
@@ -739,12 +770,12 @@ define([
       const remains = this.game.letterBag.remainingTileCount();
       if (remains > 0) {
         const mess = $.i18n(
-          "$1 tile{{PLURAL:$1||s}} left in the bag", remains);
+          "tiles-left", remains);
         $("#scoresBlock > .letterbag").text(mess);
         $("#scoresBlock td.remaining-tiles").empty();
       } else {
         $("#scoresBlock > .letterbag")
-        .text($.i18n("The letter bag is empty"));
+        .text($.i18n("warn-empty-bag"));
         const countElements = $("#scoresBlock td.remaining-tiles");
         this.game.getPlayers().forEach(
           (player, i) =>
@@ -796,6 +827,14 @@ define([
       game._debug = console.debug;
       this.game = game;
 
+      // Make racks of other players wild to mask their contents
+      if (!game.allowUndo) {
+        for (const plyer of game.players)
+          if (plyer !== this.player)
+            plyer.rack.isWild = true;
+        game.letterBag.isWild = true;
+      }
+
       // Number of tiles placed on the board since the last turn
       this.placedCount = 0;
 
@@ -808,10 +847,13 @@ define([
       if (this.player) {
         this.player.rack.$populate($("#playRack .Surface"));
         this.swapRack.$populate($("#swapRack"));
+      } else {
+        $("#playRack .Surface").hide();
       }
 
       const $board = $("#board");
       game.board.$populate($board);
+      this.handle_resize();
 
       this.$log(true, $.i18n("Game started"), "game-state");
 
@@ -821,8 +863,8 @@ define([
 
       this.$log(true, ""); // Force scroll to end of log
 
-      if (game.turnCount() > 0)
-        $(".undoButton").toggle(this.getSetting("undo_redo"));
+      if (game.turns.length > 0)
+        $(".undoButton").toggle(this.game.allowUndo);
 
       if (game.hasEnded()) {
         if (game.nextGameKey)
@@ -929,7 +971,7 @@ define([
       // A turn has been taken. turn is a Turn
       .on(Notify.TURN,
           turn => this.handle_TURN(
-            new Turn(this.game, checkSequenceNumber(turn))))
+            new Turn(checkSequenceNumber(turn))))
 
       // Server clock tick.
       .on(Notify.TICK,
@@ -960,6 +1002,57 @@ define([
           message => this.handle_UNDONE(checkSequenceNumber(message)))
 
       .on(Notify.JOIN, () => console.debug("--> join"));
+    }
+
+    /**
+     * Modify one of the cached CSS rules
+     * @param {string} selector selector of rule to modify
+     * @param {Object.&lt;string,number>} changes map of css attribute
+     * name to new pixel value.
+     * @private
+     */
+    editCSSRule(name, changes) {
+      const rule = this.cssRules[name];
+      let text = rule.style.cssText;
+      $.each(changes, (prop, val) => {
+        const re = new RegExp(`(^|[{; ])${prop}:[^;]*`);
+        text = text.replace(re, `$1${prop}:${val}px`);
+      });
+      rule.style.cssText = text;
+    }
+
+    /**
+     * Handle a screen resize, switching into porttrait mode as required
+     */
+    handle_resize() {
+      if (!this.game)
+        return;
+      const ww = $(window).width();
+      const wh = $(window).height();
+      // Board is always square, so only need one axis
+      const sz = this.game.board.cols;
+      const landscape = ww > wh;
+      // Constrain board to 80% of screen height in landscape, and the
+      // full screen width in portrait capped at 80% of the screen height
+      const available = landscape ? (wh * 0.8) : Math.max(ww, wh * 0.8);
+      // A .Surface td has a 2px border-width
+      const tdSize = available / sz - 4;
+      this.editCSSRule(".Surface td", {
+        width: tdSize,
+        height: tdSize,
+        // The font size and line height govern the underlay
+        "font-size": tdSize * 0.23,
+        "line-height": tdSize / 3
+      });
+
+      // A tile has a 3px border-width
+      const tileSize = tdSize - 6;
+      this.editCSSRule(".Tile", {
+        width: tileSize,
+        height: tileSize,
+        // and the base font size is 55% of that
+        "font-size": tileSize * 0.55
+      });
     }
 
     /**
@@ -1014,6 +1107,8 @@ define([
       // Keydown anywhere in the document
       .on("keydown", event => this.keyDown(event));
 
+      $(window).on("resize", () => this.handle_resize());
+
       super.attachHandlers();
     }
 
@@ -1044,7 +1139,7 @@ define([
         else
           this.moveTypingCursor(1, 0);
       } else
-        this.$log($.i18n("'$1' is not on the rack", letter));
+        this.$log($.i18n("not-on-rack", letter));
     }
 
     /**
@@ -1211,7 +1306,7 @@ define([
           if (rowlength == dim) {
             if ($row)
               $tab.append($row);
-            $row = $("&lt;tr>&lt;/tr>");
+            $row = $(document.createElement("tr"));
             rowlength = 0;
           }
           const $td = $(`&lt;td>${letter}&lt;/td>`);
@@ -1385,7 +1480,7 @@ define([
       if (!player)
         return;
       const text = $.i18n(
-        "Challenge $1's turn", player.name);
+        "button-challenge", player.name);
       const $button =
             $(`&lt;button name="challenge">${text}&lt;/button>`)
             .addClass("moveAction")
@@ -1618,13 +1713,13 @@ define([
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="BrowserSurface.html">BrowserSurface</a></li><li><a href="Database.html">Database</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameDialog.html">GameDialog</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="InvitePlayersDialog.html">InvitePlayersDialog</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="LoginDialog.html">LoginDialog</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Commands.html">Commands</a></li><li><a href="PasswordMixin.html">PasswordMixin</a></li><li><a href="Replay.html">Replay</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#createDialog">createDialog</a></li><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li><li><a href="global.html#step">step</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Aug 30 2022 14:43:41 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed Aug 31 2022 18:15:59 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

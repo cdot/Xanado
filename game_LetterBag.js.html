@@ -53,43 +53,56 @@ define([
     legalLetters = [];
 
     /**
+     * Whether this bag is wild or not. When a bag is wild, any tile
+     * taken from in the bag can be used as any other tile. This is
+     * used client-side, where we are only concerned about the number
+     * of tiles left in the bag and we want to prevent reverse
+     * engineering of bag and rack contents. By default, bags are not
+     * wild.
+     */
+    isWild = false;
+
+    /**
      * Construct a new letter bag using the distribution for the
      * given edition
-     * @param {Edition} edition the Edition defining the bag contents
-     * @param {boolean?} predictable set to turn off sshuffling the
-     * bag contents (for testing)
+     * @param {Edition|LetterBag} edition the Edition defining the
+     * bag contents. Can also be an existing LetterBag to give a predictable,
+     * non-random bag
      */
-    constructor(edition, predictable) {
-      for (let letter of edition.bag) {
-        // legalLetters is an array, not a string, to support
-        // multi-character tiles
-        if (!letter.isBlank)
-          // Not blank
-          this.legalLetters.push(letter.letter);
-
-        const count = Math.floor(letter.count);
-        for (let n = 0; n &lt; count; ++n) {
-          const tile = new Tile({
-            letter:  letter.letter,
-            score: letter.score
-          });
-          if (letter.isBlank)
-            tile.isBlank = true;
-          this.tiles.push(tile);
-        }
-      }
-
-      /* istanbul ignore if */
-      if (predictable)
+    constructor(edition) {
+      if (edition instanceof LetterBag) {
         /**
          * Set to disable shuffling the bag. This is used when
          * replaying moves, when we need a predictable set for tiles
          * to be delivered next out of the bag.
          * @member {boolean?}
          */
-        this.predictable = predictable;
+        this.predictable = true;
 
-      this.shake();
+        for (const tile of edition.tiles)
+          this.tiles.push(new Tile(tile));
+        // Don't shake, we want it predictable!
+      } else {
+        for (let letter of edition.bag) {
+          // legalLetters is an array, not a string, to support
+          // multi-character tiles
+          if (!letter.isBlank)
+            // Not blank
+            this.legalLetters.push(letter.letter);
+
+          const count = Math.floor(letter.count);
+          for (let n = 0; n &lt; count; ++n) {
+            const tile = new Tile({
+              letter:  letter.letter,
+              score: letter.score
+            });
+            if (letter.isBlank)
+              tile.isBlank = true;
+            this.tiles.push(tile);
+          }
+        }
+        this.shake();
+      }
     }
 
     /**
@@ -105,7 +118,7 @@ define([
      * can be disabled by setting {@linkcode LetterBag#predictable}
      */
     shake() {
-      if (this.predictable)
+      if (this.predictable || this.isWild)
         return;
 
       for (let i = this.tiles.length - 1; i > 0; i--) {
@@ -119,27 +132,29 @@ define([
     /**
      * Get a single random tile from the bag. Assumes the bag is
      * already randomised, and there is no need to shuffle it
-     * again.
-     * @return {Tile} a Tile or null if there are no tiles left
+     * again. Note that you cannot get random tiles from a wild bag.
+     * @return {Tile} a Tile or undefined if there are no tiles left
      */
     getRandomTile() {
+      Platform.assert(!this.isWild);
       if (this.tiles.length > 0)
         return this.tiles.pop();
-      return null;
+      return undefined;
     }
 
     /**
      * Remove count random tiles from the bag. Assumes the bag is
      * already randomised, and there is no need to shuffle it
-     * again.
+     * again. Note that you cannot get random tiles from a wild bag.
      * @return {Tile[]} 'count' Tile. If there aren't enough
      * tiles in the bag, may return a shorter array.
      */
     getRandomTiles(count) {
+      Platform.assert(!this.isWild);
       const tiles = [];
       Platform.assert(count >= 0);
       for (let i = 0; this.tiles.length > 0 &amp;&amp; i &lt; count; i++)
-        tiles.push(this.tiles.pop());
+        tiles.push(this.getRandomTile());
       return tiles;
     }
 
@@ -149,7 +164,7 @@ define([
      * @param {Tile} tile tile to return to bag
      */
     returnTile(tile) {
-      this.tiles.push(tile.reset());
+      this.tiles.push(tile.reset(this.isWild));
       this.shake();
     }
 
@@ -159,7 +174,7 @@ define([
      */
     returnTiles(tiles) {
       for (const tile of tiles)
-        this.tiles.push(tile.reset());
+        this.tiles.push(tile.reset(this.isWild));
       this.shake();
     }
 
@@ -167,13 +182,19 @@ define([
      * Remove a matching tile from the bag. Either the exact tile
      * will be matched or a tile that represents the same letter.
      * Blanks only match blanks.
+     * If the bag is wild, we simply pop a tile, make it look like
+     * the requested tile, and return it.
      * @param {Tile} tile tile to match in the bag
      * @return {Tile?} the tile removed, or undefined if it wasn't found
      */
     removeTile(tile) {
+      if (this.isWild)
+        // Grab a tile, any tile
+        return this.tiles.pop().copy(tile);
       for (let i = 0; i &lt; this.tiles.length; i++) {
         const t = this.tiles[i];
-        if (t === tile || (t.isBlank &amp;&amp; tile.isBlank)
+        if (t === tile
+            || (t.isBlank &amp;&amp; tile.isBlank)
             || (!t.isBlank &amp;&amp; !tile.isBlank &amp;&amp; t.letter === tile.letter))
         {
           this.tiles.splice(i, 1);
@@ -205,6 +226,7 @@ define([
 
     /**
      * Return an unsorted list of letters in the bag
+     * @return {string[]} array of letters
      */
     letters() {
       return this.tiles.map(tile => tile.letter);
@@ -230,13 +252,13 @@ define([
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="BrowserSurface.html">BrowserSurface</a></li><li><a href="Database.html">Database</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameDialog.html">GameDialog</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="InvitePlayersDialog.html">InvitePlayersDialog</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="LoginDialog.html">LoginDialog</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Commands.html">Commands</a></li><li><a href="PasswordMixin.html">PasswordMixin</a></li><li><a href="Replay.html">Replay</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#createDialog">createDialog</a></li><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li><li><a href="global.html#step">step</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Aug 30 2022 14:43:41 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed Aug 31 2022 18:15:59 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

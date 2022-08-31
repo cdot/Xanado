@@ -31,25 +31,20 @@
   and license information. Author Crawford Currie http://c-dot.co.uk*/
 
 define([
-    requirejs.isBrowser ? "browser/Tile" : "common/Mixin"
-], Mixin => {
+    requirejs.isBrowser ? "browser/Tile" : "common/EmptyBase"
+], PlatformBase => {
 
   /**
    * A tile in a LetterBag, on a Board, or on a Rack, or during best move
    * computation.
    */
-  class Tile {
+  class Tile extends PlatformBase {
 
     /**
      * @param {Tile|object} spec optional Tile to copy or spec of tile
-     * @param {string} spec.letter character(s) represented by this tile
-     * @param {boolean?} spec.isBlank true if this tile is a blank
-     * (irresepective of letter)
-     * @param {number?} spec.score value of this tile, default 0
-     * @param {number?} spec.col optional column where the tile is placed
-     * @param {number?} spec.row optional row where the tile is placed
      */
     constructor(spec) {
+      super();
 
       /**
        * Character(s) represented by this tile.
@@ -99,15 +94,42 @@ define([
     }
 
     /**
-     * Remove letter cast and positional information from the tile e.g. before
-     * returning it to the bag or rack.
+     * Fix a tile to look like the given tile.
+     * @param {Tile} tile the tile to copy
      * @return {Tile} this
      */
-    reset() {
+    copy(tile) {
+      this.reset();
+      if (tile.isBlank)
+        this.isBlank = true;
+      else
+        delete this.isBlank;
+      this.letter = tile.letter;
+      this.score = tile.score;
+      if (typeof tile.col !== "undefined")
+        this.col = tile.col;
+      if (typeof tile.row !== "undefined")
+        this.row = tile.row;
+      return this;
+    }
+
+    /**
+     * Remove letter cast and positional information from the tile e.g. before
+     * returning it to the bag or rack.
+     * @param {boolean?} wild true if this tile needs to be masked. Wild tiles
+     * are used on the client side to mask the contents of the letter bag and
+     * other players racks.
+     * @return {Tile} this
+     */
+    reset(wild) {
       delete this.isLocked;
       delete this.row;
       delete this.col;
-      if (this.isBlank)
+      if (wild) {
+        this.letter = '#';
+        this.score = 0;
+      }
+      else if (this.isBlank)
         this.letter = " ";
 
       return this;
@@ -120,11 +142,8 @@ define([
     stringify(showPos) {
       const letter = this.isBlank ? this.letter.toLowerCase() : this.letter;
       const brackets = this.isLocked ? "&lt;>" : "[]";
-      let pos = "";
-      if (typeof this.row === "number") {
-        pos = typeof this.col === "number" ? `@${this.col}` : ""
-        + `,${this.row}`;
-      }
+      const pos = (typeof this.col === "number" ? `@${this.col}` : "")
+            + (typeof this.row === "number" ? `,${this.row}` : "");
       return `${brackets.charAt(0)}${letter}${pos}${brackets.charAt(1)}`;
     }
   }
@@ -145,9 +164,6 @@ define([
     return 0;
   };
 
-  if (Mixin)
-    Object.assign(Tile.prototype, Mixin);
-
   return Tile;
 });
 </code></pre>
@@ -160,13 +176,13 @@ define([
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="Database.html">Database</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Replay.html">Replay</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Commands.html">Commands</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="BrowserSurface.html">BrowserSurface</a></li><li><a href="Database.html">Database</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameDialog.html">GameDialog</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="InvitePlayersDialog.html">InvitePlayersDialog</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="LoginDialog.html">LoginDialog</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Commands.html">Commands</a></li><li><a href="PasswordMixin.html">PasswordMixin</a></li><li><a href="Replay.html">Replay</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#createDialog">createDialog</a></li><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li><li><a href="global.html#step">step</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Aug 30 2022 14:43:41 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Wed Aug 31 2022 18:15:59 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>
