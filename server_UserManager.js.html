@@ -33,12 +33,12 @@
 
 define([
   "fs", "proper-lockfile", "async-lock", "bcrypt",
-  "express-session",
+  "express-session", "session-file-store",
   "passport", "passport-strategy",
   "platform", "common/Utils"
 ], (
   fs, Lockfile, AsyncLock, BCrypt,
-  ExpressSession,
+  ExpressSession, SessionFileStore,
   Passport, Strategy,
   Platform, Utils
 ) => {
@@ -135,17 +135,17 @@ define([
     /**
      * Construct, adding relevant routes to the given Express application
      * @param {object} config system configuration object
-     * @param {object} config.auth authentication options
-     * @param {string} config.auth.sessionSecret secret to use with express
-     * sessions
-     * @param {string} config.auth.db_file path to json file that
+     * @param {object} config.auth optional authentication options
+     * @param {string} config.auth.db_file optional path to json file that
      * stores user information
-     * @param {object} config.auth.oauth2 OAuth2 providers
-     * @param {object} config.mail mail configuration for use with
+     * @param {object} config.auth.oauth2 optional OAuth2 providers
+     * @param {object} config.mail optional mail configuration for use with
      * @param {Express} app Express application object
      */
     constructor(config, app) {
       this.config = config;
+      this.pwfile = (config.auth &amp;&amp; config.auth.db_file)
+            ? config.auth.db_file : 'passwd.json';
       this.db = undefined;
 
       /* istanbul ignore if */
@@ -155,7 +155,13 @@ define([
         this._debug = () => {};
       // Passport requires ExpressSession to be configured
       app.use(ExpressSession({
-        secret: this.config.auth.sessionSecret,
+        // In theory, using the same secret should allows session
+        // cookies to be re-used between server restarts. In practice,
+        // if you restart the server existing sessions are invalidated
+        // even if we re-use the same secret, so might as well use a
+        // random key.
+        secret: Utils.genKey(),
+        store: new SessionFileStore(ExpressSession)(),
         resave: false,
         saveUninitialized: false
       }));
@@ -186,19 +192,21 @@ define([
 
       // Load and configure oauth2 strategies
       const strategies = [];
-      /* istanbul ignore next */
-      for (let provider in this.config.auth.oauth2) {
-        strategies.push(new Promise(resolve => {
-          const cfg = this.config.auth.oauth2[provider];
-          // .module is used to override the strategy name
-          // needed because passport-google-oauth20 declares
-          // strategy "google"
-          const module = cfg.module || `passport-${provider}`;
-          requirejs([module], strategy => {
-            this.setUpOAuth2Strategy(strategy, provider, cfg, app);
-            resolve();
-          });
-        }));
+      /* istanbul ignore if */
+      if (this.config.auth &amp;&amp; this.config.auth.oauth2) {
+        for (let provider in this.config.auth.oauth2) {
+          strategies.push(new Promise(resolve => {
+            const cfg = this.config.auth.oauth2[provider];
+            // .module is used to override the strategy name
+            // needed because passport-google-oauth20 declares
+            // strategy "google"
+            const module = cfg.module || `passport-${provider}`;
+            requirejs([module], strategy => {
+              this.setUpOAuth2Strategy(strategy, provider, cfg, app);
+              resolve();
+            });
+          }));
+        }
       }
       Promise.all(strategies);
 
@@ -325,11 +333,11 @@ define([
       // to be released - but it doesn't, it just errors. So we have
       // to wrap it in a concurrency lock.
       : dbLock.acquire(
-        this.config.auth.db_file,
+        this.pwfile,
         () => this.db
         ? Promise.resolve(this.db)
-        : (Lockfile.lock(this.config.auth.db_file)
-           .then(release => Fs.readFile(this.config.auth.db_file)
+        : (Lockfile.lock(this.pwfile)
+           .then(release => Fs.readFile(this.pwfile)
                  .then(buffer => release()
                        .then(() => this.db = JSON.parse(buffer))))
            .catch(e => {
@@ -348,13 +356,13 @@ define([
     writeDB() {
       const s = JSON.stringify(this.db, null, 1);
       return dbLock.acquire(
-        this.config.auth.db_file,
-        () => Fs.access(this.config.auth.db_file)
-        .then(acc => Lockfile.lock(this.config.auth.db_file))
+        this.pwfile,
+        () => Fs.access(this.pwfile)
+        .then(acc => Lockfile.lock(this.pwfile))
         .then(release => Fs.writeFile(
-          this.config.auth.db_file, s)
+          this.pwfile, s)
               .then(() => release()))
-        .catch(e => Fs.writeFile(this.config.auth.db_file, s))); // file does not exist
+        .catch(e => Fs.writeFile(this.pwfile, s))); // file does not exist
     }
 
     /**
@@ -475,9 +483,11 @@ define([
      */
     GET_oauth2_providers(req, res) {
       const list = [];
-      for (let name in this.config.auth.oauth2) {
-        const cfg = this.config.auth.oauth2[name];
-        list.push({ name: name, logo: cfg.logo });
+      if (this.config.auth &amp;&amp; this.config.auth.oauth2) {
+        for (let name in this.config.auth.oauth2) {
+          const cfg = this.config.auth.oauth2[name];
+          list.push({ name: name, logo: cfg.logo });
+        }
       }
       this.sendResult(res, 200, list);
     }
@@ -687,6 +697,8 @@ define([
      * @private
      */
     POST_reset_password(req, res) {
+      Platform.assert(this.config.mail &amp;&amp; this.config.mail.transport,
+                      "Mail is not configured");
       const email = req.body.reset_email;
       this._debug("/reset-password for", email);
       const surly = `${req.protocol}://${req.get("Host")}`;
@@ -696,10 +708,6 @@ define([
         .then(token => {
           const url = `${surly}/password-reset/${token}`;
           this._debug(`Send password reset ${url} to ${user.email}`);
-          /* istanbul ignore if */
-          if (!this.config.mail)
-            return this.sendResult(res, 500, [
-              /*i18n*/"text-no-email" ]);
           return this.config.mail.transport.sendMail({
             from: this.config.mail.sender,
             to:  user.email,
@@ -800,7 +808,7 @@ define([
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Thu Sep 08 2022 10:06:02 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Mon Sep 19 2022 15:41:18 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>
