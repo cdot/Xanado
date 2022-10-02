@@ -97,6 +97,11 @@ You can also run [eslint](https://eslint.org/) on the code using `npm run lint`.
 ## Internationalisation
 Xanado uses the [Wikimedia jQuery.i18n framework](https://github.com/wikimedia/jquery.i18n) to support translations. Currently translation files are provided for English, (une très mauvaise traduction en) French, and (eine schlechte Übersetzung ins) German. To generate your own translation, copy `/i18n/en.json` to a file using your language code (e.g. `it` for Italian) and edit the new file to provide the translation. You can use `npm run tx` to check the completeness of your translations.
 
+## Theming the UI
+Support for theming the UI exists at two levels.
+- To theme the look of the jQuery components of the UI, you can add a (jQuery UI theme)[https://api.jqueryui.com/category/theming/] to `html/game.html`.
+- To theme the more Xanado specific classes, you can override one or more of the css files in `css/default` by providing your own version of the file. An example is given in `css/exander77`.
+
 ## Documentation
 The code is documented using `jsdoc`. The documentation is automatically
 built when a new version is pushed to github, and can be found on <a href="https://cdot.github.io/Xanado/">github pages</a>.
