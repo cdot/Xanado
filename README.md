@@ -8,7 +8,7 @@ The installation has subdirectories as follows:
 * `dictionaries` contains all the dictionaries
 * `editions` contains the edition specifications
 * `games` contains the database of games (initially empty)
-* `html` has the html for the user interfaces, `games.html` for the control panel, and `game.html` for the game itself.
+* `html` has the html for the user interfaces, `games_ui.html` for the control panel, and `game_ui.html` for the game itself.
 * `i18n` contains the master English `en.json`, qqq documentation, and any other contributed translations of the interface.
 * `images` contains images used by the game
 * `js` has all the source code
@@ -29,7 +29,7 @@ lexicon (list of words) using a processor based on [Daniel Weck's
 DAWG_Compressor program](https://github.com/danielweck/scrabble-html-ui). To build a new dictionary, follow the
 instructions given when you run:
 ```
-$ node js/dawg/compressor.js
+$ node js/dawg/dictionary_compressor.js
 ```
 `js/dawg/explore.js` can be used to explore the generated DAWG(s) e.g.
 ```
@@ -47,15 +47,14 @@ incorporate those words.
 
 ## Flow of Control
 
-Players access `/` on the server. This will load the `games`
+Players access `/` on the server. This will load the `games_ui`
 interface, which is used to view available games and create new games.
 
 A game is joined by opening a URL which identifies the game
 and player (`GET /join/gameKey/playerKey`). The server adds the
 player to the game and responds with the gameKey and playerKey. The 
-`games` interface then opens a new window on `html/game.html`, which
-loads the UI. When the document is ready, it executes `js/game.js`,
-which creates the UI.
+`games` interface then opens a new window on `html/game_ui.html`, which
+loads the UI.
 
 Construction of the UI object asks the server for the state of the
 game using a `GET /game/gameKey` URI. The server recognises this as a
@@ -94,12 +93,14 @@ Coverage statistics are outout in the `coverage` directory.
 
 You can also run [eslint](https://eslint.org/) on the code using `npm run lint`.
 
+There's a `npm run debug` script to run the server with debug options enabled (very verbose).
+
 ## Internationalisation
 Xanado uses the [Wikimedia jQuery.i18n framework](https://github.com/wikimedia/jquery.i18n) to support translations. Currently translation files are provided for English, (une très mauvaise traduction en) French, and (eine schlechte Übersetzung ins) German. To generate your own translation, copy `/i18n/en.json` to a file using your language code (e.g. `it` for Italian) and edit the new file to provide the translation. You can use `npm run tx` to check the completeness of your translations.
 
 ## Theming the UI
 Support for theming the UI exists at two levels.
-- To theme the look of the jQuery components of the UI, you can add a (jQuery UI theme)[https://api.jqueryui.com/category/theming/] to `html/game.html`.
+- To theme the look of the jQuery components of the UI, you can add a (jQuery UI theme)[https://api.jqueryui.com/category/theming/] to `html/game_ui.html`.
 - To theme the more Xanado specific classes, you can override one or more of the css files in `css/default` by providing your own version of the file. An example is given in `css/exander77`.
 
 ## Documentation

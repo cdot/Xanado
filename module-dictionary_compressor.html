@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: browser/InvitePlayersDialog.js</title>
+    <title>JSDoc: Module: dictionary_compressor</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,122 +17,135 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: browser/InvitePlayersDialog.js</h1>
+    <h1 class="page-title">Module: dictionary_compressor</h1>
 
     
 
 
 
+
+<section>
+
+<header>
     
-    <section>
-        <article>
-            <pre class="prettyprint source linenums"><code>/*Copyright (C) 2019-2022 The Xanado Project https://github.com/cdot/Xanado
-  License MIT. See README.md at the root of this distribution for full copyright
-  and license information. Author Crawford Currie http://c-dot.co.uk*/
-/* eslint-env browser, jquery */
+        
+            
+        
+    
+</header>
 
-define(["browser/Dialog"], Dialog => {
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description"><p>Command-line program to generate a DAWG (Directed Acyclic Word Graph) from a
+word lexicon. Generates a somewhat optimised Trie, encodes it in
+an integer array, which it then gzips.</p>
+<p><code>node js/dawg/dictionary_compressor.js</code> will tell you how to use it.</p></div>
+        
 
-  /**
-   * Dialog for inviting players to a game.
-   */
-  class InvitePlayersDialog extends Dialog {
+        
+            
 
-    constructor(options) {
-      super("InvitePlayersDialog", $.extend({
-        title: $.i18n("Invite players")
-      }, options));
 
-      // Known users, got afresh from /users each time the
-      // dialog is opened
-      this.users = [];
-    }
 
-    createDialog() {
-      const $email = this.$dlg.find("#playerEmail");
-      $email
-      .on('change', () => this.pick($email.val()));
 
-      const $select = this.$dlg.find("#knownUserSelect");
-      $select
-      .on("selectmenuchange", () => this.pick($select.val()));
-      return super.createDialog();
-    }
 
-    openDialog() {
-      return super.openDialog()
-      .then(() => $.get("/users"))
-      .then(users => {
-        this.users = users;
-        const $select = this.$dlg.find("#knownUserSelect");
-        $select.empty();
-        users.forEach(uo => $select.append(
-          `&lt;option value="${uo.key}">${uo.name}&lt;/option>`));
-        $select
-        .selectmenu("refresh");
-        const $gk = this.$dlg.find("[name=gameKey]");
-        $gk.val(this.options.gameKey);
-        this.$dlg.find("#invitedPlayers").empty();
-        this.invitees = [];
-        this.$dlg.find("#removeText").hide();
-      });
-    }
 
-    pick(name) {
-      if (!name)
-        return;
-      let known = this.users.find(uo => (
-        uo.name === name
-        || uo.email === name
-        || uo.key === name));
-      if (!known) {
-        known = { email: name };
-        this.users.push(known);
-      }
 
-      const $list = this.$dlg.find("#invitedPlayers");
-      let invited = false;
-      $(".invitee").each(() => {
-        if ($(this).data("uo") === known)
-          invited = true;
-      });
-      if (invited)
-        return;
 
-      const $removeText = this.$dlg.find("#removeText");
-      const $in = $(document.createElement("span"))
-            .addCLoass("invitee")
-            .text((known.name || known.email))
-            .data("uo", known)
-            .on('click', function() {
-              $(this).remove();
-              if ($list.children().length === 0)
-                $removeText.hide();
-            });
-      $list.append($in);
 
-      $removeText.show();
-    }
 
-    submit() {
-      const ps = [];
-      const $invitees = this.$dlg.find(".invitee");
-      if ($invitees.length === 0) {
-        this.$dlg.dialog("close");
-        return;
-      }
-      $invitees.each(function() {
-        ps.push($(this).data("uo"));
-      });
-      super.submit({ player: ps });
-    }
-  }
 
-  return InvitePlayersDialog;
-});
-</code></pre>
-        </article>
-    </section>
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="dawg_dictionary_compressor.js.html">dawg/dictionary_compressor.js</a>, <a href="dawg_dictionary_compressor.js.html#line7">line 7</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
 
 
 

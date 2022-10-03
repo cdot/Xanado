@@ -56,7 +56,7 @@ contain files that can override all or some of the default css.</li>
 <li><code>dictionaries</code> contains all the dictionaries</li>
 <li><code>editions</code> contains the edition specifications</li>
 <li><code>games</code> contains the database of games (initially empty)</li>
-<li><code>html</code> has the html for the user interfaces, <code>games.html</code> for the control panel, and <code>game.html</code> for the game itself.</li>
+<li><code>html</code> has the html for the user interfaces, <code>games_ui.html</code> for the control panel, and <code>game_ui.html</code> for the game itself.</li>
 <li><code>i18n</code> contains the master English <code>en.json</code>, qqq documentation, and any other contributed translations of the interface.</li>
 <li><code>images</code> contains images used by the game</li>
 <li><code>js</code> has all the source code
@@ -78,7 +78,7 @@ a DAWG (Directed Acyclic Word Graph), which is generated from a
 lexicon (list of words) using a processor based on <a href="https://github.com/danielweck/scrabble-html-ui">Daniel Weck's
 DAWG_Compressor program</a>. To build a new dictionary, follow the
 instructions given when you run:</p>
-<pre class="prettyprint source"><code>$ node js/dawg/compressor.js
+<pre class="prettyprint source"><code>$ node js/dawg/dictionary_compressor.js
 </code></pre>
 <p><code>js/dawg/explore.js</code> can be used to explore the generated DAWG(s) e.g.</p>
 <pre class="prettyprint source"><code>$ node js/dawg/explore.js SOWPODS_English --anagrams scrabble
@@ -92,14 +92,13 @@ the server starts. It will affect the performance of the dictionary,
 so you are recommended to run the compressor every so often to
 incorporate those words.</p>
 <h2>Flow of Control</h2>
-<p>Players access <code>/</code> on the server. This will load the <code>games</code>
+<p>Players access <code>/</code> on the server. This will load the <code>games_ui</code>
 interface, which is used to view available games and create new games.</p>
 <p>A game is joined by opening a URL which identifies the game
 and player (<code>GET /join/gameKey/playerKey</code>). The server adds the
 player to the game and responds with the gameKey and playerKey. The
-<code>games</code> interface then opens a new window on <code>html/game.html</code>, which
-loads the UI. When the document is ready, it executes <code>js/game.js</code>,
-which creates the UI.</p>
+<code>games</code> interface then opens a new window on <code>html/game_ui.html</code>, which
+loads the UI.</p>
 <p>Construction of the UI object asks the server for the state of the
 game using a <code>GET /game/gameKey</code> URI. The server recognises this as a
 request for JSON, and serves up the game, as serialised by
@@ -130,12 +129,13 @@ written using the <a href="https://mochajs.org/">mocha</a> framework. Run them u
 <code>npm run coverage</code>.
 Coverage statistics are outout in the <code>coverage</code> directory.</p>
 <p>You can also run <a href="https://eslint.org/">eslint</a> on the code using <code>npm run lint</code>.</p>
+<p>There's a <code>npm run debug</code> script to run the server with debug options enabled (very verbose).</p>
 <h2>Internationalisation</h2>
 <p>Xanado uses the <a href="https://github.com/wikimedia/jquery.i18n">Wikimedia jQuery.i18n framework</a> to support translations. Currently translation files are provided for English, (une très mauvaise traduction en) French, and (eine schlechte Übersetzung ins) German. To generate your own translation, copy <code>/i18n/en.json</code> to a file using your language code (e.g. <code>it</code> for Italian) and edit the new file to provide the translation. You can use <code>npm run tx</code> to check the completeness of your translations.</p>
 <h2>Theming the UI</h2>
 <p>Support for theming the UI exists at two levels.</p>
 <ul>
-<li>To theme the look of the jQuery components of the UI, you can add a (jQuery UI theme)[https://api.jqueryui.com/category/theming/] to <code>html/game.html</code>.</li>
+<li>To theme the look of the jQuery components of the UI, you can add a (jQuery UI theme)[https://api.jqueryui.com/category/theming/] to <code>html/game_ui.html</code>.</li>
 <li>To theme the more Xanado specific classes, you can override one or more of the css files in <code>css/default</code> by providing your own version of the file. An example is given in <code>css/exander77</code>.</li>
 </ul>
 <h2>Documentation</h2>
@@ -193,13 +193,13 @@ can be any big list of words, or it can simply be a lexicon). Run the program
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-compressor.html">compressor</a></li><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="BrowserSurface.html">BrowserSurface</a></li><li><a href="Database.html">Database</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameDialog.html">GameDialog</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="InvitePlayersDialog.html">InvitePlayersDialog</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="LoginDialog.html">LoginDialog</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Commands.html">Commands</a></li><li><a href="PasswordMixin.html">PasswordMixin</a></li><li><a href="Replay.html">Replay</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#createDialog">createDialog</a></li><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li><li><a href="global.html#step">step</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-dictionary_compressor.html">dictionary_compressor</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="BrowserSurface.html">BrowserSurface</a></li><li><a href="Database.html">Database</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameDialog.html">GameDialog</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="InvitePlayersDialog.html">InvitePlayersDialog</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="LoginDialog.html">LoginDialog</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Commands.html">Commands</a></li><li><a href="PasswordMixin.html">PasswordMixin</a></li><li><a href="Replay.html">Replay</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#createDialog">createDialog</a></li><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li><li><a href="global.html#step">step</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Sun Oct 02 2022 06:33:24 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Mon Oct 03 2022 08:54:17 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>
