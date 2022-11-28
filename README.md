@@ -22,9 +22,11 @@ The installation has subdirectories as follows:
     * `js/client` has the client code
 	* `js/server` has the server code
     * `js/standalone` has the code that runs entirely in the browser
+    * `js/build` has build system components
 * `test` has all the unit tests and fixtures
+* `bin` has top level scripts
 
-## Building your own dictionary
+## Creating your own dictionary
 
 Dictionaries are stored in the `dictionaries` directory in the form of
 a DAWG (Directed Acyclic Word Graph), which is generated from a
@@ -113,6 +115,10 @@ If you create a new translation, you will have to add it to
 Support for theming the UI exists at two levels.
 - To theme the look of the jQuery components of the UI, you can add a (jQuery UI theme)[https://api.jqueryui.com/category/theming/] to `html/game_ui.html`.
 - To theme the more Xanado specific classes, you can override the css files in `css/default` by providing your own versions of the files. An example is given in `css/exander77`. All files must be provided.
+
+## Build system
+
+The build system is used to generate minimal browser scripts and CSS in the `dist` subdirectory. Run it using `npm run dist`. The `dist` code can be used to run a single player game using scripts hosted a standard HTTP server that does not have server-side scripting. The `dist` code is checked in to git so that it can be served using github pages.
 
 ## Documentation
 The code is documented using `jsdoc`. The documentation is automatically
