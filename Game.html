@@ -30,7 +30,8 @@
     
         <h2><span class="attribs"><span class="type-signature"></span></span>Game<span class="signature">(params)</span><span class="type-signature"></span></h2>
         
-            <div class="class-description"><p>Class of Game objects. Contains most of the game logic.</p></div>
+            <div class="class-description"><p>Base class of Game objects. Common functionality shared by browser
+and server sides.</p></div>
         
     
 </header>
@@ -57,11 +58,9 @@
 <pre class="prettyprint source"><code>new Game(...).create().then(game => game.onLoad(db)...
 </code></pre>
 <p>A game identified by key is loaded from a db by</p>
-<pre class="prettyprint source"><code>db.get(key, &lt;Game classes>).then(game => game.onLoad(db)...
+<pre class="prettyprint source"><code>db.get(key, Game.classes).then(game => game.onLoad(db)...
 </code></pre>
-<p><code>&lt;Game classes&gt;</code> is an object mapping a class name to an
-implementation. The actual implementation used depends on
-the context.</p>
+<p>(may be null).</p>
 </div>
 
 
@@ -143,6 +142,18 @@ Note that <code>players</code> and <code>turns</code> are not copied.</p></td>
     
 
     
+        <dt class="mixes">Mixes In:</dt>
+
+        <dd class="mixes"><ul>
+        
+            <li><a href="Undo.html">Undo</a></li>
+        
+            <li><a href="BrowserGame.html">BrowserGame</a></li>
+        
+            <li><a href="ServerGame.html">ServerGame</a></li>
+        
+        </ul></dd>
+    
 
     
 
@@ -157,7 +168,7 @@ Note that <code>players</code> and <code>turns</code> are not copied.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line24">line 24</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line33">line 33</a>
     </li></ul></dd>
     
 
@@ -207,7 +218,7 @@ Note that <code>players</code> and <code>turns</code> are not copied.</p></td>
 
         
             
-<h4 class="name" id="allowTakeBack"><span class="type-signature">(nullable) </span>allowTakeBack<span class="type-signature"> :boolean</span></h4>
+<h4 class="name" id="allowTakeBack"><span class="type-signature"></span>allowTakeBack<span class="type-signature"> :boolean</span></h4>
 
 
 
@@ -263,7 +274,7 @@ challenged or played.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line465">line 465</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line289">line 289</a>
     </li></ul></dd>
     
 
@@ -281,14 +292,16 @@ challenged or played.</p>
 
         
             
-<h4 class="name" id="allowUndo"><span class="type-signature">(nullable) </span>allowUndo<span class="type-signature"> :boolean</span></h4>
+<h4 class="name" id="allowUndo"><span class="type-signature"></span>allowUndo<span class="type-signature"> :boolean</span></h4>
 
 
 
 
 <div class="description">
     <p>Whether or not to allow players to undo previous
-moves without penalty. Implies syncRacks.</p>
+moves without penalty. Disables encryption of move
+data, so any player could potentially reverse-engineer
+the entire board and all racks if this is enabled.</p>
 </div>
 
 
@@ -336,69 +349,7 @@ moves without penalty. Implies syncRacks.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line473">line 473</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="Board"><span class="type-signature"></span>Board<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <p>Factory class. Subclasses may redefine this.</p>
-</div>
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line39">line 39</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line299">line 299</a>
     </li></ul></dd>
     
 
@@ -470,7 +421,7 @@ moves without penalty. Implies syncRacks.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line290">line 290</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line114">line 114</a>
     </li></ul></dd>
     
 
@@ -542,7 +493,7 @@ moves without penalty. Implies syncRacks.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line269">line 269</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line93">line 93</a>
     </li></ul></dd>
     
 
@@ -622,7 +573,7 @@ the data volume.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line370">line 370</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line194">line 194</a>
     </li></ul></dd>
     
 
@@ -698,69 +649,7 @@ the data volume.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line347">line 347</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="Game"><span class="type-signature"></span>Game<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <p>Factory class. Subclasses may redefine this.</p>
-</div>
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line44">line 44</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line171">line 171</a>
     </li></ul></dd>
     
 
@@ -832,69 +721,7 @@ the data volume.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line257">line 257</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="LetterBag"><span class="type-signature"></span>LetterBag<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <p>Factory class. Subclasses may redefine this.</p>
-</div>
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line49">line 49</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line81">line 81</a>
     </li></ul></dd>
     
 
@@ -968,7 +795,7 @@ load.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line324">line 324</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line148">line 148</a>
     </li></ul></dd>
     
 
@@ -986,7 +813,7 @@ load.</p>
 
         
             
-<h4 class="name" id="maxPlayers"><span class="type-signature">(nullable) </span>maxPlayers<span class="type-signature"> :number</span></h4>
+<h4 class="name" id="maxPlayers"><span class="type-signature"></span>maxPlayers<span class="type-signature"> :number</span></h4>
 
 
 
@@ -1041,7 +868,7 @@ means no limit.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line443">line 443</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line267">line 267</a>
     </li></ul></dd>
     
 
@@ -1114,69 +941,7 @@ can start. Must be at least 2.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line435">line 435</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="Move"><span class="type-signature"></span>Move<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <p>Factory class. Subclasses may redefine this.</p>
-</div>
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line54">line 54</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line259">line 259</a>
     </li></ul></dd>
     
 
@@ -1249,7 +1014,7 @@ continuation game.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line498">line 498</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line315">line 315</a>
     </li></ul></dd>
     
 
@@ -1321,7 +1086,7 @@ continuation game.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line505">line 505</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line322">line 322</a>
     </li></ul></dd>
     
 
@@ -1339,14 +1104,14 @@ continuation game.</p>
 
         
             
-<h4 class="name" id="penaltyPoints"><span class="type-signature">(nullable) </span>penaltyPoints<span class="type-signature"> :number</span></h4>
+<h4 class="name" id="penaltyPoints"><span class="type-signature"></span>penaltyPoints<span class="type-signature"> :number</span></h4>
 
 
 
 
 <div class="description">
     <p>The score penalty to apply for a failed challenge. Only used
-if <code>challengePenalty</code> is <code>Game.Penalty.PER_TURN</code> or <code>Game.Penalty.PER_WORD</code>.</p>
+if <code>challengePenalty</code> is <code>Penalty.PER_TURN</code> or <code>Penalty.PER_WORD</code>.</p>
 </div>
 
 
@@ -1394,7 +1159,7 @@ if <code>challengePenalty</code> is <code>Game.Penalty.PER_TURN</code> or <code>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line420">line 420</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line244">line 244</a>
     </li></ul></dd>
     
 
@@ -1412,69 +1177,7 @@ if <code>challengePenalty</code> is <code>Game.Penalty.PER_TURN</code> or <code>
 
         
             
-<h4 class="name" id="Player"><span class="type-signature"></span>Player<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <p>Factory class. Subclasses may redefine this.</p>
-</div>
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line59">line 59</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="predictScore"><span class="type-signature">(nullable) </span>predictScore<span class="type-signature"> :boolean</span></h4>
+<h4 class="name" id="predictScore"><span class="type-signature"></span>predictScore<span class="type-signature"> :boolean</span></h4>
 
 
 
@@ -1530,69 +1233,7 @@ play, true otherwise.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line456">line 456</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="Rack"><span class="type-signature"></span>Rack<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <p>Factory class. Subclasses may redefine this.</p>
-</div>
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line64">line 64</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line280">line 280</a>
     </li></ul></dd>
     
 
@@ -1667,7 +1308,7 @@ Copied from the <a href="Edition.html"><code>Edition</code></a> in <a href="Game
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line299">line 299</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line123">line 123</a>
     </li></ul></dd>
     
 
@@ -1685,69 +1326,7 @@ Copied from the <a href="Edition.html"><code>Edition</code></a> in <a href="Game
 
         
             
-<h4 class="name" id="Square"><span class="type-signature"></span>Square<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <p>Factory class. Subclasses may redefine this.</p>
-</div>
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line29">line 29</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="state"><span class="type-signature"></span>state<span class="type-signature"> :State</span></h4>
+<h4 class="name" id="state"><span class="type-signature"></span>state<span class="type-signature"> :<a href="global.html#State">State</a></span></h4>
 
 
 
@@ -1762,7 +1341,7 @@ Copied from the <a href="Edition.html"><code>Edition</code></a> in <a href="Game
     <ul>
         <li>
             
-<span class="param-type">State</span>
+<span class="param-type"><a href="global.html#State">State</a></span>
 
 
         </li>
@@ -1801,7 +1380,7 @@ Copied from the <a href="Edition.html"><code>Edition</code></a> in <a href="Game
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line263">line 263</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line87">line 87</a>
     </li></ul></dd>
     
 
@@ -1875,143 +1454,7 @@ load.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line307">line 307</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="syncRacks"><span class="type-signature">(nullable) </span>syncRacks<span class="type-signature"> :boolean</span></h4>
-
-
-
-
-<div class="description">
-    <p>Disables obfustication of move data, so any player
-could potentially reverse-engineer
-the entire board and all racks if this is enabled.</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">boolean</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line482">line 482</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="Tile"><span class="type-signature"></span>Tile<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <p>Factory class. Subclasses may redefine this.</p>
-</div>
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line34">line 34</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line131">line 131</a>
     </li></ul></dd>
     
 
@@ -2085,7 +1528,7 @@ the entire board and all racks if this is enabled.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line387">line 387</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line211">line 211</a>
     </li></ul></dd>
     
 
@@ -2158,7 +1601,7 @@ timeAllowed. Only used if <code>timerType</code> is <code>TIMER_GAME</code>.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line403">line 403</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line227">line 227</a>
     </li></ul></dd>
     
 
@@ -2176,7 +1619,7 @@ timeAllowed. Only used if <code>timerType</code> is <code>TIMER_GAME</code>.</p>
 
         
             
-<h4 class="name" id="timerType"><span class="type-signature">(nullable) </span>timerType<span class="type-signature"> :Timer</span></h4>
+<h4 class="name" id="timerType"><span class="type-signature"></span>timerType<span class="type-signature"> :<a href="global.html#Timer">Timer</a></span></h4>
 
 
 
@@ -2191,7 +1634,7 @@ timeAllowed. Only used if <code>timerType</code> is <code>TIMER_GAME</code>.</p>
     <ul>
         <li>
             
-<span class="param-type">Timer</span>
+<span class="param-type"><a href="global.html#Timer">Timer</a></span>
 
 
         </li>
@@ -2230,69 +1673,7 @@ timeAllowed. Only used if <code>timerType</code> is <code>TIMER_GAME</code>.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line377">line 377</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="Turn"><span class="type-signature"></span>Turn<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <p>Factory class. Subclasses may redefine this.</p>
-</div>
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line69">line 69</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line201">line 201</a>
     </li></ul></dd>
     
 
@@ -2364,7 +1745,7 @@ timeAllowed. Only used if <code>timerType</code> is <code>TIMER_GAME</code>.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line330">line 330</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line154">line 154</a>
     </li></ul></dd>
     
 
@@ -2382,7 +1763,7 @@ timeAllowed. Only used if <code>timerType</code> is <code>TIMER_GAME</code>.</p>
 
         
             
-<h4 class="name" id="wordCheck"><span class="type-signature">(nullable) </span>wordCheck<span class="type-signature"> :WordCheck</span></h4>
+<h4 class="name" id="wordCheck"><span class="type-signature"></span>wordCheck<span class="type-signature"> :<a href="global.html#WordCheck">WordCheck</a></span></h4>
 
 
 
@@ -2397,7 +1778,7 @@ timeAllowed. Only used if <code>timerType</code> is <code>TIMER_GAME</code>.</p>
     <ul>
         <li>
             
-<span class="param-type">WordCheck</span>
+<span class="param-type"><a href="global.html#WordCheck">WordCheck</a></span>
 
 
         </li>
@@ -2436,7 +1817,7 @@ timeAllowed. Only used if <code>timerType</code> is <code>TIMER_GAME</code>.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line427">line 427</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line251">line 251</a>
     </li></ul></dd>
     
 
@@ -2464,7 +1845,7 @@ timeAllowed. Only used if <code>timerType</code> is <code>TIMER_GAME</code>.</p>
     
 
     
-    <h4 class="name" id=".fromSerialisable"><span class="type-signature">(static) </span>fromSerialisable<span class="signature">(factory, simple)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".fromSerialisable"><span class="type-signature">(static) </span>fromSerialisable<span class="signature">(simple)</span><span class="type-signature"></span></h4>
     
 
     
@@ -2507,29 +1888,6 @@ only the fields supported by serialisable will be populated.</p>
     </thead>
 
     <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>factory</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Game class to be used as factory</p></td>
-        </tr>
-
     
 
         <tr>
@@ -2591,7 +1949,7 @@ only the fields supported by serialisable will be populated.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line915">line 915</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line701">line 701</a>
     </li></ul></dd>
     
 
@@ -2772,7 +2130,7 @@ from the game's letter bag.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line544">line 544</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line368">line 368</a>
     </li></ul></dd>
     
 
@@ -2882,7 +2240,7 @@ from the game's letter bag.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line762">line 762</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line586">line 586</a>
     </li></ul></dd>
     
 
@@ -2923,116 +2281,6 @@ from the game's letter bag.</p></td>
     <dd>
         
 <span class="param-type"><a href="Square.html">Square</a></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="autoplay"><span class="type-signature"></span>autoplay<span class="signature">()</span><span class="type-signature"> &rarr; {Promise}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Robot play for the current player. This may result in a challenge.</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line1208">line 1208</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>resolving to this</p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise</span>
 
 
     </dd>
@@ -3175,7 +2423,7 @@ them on a rack</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line966">line 966</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line751">line 751</a>
     </li></ul></dd>
     
 
@@ -3336,7 +2584,7 @@ them on a rack</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line932">line 932</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line716">line 716</a>
     </li></ul></dd>
     
 
@@ -3473,7 +2721,7 @@ them on a rack</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line651">line 651</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line477">line 477</a>
     </li></ul></dd>
     
 
@@ -3506,191 +2754,6 @@ them on a rack</p>
 </div>
 
 
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="connect"><span class="type-signature"></span>connect<span class="signature">(channel, playerKey)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Connect to a player front end via the given notification channel.
-Play the game if preconditions have been met.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>channel</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="Channel.html">Channel</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>the channel that will be
-used to send notifications to the front end for the given
-player.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>playerKey</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>the key identifying the player</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line1414">line 1414</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>promise that resolves to undefined</p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise</span>
-
-
-    </dd>
-</dl>
 
     
 
@@ -3761,7 +2824,7 @@ DB and complete initialisation of private fields.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line517">line 517</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line334">line 334</a>
     </li></ul></dd>
     
 
@@ -3819,191 +2882,6 @@ DB and complete initialisation of private fields.</p>
     
 
     
-    <h4 class="name" id="finishTurn"><span class="type-signature"></span>finishTurn<span class="signature">(player, turn)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>TODO: move to BackendGame
-Wrap up after a command handler that is returning a Turn.
-Log the command, determine whether the game has ended,
-save state and notify connected players with the Turn object.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>player</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="Player.html">Player</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>player who's turn it was</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>turn</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>fields to populate the Turn to finish</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line1061">line 1061</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>that resolves to the game</p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
     <h4 class="name" id="forEachTurn"><span class="type-signature"></span>forEachTurn<span class="signature">(cb)</span><span class="type-signature"></span></h4>
     
 
@@ -4012,8 +2890,7 @@ save state and notify connected players with the Turn object.</p>
 
 
 <div class="description">
-    <p>Iterate over turns calling cb on each, flagging when the
-last (most recent) turn is reached.</p>
+    <p>Iterate over turns calling cb on each.</p>
 </div>
 
 
@@ -4106,7 +2983,7 @@ last (most recent) turn is reached.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line752">line 752</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line576">line 576</a>
     </li></ul></dd>
     
 
@@ -4131,275 +3008,6 @@ last (most recent) turn is reached.</p>
 
 
 
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="getConnection"><span class="type-signature"></span>getConnection<span class="signature">(player)</span><span class="type-signature"> &rarr; (nullable) {<a href="Channel.html">Channel</a>}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Does player have an active connection to this game?</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>player</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="Player.html">Player</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>the player</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line1360">line 1360</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>the connection channel, if connected.</p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="Channel.html">Channel</a></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="getDictionary"><span class="type-signature"></span>getDictionary<span class="signature">()</span><span class="type-signature"> &rarr; {Promise}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Get the dictionary for this game, lazy-loading as necessary</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line1287">line 1287</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>promise resolves to a <a href="Dictionary.html"><code>Dictionary</code></a></p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise</span>
-
-
-    </dd>
-</dl>
-
-    
 
 
 
@@ -4463,7 +3071,7 @@ last (most recent) turn is reached.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line533">line 533</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line357">line 357</a>
     </li></ul></dd>
     
 
@@ -4573,7 +3181,7 @@ last (most recent) turn is reached.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line589">line 589</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line413">line 413</a>
     </li></ul></dd>
     
 
@@ -4683,7 +3291,7 @@ last (most recent) turn is reached.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line597">line 597</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line421">line 421</a>
     </li></ul></dd>
     
 
@@ -4842,7 +3450,7 @@ last (most recent) turn is reached.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line581">line 581</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line405">line 405</a>
     </li></ul></dd>
     
 
@@ -4952,7 +3560,7 @@ last (most recent) turn is reached.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line680">line 680</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line506">line 506</a>
     </li></ul></dd>
     
 
@@ -5062,7 +3670,7 @@ last (most recent) turn is reached.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line670">line 670</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line496">line 496</a>
     </li></ul></dd>
     
 
@@ -5172,7 +3780,7 @@ last (most recent) turn is reached.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line688">line 688</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line514">line 514</a>
     </li></ul></dd>
     
 
@@ -5260,7 +3868,7 @@ last (most recent) turn is reached.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line810">line 810</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line634">line 634</a>
     </li></ul></dd>
     
 
@@ -5359,7 +3967,7 @@ is either the last time a turn was processed, or the creation time.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line710">line 710</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line535">line 535</a>
     </li></ul></dd>
     
 
@@ -5469,7 +4077,7 @@ is either the last time a turn was processed, or the creation time.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line723">line 723</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line548">line 548</a>
     </li></ul></dd>
     
 
@@ -5517,6 +4125,95 @@ if no turns have been made yet.</p>
 </dl>
 
     
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="makeChanges"><span class="type-signature"></span>makeChanges<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Make changes as required by the structure passed. Any field
+in the game can be changed. The game will be saved.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line350">line 350</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5635,7 +4332,7 @@ of the player to get the next player to</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line626">line 626</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line451">line 451</a>
     </li></ul></dd>
     
 
@@ -5693,811 +4390,7 @@ of the player to get the next player to</p></td>
     
 
     
-    <h4 class="name" id="notifyAll"><span class="type-signature"></span>notifyAll<span class="signature">(message, data)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Broadcast a notification to all game observers. Note
-that an observer may be connected multiple times,
-through different channels, or not at all.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>message</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>to send</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>data</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>to send with message</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line1331">line 1331</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="notifyOthers"><span class="type-signature"></span>notifyOthers<span class="signature">(player, message, data)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Broadcast a notification to all observers except the
-given player.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>player</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="Player.html">Player</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>player to exclude</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>message</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>to send</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>data</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>to send with message</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line1344">line 1344</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="notifyPlayer"><span class="type-signature"></span>notifyPlayer<span class="signature">(player, message, data)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Send a notification to just one player, if they are connected
-through a channel. Note that the player
-may be connected multiple times through different channels.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>player</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="Player.html">Player</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>player to send to</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>message</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>to send</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>data</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>to send with message.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line1312">line 1312</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="onLoad"><span class="type-signature"></span>onLoad<span class="signature">(db)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Promise to finish the construction or load from serialisation
-of a game.
-A game has to know what DB so it knows where to save. The
-database and connections are not serialised, and must be
-reset when loading.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>db</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="Database.html">Database</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>the db to use to store games</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line879">line 879</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>Promise that resolves to the game</p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="playIfReady"><span class="type-signature"></span>playIfReady<span class="signature">()</span><span class="type-signature"> &rarr; {Promise}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Start, or continue, playing the game if preconditions are met.</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line991">line 991</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>promise that resolves to the game</p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="popTurn"><span class="type-signature"></span>popTurn<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="Turn.html">Turn</a>}</span></h4>
+    <h4 class="name" id="popTurn"><span class="type-signature"></span>popTurn<span class="signature">(the)</span><span class="type-signature"></span></h4>
     
 
     
@@ -6516,6 +4409,55 @@ reset when loading.</p>
 
 
 
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>the</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Turn.html">Turn</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>turn to add</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
 
 
 
@@ -6549,7 +4491,7 @@ reset when loading.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line742">line 742</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line567">line 567</a>
     </li></ul></dd>
     
 
@@ -6574,28 +4516,6 @@ reset when loading.</p>
 
 
 
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>the turn popped</p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="Turn.html">Turn</a></span>
-
-
-    </dd>
-</dl>
-
-    
 
 
 
@@ -6712,7 +4632,7 @@ the player to get the previous player of</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line607">line 607</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line431">line 431</a>
     </li></ul></dd>
     
 
@@ -6871,7 +4791,7 @@ the player to get the previous player of</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line734">line 734</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line559">line 559</a>
     </li></ul></dd>
     
 
@@ -7031,7 +4951,7 @@ the player to get the previous player of</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line979">line 979</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line764">line 764</a>
     </li></ul></dd>
     
 
@@ -7243,7 +5163,7 @@ at the locations dictated in a set of placements</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line948">line 948</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line732">line 732</a>
     </li></ul></dd>
     
 
@@ -7381,206 +5301,7 @@ the bag</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line564">line 564</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="save"><span class="type-signature"></span>save<span class="signature">()</span><span class="type-signature"> &rarr; {Promise}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Perform a save to the connected database (set in onLoad).</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line1297">line 1297</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>promise resolves to this</p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="sendCONNECTIONS"><span class="type-signature"></span>sendCONNECTIONS<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Notify players with a list of the currently connected
-players, non-playing observers and non-connected players.</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line1378">line 1378</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line388">line 388</a>
     </li></ul></dd>
     
 
@@ -7724,7 +5445,7 @@ works on server side</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line827">line 827</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line651">line 651</a>
     </li></ul></dd>
     
 
@@ -7835,7 +5556,7 @@ key game data</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line771">line 771</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line595">line 595</a>
     </li></ul></dd>
     
 
@@ -7923,7 +5644,7 @@ key game data</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line661">line 661</a>
+        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line487">line 487</a>
     </li></ul></dd>
     
 
@@ -7979,676 +5700,6 @@ key game data</p>
     
 
     
-        <h3 class="subsection-title">Type Definitions</h3>
-
-        
-                
-<h4 class="name" id=".Command">Command</h4>
-
-
-
-
-<div class="description">
-    <p>Commands that can be sent from the UI to the Backend.</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">UNPAUSE</span>
-|
-
-<span class="param-type">PAUSE</span>
-|
-
-<span class="param-type">CHALLENGE</span>
-|
-
-<span class="param-type">PLAY</span>
-|
-
-<span class="param-type">TAKE_BACK</span>
-|
-
-<span class="param-type">PASS</span>
-|
-
-<span class="param-type">GAME_OVER</span>
-|
-
-<span class="param-type">SWAP</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line91">line 91</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-            
-                
-<h4 class="name" id=".Notify">Notify</h4>
-
-
-
-
-<div class="description">
-    <p>Notifications sent between back and front end.</p>
-<ul>
-<li><code>CONNECTIONS</code>: list of the currently connected observers</li>
-<li><code>MESSAGE</code>: someone has sent a message</li>
-<li><code>NEXT_GAME</code>: a follow-on game is available</li>
-<li><code>PAUSE</code>: someone paused the game</li>
-<li><code>REJECT</code>: a move has been rejected (not found in dictionary)</li>
-<li><code>TICK</code>: the game timer has ticked</li>
-<li><code>TURN</code>: someone has made a move in the game</li>
-<li><code>UNDONE</code>: the last play was undone</li>
-<li><code>UNPAUSE</code>: someone has unpaused the game
-Notifications only sent to games pages by the server</li>
-<li><code>UPDATE</code>: a change has been made that requires a monitor update
-Notifications sent by a game page</li>
-<li><code>JOIN</code>: request to join (or observe) the game
-Notifications sent by games pages (monitors)</li>
-<li><code>MONITOR</code>: monitor wants to connect to the server</li>
-</ul>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">UNPAUSE</span>
-|
-
-<span class="param-type">PAUSE</span>
-|
-
-<span class="param-type">JOIN</span>
-|
-
-<span class="param-type">REJECT</span>
-|
-
-<span class="param-type">MESSAGE</span>
-|
-
-<span class="param-type">NEXT_GAME</span>
-|
-
-<span class="param-type">TICK</span>
-|
-
-<span class="param-type">TURN</span>
-|
-
-<span class="param-type">CONNECTIONS</span>
-|
-
-<span class="param-type">UPDATE</span>
-|
-
-<span class="param-type">MONITOR</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line108">line 108</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-            
-                
-<h4 class="name" id=".Penalty">Penalty</h4>
-
-
-
-
-<div class="description">
-    <p>Different types of penalty for a failed challenge.</p>
-<ul>
-<li><code>NONE</code> - no penalty</li>
-<li><code>MISS</code> - challenging player misses next turn</li>
-<li><code>PER_TURN</code> - challenger loses a fixed number of points</li>
-<li><code>PER_WORD</code> - challenger loses points for each wrongly challenged word</li>
-</ul>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">NONE</span>
-|
-
-<span class="param-type">MISS</span>
-|
-
-<span class="param-type">PER_TURN</span>
-|
-
-<span class="param-type">PER_WORD</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line182">line 182</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-            
-                
-<h4 class="name" id=".State">State</h4>
-
-
-
-
-<div class="description">
-    <p>Game states.</p>
-<ul>
-<li><code>WAITING</code> - until enough players join the game</li>
-<li><code>PLAYING</code> - until the game is over, then one of:</li>
-<li><code>GAME_OVER</code> - game was played to end, or</li>
-<li><code>TWO_PASSES</code> - all players passed twice, or</li>
-<li><code>FAILED_CHALLENGE</code> - a challenge on the final play failed, or</li>
-<li><code>TIMED_OUT</code> - game is too old, will be pruned</li>
-</ul>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">WAITING</span>
-|
-
-<span class="param-type">PLAYING</span>
-|
-
-<span class="param-type">GAME_OVER</span>
-|
-
-<span class="param-type">TWO_PASSES</span>
-|
-
-<span class="param-type">FAILED_CHALLENGE</span>
-|
-
-<span class="param-type">TIMED_OUT</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line71">line 71</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-            
-                
-<h4 class="name" id=".Timer">Timer</h4>
-
-
-
-
-<div class="description">
-    <p>Types of game timer</p>
-<ul>
-<li><code>NONE</code> - game is untimed</li>
-<li><code>TURN</code> - each turn is time-limited</li>
-<li><code>GAME</code> - game is time limited, and a points penalty is applied
-for overtime</li>
-</ul>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">NONE</span>
-|
-
-<span class="param-type">TURN</span>
-|
-
-<span class="param-type">GAME</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line168">line 168</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-            
-                
-<h4 class="name" id=".Turns">Turns</h4>
-
-
-
-
-<div class="description">
-    <p>Different types of <a href="Turn.html"><code>Turn</code></a></p>
-<ul>
-<li>PLAY - some tiles were placed on the board</li>
-<li>SWAP - player swapped for fresh tiles from the bag</li>
-<li>GAME_OVER - game is over</li>
-<li>CHALLENGE_LOST - player challenged, and lost</li>
-<li>CHALLENGE_WON - player challenged, and won</li>
-<li>TOOK_BACK - player took back their play</li>
-<li>PASSED - player passed</li>
-<li>TIMED_OUT - player was timed out (if timer type is <code>TURN</code>)</li>
-</ul>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">PLAY</span>
-|
-
-<span class="param-type">SWAP</span>
-|
-
-<span class="param-type">GAME_OVER</span>
-|
-
-<span class="param-type">CHALLENGE_LOST</span>
-|
-
-<span class="param-type">CHALLENGE_WON</span>
-|
-
-<span class="param-type">TOOK_BACK</span>
-|
-
-<span class="param-type">PASSED</span>
-|
-
-<span class="param-type">TIMED_OUT</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line145">line 145</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-            
-                
-<h4 class="name" id=".WordCheck">WordCheck</h4>
-
-
-
-
-<div class="description">
-    <p>Ways to check played words.</p>
-<ul>
-<li>NONE - don't check played words</li>
-<li>AFTER - report to player (only) if played words were in dictionary</li>
-<li>REJECT - refuse to accept words not in the dictionary. A bad play
-in this case does not result in a penalty, it just won't accept
-the play.</li>
-</ul>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">NONE</span>
-|
-
-<span class="param-type">AFTER</span>
-|
-
-<span class="param-type">REJECT</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Game.js.html">game/Game.js</a>, <a href="game_Game.js.html#line197">line 197</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-            
-    
 
     
 </article>
@@ -8661,13 +5712,13 @@ the play.</li>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_dictionary_compressor.html">dawg/dictionary_compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li></ul><h3>Classes</h3><ul><li><a href="BackendGame.html">BackendGame</a></li><li><a href="Board.html">Board</a></li><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserDatabase.html">BrowserDatabase</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Channel.html">Channel</a></li><li><a href="ClientGamesUI.html">ClientGamesUI</a></li><li><a href="ClientGameUI.html">ClientGameUI</a></li><li><a href="Compressor.html">Compressor</a></li><li><a href="Configurator.html">Configurator</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="Explorer.html">Explorer</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameDialog.html">GameDialog</a></li><li><a href="GameSetupDialog.html">GameSetupDialog</a></li><li><a href="InvitePlayersDialog.html">InvitePlayersDialog</a></li><li><a href="JSAnalyser.html">JSAnalyser</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="LoginDialog.html">LoginDialog</a></li><li><a href="Move.html">Move</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="StandaloneGamesUI.html">StandaloneGamesUI</a></li><li><a href="StandaloneGameUI.html">StandaloneGameUI</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Interfaces</h3><ul><li><a href="Database.html">Database</a></li><li><a href="Platform.html">Platform</a></li></ul><h3>Mixins</h3><ul><li><a href="browser_GamesUIMixin.html">browser/GamesUIMixin</a></li><li><a href="browser_GameUIMixin.html">browser/GameUIMixin</a></li><li><a href="browser_SquareMixin.html">browser/SquareMixin</a></li><li><a href="browser_SurfaceMixin.html">browser/SurfaceMixin</a></li><li><a href="client_ClientUIMixin.html">client/ClientUIMixin</a></li><li><a href="client_PasswordMixin.html">client/PasswordMixin</a></li><li><a href="game_Commands.html">game/Commands</a></li><li><a href="game_Replay.html">game/Replay</a></li><li><a href="game_Undo.html">game/Undo</a></li><li><a href="standalone_StandaloneUIMixin.html">standalone/StandaloneUIMixin</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_define_module">_define_module</a></li><li><a href="global.html#_get_module">_get_module</a></li><li><a href="global.html#_require_js">_require_js</a></li><li><a href="global.html#backend/findBestPlay">backend/findBestPlay</a></li><li><a href="global.html#create">create</a></li><li><a href="global.html#define">define</a></li><li><a href="global.html#index">index</a></li><li><a href="global.html#mechanicalTurk">mechanicalTurk</a></li><li><a href="global.html#requirejs">requirejs</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-dictionary_compressor.html">dictionary_compressor</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="BrowserSurface.html">BrowserSurface</a></li><li><a href="Database.html">Database</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameDialog.html">GameDialog</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="InvitePlayersDialog.html">InvitePlayersDialog</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="LoginDialog.html">LoginDialog</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Commands.html">Commands</a></li><li><a href="PasswordMixin.html">PasswordMixin</a></li><li><a href="Replay.html">Replay</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#createDialog">createDialog</a></li><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li><li><a href="global.html#step">step</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Mon Nov 28 2022 19:17:52 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Mon Nov 28 2022 19:23:28 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

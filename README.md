@@ -12,21 +12,16 @@ The installation has subdirectories as follows:
 * `i18n` contains the master English `en.json`, qqq documentation, and any other contributed translations of the interface.
 * `images` contains images used by the game
 * `js` has all the source code
-    * `js/common` has generic code
+    * `js/common` has generic code shared between server and browser
 	* `js/dawg` is generation and management of DAWGs
 	* `js/design` is the Valett program
-	* `js/game` has basic game code shared between frontend and backend
-    * `js/backend` has game code specific to the backend
+	* `js/game` has game code shared between browser and server
 	* `js/i18n` has the translations checker
-	* `js/browser` has browser-specific code
-    * `js/client` has the client code
+	* `js/browser` is the browser code
 	* `js/server` has the server code
-    * `js/standalone` has the code that runs entirely in the browser
-    * `js/build` has build system components
 * `test` has all the unit tests and fixtures
-* `bin` has top level scripts
 
-## Creating your own dictionary
+## Building your own dictionary
 
 Dictionaries are stored in the `dictionaries` directory in the form of
 a DAWG (Directed Acyclic Word Graph), which is generated from a
@@ -49,9 +44,6 @@ it will be read and the words in it loaded into the dictionary when
 the server starts. It will affect the performance of the dictionary,
 so you are recommended to run the compressor every so often to
 incorporate those words.
-
-If you create a new dictionary, you will have to add it to
-`dictionaries/index.json` for the standalone game to pick it up.
 
 ## Flow of Control
 
@@ -103,22 +95,13 @@ You can also run [eslint](https://eslint.org/) on the code using `npm run lint`.
 
 There's a `npm run debug` script to run the server with debug options enabled (very verbose).
 
-The client UI supports a mechanical turk for UI testing. This can be enabled by passing `autoplay` in the URL parameters to an open game. Once a first manual play has been played, all subsequent plays in that UI will be decided automatically.
-
 ## Internationalisation
 Xanado uses the [Wikimedia jQuery.i18n framework](https://github.com/wikimedia/jquery.i18n) to support translations. Currently translation files are provided for English, (une très mauvaise traduction en) French, and (eine schlechte Übersetzung ins) German. To generate your own translation, copy `/i18n/en.json` to a file using your language code (e.g. `it` for Italian) and edit the new file to provide the translation. You can use `npm run tx` to check the completeness of your translations.
-
-If you create a new translation, you will have to add it to
-`i18n/index.json` for the standalone game to pick it up.
 
 ## Theming the UI
 Support for theming the UI exists at two levels.
 - To theme the look of the jQuery components of the UI, you can add a (jQuery UI theme)[https://api.jqueryui.com/category/theming/] to `html/game_ui.html`.
-- To theme the more Xanado specific classes, you can override the css files in `css/default` by providing your own versions of the files. An example is given in `css/exander77`. All files must be provided.
-
-## Build system
-
-The build system is used to generate minimal browser scripts and CSS in the `dist` subdirectory. Run it using `npm run dist`. The `dist` code can be used to run a single player game using scripts hosted a standard HTTP server that does not have server-side scripting. The `dist` code is checked in to git so that it can be served using github pages.
+- To theme the more Xanado specific classes, you can override one or more of the css files in `css/default` by providing your own version of the file. An example is given in `css/exander77`.
 
 ## Documentation
 The code is documented using `jsdoc`. The documentation is automatically
@@ -155,9 +138,6 @@ board (it is assumed to be mirrored), the contents of the bag, the
 number of tiles on the rack, the number of tiles that can be swapped
 in a play, and the bonuses for playing certain numbers of tiles in one
 play.
-
-If you create a new edition, you will have to add it to
-`editions/index.json` for the standalone game to pick it up.
 
 ### Valett
 Choosing point values for tiles, and the number of tiles of each letter,

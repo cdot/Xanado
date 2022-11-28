@@ -104,7 +104,7 @@
     
 
     
-    <h4 class="name" id="_define_module"><span class="type-signature"></span>_define_module<span class="signature">(name, definition)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="createDialog"><span class="type-signature"></span>createDialog<span class="signature">()</span><span class="type-signature"></span></h4>
     
 
     
@@ -112,9 +112,7 @@
 
 
 <div class="description">
-    <p>Wrapper around code read from a .js file. If the name of the module
-is <code>root</code>, the definition function is run immediately. Otherwise it
-is cached in _module_defs for when it is needed.</p>
+    <p>Add the configuration of password fields</p>
 </div>
 
 
@@ -123,79 +121,6 @@ is cached in _module_defs for when it is needed.</p>
 
 
 
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>name</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>module name</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>definition</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>anonymous function that runs the code
-for the module</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
 
 
 
@@ -231,7 +156,7 @@ for the module</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="build_combined.js.html">build/combined.js</a>, <a href="build_combined.js.html#line29">line 29</a>
+        <a href="browser_PasswordMixin.js.html">browser/PasswordMixin.js</a>, <a href="browser_PasswordMixin.js.html#line18">line 18</a>
     </li></ul></dd>
     
 
@@ -267,281 +192,7 @@ for the module</p></td>
     
 
     
-    <h4 class="name" id="_get_module"><span class="type-signature"></span>_get_module<span class="signature">(name)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Get the result of the define() call in the named module.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>name</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>module name</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="build_combined.js.html">build/combined.js</a>, <a href="build_combined.js.html#line40">line 40</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="_require_js"><span class="type-signature"></span>_require_js<span class="signature">(name)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>If the named module isn't in the cached, load it using <code>$.get()</code></p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>name</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>module name</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="build_combined.js.html">build/combined.js</a>, <a href="build_combined.js.html#line79">line 79</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="backend/findBestPlay"><span class="type-signature"></span>backend/findBestPlay<span class="signature">(game, rack, listener, dictionary<span class="signature-attributes">nullable</span>)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+    <h4 class="name" id="game/findBestPlay"><span class="type-signature"></span>game/findBestPlay<span class="signature">(game, rack, listener, dictionary<span class="signature-attributes">nullable</span>)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
     
 
     
@@ -593,7 +244,7 @@ for the module</p></td>
             <td class="type">
             
                 
-<span class="param-type"><a href="BackendGame.html">BackendGame</a></span>
+<span class="param-type"><a href="Game.html">Game</a></span>
 
 
             
@@ -750,7 +401,7 @@ defaults to game dictionary</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="backend_findBestPlay.js.html">backend/findBestPlay.js</a>, <a href="backend_findBestPlay.js.html#line569">line 569</a>
+        <a href="game_findBestPlay.js.html">game/findBestPlay.js</a>, <a href="game_findBestPlay.js.html#line569">line 569</a>
     </li></ul></dd>
     
 
@@ -809,7 +460,7 @@ identified</p>
     
 
     
-    <h4 class="name" id="create"><span class="type-signature"></span>create<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="step"><span class="type-signature"></span>step<span class="signature">()</span><span class="type-signature"> &rarr; {Promise}</span></h4>
     
 
     
@@ -817,8 +468,7 @@ identified</p>
 
 
 <div class="description">
-    <p>Start the process of constructing the UI. Subclasses should
-continue this process in their own create() methods.</p>
+    <p>Promise to perform a single step in the simulation</p>
 </div>
 
 
@@ -862,310 +512,7 @@ continue this process in their own create() methods.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="standalone_StandaloneUIMixin.js.html">standalone/StandaloneUIMixin.js</a>, <a href="standalone_StandaloneUIMixin.js.html#line263">line 263</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="define"><span class="type-signature"></span>define<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Implementation of requirejs <code>define</code>. Loads dependencies and calls
-the provided anonymous function (callback).
-See the requirejs documentation for parameter information.</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="build_combined.js.html">build/combined.js</a>, <a href="build_combined.js.html#line58">line 58</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="index"><span class="type-signature"></span>index<span class="signature">(dir, filt, rip<span class="signature-attributes">nullable</span>)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Index a single directory.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>dir</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>path to directory</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>filt</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>filter function to select files in the directory
-for inclusion in the index</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>rip</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">RegExp</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-                    &lt;nullable><br>
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>optional regular expression that rips off any
-unwanted part of the filename (e.g. extension)</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="build_updateIndexes.js.html">build/updateIndexes.js</a>, <a href="build_updateIndexes.js.html#line18">line 18</a>
+        <a href="game_Replay.js.html">game/Replay.js</a>, <a href="game_Replay.js.html#line114">line 114</a>
     </li></ul></dd>
     
 
@@ -1194,7 +541,8 @@ unwanted part of the filename (e.g. extension)</p></td>
 
         
 <div class="param-desc">
-    <p>promise that resolves to undefined</p>
+    <p>promise that resolves to the simulated turn when
+the simulation step has been run</p>
 </div>
 
 
@@ -1218,184 +566,6 @@ unwanted part of the filename (e.g. extension)</p></td>
 
 
         
-            
-
-    
-
-    
-    <h4 class="name" id="mechanicalTurk"><span class="type-signature"></span>mechanicalTurk<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Make a mechanical play.</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="client_ClientUIMixin.js.html">client/ClientUIMixin.js</a>, <a href="client_ClientUIMixin.js.html#line80">line 80</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="requirejs"><span class="type-signature"></span>requirejs<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p><code>requirejs</code> is used to &quot;demand-load&quot; a module, the name of which may
-not be known at build time.
-See the requirejs documentation for parameter information.</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="build_combined.js.html">build/combined.js</a>, <a href="build_combined.js.html#line95">line 95</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
     
 
     
@@ -1407,11 +577,6 @@ See the requirejs documentation for parameter information.</p>
 
 
 
-
-<div class="description">
-    <p>An object that holds a letter, a score, and a count.
-A <a href="LetterBag.html"><code>LetterBag</code></a> is a set of BagLetter.</p>
-</div>
 
 
 
@@ -1458,7 +623,100 @@ A <a href="LetterBag.html"><code>LetterBag</code></a> is a set of BagLetter.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_Types.js.html">common/Types.js</a>, <a href="common_Types.js.html#line10">line 10</a>
+        <a href="game_Edition.js.html">game/Edition.js</a>, <a href="game_Edition.js.html#line10">line 10</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+            
+                
+<h4 class="name" id="Command">Command</h4>
+
+
+
+
+<div class="description">
+    <p>Commands that can be sent from the UI to the Server.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">UNPAUSE</span>
+|
+
+<span class="param-type">PAUSE</span>
+|
+
+<span class="param-type">CHALLENGE</span>
+|
+
+<span class="param-type">PLAY</span>
+|
+
+<span class="param-type">TAKE_BACK</span>
+|
+
+<span class="param-type">PASS</span>
+|
+
+<span class="param-type">GAME_OVER</span>
+|
+
+<span class="param-type">SWAP</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="common_Types.js.html">common/Types.js</a>, <a href="common_Types.js.html#line45">line 45</a>
     </li></ul></dd>
     
 
@@ -1530,7 +788,213 @@ A <a href="LetterBag.html"><code>LetterBag</code></a> is a set of BagLetter.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_Types.js.html">common/Types.js</a>, <a href="common_Types.js.html#line29">line 29</a>
+        <a href="common_Types.js.html">common/Types.js</a>, <a href="common_Types.js.html#line21">line 21</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+            
+                
+<h4 class="name" id="Notify">Notify</h4>
+
+
+
+
+<div class="description">
+    <p>Notifications sent to game pages by the server.</p>
+<ul>
+<li><code>CONNECTIONS</code>: list of the currently connected observers</li>
+<li><code>MESSAGE</code>: someone has sent a message</li>
+<li><code>NEXT_GAME</code>: a follow-on game is available</li>
+<li><code>PAUSE</code>: someone paused the game</li>
+<li><code>REJECT</code>: a move has been rejected (not found in dictionary)</li>
+<li><code>TICK</code>: the game timer has ticked</li>
+<li><code>TURN</code>: someone has made a move in the game</li>
+<li><code>UNDONE</code>: the last play was undone</li>
+<li><code>UNPAUSE</code>: someone has unpaused the game
+Notifications only sent to games pages by the server</li>
+<li><code>UPDATE</code>: a change has been made that requires a monitor update
+Notifications sent by a game page</li>
+<li><code>JOIN</code>: request to join (or observe) the game
+Notifications sent by games pages (monitors)</li>
+<li><code>MONITOR</code>: monitor wants to connect to the server</li>
+</ul>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">UNPAUSE</span>
+|
+
+<span class="param-type">PAUSE</span>
+|
+
+<span class="param-type">JOIN</span>
+|
+
+<span class="param-type">REJECT</span>
+|
+
+<span class="param-type">MESSAGE</span>
+|
+
+<span class="param-type">NEXT_GAME</span>
+|
+
+<span class="param-type">TICK</span>
+|
+
+<span class="param-type">TURN</span>
+|
+
+<span class="param-type">CONNECTIONS</span>
+|
+
+<span class="param-type">UPDATE</span>
+|
+
+<span class="param-type">MONITOR</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="common_Types.js.html">common/Types.js</a>, <a href="common_Types.js.html#line62">line 62</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+            
+                
+<h4 class="name" id="Penalty">Penalty</h4>
+
+
+
+
+<div class="description">
+    <p>Different types of penalty for a failed challenge.</p>
+<ul>
+<li>NONE - no penalty</li>
+<li>MISS - challenging player misses next turn</li>
+<li>PER_TURN - challenger loses a fixed number of points</li>
+<li>PER_WORD - challenger loses points for each wrongly challenged word</li>
+</ul>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">NONE</span>
+|
+
+<span class="param-type">MISS</span>
+|
+
+<span class="param-type">PER_TURN</span>
+|
+
+<span class="param-type">PER_WORD</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="common_Types.js.html">common/Types.js</a>, <a href="common_Types.js.html#line112">line 112</a>
     </li></ul></dd>
     
 
@@ -1602,7 +1066,7 @@ A <a href="LetterBag.html"><code>LetterBag</code></a> is a set of BagLetter.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_Types.js.html">common/Types.js</a>, <a href="common_Types.js.html#line19">line 19</a>
+        <a href="common_Types.js.html">common/Types.js</a>, <a href="common_Types.js.html#line11">line 11</a>
     </li></ul></dd>
     
 
@@ -1674,7 +1138,288 @@ A <a href="LetterBag.html"><code>LetterBag</code></a> is a set of BagLetter.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_Types.js.html">common/Types.js</a>, <a href="common_Types.js.html#line24">line 24</a>
+        <a href="common_Types.js.html">common/Types.js</a>, <a href="common_Types.js.html#line16">line 16</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+            
+                
+<h4 class="name" id="State">State</h4>
+
+
+
+
+<div class="description">
+    <p>Game states.</p>
+<ul>
+<li>WAITING - until enough players join the game</li>
+<li>PLAYING - until the game is over, then one of:</li>
+<li>GAME_OVER - game was played to end, or</li>
+<li>TWO_PASSES - all players passed twice, or</li>
+<li>FAILED_CHALLENGE - a challenge on the final play failed, or</li>
+<li>TIMED_OUT - game is too old, will be pruned</li>
+</ul>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">WAITING</span>
+|
+
+<span class="param-type">PLAYING</span>
+|
+
+<span class="param-type">GAME_OVER</span>
+|
+
+<span class="param-type">TWO_PASSES</span>
+|
+
+<span class="param-type">FAILED_CHALLENGE</span>
+|
+
+<span class="param-type">TIMED_OUT</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="common_Types.js.html">common/Types.js</a>, <a href="common_Types.js.html#line26">line 26</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+            
+                
+<h4 class="name" id="Timer">Timer</h4>
+
+
+
+
+<div class="description">
+    <p>Types of game timer</p>
+<ul>
+<li>NONE - game is untimed</li>
+<li>TURN - each turn is time-limited</li>
+<li>GAME - game is time limited, and a points penalty is applied for overtime</li>
+</ul>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">NONE</span>
+|
+
+<span class="param-type">TURN</span>
+|
+
+<span class="param-type">GAME</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="common_Types.js.html">common/Types.js</a>, <a href="common_Types.js.html#line99">line 99</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+            
+                
+<h4 class="name" id="Turns">Turns</h4>
+
+
+
+
+<div class="description">
+    <p>Different types of <a href="Turn.html"><code>Turn</code></a></p>
+<ul>
+<li>PLAY - some tiles were placed on the board</li>
+<li>SWAP - player swapped for fresh tiles from the bag</li>
+<li>GAME_OVER - game is over</li>
+<li>CHALLENGE_LOST - player challenged, and lost</li>
+<li>CHALLENGE_WON - player challenged, and won</li>
+<li>TOOK_BACK - player took back their play</li>
+<li>PASSED - player passed</li>
+<li>TIMED_OUT - player was timed out (if timer type is <code>TURN</code>)</li>
+</ul>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">PLAY</span>
+|
+
+<span class="param-type">SWAP</span>
+|
+
+<span class="param-type">GAME_OVER</span>
+|
+
+<span class="param-type">CHALLENGE_LOST</span>
+|
+
+<span class="param-type">CHALLENGE_WON</span>
+|
+
+<span class="param-type">TOOK_BACK</span>
+|
+
+<span class="param-type">PASSED</span>
+|
+
+<span class="param-type">TIMED_OUT</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="common_Types.js.html">common/Types.js</a>, <a href="common_Types.js.html#line127">line 127</a>
     </li></ul></dd>
     
 
@@ -1700,6 +1445,9 @@ A <a href="LetterBag.html"><code>LetterBag</code></a> is a set of BagLetter.</p>
 <div class="description">
     <p>Events issued by the game code to update the UI - ignored on server side</p>
 <ul>
+<li>PLACE_TILE - a tile has just been placed on the square passed</li>
+<li>UNPLACE_TILE - a tile has just been removed from the square passed. The
+square and the removed tile are passed.</li>
 <li>SELECT_SQUARE - the square passed has been selected. This will
 either delegate to the tile placed on the square, or enable the
 typing cursor on an empty square.</li>
@@ -1716,6 +1464,12 @@ source and destination squares are passed.</li>
     <ul>
         <li>
             
+<span class="param-type">PLACE_TILE</span>
+|
+
+<span class="param-type">UNPLACE_TILE</span>
+|
+
 <span class="param-type">SELECT_SQUARE</span>
 |
 
@@ -1761,7 +1515,92 @@ source and destination squares are passed.</li>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="browser_UIEvents.js.html">browser/UIEvents.js</a>, <a href="browser_UIEvents.js.html#line8">line 8</a>
+        <a href="common_Types.js.html">common/Types.js</a>, <a href="common_Types.js.html#line165">line 165</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+            
+                
+<h4 class="name" id="WordCheck">WordCheck</h4>
+
+
+
+
+<div class="description">
+    <p>Ways to check played words.</p>
+<ul>
+<li>NONE - don't check played words</li>
+<li>AFTER - report to player (only) if played words were in dictionary</li>
+<li>REJECT - refuse to accept words not in the dictionary. A bad play
+in this case does not result in a penalty, it just won't accept
+the play.</li>
+</ul>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">NONE</span>
+|
+
+<span class="param-type">AFTER</span>
+|
+
+<span class="param-type">REJECT</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="common_Types.js.html">common/Types.js</a>, <a href="common_Types.js.html#line150">line 150</a>
     </li></ul></dd>
     
 
@@ -1791,13 +1630,13 @@ source and destination squares are passed.</li>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_dictionary_compressor.html">dawg/dictionary_compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li></ul><h3>Classes</h3><ul><li><a href="BackendGame.html">BackendGame</a></li><li><a href="Board.html">Board</a></li><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserDatabase.html">BrowserDatabase</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Channel.html">Channel</a></li><li><a href="ClientGamesUI.html">ClientGamesUI</a></li><li><a href="ClientGameUI.html">ClientGameUI</a></li><li><a href="Compressor.html">Compressor</a></li><li><a href="Configurator.html">Configurator</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="Explorer.html">Explorer</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameDialog.html">GameDialog</a></li><li><a href="GameSetupDialog.html">GameSetupDialog</a></li><li><a href="InvitePlayersDialog.html">InvitePlayersDialog</a></li><li><a href="JSAnalyser.html">JSAnalyser</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="LoginDialog.html">LoginDialog</a></li><li><a href="Move.html">Move</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="StandaloneGamesUI.html">StandaloneGamesUI</a></li><li><a href="StandaloneGameUI.html">StandaloneGameUI</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Interfaces</h3><ul><li><a href="Database.html">Database</a></li><li><a href="Platform.html">Platform</a></li></ul><h3>Mixins</h3><ul><li><a href="browser_GamesUIMixin.html">browser/GamesUIMixin</a></li><li><a href="browser_GameUIMixin.html">browser/GameUIMixin</a></li><li><a href="browser_SquareMixin.html">browser/SquareMixin</a></li><li><a href="browser_SurfaceMixin.html">browser/SurfaceMixin</a></li><li><a href="client_ClientUIMixin.html">client/ClientUIMixin</a></li><li><a href="client_PasswordMixin.html">client/PasswordMixin</a></li><li><a href="game_Commands.html">game/Commands</a></li><li><a href="game_Replay.html">game/Replay</a></li><li><a href="game_Undo.html">game/Undo</a></li><li><a href="standalone_StandaloneUIMixin.html">standalone/StandaloneUIMixin</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_define_module">_define_module</a></li><li><a href="global.html#_get_module">_get_module</a></li><li><a href="global.html#_require_js">_require_js</a></li><li><a href="global.html#backend/findBestPlay">backend/findBestPlay</a></li><li><a href="global.html#create">create</a></li><li><a href="global.html#define">define</a></li><li><a href="global.html#index">index</a></li><li><a href="global.html#mechanicalTurk">mechanicalTurk</a></li><li><a href="global.html#requirejs">requirejs</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-dictionary_compressor.html">dictionary_compressor</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="BrowserSurface.html">BrowserSurface</a></li><li><a href="Database.html">Database</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameDialog.html">GameDialog</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="InvitePlayersDialog.html">InvitePlayersDialog</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="LoginDialog.html">LoginDialog</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Commands.html">Commands</a></li><li><a href="PasswordMixin.html">PasswordMixin</a></li><li><a href="Replay.html">Replay</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#createDialog">createDialog</a></li><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li><li><a href="global.html#step">step</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Mon Nov 28 2022 19:17:52 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Mon Nov 28 2022 19:23:28 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: browser/Player.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: browser/Player.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*Copyright (C) 2019-2022 The Xanado Project https://github.com/cdot/Xanado
+  License MIT. See README.md at the root of this distribution for full copyright
+  and license information. Author Crawford Currie http://c-dot.co.uk*/
+/* eslint-env amd, browser, jquery */
+
+define([ "jquery" ], () => {
+
+  // Unicode characters
+  const BLACK_CIRCLE = "\u25cf";
+
+  /**
+   * Browser-side mixin for {@linkcode Player}
+   * @mixin BrowserPlayer
+   */
+  class BrowserPlayer {
+
+    /**
+     * Create score table row for the player.
+     * @function
+     * @instance
+     * @memberof BrowserPlayer
+     * @param {Player?} uiPlayer the current player in the UI
+     * @return {jQuery} jQuery object for the score table
+     */
+    $tableRow(uiPlayer) {
+      const $tr = $(`&lt;tr id="player${this.key}">&lt;/tr>`)
+            .addClass("player-row");
+      if (this === uiPlayer)
+        $tr.addClass("whosTurn");
+      $tr.append(`&lt;td class="turn-pointer">&amp;#10148;&lt;/td>`);
+      const $icon = $('&lt;div class="ui-icon">&lt;/div>');
+      $icon.addClass(this.isRobot ? "icon-robot" : "icon-person");
+      $tr.append($(document.createElement("td")).append($icon));
+      const who = this === uiPlayer ? $.i18n("You") : this.name;
+      const $name = $(`&lt;td class="player-name">${who}&lt;/td>`);
+      if (this.missNextTurn)
+        $name.addClass("miss-turn");
+      $tr.append($name);
+      $tr.append('&lt;td class="remaining-tiles">&lt;/td>');
+
+      // Robots are always connected
+      const $status = $(`&lt;td class='connect-state'>${BLACK_CIRCLE}&lt;/td>`);
+      $status.addClass(
+        this._isConnected || this.isRobot ? "online" : "offline");
+      $tr.append($status);
+
+      $tr.append(`&lt;td class='score'>${this.score}&lt;/td>`);
+      $tr.append(`&lt;td class='player-clock'>&lt;/td>`);
+
+      return $tr;
+    }
+
+    /**
+     * Refresh score table representation of the player.
+     * @function
+     * @instance
+     * @memberof BrowserPlayer
+     */
+    $refreshScore() {
+      $(`#player${this.key} .score`).text(this.score);
+    }
+
+    /**
+     * Set 'online' status of player.
+     * @function
+     * @instance
+     * @memberof BrowserPlayer
+     * @param {boolean} tf true/false
+     */
+    online(tf) {
+      const conn = this.isRobot || tf;
+      if (!this.isRobot)
+        this._isConnected = conn;
+      let rem = conn ? "offline" : "online";
+      let add = conn ? "online" : "offline";
+      $(`#player${this.key} .connect-state`)
+      .removeClass(rem)
+      .addClass(add);
+    }
+  }
+
+  return BrowserPlayer;
+});
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-dictionary_compressor.html">dictionary_compressor</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="BrowserSurface.html">BrowserSurface</a></li><li><a href="Database.html">Database</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameDialog.html">GameDialog</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="InvitePlayersDialog.html">InvitePlayersDialog</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="LoginDialog.html">LoginDialog</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Commands.html">Commands</a></li><li><a href="PasswordMixin.html">PasswordMixin</a></li><li><a href="Replay.html">Replay</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#createDialog">createDialog</a></li><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li><li><a href="global.html#step">step</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Mon Nov 28 2022 19:23:28 GMT+0000 (Coordinated Universal Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
