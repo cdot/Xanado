@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: browser/BrowserBoard.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: browser/BrowserBoard.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*Copyright (C) 2019-2022 The Xanado Project https://github.com/cdot/Xanado
+  License MIT. See README.md at the root of this distribution for full copyright
+  and license information. Author Crawford Currie http://c-dot.co.uk*/
+/* eslint-env amd, node, jquery */
+
+define([
+  "game/Board", "game/Move",
+  "browser/SurfaceMixin"
+], (
+  Board, Move,
+  SurfaceMixin
+) => {
+
+  /**
+   * Browser-side {@linkcode Board}
+   * @extends Board
+   * @mixes browser/SurfaceMixin
+   */
+  class BrowserBoard extends SurfaceMixin(Board) {
+
+    /**
+     * @see Fridge
+     */
+    static UNFREEZABLE = true;
+
+    /**
+     * Calculate score for all words that involve new tiles.
+     * This is used on the UI side, when the placement may be fragmented
+     * and difficult to analyse.
+     * @function
+     * @instance
+     * @memberof browser/BoardMixin
+     * @param {Move.wordSpec[]} words list to update
+     * @return {number} the total score
+     * @private
+     */
+    scoreNewWords(words) {
+      let totalScore = 0;
+      let row, col;
+
+      const taste = (dcol, drow) => {
+        let wordScore = 0;
+        let letters = "";
+        let wordMultiplier = 1;
+        let isNewWord = false;
+        while (col &lt; this.cols
+               &amp;&amp; row &lt; this.rows
+               &amp;&amp; this.at(col, row).tile) {
+          const square = this.at(col, row);
+          let letterScore = square.tile.score;
+          isNewWord = isNewWord || !square.isLocked();
+          if (!square.isLocked()) {
+            letterScore *= (square.letterScoreMultiplier || 1);
+            wordMultiplier *= (square.wordScoreMultiplier || 1);
+          }
+          wordScore += letterScore;
+          letters += square.tile.letter;
+          col += dcol;
+          row += drow;
+        }
+        if (isNewWord) {
+          wordScore *= wordMultiplier;
+          totalScore += wordScore;
+          words.push({
+            word: letters,
+            score: wordScore
+          });
+        }
+      };
+
+      for (row = 0; row &lt; this.rows; row++)
+        for (col = 0; col &lt; this.cols - 1; col++)
+          if (this.at(col, row).tile &amp;&amp; this.at(col + 1, row).tile)
+            taste(1, 0);
+
+      for (col = 0; col &lt; this.cols; col++)
+        for (row = 0; row &lt; this.rows - 1; row++)
+          if (this.at(col, row).tile &amp;&amp; this.at(col, row + 1).tile)
+            taste(0, 1);
+
+      return totalScore;
+    }
+
+    /**
+     * UI-side move calculation. Constructs a {@linkcode Move}.
+     * `analysePlay` and {@linkcode Board#scorePlay|scorePlay} do
+     * essentially the same job; calculate the score for a given
+     * play. They differ in respect of their application;
+     * `analysePlay` is used client-side to calculate a move made by a
+     * human and has to be tolerant of disconnected plays and other
+     * errors. It works on a board with tiles placed but not locked.
+     * `scorePlay` is used server-side to calculate the score for a
+     * play being constructed on the server side by a robot, and has
+     * to perform as well as possible. Note that neither `analysePlay`
+     * nor `scorePlay` calculate bonuses for number of tiles played.
+     * @function
+     * @instance
+     * @memberof browser/BoardMixin
+     * @return {(Move|string)} Move, or a string if there is a problem
+     */
+    analysePlay() {
+      // Check that the start field is occupied
+      if (!this.at(this.midcol, this.midrow).tile)
+        return $.i18n("warn-uncentred");
+
+      // Determine that the placement of the Tile(s) is legal
+
+      // Find top-leftmost placed tile
+      let topLeftX, topLeftY, tile;
+      this.forEachTiledSquare((square, col, row) => {
+        if (square.isLocked())
+          return false;
+        tile = square.tile;
+        topLeftX = col;
+        topLeftY = row;
+        return true;
+      });
+
+      // Remember which newly placed tile positions are legal
+      const legalPlacements = new Array(this.cols);
+      for (let col = 0; col &lt; this.cols; col++)
+        legalPlacements[col] = new Array(this.rows);
+
+      legalPlacements[topLeftX][topLeftY] = true;
+
+      let isTouchingOld = this.touchingOld(topLeftX, topLeftY);
+      let horizontal = false;
+      for (let col = topLeftX + 1; col &lt; this.cols; col++) {
+        if (this.at(col, topLeftY).isEmpty())
+          break;
+        if (!this.at(col, topLeftY).isLocked()) {
+          legalPlacements[col][topLeftY] = true;
+          horizontal = true;
+          isTouchingOld =
+          isTouchingOld || this.touchingOld(col, topLeftY);
+        }
+      }
+
+      if (!horizontal) {
+        for (let row = topLeftY + 1; row &lt; this.rows; row++) {
+          if (!this.at(topLeftX, row).tile) {
+            break;
+          } else if (!this.at(topLeftX, row).isLocked()) {
+            legalPlacements[topLeftX][row] = true;
+            isTouchingOld =
+            isTouchingOld || this.touchingOld(topLeftX, row);
+          }
+        }
+      }
+
+      if (!isTouchingOld &amp;&amp; !legalPlacements[this.midcol][this.midrow])
+        return $.i18n("warn-disco");
+
+      // Check whether there are any unconnected placements
+      let totalTiles = 0;
+      let disco = false;
+      this.forEachTiledSquare((square, col, row) => {
+        totalTiles++;
+        disco = disco || (!square.isLocked() &amp;&amp; !legalPlacements[col][row]);
+      });
+
+      if (disco)
+        return $.i18n("warn-disco");
+
+      if (totalTiles &lt; 2)
+        return $.i18n("warn-2-tiles");
+
+      const placements = [];
+      this.forEachTiledSquare(square => {
+        if (!square.isLocked()) {
+          placements.push(square.tile);
+        }
+      });
+
+      const words = [];
+      const score = this.scoreNewWords(words);
+      return new Move({
+          placements: placements,
+          score: score,
+          words: words
+        });
+    }
+  }
+
+  return BrowserBoard;
+});
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_dictionary_compressor.html">dawg/dictionary_compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li></ul><h3>Classes</h3><ul><li><a href="BackendGame.html">BackendGame</a></li><li><a href="Board.html">Board</a></li><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserDatabase.html">BrowserDatabase</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Channel.html">Channel</a></li><li><a href="ClientGamesUI.html">ClientGamesUI</a></li><li><a href="ClientGameUI.html">ClientGameUI</a></li><li><a href="Compressor.html">Compressor</a></li><li><a href="Configurator.html">Configurator</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="Explorer.html">Explorer</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameDialog.html">GameDialog</a></li><li><a href="GameSetupDialog.html">GameSetupDialog</a></li><li><a href="InvitePlayersDialog.html">InvitePlayersDialog</a></li><li><a href="JSAnalyser.html">JSAnalyser</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="LoginDialog.html">LoginDialog</a></li><li><a href="Move.html">Move</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="StandaloneGamesUI.html">StandaloneGamesUI</a></li><li><a href="StandaloneGameUI.html">StandaloneGameUI</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Interfaces</h3><ul><li><a href="Database.html">Database</a></li><li><a href="Platform.html">Platform</a></li></ul><h3>Mixins</h3><ul><li><a href="browser_GamesUIMixin.html">browser/GamesUIMixin</a></li><li><a href="browser_GameUIMixin.html">browser/GameUIMixin</a></li><li><a href="browser_SquareMixin.html">browser/SquareMixin</a></li><li><a href="browser_SurfaceMixin.html">browser/SurfaceMixin</a></li><li><a href="client_ClientUIMixin.html">client/ClientUIMixin</a></li><li><a href="client_PasswordMixin.html">client/PasswordMixin</a></li><li><a href="game_Commands.html">game/Commands</a></li><li><a href="game_Replay.html">game/Replay</a></li><li><a href="game_Undo.html">game/Undo</a></li><li><a href="standalone_StandaloneUIMixin.html">standalone/StandaloneUIMixin</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_define_module">_define_module</a></li><li><a href="global.html#_get_module">_get_module</a></li><li><a href="global.html#_require_js">_require_js</a></li><li><a href="global.html#backend/findBestPlay">backend/findBestPlay</a></li><li><a href="global.html#create">create</a></li><li><a href="global.html#define">define</a></li><li><a href="global.html#index">index</a></li><li><a href="global.html#mechanicalTurk">mechanicalTurk</a></li><li><a href="global.html#requirejs">requirejs</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Mon Nov 28 2022 14:33:49 GMT+0000 (Coordinated Universal Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: browser/BrowserTile.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: browser/BrowserTile.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*Copyright (C) 2019-2022 The Xanado Project https://github.com/cdot/Xanado
+  License MIT. See README.md at the root of this distribution for full copyright
+  and license information. Author Crawford Currie http://c-dot.co.uk*/
+/* eslint-env amd, browser, jquery */
+
+define([
+  "platform",
+  "game/Tile",
+  "browser/UIEvents"
+], (
+  Platform,
+  Tile,
+  UIEvents
+) => {
+
+  /**
+   * Browser-side {@linkcode Tile}
+   * @extends Tile
+   */
+  class BrowserTile extends Tile {
+
+    /**
+     * @see Fridge
+     */
+    static UNFREEZABLE = true;
+
+    /**
+     * jQuery element for the tile
+     * @private
+     */
+    _$tile = undefined;
+
+    /**
+     * Create or refresh the jQuery representation of the tile.
+     * @instance
+     * @memberof browser/TileMixin
+     * @param {Square?} square where this tile is placed. If the
+     * tile is currently unplaced, this can be undefined.
+     */
+    $ui(square) {
+      if (this._$tile) {
+        this._$tile.find(".letter").text(this.letter);
+        this._$tile.find(".score").text(this.score);
+      } else {
+        const $glyph = $(document.createElement("div"))
+              .addClass("glyph")
+              .append(`&lt;span class="letter">${this.letter}&lt;/span>`)
+              .append(`&lt;span class="score">${this.score}&lt;/span>`);
+        this._$tile = $(document.createElement("div"))
+        .addClass("Tile")
+        .append($glyph);
+      }
+
+      // Vary the font to accommodate longer strings
+      if (this.letter.length > 1)
+        this._$tile.find(".glyph").addClass(`length-${this.letter.length}`);
+
+      // Associate the square passed with the tile UI. This is only
+      // used when dragging the tile away from the square, so we know
+      // where it was previously placed. Note that this creates a
+      // circular dependency, which has to be broken when generting
+      // JSON.
+      this._$tile.data("Square", square);
+
+      // Attach the tile to the DOM so it is available for clicks
+      this._$tile.data("Tile", this);
+
+      if (this.isBlank)
+        this._$tile.addClass("blank-letter");
+
+      if (this.isLocked) {
+        if (this._$tile.hasClass("ui-draggable"))
+          this._$tile.draggable("destroy");
+        this._$tile
+        .removeClass("unlocked-tile")
+        .addClass("locked-tile");
+      }
+      else {
+        // tile isn't locked, make sure it's draggable. It might be
+        // a new UI, or it may have lost its draggability when it was
+        // locked onto the board, and is being unlocked by an undo.
+        if (!this._$tile.hasClass("ui-draggable")) {
+          /* istanbul ignore next */
+          this._$tile
+          .draggable({
+            revert: "invalid",
+            opacity: 1,
+            helper: "clone",
+            appendTo: 'body',
+            start: (event, jui) => {
+              Platform.trigger(UIEvents.CLEAR_SELECT);
+              // Highlight drag source
+              this._$tile.css({ opacity: 0.5 });
+              $(jui.helper)
+              .addClass("being-dragged");
+            },
+            drag: (event, jui) => $(jui.helper).addClass("being-dragged"),
+            stop: (event, jui) => this._$tile.css({ opacity: 1 })
+          });
+        }
+        this._$tile
+        .removeClass("locked-tile")
+        .addClass("unlocked-tile");
+      }
+
+      return this._$tile;
+    }
+
+    /**
+     * Change the visual representation of the tile to show it as
+     * (un)selected
+     * @instance
+     * @memberof browser/TileMixin
+     * @param {boolean} sel whether to select or deselect
+     */
+    showSelected(sel) {
+      if (sel) {
+        this._$tile.addClass("selected");
+      } else
+        this._$tile.removeClass("selected");
+    }
+  }
+
+  return BrowserTile;
+});
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_dictionary_compressor.html">dawg/dictionary_compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li></ul><h3>Classes</h3><ul><li><a href="BackendGame.html">BackendGame</a></li><li><a href="Board.html">Board</a></li><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserDatabase.html">BrowserDatabase</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Channel.html">Channel</a></li><li><a href="ClientGamesUI.html">ClientGamesUI</a></li><li><a href="ClientGameUI.html">ClientGameUI</a></li><li><a href="Compressor.html">Compressor</a></li><li><a href="Configurator.html">Configurator</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="Explorer.html">Explorer</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameDialog.html">GameDialog</a></li><li><a href="GameSetupDialog.html">GameSetupDialog</a></li><li><a href="InvitePlayersDialog.html">InvitePlayersDialog</a></li><li><a href="JSAnalyser.html">JSAnalyser</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="LoginDialog.html">LoginDialog</a></li><li><a href="Move.html">Move</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="StandaloneGamesUI.html">StandaloneGamesUI</a></li><li><a href="StandaloneGameUI.html">StandaloneGameUI</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Interfaces</h3><ul><li><a href="Database.html">Database</a></li><li><a href="Platform.html">Platform</a></li></ul><h3>Mixins</h3><ul><li><a href="browser_GamesUIMixin.html">browser/GamesUIMixin</a></li><li><a href="browser_GameUIMixin.html">browser/GameUIMixin</a></li><li><a href="browser_SquareMixin.html">browser/SquareMixin</a></li><li><a href="browser_SurfaceMixin.html">browser/SurfaceMixin</a></li><li><a href="client_ClientUIMixin.html">client/ClientUIMixin</a></li><li><a href="client_PasswordMixin.html">client/PasswordMixin</a></li><li><a href="game_Commands.html">game/Commands</a></li><li><a href="game_Replay.html">game/Replay</a></li><li><a href="game_Undo.html">game/Undo</a></li><li><a href="standalone_StandaloneUIMixin.html">standalone/StandaloneUIMixin</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_define_module">_define_module</a></li><li><a href="global.html#_get_module">_get_module</a></li><li><a href="global.html#_require_js">_require_js</a></li><li><a href="global.html#backend/findBestPlay">backend/findBestPlay</a></li><li><a href="global.html#create">create</a></li><li><a href="global.html#define">define</a></li><li><a href="global.html#index">index</a></li><li><a href="global.html#mechanicalTurk">mechanicalTurk</a></li><li><a href="global.html#requirejs">requirejs</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Mon Nov 28 2022 14:33:49 GMT+0000 (Coordinated Universal Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

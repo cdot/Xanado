@@ -32,65 +32,76 @@
 /* eslint-env amd, node, jquery */
 
 define([
-  "platform", "common/Utils", "game/Surface", "game/Tile", "game/Move",
-  requirejs.isBrowser ? "browser/Board" : "server/Board"
-], (Platform, Utils, Surface, Tile, Move, PlatformMixin) => {
+  "platform", "common/Utils",
+  "game/Surface", "game/Tile", "game/Move", "game/Edition"
+], (
+  Platform, Utils,
+  Surface, Tile, Move, Edition,
+) => {
 
   /**
    * The square game board.
-   * @extends Surface
-   * @mixes BrowserBoard
-   * @mixes ServerBoard
    */
-  class Board extends PlatformMixin(Surface) {
+  class Board extends Surface {
 
     /**
      * Row of middle square on board.
      * @member {number}
      */
-    midrow;
+    midrow = -1;
 
     /**
      * Column of middle square on board.
      * @member {number}
      */
-    midcol;
+    midcol = -1;
 
     /**
-     * @param {Edition} edition the edition defining the board layout
+     * @param {object} factory class object mapping class name to a class
+     * @param {Edition|Board} spec an Edition defining the board layout,
+     * or a Board to copy. The tiles on the old board will NOT be copied.
      */
-    constructor(edition) {
-      if (edition instanceof Board) {
-        super("Board", edition.cols, edition.rows,
-              (col, row) => edition.at(col, row).type);
-      } else {
-        super("Board", edition.cols, edition.rows,
-              (col, row) => edition.squareType(col, row));
+    constructor(factory, spec) {
+      const info = {
+        id: "Board",
+        rows: spec.rows,
+        cols: spec.cols
+      };
+      if (spec instanceof Board)
+        info.type = (col, row) => spec.at(col, row).type;
+      else // if (spec instanceof Edition)
+        info.type = (col, row) => spec.squareType(col, row);
 
-        this.midrow = Math.floor(edition.rows / 2);
-        this.midcol = Math.floor(edition.cols / 2);
-      }
+      super(factory, info);
+
+      this.midrow = Math.floor(this.rows / 2);
+      this.midcol = Math.floor(this.cols / 2);
     }
 
     /**
-     * Load the board from the string representation output by
+     * Populate the board from a string output by
      * {@linkcode Board#toString|toString}. This is for use in tests.
-     * @param {string} sboard string representation of the board
+     * @param {object} factory object giving Game classes to instantiate
      * @param {Edition} edition the edition defining the board layout.
      * This has to be provided because we don't cache the actual
      * Edition in the Board.
+     * @param {string} tiles string representation of the board
+     * @private
      */
-    parse(sboard, edition) {
-      const rows = sboard.split("\n");
+    parse(factory, edition, tiles) {
+      const rows = tiles.split("\n");
+      assert(rows.length >= this.rows, "Too many rows");
       for (let row = 0; row &lt; this.rows; row++) {
         const r = rows[row].split("|");
+        assert(r.length === this.cols + 2,
+                        `${r.length} === ${this.cols} + 2`);
         for (let col = 0; col &lt; this.cols; col++) {
           const letter = r[col + 1];
           if (letter != " ") {
             // Treat lower-case letters as cast blanks.
             // May not work in non-latin languages.
             const isBlank = (letter.toUpperCase() != letter);
-            const tile = new Tile({
+            const tile = new factory.Tile({
               letter: letter.toUpperCase(),
               isBlank: isBlank,
               score: isBlank ? 0 : edition.letterScore(letter)
@@ -167,13 +178,13 @@ define([
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-dictionary_compressor.html">dictionary_compressor</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="BrowserSurface.html">BrowserSurface</a></li><li><a href="Database.html">Database</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameDialog.html">GameDialog</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="InvitePlayersDialog.html">InvitePlayersDialog</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="LoginDialog.html">LoginDialog</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Commands.html">Commands</a></li><li><a href="PasswordMixin.html">PasswordMixin</a></li><li><a href="Replay.html">Replay</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#createDialog">createDialog</a></li><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li><li><a href="global.html#step">step</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_dictionary_compressor.html">dawg/dictionary_compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li></ul><h3>Classes</h3><ul><li><a href="BackendGame.html">BackendGame</a></li><li><a href="Board.html">Board</a></li><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserDatabase.html">BrowserDatabase</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Channel.html">Channel</a></li><li><a href="ClientGamesUI.html">ClientGamesUI</a></li><li><a href="ClientGameUI.html">ClientGameUI</a></li><li><a href="Compressor.html">Compressor</a></li><li><a href="Configurator.html">Configurator</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="Explorer.html">Explorer</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameDialog.html">GameDialog</a></li><li><a href="GameSetupDialog.html">GameSetupDialog</a></li><li><a href="InvitePlayersDialog.html">InvitePlayersDialog</a></li><li><a href="JSAnalyser.html">JSAnalyser</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="LoginDialog.html">LoginDialog</a></li><li><a href="Move.html">Move</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="StandaloneGamesUI.html">StandaloneGamesUI</a></li><li><a href="StandaloneGameUI.html">StandaloneGameUI</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Interfaces</h3><ul><li><a href="Database.html">Database</a></li><li><a href="Platform.html">Platform</a></li></ul><h3>Mixins</h3><ul><li><a href="browser_GamesUIMixin.html">browser/GamesUIMixin</a></li><li><a href="browser_GameUIMixin.html">browser/GameUIMixin</a></li><li><a href="browser_SquareMixin.html">browser/SquareMixin</a></li><li><a href="browser_SurfaceMixin.html">browser/SurfaceMixin</a></li><li><a href="client_ClientUIMixin.html">client/ClientUIMixin</a></li><li><a href="client_PasswordMixin.html">client/PasswordMixin</a></li><li><a href="game_Commands.html">game/Commands</a></li><li><a href="game_Replay.html">game/Replay</a></li><li><a href="game_Undo.html">game/Undo</a></li><li><a href="standalone_StandaloneUIMixin.html">standalone/StandaloneUIMixin</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_define_module">_define_module</a></li><li><a href="global.html#_get_module">_get_module</a></li><li><a href="global.html#_require_js">_require_js</a></li><li><a href="global.html#backend/findBestPlay">backend/findBestPlay</a></li><li><a href="global.html#create">create</a></li><li><a href="global.html#define">define</a></li><li><a href="global.html#index">index</a></li><li><a href="global.html#mechanicalTurk">mechanicalTurk</a></li><li><a href="global.html#requirejs">requirejs</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Mon Oct 24 2022 18:02:06 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Mon Nov 28 2022 14:33:49 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

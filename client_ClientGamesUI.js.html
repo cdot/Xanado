@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: client/ClientGamesUI.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: client/ClientGamesUI.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*Copyright (C) 2019-2022 The Xanado Project https://github.com/cdot/Xanado
+  License MIT. See README.md at the root of this distribution for full copyright
+  and license information. Author Crawford Currie http://c-dot.co.uk*/
+/* eslint-env browser, jquery */
+
+/**
+ * Browser app for client_games.html; populate the list of live games
+ */
+requirejs([
+  "platform",
+  "common/Utils",
+  "game/Player", "game/Game",
+  "browser/UI", "browser/Dialog", "browser/GamesUIMixin",
+  "client/ClientUIMixin"
+], (
+  Platform,
+  Utils,
+  Player, Game,
+  UI, Dialog, GamesUIMixin,
+  ClientUIMixin
+) => {
+
+  /**
+   * Management interface for a database of games.
+   * @mixes client/ClientUIMixin
+   * @mixes browser/GamesUIMixin
+   */
+  class ClientGamesUI extends ClientUIMixin(GamesUIMixin(UI)) {
+
+    /**
+     * @implements browser/GamesUIMixin#attachUIEventHandlers
+     * @override
+     */
+    attachUIEventHandlers() {
+
+      super.attachUIEventHandlers();
+
+      $("#create-game")
+      .on("click", () => Dialog.open("browser/GameSetupDialog", {
+        title: $.i18n("Create game"),
+        ui: this,
+        postAction: "/createGame",
+        postResult: () => this.refreshGames(),
+        error: this.constructor.report
+      }));
+
+      $("#reminder-button")
+      .on("click", () => {
+        $.post("/sendReminder/*")
+        .then(info => $("#alertDialog")
+              .text($.i18n.apply(null, info))
+              .dialog({
+                title: $.i18n("label-send-rem"),
+                modal: true
+              }))
+        .catch(this.constructor.report);
+      });
+
+      $("#login-button")
+      .on("click", () => Dialog.open("client/LoginDialog", {
+        // postAction is dynamic, depends which tab is open
+        postResult: () => this.refresh().catch(this.constructor.report),
+        error: this.constructor.report
+      }));
+
+      $("#logout-button")
+      .on("click", () => {
+        $.post("/logout")
+        .then(result => {
+          console.debug("Logged out", result);
+          this.session = undefined;
+          this.refresh().catch(this.constructor.report);
+        })
+        .catch(this.constructor.report);
+      });
+
+      $("#chpw_button")
+      .on("click", () => Dialog.open("client/ChangePasswordDialog", {
+        postAction: "/change-password",
+        postResult: () => this.refresh().catch(this.constructor.report),
+        error: this.constructor.report
+      }));
+    }
+
+    /**
+     * Attach handlers to receive notifications from the server
+     */
+    attachChannelHandlers() {
+
+      this.channel
+
+      .on(Game.Notify.UPDATE, () => {
+        console.debug("b>f update");
+        // Can be smarter than this!
+        this.refresh().catch(this.constructor.report);
+      });
+
+      // Tell the backend we want to receive monitor messages
+      this.notifyBackend(Game.Notify.MONITOR);
+
+      return Promise.resolve();
+    }
+
+    /**
+     * @implements browser/GamesUIMixin#gameOptions
+     */
+    gameOptions(game) {
+      Dialog.open("browser/GameSetupDialog", {
+        // use the generic html
+        title: $.i18n("Game setup"),
+        game: game,
+        onSubmit: (dialog, desc) => {
+          for (const key of Object.keys(desc))
+            game[key] = desc[key];
+          $.post("/gameSetup/${game.key}", desc)
+          .catch(this.constructor.report);
+          this.refreshGame(game.key);
+        },
+        ui: this,
+        error: this.constructor.report
+      });
+    }
+
+    /**
+     * @implements browser/GamesUIMixin#joinGame
+     */
+    joinGame(game) {
+      $.post(`/join/${game.key}`)
+      .then(info => {
+        const url = `/html/client_game.html?game=${game.key}&amp;player=${this.session.key}`;
+        if (this.getSetting("one_window"))
+          location.replace(url);
+        else {
+          window.open(url, "_blank");
+          this.refreshGame(game.key);
+        }
+      })
+      .catch(this.constructor.report);
+    }
+
+    /**
+     * @implements browser/GamesUIMixin#addRobot
+     * @inheritdoc
+     */
+    addRobot(game) {
+      Dialog.open("client/AddRobotDialog", {
+        ui: this,
+        postAction: `/addRobot/${game.key}`,
+        postResult: () => this.refreshGame(game.key),
+        error: this.constructor.report
+      });
+    }
+
+    /**
+     * @implements browser/GamesUIMixin#invitePlayers
+     */
+    invitePlayers(game) {
+      Dialog.open("client/InvitePlayersDialog", {
+        postAction: `/invitePlayers/${game.key}`,
+        postResult: names => {
+          $("#alertDialog")
+          .text($.i18n("sent-invite", names.join(", ")))
+          .dialog({
+            title: $.i18n("Invitations"),
+            modal: true
+          });
+        },
+        error: this.constructor.report
+      });
+    }
+
+    /**
+     * @implements browser/GamesUIMixin#anotherGame
+     */
+    anotherGame(game) {
+      $.post(`/anotherGame/${game.key}`)
+      .then(() => this.refreshGames())
+      .catch(this.constructor.report);
+    }
+
+    /**
+     * @implements browser/GamesUIMixin#deleteGame
+     */
+    deleteGame(game) {
+      $.post(`/deleteGame/${game.key}`)
+      .then(() => this.refreshGames())
+      .catch(this.constructor.report);
+    }
+
+    /**
+     * @implements browser/GamesUIMixin#observe
+     */
+    observe(game) {
+      const obs = $.i18n("Observe game");
+      $("#observeDialog")
+      .dialog({
+        create: function () {
+          $(this).find("button[type=submit]")
+          .on("click", () => $(this).dialog("close"));
+        },
+        title: obs,
+        closeText: obs,
+        modal: true,
+        close: function() {
+          const name = encodeURIComponent(
+            $(this).find("#observerName").val());
+          console.debug("Observe game", this.game.key,
+                      "as", name);
+          window.open(
+            `/html/client_game.html?game=${this.game.key};observer=${name}`,
+            "_blank");
+          this.refreshGame(this.game.key);
+        }
+      });
+    }
+
+    /**
+     * Construct a table row that shows the state of the given player
+     * @param {Game|object} game a Game or Game.simple
+     * @param {Player} player the player
+     * @param {boolean} isActive true if the game isn't over
+     */
+    $player(game, player, isActive) {
+
+      const $tr = super.$player(game, player, isActive);
+
+      if (!this.session)
+        return $tr;
+
+      const $box = $tr.find(".button-box");
+
+      if (player.key === this.session.key) {
+        // Currently signed in player
+        $box.append(
+          $(document.createElement("button"))
+          .addClass("risky")
+          .attr("name", `leave${game.key}`)
+          .button({ label: $.i18n("Leave game") })
+          .tooltip({
+            content: $.i18n("tt-leave")
+          })
+          .on("click", () => {
+            console.debug(`Leave game ${game.key}`);
+            $.post(`/leave/${game.key}`)
+            .then(() => this.refreshGame(game.key))
+            .catch(this.constructor.report);
+          }));
+
+        return $tr;
+      }
+      else if (player.isRobot) {
+        $box.append(
+          $(document.createElement("button"))
+          .attr("name", "removeRobot")
+          .button({ label: $.i18n("Remove robot") })
+          .tooltip({
+            content: $.i18n("tt-remove-robot")
+          })
+          .on("click", () => {
+            console.debug(`Remove robot from ${game.key}`);
+            $.post(`/removeRobot/${game.key}`)
+            .then(() => this.refreshGame(game.key))
+            .catch(this.constructor.report);
+          }));
+      }
+
+      // Not the signed in player
+      if (this.getSetting("canEmail")
+          &amp;&amp; !player.isRobot
+          &amp;&amp; game.whosTurnKey === player.key) {
+        $box.append(
+          $(document.createElement("button"))
+          .attr("name", "email")
+          .button({ label: $.i18n("Send reminder") })
+          .tooltip({
+            content: $.i18n("tt-send-rem")
+          })
+          .on("click", () => {
+            console.debug("Send reminder");
+            $.post(`/sendReminder/${game.key}`)
+            .then(names => $("#alertDialog")
+                  .text($.i18n("player-reminded", names.join(", ")))
+                  .dialog({
+                    title: $.i18n("player-reminded", player.name),
+                    modal: true
+                  }))
+            .catch(this.constructor.report);
+          }));
+      }
+
+      return $tr;
+    }
+
+    /**
+     * @implements browser/GamesUIMixin#showGames
+     * @override
+     */
+    showGames(simples) {
+      super.showGames(simples);
+
+      $("#reminder-button").hide();
+
+      if (this.session &amp;&amp; this.getSetting("canEmail") &amp;&amp; simples.length > 0) {
+        const games = simples.map(simple => Game.fromSerialisable(simple, Game));
+        if (games.reduce((em, game) => {
+          // game is Game.simple, not a Game object
+          // Can't remind a game that hasn't started or has ended.
+          if (game.hasEnded() || game.state === Game.State.WAITING)
+            return em;
+          return em || game.getPlayerWithKey(game.whosTurnKey)
+          .email;
+        }, false))
+          $("#reminder-button").show();
+      }
+    }
+
+    /**
+     * @implements browser/GamesUIMixin#getHistory
+     */
+    getHistory() {
+      return $.get("/history");
+    }
+
+    /**
+     * @implements browser/GamesUIMixin#getGame
+     */
+    getGame(key) {
+      return $.get(`/games/${key}`);
+    }
+
+    /**
+     * @implements browser/GamesUIMixin#getGames
+     */
+    getGames(what) {
+      return $.get(`/games/${what}`);
+    }
+
+    create() {
+      return super.create()
+      .then(() => this.refreshGames());
+    }
+  }
+
+  new ClientGamesUI().create();
+});
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_dictionary_compressor.html">dawg/dictionary_compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li></ul><h3>Classes</h3><ul><li><a href="BackendGame.html">BackendGame</a></li><li><a href="Board.html">Board</a></li><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserDatabase.html">BrowserDatabase</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Channel.html">Channel</a></li><li><a href="ClientGamesUI.html">ClientGamesUI</a></li><li><a href="ClientGameUI.html">ClientGameUI</a></li><li><a href="Compressor.html">Compressor</a></li><li><a href="Configurator.html">Configurator</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="Explorer.html">Explorer</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameDialog.html">GameDialog</a></li><li><a href="GameSetupDialog.html">GameSetupDialog</a></li><li><a href="InvitePlayersDialog.html">InvitePlayersDialog</a></li><li><a href="JSAnalyser.html">JSAnalyser</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="LoginDialog.html">LoginDialog</a></li><li><a href="Move.html">Move</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="StandaloneGamesUI.html">StandaloneGamesUI</a></li><li><a href="StandaloneGameUI.html">StandaloneGameUI</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Interfaces</h3><ul><li><a href="Database.html">Database</a></li><li><a href="Platform.html">Platform</a></li></ul><h3>Mixins</h3><ul><li><a href="browser_GamesUIMixin.html">browser/GamesUIMixin</a></li><li><a href="browser_GameUIMixin.html">browser/GameUIMixin</a></li><li><a href="browser_SquareMixin.html">browser/SquareMixin</a></li><li><a href="browser_SurfaceMixin.html">browser/SurfaceMixin</a></li><li><a href="client_ClientUIMixin.html">client/ClientUIMixin</a></li><li><a href="client_PasswordMixin.html">client/PasswordMixin</a></li><li><a href="game_Commands.html">game/Commands</a></li><li><a href="game_Replay.html">game/Replay</a></li><li><a href="game_Undo.html">game/Undo</a></li><li><a href="standalone_StandaloneUIMixin.html">standalone/StandaloneUIMixin</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_define_module">_define_module</a></li><li><a href="global.html#_get_module">_get_module</a></li><li><a href="global.html#_require_js">_require_js</a></li><li><a href="global.html#backend/findBestPlay">backend/findBestPlay</a></li><li><a href="global.html#create">create</a></li><li><a href="global.html#define">define</a></li><li><a href="global.html#index">index</a></li><li><a href="global.html#mechanicalTurk">mechanicalTurk</a></li><li><a href="global.html#requirejs">requirejs</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Mon Nov 28 2022 14:33:49 GMT+0000 (Coordinated Universal Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

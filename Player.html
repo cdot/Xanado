@@ -28,7 +28,7 @@
 
 <header>
     
-        <h2><span class="attribs"><span class="type-signature"></span></span>Player<span class="signature">(params)</span><span class="type-signature"></span></h2>
+        <h2><span class="attribs"><span class="type-signature"></span></span>Player<span class="signature">(spec, factory)</span><span class="type-signature"></span></h2>
         
             <div class="class-description"><p>A player in a <a href="Game.html"><code>Game</code></a>. Player objects are specific to
 a single game, and are used on both browser and server sides.</p></div>
@@ -46,7 +46,7 @@ a single game, and are used on both browser and server sides.</p></div>
     
 
     
-    <h4 class="name" id="Player"><span class="type-signature"></span>new Player<span class="signature">(params)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="Player"><span class="type-signature"></span>new Player<span class="signature">(spec, factory)</span><span class="type-signature"></span></h4>
     
 
     
@@ -86,7 +86,7 @@ a single game, and are used on both browser and server sides.</p></div>
 
         <tr>
             
-                <td class="name"><code>params</code></td>
+                <td class="name"><code>spec</code></td>
             
 
             <td class="type">
@@ -107,6 +107,29 @@ object to copy. <code>name</code> and <code>key </code> are required. Any of <co
 <code>isRobot</code>, <code>canChallenge</code>, <code>wantsAdvice</code>,<code>dictionary</code> or
 <code>missNextTurn</code> can be passed. The player will be initialised with
 an empty rack (no squares).</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>factory</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>class object mapping class name to a class</p></td>
         </tr>
 
     
@@ -133,14 +156,6 @@ an empty rack (no squares).</p></td>
     
 
     
-        <dt class="mixes">Mixes In:</dt>
-
-        <dd class="mixes"><ul>
-        
-            <li><a href="BrowserPlayer.html">BrowserPlayer</a></li>
-        
-        </ul></dd>
-    
 
     
 
@@ -155,7 +170,7 @@ an empty rack (no squares).</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line20">line 20</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line16">line 16</a>
     </li></ul></dd>
     
 
@@ -259,7 +274,7 @@ an empty rack (no squares).</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line137">line 137</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line145">line 145</a>
     </li></ul></dd>
     
 
@@ -277,13 +292,13 @@ an empty rack (no squares).</p></td>
 
         
             
-<h4 class="name" id="_isConnected"><span class="type-signature"></span>_isConnected<span class="type-signature"> :boolean</span></h4>
+<h4 class="name" id="_isConnected"><span class="type-signature">(nullable) </span>_isConnected<span class="type-signature"> :boolean</span></h4>
 
 
 
 
 <div class="description">
-    <p>Whether the server thinks the player is connected or not.
+    <p>Whether the backend thinks the player is connected or not.
 Not serialised.</p>
 </div>
 
@@ -332,7 +347,7 @@ Not serialised.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line82">line 82</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line90">line 90</a>
     </li></ul></dd>
     
 
@@ -350,7 +365,7 @@ Not serialised.</p>
 
         
             
-<h4 class="name" id="canChallenge"><span class="type-signature"></span>canChallenge<span class="type-signature"> :boolean</span></h4>
+<h4 class="name" id="canChallenge"><span class="type-signature">(nullable) </span>canChallenge<span class="type-signature"> :boolean</span></h4>
 
 
 
@@ -404,7 +419,7 @@ Not serialised.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line112">line 112</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line120">line 120</a>
     </li></ul></dd>
     
 
@@ -480,7 +495,7 @@ Setting and management is done in <a href="Game.html"><code>Game</code></a></p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line74">line 74</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line82">line 82</a>
     </li></ul></dd>
     
 
@@ -554,7 +569,7 @@ time to take back their move (or just think!)</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line130">line 130</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line138">line 138</a>
     </li></ul></dd>
     
 
@@ -628,7 +643,7 @@ Default is undefined.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line121">line 121</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line129">line 129</a>
     </li></ul></dd>
     
 
@@ -646,7 +661,7 @@ Default is undefined.</p>
 
         
             
-<h4 class="name" id="isRobot"><span class="type-signature"></span>isRobot<span class="type-signature"> :boolean</span></h4>
+<h4 class="name" id="isRobot"><span class="type-signature">(nullable) </span>isRobot<span class="type-signature"> :boolean</span></h4>
 
 
 
@@ -700,7 +715,7 @@ Default is undefined.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line105">line 105</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line113">line 113</a>
     </li></ul></dd>
     
 
@@ -772,7 +787,7 @@ Default is undefined.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line36">line 36</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line44">line 44</a>
     </li></ul></dd>
     
 
@@ -845,7 +860,7 @@ to a failed challenge. Default is false.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line90">line 90</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line98">line 98</a>
     </li></ul></dd>
     
 
@@ -917,7 +932,7 @@ to a failed challenge. Default is false.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line42">line 42</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line50">line 50</a>
     </li></ul></dd>
     
 
@@ -990,7 +1005,7 @@ since the last non-pass/swap play.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line57">line 57</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line65">line 65</a>
     </li></ul></dd>
     
 
@@ -1064,7 +1079,7 @@ it's only then we know how big it has to be.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line50">line 50</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line58">line 58</a>
     </li></ul></dd>
     
 
@@ -1136,7 +1151,7 @@ it's only then we know how big it has to be.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line63">line 63</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line71">line 71</a>
     </li></ul></dd>
     
 
@@ -1154,7 +1169,7 @@ it's only then we know how big it has to be.</p>
 
         
             
-<h4 class="name" id="wantsAdvice"><span class="type-signature"></span>wantsAdvice<span class="type-signature"> :boolean</span></h4>
+<h4 class="name" id="wantsAdvice"><span class="type-signature">(nullable) </span>wantsAdvice<span class="type-signature"> :boolean</span></h4>
 
 
 
@@ -1209,7 +1224,7 @@ they used. Default is false.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line98">line 98</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line106">line 106</a>
     </li></ul></dd>
     
 
@@ -1237,7 +1252,7 @@ they used. Default is false.</p>
     
 
     
-    <h4 class="name" id=".fromSerialisable"><span class="type-signature">(static) </span>fromSerialisable<span class="signature">(simple)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".fromSerialisable"><span class="type-signature">(static) </span>fromSerialisable<span class="signature">(factory, simple)</span><span class="type-signature"></span></h4>
     
 
     
@@ -1278,6 +1293,29 @@ serialisable()</p>
     </thead>
 
     <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>factory</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>class object mapping class name to a class</p></td>
+        </tr>
+
     
 
         <tr>
@@ -1339,7 +1377,7 @@ serialisable()</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line180">line 180</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line189">line 189</a>
     </li></ul></dd>
     
 
@@ -1383,7 +1421,7 @@ serialisable()</p>
 
 
 <div class="description">
-    <p>Draw an initial rack from the letter bag. Server side only.</p>
+    <p>Draw an initial rack from the letter bag.</p>
 </div>
 
 
@@ -1435,7 +1473,9 @@ serialisable()</p>
 
             
 
-            <td class="description last"><p>LetterBag to draw tiles from</p></td>
+            <td class="description last"><p>LetterBag to draw tiles from. Note that
+tiles are copied, with the copy being constructed using the
+factory that was passed to the constructor.</p></td>
         </tr>
 
     
@@ -1499,7 +1539,7 @@ serialisable()</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line196">line 196</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line207">line 207</a>
     </li></ul></dd>
     
 
@@ -1636,7 +1676,7 @@ serialisable()</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line210">line 210</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line222">line 222</a>
     </li></ul></dd>
     
 
@@ -1818,7 +1858,7 @@ the <code>games</code> interface using JSON.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line151">line 151</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line159">line 159</a>
     </li></ul></dd>
     
 
@@ -2005,7 +2045,7 @@ timer expires, ignored if time undefined</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line238">line 238</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line250">line 250</a>
     </li></ul></dd>
     
 
@@ -2093,7 +2133,7 @@ timer expires, ignored if time undefined</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line247">line 247</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line259">line 259</a>
     </li></ul></dd>
     
 
@@ -2181,7 +2221,7 @@ timer expires, ignored if time undefined</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line218">line 218</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line230">line 230</a>
     </li></ul></dd>
     
 
@@ -2269,7 +2309,7 @@ timer expires, ignored if time undefined</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line260">line 260</a>
+        <a href="game_Player.js.html">game/Player.js</a>, <a href="game_Player.js.html#line272">line 272</a>
     </li></ul></dd>
     
 
@@ -2315,13 +2355,13 @@ timer expires, ignored if time undefined</p></td>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-dictionary_compressor.html">dictionary_compressor</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="BrowserSurface.html">BrowserSurface</a></li><li><a href="Database.html">Database</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameDialog.html">GameDialog</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="InvitePlayersDialog.html">InvitePlayersDialog</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="LoginDialog.html">LoginDialog</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Commands.html">Commands</a></li><li><a href="PasswordMixin.html">PasswordMixin</a></li><li><a href="Replay.html">Replay</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#createDialog">createDialog</a></li><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li><li><a href="global.html#step">step</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_dictionary_compressor.html">dawg/dictionary_compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li></ul><h3>Classes</h3><ul><li><a href="BackendGame.html">BackendGame</a></li><li><a href="Board.html">Board</a></li><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserDatabase.html">BrowserDatabase</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Channel.html">Channel</a></li><li><a href="ClientGamesUI.html">ClientGamesUI</a></li><li><a href="ClientGameUI.html">ClientGameUI</a></li><li><a href="Compressor.html">Compressor</a></li><li><a href="Configurator.html">Configurator</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="Explorer.html">Explorer</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameDialog.html">GameDialog</a></li><li><a href="GameSetupDialog.html">GameSetupDialog</a></li><li><a href="InvitePlayersDialog.html">InvitePlayersDialog</a></li><li><a href="JSAnalyser.html">JSAnalyser</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="LoginDialog.html">LoginDialog</a></li><li><a href="Move.html">Move</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="StandaloneGamesUI.html">StandaloneGamesUI</a></li><li><a href="StandaloneGameUI.html">StandaloneGameUI</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Interfaces</h3><ul><li><a href="Database.html">Database</a></li><li><a href="Platform.html">Platform</a></li></ul><h3>Mixins</h3><ul><li><a href="browser_GamesUIMixin.html">browser/GamesUIMixin</a></li><li><a href="browser_GameUIMixin.html">browser/GameUIMixin</a></li><li><a href="browser_SquareMixin.html">browser/SquareMixin</a></li><li><a href="browser_SurfaceMixin.html">browser/SurfaceMixin</a></li><li><a href="client_ClientUIMixin.html">client/ClientUIMixin</a></li><li><a href="client_PasswordMixin.html">client/PasswordMixin</a></li><li><a href="game_Commands.html">game/Commands</a></li><li><a href="game_Replay.html">game/Replay</a></li><li><a href="game_Undo.html">game/Undo</a></li><li><a href="standalone_StandaloneUIMixin.html">standalone/StandaloneUIMixin</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_define_module">_define_module</a></li><li><a href="global.html#_get_module">_get_module</a></li><li><a href="global.html#_require_js">_require_js</a></li><li><a href="global.html#backend/findBestPlay">backend/findBestPlay</a></li><li><a href="global.html#create">create</a></li><li><a href="global.html#define">define</a></li><li><a href="global.html#index">index</a></li><li><a href="global.html#mechanicalTurk">mechanicalTurk</a></li><li><a href="global.html#requirejs">requirejs</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Mon Oct 24 2022 18:02:06 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Mon Nov 28 2022 14:33:49 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -169,7 +169,7 @@ that member.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line18">line 18</a>
+        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line16">line 16</a>
     </li></ul></dd>
     
 
@@ -236,7 +236,7 @@ that member.</p></td>
 
 
 <div class="description">
-    <p>For <code>Turns.CHALLENGE_WON</code> and <code>Turns.CHALLENGE_LOST</code>,
+    <p>For <code>Game.Turns.CHALLENGE_WON</code> and <code>Game.Turns.CHALLENGE_LOST</code>,
 the key of the player who challenged. playerkey in this case
 will be the player who's play was challenged (always the
 previous player)</p>
@@ -287,7 +287,7 @@ previous player)</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line84">line 84</a>
+        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line82">line 82</a>
     </li></ul></dd>
     
 
@@ -305,14 +305,14 @@ previous player)</p>
 
         
             
-<h4 class="name" id="endState"><span class="type-signature">(nullable) </span>endState<span class="type-signature"> :<a href="global.html#State">State</a></span></h4>
+<h4 class="name" id="endState"><span class="type-signature">(nullable) </span>endState<span class="type-signature"> :State</span></h4>
 
 
 
 
 <div class="description">
     <p>String describing the reason the game ended. Only used when
-type==Turns.GAME_ENDED</p>
+type==Game.Turns.GAME_ENDED</p>
 </div>
 
 
@@ -321,7 +321,7 @@ type==Turns.GAME_ENDED</p>
     <ul>
         <li>
             
-<span class="param-type"><a href="global.html#State">State</a></span>
+<span class="param-type">State</span>
 
 
         </li>
@@ -360,7 +360,7 @@ type==Turns.GAME_ENDED</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line92">line 92</a>
+        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line90">line 90</a>
     </li></ul></dd>
     
 
@@ -432,7 +432,7 @@ type==Turns.GAME_ENDED</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line29">line 29</a>
+        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line27">line 27</a>
     </li></ul></dd>
     
 
@@ -504,7 +504,7 @@ type==Turns.GAME_ENDED</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line44">line 44</a>
+        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line42">line 42</a>
     </li></ul></dd>
     
 
@@ -577,7 +577,7 @@ for undo.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line100">line 100</a>
+        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line98">line 98</a>
     </li></ul></dd>
     
 
@@ -604,8 +604,12 @@ for undo.</p>
     <p>List of tiles placed in this move. Tiles are required
 to carry col, row positions where they were placed.  In
 a Turn, for type=<code>move</code> it indicates the move. For
-<code>Turns.TOOK_BACK</code> and <code>Turns.CHALLENGE_WON</code> it is
-the move just taken back/challenged.</p>
+<code>Game.Turns.TOOK_BACK</code> and <code>Game.Turns.CHALLENGE_WON</code> it is
+the move just taken back/challenged.
+Note that we instatiate game Tiles, without taking account
+of the context of the call; Move is used for comms
+between front and ack ends, and the tiles therein don't
+need customised functionality.</p>
 </div>
 
 
@@ -658,7 +662,7 @@ the move just taken back/challenged.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Move.js.html">game/Move.js</a>, <a href="game_Move.js.html#line57">line 57</a>
+        <a href="game_Move.js.html">game/Move.js</a>, <a href="game_Move.js.html#line61">line 61</a>
     </li></ul></dd>
     
 
@@ -733,7 +737,7 @@ challenged.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line38">line 38</a>
+        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line36">line 36</a>
     </li></ul></dd>
     
 
@@ -806,7 +810,7 @@ in this turn. These tiles will not have positions.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line73">line 73</a>
+        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line71">line 71</a>
     </li></ul></dd>
     
 
@@ -890,7 +894,7 @@ in Turn.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Move.js.html">game/Move.js</a>, <a href="game_Move.js.html#line27">line 27</a>
+        <a href="game_Move.js.html">game/Move.js</a>, <a href="game_Move.js.html#line28">line 28</a>
     </li></ul></dd>
     
 
@@ -962,7 +966,7 @@ in Turn.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line50">line 50</a>
+        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line48">line 48</a>
     </li></ul></dd>
     
 
@@ -980,7 +984,7 @@ in Turn.</p>
 
         
             
-<h4 class="name" id="type"><span class="type-signature"></span>type<span class="type-signature"> :<a href="global.html#Turns">Turns</a></span></h4>
+<h4 class="name" id="type"><span class="type-signature"></span>type<span class="type-signature"> :Turns</span></h4>
 
 
 
@@ -995,7 +999,7 @@ in Turn.</p>
     <ul>
         <li>
             
-<span class="param-type"><a href="global.html#Turns">Turns</a></span>
+<span class="param-type">Turns</span>
 
 
         </li>
@@ -1034,7 +1038,7 @@ in Turn.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line23">line 23</a>
+        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line21">line 21</a>
     </li></ul></dd>
     
 
@@ -1140,7 +1144,7 @@ in Turn.</p>
     
 
     
-    <h4 class="name" id=".fromSerialisable"><span class="type-signature">(static) </span>fromSerialisable<span class="signature">(simple)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".fromSerialisable"><span class="type-signature">(static) </span>fromSerialisable<span class="signature">(simple, factory)</span><span class="type-signature"></span></h4>
     
 
     
@@ -1205,6 +1209,29 @@ serialisable()</p>
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>factory</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Game class to be used as factory</p></td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -1242,7 +1269,7 @@ serialisable()</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line121">line 121</a>
+        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line120">line 120</a>
     </li></ul></dd>
     
 
@@ -1384,7 +1411,7 @@ serialisable()</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Move.js.html">game/Move.js</a>, <a href="game_Move.js.html#line65">line 65</a>
+        <a href="game_Move.js.html">game/Move.js</a>, <a href="game_Move.js.html#line69">line 69</a>
     </li></ul></dd>
     
 
@@ -1474,7 +1501,7 @@ the <code>games</code> interface using JSON.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line108">line 108</a>
+        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line106">line 106</a>
     </li></ul></dd>
     
 
@@ -1567,7 +1594,7 @@ the <code>games</code> interface using JSON.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line129">line 129</a>
+        <a href="game_Turn.js.html">game/Turn.js</a>, <a href="game_Turn.js.html#line128">line 128</a>
     </li></ul></dd>
     
 
@@ -1613,13 +1640,13 @@ the <code>games</code> interface using JSON.</p>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-dictionary_compressor.html">dictionary_compressor</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="BrowserSurface.html">BrowserSurface</a></li><li><a href="Database.html">Database</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameDialog.html">GameDialog</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="InvitePlayersDialog.html">InvitePlayersDialog</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="LoginDialog.html">LoginDialog</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Commands.html">Commands</a></li><li><a href="PasswordMixin.html">PasswordMixin</a></li><li><a href="Replay.html">Replay</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#createDialog">createDialog</a></li><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li><li><a href="global.html#step">step</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_dictionary_compressor.html">dawg/dictionary_compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li></ul><h3>Classes</h3><ul><li><a href="BackendGame.html">BackendGame</a></li><li><a href="Board.html">Board</a></li><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserDatabase.html">BrowserDatabase</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Channel.html">Channel</a></li><li><a href="ClientGamesUI.html">ClientGamesUI</a></li><li><a href="ClientGameUI.html">ClientGameUI</a></li><li><a href="Compressor.html">Compressor</a></li><li><a href="Configurator.html">Configurator</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="Explorer.html">Explorer</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameDialog.html">GameDialog</a></li><li><a href="GameSetupDialog.html">GameSetupDialog</a></li><li><a href="InvitePlayersDialog.html">InvitePlayersDialog</a></li><li><a href="JSAnalyser.html">JSAnalyser</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="LoginDialog.html">LoginDialog</a></li><li><a href="Move.html">Move</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="StandaloneGamesUI.html">StandaloneGamesUI</a></li><li><a href="StandaloneGameUI.html">StandaloneGameUI</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Interfaces</h3><ul><li><a href="Database.html">Database</a></li><li><a href="Platform.html">Platform</a></li></ul><h3>Mixins</h3><ul><li><a href="browser_GamesUIMixin.html">browser/GamesUIMixin</a></li><li><a href="browser_GameUIMixin.html">browser/GameUIMixin</a></li><li><a href="browser_SquareMixin.html">browser/SquareMixin</a></li><li><a href="browser_SurfaceMixin.html">browser/SurfaceMixin</a></li><li><a href="client_ClientUIMixin.html">client/ClientUIMixin</a></li><li><a href="client_PasswordMixin.html">client/PasswordMixin</a></li><li><a href="game_Commands.html">game/Commands</a></li><li><a href="game_Replay.html">game/Replay</a></li><li><a href="game_Undo.html">game/Undo</a></li><li><a href="standalone_StandaloneUIMixin.html">standalone/StandaloneUIMixin</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_define_module">_define_module</a></li><li><a href="global.html#_get_module">_get_module</a></li><li><a href="global.html#_require_js">_require_js</a></li><li><a href="global.html#backend/findBestPlay">backend/findBestPlay</a></li><li><a href="global.html#create">create</a></li><li><a href="global.html#define">define</a></li><li><a href="global.html#index">index</a></li><li><a href="global.html#mechanicalTurk">mechanicalTurk</a></li><li><a href="global.html#requirejs">requirejs</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Mon Oct 24 2022 18:02:06 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Mon Nov 28 2022 14:33:49 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

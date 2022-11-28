@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: browser/BrowserSquare.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: browser/BrowserSquare.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*Copyright (C) 2019-2022 The Xanado Project https://github.com/cdot/Xanado
+  License MIT. See README.md at the root of this distribution for full copyright
+  and license information. Author Crawford Currie http://c-dot.co.uk*/
+/* eslint-env amd, browser, jquery */
+
+define([
+  "platform",
+  "game/Square",
+  "browser/UIEvents"
+], (
+  Platform,
+  Square,
+  UIEvents
+) => {
+
+  // Translation strings, only required to keep npm run tx happy
+  // /*i18n*/"long-D" /*i18n*/"short-D"
+  // /*i18n*/"long-M" /*i18n*/"short-M"
+  // /*i18n*/"long-Q" /*i18n*/"short-Q"
+  // /*i18n*/"long-T" /*i18n*/"short-T"
+  // /*i18n*/"long-_" /*i18n*/"short-_"
+  // /*i18n*/"long-d" /*i18n*/"short-d"
+  // /*i18n*/"long-q" /*i18n*/"short-q"
+  // /*i18n*/"long-t" /*i18n*/"short-t"
+
+  /**
+   * Browser-side mixin for {@linkcode Square}
+   * @mixin browser/SquareMixin
+   */
+  class BrowserSquare extends Square {
+
+    /**
+     * @see Fridge
+     */
+    static UNFREEZABLE = true;
+
+    /**
+     * Create the jquery representation of the square.
+     * @param {jQuery} $td TD to make into a square
+     */
+    $populate($td) {
+      $td
+      .addClass(`square-${this.type}`)
+      .attr("id", this.id)
+      .on("click",
+          () => Platform.trigger(UIEvents.SELECT_SQUARE, [ this ]));
+
+      if (typeof this.underlay !== "undefined") {
+        // Simple underlay character i.e. SWAP
+        const $underlay = $(document.createElement("div")).addClass("underlay");
+        $td.append($underlay);
+        $underlay.text(this.underlay);
+      } else if (this.type !== "_") {
+        $td.addClass("score-multiplier");
+        // map long- and short- to language strings describing the
+        // multiplier. data-long is for when the display resolution
+        // is high, data-short for when it is tight e.g. on mobile
+        // devices. The relevant string is selected in CSS.
+        const $underlay = $(document.createElement("div")).addClass("underlay");
+        $td.append($underlay);
+        $underlay
+        .attr("data-long", Platform.i18n(`long-${this.type}`))
+        .attr("data-short", Platform.i18n(`short-${this.type}`));
+      }
+
+      if (this.tile)
+        this.$placeTile($td);
+      else
+        // Call to get the droppable attached
+        this.$unplaceTile($td);
+
+      return $td;
+    }
+
+    /**
+     * A tile has been placed on this square and we have to adjust the
+     * UI accordingly. The tile is assumed to already be
+     * attached to the Square.
+     * @param {jQuery?} $td jquery object for the TD of the square. If
+     * undefined, the TD will be found from the id.
+     */
+    $placeTile($td) {
+      if (!$td) $td = $(`#${this.id}`);
+
+      assert(this.tile, "No tile");
+
+      // Can't drop on a tiled square
+      if ($td.hasClass("ui-droppable"))
+        $td.droppable("destroy");
+
+      // Compatability hack
+      /* istanbul ignore next */
+      if (this.tileLocked) this.tile.isLocked = true;
+
+      const $tile = this.tile.$ui(this);
+      $td.append($tile);
+    }
+
+    // @override
+    placeTile(tile, lock) {
+      if (super.placeTile(tile, lock))
+        this.$placeTile();
+    }
+
+    /**
+     * Remove the currently placed tile's UI from the square's
+     * UI. By the time this is called, the tile has already been
+     * removed from the model of the square, we just need to detach
+     * the UI.
+     * @param {Tile?} tile the tile being unplaced.
+     * @param {jQuery?} $td jquery object for the TD of the square. If
+     * undefined, the TD will be found from the ID.
+     */
+    $unplaceTile($td) {
+
+      assert(!this.tile, "Can't $unplace a placed tile");
+
+      if (!$td) $td = $(`#${this.id}`);
+
+      // There may be no TD if the tile is being unplaced from
+      // another player's rack.
+      if ($td.length === 0)
+        return;
+
+      // Remove the tile UI from the square (without deleting it)
+      $td.find(".Tile").detach();
+
+      // Reinstate the droppable target, which was removed
+      // in $placeTile (or is not yet added)
+      assert(!$td.hasClass("ui-droppable"), "Already droppable");
+      $td.droppable({
+        hoverClass: "drop-active",
+        drop: (event, jui) => {
+          // jui.draggable is a $tile, which has had data("Square")
+          // set in Tile.$ui
+          const from = $(jui.draggable).data("Square");
+          // Tell the main UI about it
+          Platform.trigger(UIEvents.DROP_TILE, [ from, this ]);
+        }
+      });
+    }
+
+    // @override
+    unplaceTile() {
+      const unplaced = super.unplaceTile();
+      if (unplaced)
+        this.$unplaceTile();
+      return unplaced;
+    }
+
+    /**
+     * Set the underlay
+     * @function
+     * @instance
+     * @memberof browser/SquareMixin
+     * @param {boolean} sel
+     */
+    setUnderlay(ch) {
+      this.underlay = ch;
+    }
+
+    /**
+     * Change the visual representation of the square (or the tile on it)
+     * to reflect the fact that it is selected in the UI
+     * @param {boolean} sel
+     */
+    select(sel) {
+      const $tc = $("#typingCursor").hide();
+      if (this.tile)
+        this.tile.showSelected(sel);
+      else if (sel)
+        $(`#${this.id}`).prepend($tc.show());
+    }
+  }
+
+  return BrowserSquare;
+});
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_dictionary_compressor.html">dawg/dictionary_compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li></ul><h3>Classes</h3><ul><li><a href="BackendGame.html">BackendGame</a></li><li><a href="Board.html">Board</a></li><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserDatabase.html">BrowserDatabase</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Channel.html">Channel</a></li><li><a href="ClientGamesUI.html">ClientGamesUI</a></li><li><a href="ClientGameUI.html">ClientGameUI</a></li><li><a href="Compressor.html">Compressor</a></li><li><a href="Configurator.html">Configurator</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="Explorer.html">Explorer</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameDialog.html">GameDialog</a></li><li><a href="GameSetupDialog.html">GameSetupDialog</a></li><li><a href="InvitePlayersDialog.html">InvitePlayersDialog</a></li><li><a href="JSAnalyser.html">JSAnalyser</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="LoginDialog.html">LoginDialog</a></li><li><a href="Move.html">Move</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="StandaloneGamesUI.html">StandaloneGamesUI</a></li><li><a href="StandaloneGameUI.html">StandaloneGameUI</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Interfaces</h3><ul><li><a href="Database.html">Database</a></li><li><a href="Platform.html">Platform</a></li></ul><h3>Mixins</h3><ul><li><a href="browser_GamesUIMixin.html">browser/GamesUIMixin</a></li><li><a href="browser_GameUIMixin.html">browser/GameUIMixin</a></li><li><a href="browser_SquareMixin.html">browser/SquareMixin</a></li><li><a href="browser_SurfaceMixin.html">browser/SurfaceMixin</a></li><li><a href="client_ClientUIMixin.html">client/ClientUIMixin</a></li><li><a href="client_PasswordMixin.html">client/PasswordMixin</a></li><li><a href="game_Commands.html">game/Commands</a></li><li><a href="game_Replay.html">game/Replay</a></li><li><a href="game_Undo.html">game/Undo</a></li><li><a href="standalone_StandaloneUIMixin.html">standalone/StandaloneUIMixin</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_define_module">_define_module</a></li><li><a href="global.html#_get_module">_get_module</a></li><li><a href="global.html#_require_js">_require_js</a></li><li><a href="global.html#backend/findBestPlay">backend/findBestPlay</a></li><li><a href="global.html#create">create</a></li><li><a href="global.html#define">define</a></li><li><a href="global.html#index">index</a></li><li><a href="global.html#mechanicalTurk">mechanicalTurk</a></li><li><a href="global.html#requirejs">requirejs</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Mon Nov 28 2022 14:33:49 GMT+0000 (Coordinated Universal Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

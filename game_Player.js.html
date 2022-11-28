@@ -32,42 +32,50 @@
 /* eslint-env amd, jquery */
 
 define([
-  "platform", "common/Types", "game/Rack",
-  requirejs.isBrowser ? "browser/Player" : "common/EmptyBase"
+  "game/Rack"
 ], (
-  Platform, Types, Rack, PlatformBase
+  Rack
 ) => {
-
-  const Timer = Types.Timer;
 
   /**
    * A player in a {@linkcode Game}. Player objects are specific to
    * a single game, and are used on both browser and server sides.
-   * @mixes BrowserPlayer
    */
-  class Player extends PlatformBase {
+  class Player {
+
+    // Note that we do NOT use the field syntax for the fields that
+    // are serialised. If we do that, then the constructor blows the
+    // field away when loading using Freeze.
 
     /**
-     * @param {object} params named parameters, or other Player
+     * @param {object} spec named parameters, or other Player
      * object to copy. `name` and `key ` are required. Any of `_debug`,
      * `isRobot`, `canChallenge`, `wantsAdvice`,`dictionary` or
      * `missNextTurn` can be passed. The player will be initialised with
      * an empty rack (no squares).
+     * @param {object} factory class object mapping class name to a class
      */
-    constructor(params) {
-      super();
+    constructor(spec, factory) {
+
+      assert(factory.Game); // make sure it's a factory
+
+      /**
+       * Factory object used to create this object (not serialiable)
+       * @private
+       */
+      this._factory = factory;
 
       /**
        * Player unique key. Required.
        * @member {Key}
        */
-      this.key = params.key;
+      this.key = spec.key;
 
       /**
        * Player name. Required.
        * @member {string}
        */
-      this.name = params.name;
+      this.name = spec.name;
 
       /**
        * Rack of tiles. By default an 8-cell rack is created, but
@@ -75,7 +83,7 @@ define([
        * it's only then we know how big it has to be.
        * @member {Rack}
        */
-      this.rack = new Rack(`Rack_${this.key}`, 8);
+      this.rack = new factory.Rack(factory, {id: `Rack_${this.key}`, size: 8 });
 
       /**
        * Number of times this player has passed (or swapped)
@@ -90,7 +98,7 @@ define([
        */
       this.score = 0;
 
-      if (params.clock)
+      if (spec.clock)
         /**
          * Player countdown clock. In games with `timerType` `TIMER_TURN`,
          * this is the number of seconds before the player's turn times
@@ -101,15 +109,15 @@ define([
          */
         this.clock = 0;
 
-      if (params._isConnected)
+      if (spec._isConnected)
         /**
-         * Whether the server thinks the player is connected or not.
+         * Whether the backend thinks the player is connected or not.
          * Not serialised.
-         * @member {boolean}
+         * @member {boolean?}
          */
         this._isConnected = true;
 
-      if (params.missNextTurn)
+      if (spec.missNextTurn)
         /**
          * True if this player is due to miss their next play due
          * to a failed challenge. Default is false.
@@ -117,52 +125,52 @@ define([
          */
         this.missNextTurn = true;
 
-      if (params.wantsAdvice)
+      if (spec.wantsAdvice)
         /**
          * Set true to advise human player of better plays than the one
          * they used. Default is false.
-         * @member {boolean}
+         * @member {boolean?}
          */
         this.wantsAdvice = true;
 
-      if (params.isRobot)
+      if (spec.isRobot)
         /**
          * Is player a robot? Default is false.
-         * @member {boolean}
+         * @member {boolean?}
          */
         this.isRobot = true;
 
-      if (params.canChallenge)
+      if (spec.canChallenge)
         /**
          * Can robot player challenge? Default is false.
-         * @member {boolean}
+         * @member {boolean?}
          */
         this.canChallenge = true;
 
-      if (params.dictionary)
+      if (spec.dictionary)
         /**
          * Name of (or path to) the dictionary the robot will use. Defaults to
          * the game dictionary. Only used for findBestPlay for robot players.
          * Default is undefined.
          * @member {string?}
          */
-        this.dictionary = params.dictionary;
+        this.dictionary = spec.dictionary;
 
-      if (params.delayBeforePlay &amp;&amp; params.delayBeforePlay > 0)
+      if (spec.delayBeforePlay &amp;&amp; spec.delayBeforePlay > 0)
         /**
          * Number of seconds that a robot player must wait before it
          * can play it's move. This delay is to give the revious player
          * time to take back their move (or just think!)
          * @member {number?}
          */
-        this.delayBeforePlay = params.delayBeforePlay;
+        this.delayBeforePlay = spec.delayBeforePlay;
 
-      if (typeof params._debug === "function")
+      if (typeof spec._debug === "function")
         /**
          * Debug function
          * @member {function}
          */
-        this._debug = params._debug;
+        this._debug = spec._debug;
       else
         this._debug = () => {};
     }
@@ -203,10 +211,11 @@ define([
     /**
      * Construct a player object from a structure generated by
      * serialisable()
+     * @param {object} factory class object mapping class name to a class
      * @param {object} simple object generated by serialisable()
      */
-    static fromSerialisable(simple) {
-      const player = new Player(simple);
+    static fromSerialisable(simple, factory) {
+      const player = new factory.Player(simple, factory);
       if (simple.passes)
         player.passes = simple.passes;
       if (simple.score)
@@ -217,17 +226,20 @@ define([
     }
 
     /**
-     * Draw an initial rack from the letter bag. Server side only.
-     * @param {LetterBag} letterBag LetterBag to draw tiles from
+     * Draw an initial rack from the letter bag.
+     * @param {LetterBag} letterBag LetterBag to draw tiles from. Note that
+     * tiles are copied, with the copy being constructed using the
+     * factory that was passed to the constructor.
      * @param {number} rackSize size of the rack
      */
     fillRack(letterBag, rackSize) {
       // +1 to allow space for tile sorting in the UI
       // Use the player key for the rack id, so we can maintain
       // unique racks for different players
-      this.rack = new Rack(`Rack_${this.key}`, rackSize + 1);
+      this.rack = new (this._factory.Rack)(
+        this._factory, { id: `Rack_${this.key}`, size: rackSize + 1 });
       for (let i = 0; i &lt; rackSize; i++)
-        this.rack.addTile(letterBag.getRandomTile());
+        this.rack.addTile(new (this._factory.Tile)(letterBag.getRandomTile()));
       this.score = 0;
     }
 
@@ -303,13 +315,13 @@ define([
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-dictionary_compressor.html">dictionary_compressor</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="BrowserSurface.html">BrowserSurface</a></li><li><a href="Database.html">Database</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameDialog.html">GameDialog</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="InvitePlayersDialog.html">InvitePlayersDialog</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="LoginDialog.html">LoginDialog</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Commands.html">Commands</a></li><li><a href="PasswordMixin.html">PasswordMixin</a></li><li><a href="Replay.html">Replay</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#createDialog">createDialog</a></li><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li><li><a href="global.html#step">step</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-dawg_dictionary_compressor.html">dawg/dictionary_compressor</a></li><li><a href="module-dawg_explore.html">dawg/explore</a></li><li><a href="module-design_valett.html">design/valett</a></li></ul><h3>Classes</h3><ul><li><a href="BackendGame.html">BackendGame</a></li><li><a href="Board.html">Board</a></li><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserDatabase.html">BrowserDatabase</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Channel.html">Channel</a></li><li><a href="ClientGamesUI.html">ClientGamesUI</a></li><li><a href="ClientGameUI.html">ClientGameUI</a></li><li><a href="Compressor.html">Compressor</a></li><li><a href="Configurator.html">Configurator</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="Explorer.html">Explorer</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameDialog.html">GameDialog</a></li><li><a href="GameSetupDialog.html">GameSetupDialog</a></li><li><a href="InvitePlayersDialog.html">InvitePlayersDialog</a></li><li><a href="JSAnalyser.html">JSAnalyser</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="LoginDialog.html">LoginDialog</a></li><li><a href="Move.html">Move</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="StandaloneGamesUI.html">StandaloneGamesUI</a></li><li><a href="StandaloneGameUI.html">StandaloneGameUI</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Interfaces</h3><ul><li><a href="Database.html">Database</a></li><li><a href="Platform.html">Platform</a></li></ul><h3>Mixins</h3><ul><li><a href="browser_GamesUIMixin.html">browser/GamesUIMixin</a></li><li><a href="browser_GameUIMixin.html">browser/GameUIMixin</a></li><li><a href="browser_SquareMixin.html">browser/SquareMixin</a></li><li><a href="browser_SurfaceMixin.html">browser/SurfaceMixin</a></li><li><a href="client_ClientUIMixin.html">client/ClientUIMixin</a></li><li><a href="client_PasswordMixin.html">client/PasswordMixin</a></li><li><a href="game_Commands.html">game/Commands</a></li><li><a href="game_Replay.html">game/Replay</a></li><li><a href="game_Undo.html">game/Undo</a></li><li><a href="standalone_StandaloneUIMixin.html">standalone/StandaloneUIMixin</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_define_module">_define_module</a></li><li><a href="global.html#_get_module">_get_module</a></li><li><a href="global.html#_require_js">_require_js</a></li><li><a href="global.html#backend/findBestPlay">backend/findBestPlay</a></li><li><a href="global.html#create">create</a></li><li><a href="global.html#define">define</a></li><li><a href="global.html#index">index</a></li><li><a href="global.html#mechanicalTurk">mechanicalTurk</a></li><li><a href="global.html#requirejs">requirejs</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Mon Oct 24 2022 18:02:06 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Mon Nov 28 2022 14:33:49 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>
