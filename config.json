@@ -1,6 +1,0 @@
-{
-	"opts": {
-		"readme": "doc/README.md"
-	},
-    "plugins": ["plugins/markdown"]
-}

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: standalone/StandaloneUIMixin.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: standalone/StandaloneUIMixin.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*Copyright (C) 2022 The Xanado Project https://github.com/cdot/Xanado
+  License MIT. See README.md at the root of this distribution for full copyright
+  and license information. Author Crawford Currie http://c-dot.co.uk*/
+/* eslint-env browser, jquery */
+/* global pluralRuleParser */
+
+define([
+  "platform",
+  "common/Utils", "common/Fridge",
+  "game/Player", "game/Edition",
+  "backend/BackendGame",
+  "dawg/Dictionary",
+  "browser/BrowserDatabase",
+
+  "jquery", "jqueryui"
+], (
+  Platform,
+  Utils, Fridge,
+  Player, Edition,
+  BackendGame,
+  Dictionary,
+  BrowserDatabase
+) => {
+
+  /**
+   * Mixin with common code shared between client game and games interfaces
+   * (client/ClientGamesUI.js and client/ClientGameUI.js) but NOT used by
+   * standalone.
+   * @mixin standalone/StandaloneUIMixin
+   */
+  return superclass => class StandaloneUIMixin extends superclass {
+
+    /**
+     * Format of entries in the games table.
+     * See {@linkcode browser/BrowserGame#headline}
+     * @override
+     */
+    static GAME_TABLE_ROW = '&lt;tr class="game" id="%k">'
+    + '&lt;td class="h-key">%k&lt;/td>'
+    + '&lt;td class="h-edition">%e&lt;/td>'
+    + '&lt;td class="h-created">%c&lt;/td>'
+    + '&lt;td class="h-state">%s&lt;/td>'
+    + '&lt;/tr>';
+
+    /**
+     * Key for the robot player
+     */
+    static ROBOT_KEY = "Computer";
+
+    /**
+     * Key for the human player
+     */
+    static HUMAN_KEY = "You";
+
+    /**
+     * Game defaults, for getGameDefaults
+     * @member {object}
+     */
+    static DEFAULTS = {
+	    edition: "English_Scrabble",
+	    dictionary: "British_English",
+      one_window: false,
+      // User settings
+	    notification: false,
+	    theme: "default",
+	    warnings: true,
+	    cheers: true,
+	    tile_click: true,
+      turn_alert: true,
+      // for ease of debug, frontend and backend racks should be the same
+      syncRacks: true
+    };
+
+    /**
+     * The database that will be used for saving and reading games
+     * @member {BrowserDatabase}
+     */
+    db = new BrowserDatabase();
+
+    /**
+     * There can be only one (player)
+     */
+    session = { key: null };
+
+    /**
+     * Arguments passed in the URL and parsed out using
+     * {@linkcode Utils#parseURLArguments}
+     * @member {object}
+     */
+    args = undefined;
+
+    /**
+     * @implements UI
+     * @instance
+     * @memberof browser/GameUIMixin
+     * @override
+     */
+    getSession() {
+      return Promise.resolve(this.session);
+    }
+
+    /**
+     * @implements UI
+     * @instance
+     * @memberof browser/GameUIMixin
+     * @override
+     */
+    getHistory() {
+    }
+
+    /**
+     * @implements UI
+     * @instance
+     * @memberof browser/GameUIMixin
+     * @override
+     */
+    getGameDefaults() {
+      return Promise.resolve(this.constructor.DEFAULTS);
+    }
+
+    /**
+     * @implements UI
+     * @instance
+     * @memberof StandaloneUIMixin
+     * @override
+     */
+    getSetting(key) {
+      return localStorage.getItem(`XANADO${key}`)
+      || this.constructor.DEFAULTS[key];
+    }
+
+    /**
+     * @implements UI
+     * @instance
+     * @memberof StandaloneUIMixin
+     * @override
+     */
+    setSetting(key, value) {
+      localStorage.setItem(`XANADO${key}`, value);
+    }
+
+    /**
+     * @implements UI
+     * @instance
+     * @memberof StandaloneUIMixin
+     * @override
+     */
+    getThemes() {
+      return $.get("../css/index.json");
+    }
+
+    /**
+     * @implements UI
+     * @instance
+     * @memberof StandaloneUIMixin
+     * @override
+     */
+    getLocales() {
+      return $.get("../i18n/index.json");
+    }
+
+    /**
+     * @implements UI
+     * @instance
+     * @memberof StandaloneUIMixin
+     * @override
+     */
+    getEditions() {
+      return $.get(`../editions/index.json`);
+    }
+
+    /**
+     * @implements UI
+     * @instance
+     * @memberof StandaloneUIMixin
+     * @override
+     */
+    getDictionaries() {
+      return $.get(`../dictionaries/index.json`);
+    }
+
+    /**
+     * @implements browser/GameUIMixin
+     * @instance
+     * @memberof StandaloneUIMixin
+     * @override
+     */
+    getDictionary(dict) {
+      return Dictionary.load(dict);
+    }
+
+    /**
+     * @implements browser/GameUIMixin
+     * @instance
+     * @memberof StandaloneUIMixin
+     * @override
+     */
+    getEdition(ed) {
+      return new Promise((resolve, reject) => {
+        requirejs([`editions/${ed}`],
+                  edition => resolve(edition));
+      });
+    }
+
+    /**
+     * Create a new game using the options passed.
+     * @instance
+     * @memberof StandaloneUIMixin
+     * @param {object} vals game setup options
+     * @return {Promise} resolves to the created game
+     */
+    createGame(setup) {
+      return Edition.load(setup.edition)
+      .then(edition => new BackendGame(setup).create())
+      .then(game => game.onLoad(this.db))
+      .then(game => {
+        const robot = new Player({
+          name: $.i18n("Robot"),
+          key: this.constructor.ROBOT_KEY,
+          isRobot: true
+        }, BackendGame);
+
+        const human = new Player({
+          name: $.i18n("You"),
+          key: this.constructor.HUMAN_KEY,
+          isRobot: false
+        }, BackendGame);
+
+        game.addPlayer(robot, true);
+        game.addPlayer(human, true);
+
+        if (Math.random() > 0.5)
+          game.whosTurnKey = this.constructor.HUMAN_KEY;
+        else
+          game.whosTurnKey = this.constructor.ROBOT_KEY;
+
+        game.state = game.constructor.State.PLAYING;
+
+        return game;
+      });
+    }
+
+    /**
+     * Change the URL to a new URL calculated to open the game with the
+     * given key (which must have been saved)
+     * implements browser/GameUIMixin
+     * @instance
+     * @memberof StandaloneUIMixin
+     * @override
+     * @param {Key} key the key for the game to switch to
+     */
+    redirectToGame(key) {
+      const parts = Utils.parseURLArguments(window.location.toString());
+      parts._URL = parts._URL.replace(/standalone_games./, "standalone_game.");
+      parts.game = key;
+      window.location = Utils.makeURL(parts);
+    }
+
+    /**
+     * Start the process of constructing the UI. Subclasses should
+     * continue this process in their own create() methods.
+     * @implements browser/GameUIMixin
+     * @instance
+     * @memberof StandaloneUIMixin
+     */
+    create() {
+      this.args = Utils.parseURLArguments(document.URL);
+      if (this.args.debug) {
+        this.debugging = true;
+        this.debug = console.debug;
+      }
+
+      this.session.key = this.constructor.HUMAN_KEY;
+    }
+  };
+});
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="BackendGame.html">BackendGame</a></li><li><a href="Board.html">Board</a></li><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserDatabase.html">BrowserDatabase</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Channel.html">Channel</a></li><li><a href="ClientGamesUI.html">ClientGamesUI</a></li><li><a href="ClientGameUI.html">ClientGameUI</a></li><li><a href="Compressor.html">Compressor</a></li><li><a href="Configurator.html">Configurator</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="Explorer.html">Explorer</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameDialog.html">GameDialog</a></li><li><a href="GameSetupDialog.html">GameSetupDialog</a></li><li><a href="InvitePlayersDialog.html">InvitePlayersDialog</a></li><li><a href="JSAnalyser.html">JSAnalyser</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="LoginDialog.html">LoginDialog</a></li><li><a href="Move.html">Move</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="StandaloneGamesUI.html">StandaloneGamesUI</a></li><li><a href="StandaloneGameUI.html">StandaloneGameUI</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Interfaces</h3><ul><li><a href="Database.html">Database</a></li><li><a href="Platform.html">Platform</a></li></ul><h3>Mixins</h3><ul><li><a href="browser_GamesUIMixin.html">browser/GamesUIMixin</a></li><li><a href="browser_GameUIMixin.html">browser/GameUIMixin</a></li><li><a href="browser_SquareMixin.html">browser/SquareMixin</a></li><li><a href="browser_SurfaceMixin.html">browser/SurfaceMixin</a></li><li><a href="client_ClientUIMixin.html">client/ClientUIMixin</a></li><li><a href="client_PasswordMixin.html">client/PasswordMixin</a></li><li><a href="game_Commands.html">game/Commands</a></li><li><a href="game_Replay.html">game/Replay</a></li><li><a href="game_Undo.html">game/Undo</a></li><li><a href="standalone_StandaloneUIMixin.html">standalone/StandaloneUIMixin</a></li></ul><h3>Global</h3><ul><li><a href="global.html#backend/findBestPlay">backend/findBestPlay</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Nov 29 2022 17:32:07 GMT+0000 (Coordinated Universal Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

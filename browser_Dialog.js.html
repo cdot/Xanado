@@ -33,34 +33,43 @@
 
 define(() => {
 
-  // Index of dialog instances.
-  const instances = {};
-
   /**
    * Base class of modal dialogs with demand-loadable HTML and a submit
    * button.
    *
+   * HTML is loaded on demand from the html directory, based in the `id`
+   * of the dialog (or the `html` option.
+   *
    * In the HTML, any input or select that has a "name" attribute will
    * be used to populate a structure representing the dialog data.
    *
-   * If a `postAction` URL is set, this structure will be posted to the
+   * If a `postAction` URL option is set, this structure will be posted to the
    * URL and the result passed to an optional `postResult` function.
    *
    * Alternatively (or additionally), the `onSubmit` option can be set to
    * a function that will be called with `this` when the submit button
    * is pressed, *before* the `postAction` is sent.
    *
-   * Note that each dialog type has a single Dialog instance associated
-   * with it, and only one
+   * Note that each dialog id has a single Dialog instance associated
+   * with it. You cannot have two of the same type of dialog visible
+   * at once.
    */
   class Dialog {
+
+    /**
+     * Index of dialog instances.
+     * @private
+     */
+    static instances = {};
 
     /**
      * Construct the named dialog, demand-loading the HTML as
      * necessary. Do not use this - use {@linkcode Dialog#open|open()}
      * instead.
-     * @param {string} dlg the dialog name
+     * @param {string} id the dialog name
      * @param {object} options options
+     * @param {string?} options.html optional name of HTML file to
+     * load, defaults to the id of the dialog
      * @param {string?} options.postAction AJAX call name. If defined,
      * the dialog fields will be posted here on close.
      * @param {function?} options.postResult passed result
@@ -69,7 +78,6 @@ define(() => {
      * @param {function?} options.onSubmit Passed this, can be used without
      * postAction.
      * @param {function} options.error error function, passed jqXHR
-     * @private
      */
     constructor(id, options) {
       /**
@@ -94,7 +102,8 @@ define(() => {
 
       if (this.$dlg.length === 0) {
         // HTML is not already present; load it asynchronously.
-        pre_dialog = $.get(`/html/${id}.html`)
+        pre_dialog = $.get(requirejs.toUrl(
+          `html/${options.html || id}.html`))
         .then(html_code => {
           $("body").append(
             $(document.createElement("div"))
@@ -102,6 +111,9 @@ define(() => {
             .addClass("dialog")
             .html(html_code));
           this.$dlg = $(`#${id}`);
+        })
+        .catch(e => {
+          console.error("Dialog HTML load failed " + e);
         });
       } else
         pre_dialog = Promise.resolve();
@@ -341,8 +353,8 @@ define(() => {
     static open(dlg, options) {
       console.debug("Static open", dlg, options);
       return new Promise(resolve => {
-        requirejs([`browser/${dlg}`], Clas => {
-          let inst = instances[dlg];
+        requirejs([dlg], Clas => {
+          let inst = Dialog.instances[dlg];
           if (inst) {
             if (options)
               Object.assign(inst.options, options);
@@ -355,7 +367,7 @@ define(() => {
               inst.$dlg.dialog("open");
             }
           } else
-            inst = instances[dlg] = new Clas(options);
+            inst = Dialog.instances[dlg] = new Clas(options);
           resolve(inst);
         });
       });
@@ -374,13 +386,13 @@ define(() => {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-dictionary_compressor.html">dictionary_compressor</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="BrowserSurface.html">BrowserSurface</a></li><li><a href="Database.html">Database</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameDialog.html">GameDialog</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="InvitePlayersDialog.html">InvitePlayersDialog</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="LoginDialog.html">LoginDialog</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Commands.html">Commands</a></li><li><a href="PasswordMixin.html">PasswordMixin</a></li><li><a href="Replay.html">Replay</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#createDialog">createDialog</a></li><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li><li><a href="global.html#step">step</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="BackendGame.html">BackendGame</a></li><li><a href="Board.html">Board</a></li><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserDatabase.html">BrowserDatabase</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Channel.html">Channel</a></li><li><a href="ClientGamesUI.html">ClientGamesUI</a></li><li><a href="ClientGameUI.html">ClientGameUI</a></li><li><a href="Compressor.html">Compressor</a></li><li><a href="Configurator.html">Configurator</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="Explorer.html">Explorer</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameDialog.html">GameDialog</a></li><li><a href="GameSetupDialog.html">GameSetupDialog</a></li><li><a href="InvitePlayersDialog.html">InvitePlayersDialog</a></li><li><a href="JSAnalyser.html">JSAnalyser</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="LoginDialog.html">LoginDialog</a></li><li><a href="Move.html">Move</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="StandaloneGamesUI.html">StandaloneGamesUI</a></li><li><a href="StandaloneGameUI.html">StandaloneGameUI</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Interfaces</h3><ul><li><a href="Database.html">Database</a></li><li><a href="Platform.html">Platform</a></li></ul><h3>Mixins</h3><ul><li><a href="browser_GamesUIMixin.html">browser/GamesUIMixin</a></li><li><a href="browser_GameUIMixin.html">browser/GameUIMixin</a></li><li><a href="browser_SquareMixin.html">browser/SquareMixin</a></li><li><a href="browser_SurfaceMixin.html">browser/SurfaceMixin</a></li><li><a href="client_ClientUIMixin.html">client/ClientUIMixin</a></li><li><a href="client_PasswordMixin.html">client/PasswordMixin</a></li><li><a href="game_Commands.html">game/Commands</a></li><li><a href="game_Replay.html">game/Replay</a></li><li><a href="game_Undo.html">game/Undo</a></li><li><a href="standalone_StandaloneUIMixin.html">standalone/StandaloneUIMixin</a></li></ul><h3>Global</h3><ul><li><a href="global.html#backend/findBestPlay">backend/findBestPlay</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Nov 29 2022 14:50:55 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Nov 29 2022 17:32:07 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

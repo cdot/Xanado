@@ -28,7 +28,7 @@
 
 <header>
     
-        <h2><span class="attribs"><span class="type-signature"></span></span>Rack<span class="signature">(id, size, underlay<span class="signature-attributes">nullable</span>)</span><span class="type-signature"></span></h2>
+        <h2><span class="attribs"><span class="type-signature"></span></span>Rack<span class="signature">(factory, spec)</span><span class="type-signature"></span></h2>
         
             <div class="class-description"><p>A Rack is a 1-column <a href="Surface.html"><code>Surface</code></a></p></div>
         
@@ -45,7 +45,7 @@
     
 
     
-    <h4 class="name" id="Rack"><span class="type-signature"></span>new Rack<span class="signature">(id, size, underlay<span class="signature-attributes">nullable</span>)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="Rack"><span class="type-signature"></span>new Rack<span class="signature">(factory, spec)</span><span class="type-signature"></span></h4>
     
 
     
@@ -62,6 +62,74 @@
 
     <h5>Parameters:</h5>
     
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>factory</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>class object mapping class name to a class</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>spec</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Rack.html">Rack</a></span>
+|
+
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>specification of the rack, or a rack to copy</p>
+                <h6>Properties</h6>
+                
 
 <table class="params">
     <thead>
@@ -188,6 +256,13 @@ underlies the swap rack.</p></td>
     </tbody>
 </table>
 
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
 
 
 
@@ -222,7 +297,7 @@ underlies the swap rack.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line17">line 17</a>
+        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line22">line 22</a>
     </li></ul></dd>
     
 
@@ -267,74 +342,6 @@ underlies the swap rack.</p></td>
 
     
 
-    
-        <h3 class="subsection-title">Members</h3>
-
-        
-            
-<h4 class="name" id="isWild"><span class="type-signature"></span>isWild<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <p>Whether this rack is wild or not. When a rack is wild, the tiles
-taken from in the rack can be used as any other tile. This is
-used client-side, for players other than the current player.</p>
-</div>
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line24">line 24</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
     
 
     
@@ -447,7 +454,7 @@ used client-side, for players other than the current player.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line67">line 67</a>
+        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line90">line 90</a>
     </li></ul></dd>
     
 
@@ -607,7 +614,7 @@ used client-side, for players other than the current player.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line83">line 83</a>
+        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line106">line 106</a>
     </li></ul></dd>
     
 
@@ -769,7 +776,7 @@ is one.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line104">line 104</a>
+        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line127">line 127</a>
     </li></ul></dd>
     
 
@@ -880,7 +887,7 @@ Blanks are represented by a space.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line92">line 92</a>
+        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line115">line 115</a>
     </li></ul></dd>
     
 
@@ -986,7 +993,7 @@ Blanks are represented by a space.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line179">line 179</a>
+        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line201">line 201</a>
     </li></ul></dd>
     
 
@@ -1154,7 +1161,7 @@ this tile. If undefined, any tile can be removed.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line122">line 122</a>
+        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line145">line 145</a>
     </li></ul></dd>
     
 
@@ -1336,7 +1343,7 @@ this tile. If undefined, any tile can be removed.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line142">line 142</a>
+        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line164">line 164</a>
     </li></ul></dd>
     
 
@@ -1446,7 +1453,7 @@ this tile. If undefined, any tile can be removed.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line156">line 156</a>
+        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line178">line 178</a>
     </li></ul></dd>
     
 
@@ -1556,7 +1563,7 @@ this tile. If undefined, any tile can be removed.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line188">line 188</a>
+        <a href="game_Rack.js.html">game/Rack.js</a>, <a href="game_Rack.js.html#line210">line 210</a>
     </li></ul></dd>
     
 
@@ -1602,13 +1609,13 @@ this tile. If undefined, any tile can be removed.</p></td>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-design_valett.html">design/valett</a></li><li><a href="module-dictionary_compressor.html">dictionary_compressor</a></li><li><a href="module-explore.html">explore</a></li></ul><h3>Classes</h3><ul><li><a href="Board.html">Board</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="BrowserSurface.html">BrowserSurface</a></li><li><a href="Database.html">Database</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameDialog.html">GameDialog</a></li><li><a href="GamesUI.html">GamesUI</a></li><li><a href="GameUI.html">GameUI</a></li><li><a href="InvitePlayersDialog.html">InvitePlayersDialog</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="LoginDialog.html">LoginDialog</a></li><li><a href="Move.html">Move</a></li><li><a href="Platform.html">Platform</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerGame.html">ServerGame</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Mixins</h3><ul><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserMove.html">BrowserMove</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserSquare.html">BrowserSquare</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Commands.html">Commands</a></li><li><a href="PasswordMixin.html">PasswordMixin</a></li><li><a href="Replay.html">Replay</a></li><li><a href="ServerBoard.html">ServerBoard</a></li><li><a href="Undo.html">Undo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#createDialog">createDialog</a></li><li><a href="global.html#game/findBestPlay">game/findBestPlay</a></li><li><a href="global.html#step">step</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="BackendGame.html">BackendGame</a></li><li><a href="Board.html">Board</a></li><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserDatabase.html">BrowserDatabase</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Channel.html">Channel</a></li><li><a href="ClientGamesUI.html">ClientGamesUI</a></li><li><a href="ClientGameUI.html">ClientGameUI</a></li><li><a href="Compressor.html">Compressor</a></li><li><a href="Configurator.html">Configurator</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="Explorer.html">Explorer</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameDialog.html">GameDialog</a></li><li><a href="GameSetupDialog.html">GameSetupDialog</a></li><li><a href="InvitePlayersDialog.html">InvitePlayersDialog</a></li><li><a href="JSAnalyser.html">JSAnalyser</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="LoginDialog.html">LoginDialog</a></li><li><a href="Move.html">Move</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="StandaloneGamesUI.html">StandaloneGamesUI</a></li><li><a href="StandaloneGameUI.html">StandaloneGameUI</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Interfaces</h3><ul><li><a href="Database.html">Database</a></li><li><a href="Platform.html">Platform</a></li></ul><h3>Mixins</h3><ul><li><a href="browser_GamesUIMixin.html">browser/GamesUIMixin</a></li><li><a href="browser_GameUIMixin.html">browser/GameUIMixin</a></li><li><a href="browser_SquareMixin.html">browser/SquareMixin</a></li><li><a href="browser_SurfaceMixin.html">browser/SurfaceMixin</a></li><li><a href="client_ClientUIMixin.html">client/ClientUIMixin</a></li><li><a href="client_PasswordMixin.html">client/PasswordMixin</a></li><li><a href="game_Commands.html">game/Commands</a></li><li><a href="game_Replay.html">game/Replay</a></li><li><a href="game_Undo.html">game/Undo</a></li><li><a href="standalone_StandaloneUIMixin.html">standalone/StandaloneUIMixin</a></li></ul><h3>Global</h3><ul><li><a href="global.html#backend/findBestPlay">backend/findBestPlay</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Nov 29 2022 14:50:56 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Nov 29 2022 17:32:08 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>
