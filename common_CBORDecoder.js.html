@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: common/CBORDecoder.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: common/CBORDecoder.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*
+ * Based on cbor-js, Copyright (c) 2014-2016 Patrick Gansterer &lt;paroga@paroga.com> and (c) 2021 Taisuke Fukuno &lt;fukuno@jig.jp>
+ * This version Copyright (C) 2022 The Xanado Project
+ */
+
+/**
+ * CBOR specification is at https://www.rfc-editor.org/rfc/rfc8949.html
+ * Converted to AMD module for Xanado, and support for tags added
+ * CC 2022-12-01
+ */
+
+/* global TypedArray */
+
+define(() => {
+
+  const POW_2_24 = 5.960464477539063e-8;
+  const POW_2_32 = 2 ** 32;
+
+  function pad(v, n) {
+    const s = `0000${v}`;
+    return s.substring(s.length - (n || 2));
+  }
+
+  /**
+   * Decoder for objects encoded according to the CBOR specification.
+   * A tagger object must be provded to handle extensions to basic
+   * CBOR.
+   */
+  class CBORDecoder {
+
+    /**
+     * DataView being read from.
+     * @private
+     * @member {DataView}
+     */
+    view = undefined;
+
+    /**
+     * Read offset into the DataView.
+     * @private
+     * @member {number}
+     */
+    offset = undefined;
+
+    /**
+     * @param {CBORTagger} tagger tagger object, called on all objects
+     */
+    constructor(tagger) {
+      /**
+       * Tagger object.
+       * @member {CBORTagger}
+       * @private
+       */
+      this.tagger = tagger;
+    }
+
+    /**
+     * Take a data buffer and return it decoded as a Javascript object.
+     * @param {TypedArray|ArrayBuffer|DataView} data encoded data
+     * @param {Tagger} tagger
+     * @return {object} object decoded from the data
+     */
+    decode(data) {
+
+      if (data instanceof DataView) {
+        this.view = data;
+        this.offset = 0;
+
+        const ret = this.decodeItem();
+        if (this.tagger)
+          this.tagger.cleanUp();
+
+        if (this.offset !== data.byteLength)
+          throw Error(`Remaining bytes: ${this.offset} is not ${data.byteLength}`);
+
+        return ret;
+      }
+
+      if (data instanceof ArrayBuffer)
+        return this.decode(new DataView(data, 0, data.length));
+
+      if (!data.buffer
+          || typeof data.byteLength === "undefined"
+          || typeof data.byteOffset === "undefined")
+        throw Error("Bad parameter to constructor");
+
+      // TypedArray, but node.js doesn't define it
+      return this.decode(new DataView(data.buffer, data.byteOffset, data.byteLength));
+    }
+
+    /**
+     * Read a short float.
+     * @return {number} the data read
+     * @private
+     */
+    readFloat16() {
+      const tempArrayBuffer = new ArrayBuffer(4);
+      const tempDataView = new DataView(tempArrayBuffer);
+      const value = this.readUint16();
+
+      const sign = value &amp; 0x8000;
+      let exponent = value &amp; 0x7c00;
+      const fraction = value &amp; 0x03ff;
+
+      if (exponent === 0x7c00)
+        exponent = 0xff &lt;&lt; 10;
+      else if (exponent !== 0)
+        exponent += (127 - 15) &lt;&lt; 10;
+      else if (fraction !== 0)
+        return (sign ? -1 : 1) * fraction * POW_2_24;
+
+      tempDataView.setUint32(0, sign &lt;&lt; 16 | exponent &lt;&lt; 13 | fraction &lt;&lt; 13);
+      return tempDataView.getFloat32(0);
+    }
+
+    /**
+     * Read a float.
+     * @return {number} the data read
+     * @private
+     */
+    readFloat32() {
+      const val = this.view.getFloat32(this.offset);
+      this.offset += 4;
+      return val;
+    }
+
+    /**
+     * Read a long float.
+     * @return {number} the data read
+     * @private
+     */
+    readFloat64() {
+      const val = this.view.getFloat64(this.offset);
+      this.offset += 8;
+      return val;
+    }
+
+    /**
+     * Read an unsigned byte.
+     * @return {number} the data read
+     * @private
+     */
+    readUint8() {
+      const val = this.view.getUint8(this.offset);
+      this.offset += 1;
+      return val;
+    }
+
+    /**
+     * Read an unsigned short.
+     * @return {number} the data read
+     * @private
+     */
+    readUint16() {
+      const val = this.view.getUint16(this.offset);
+      this.offset += 2;
+      return val;
+    }
+
+    /**
+     * Read an unsigned int.
+     * @return {number} the data read
+     * @private
+     */
+    readUint32() {
+      const val = this.view.getUint32(this.offset);
+      this.offset += 4;
+      return val;
+    }
+
+    /**
+     * Read an unsigned long.
+     * @return {number} the data read
+     * @private
+     */
+    readUint64() {
+      return this.readUint32() * POW_2_32 + this.readUint32();
+    }
+
+    /**
+     * Skip an array break.
+     * @return {boolean} true if a break was seen.
+     */
+    readBreak() {
+      if (this.view.getUint8(this.offset) !== 0xff)
+        return false;
+      this.offset++;
+      return true;
+    }
+
+    /**
+     * Major type 7; analyse argument
+     * @param {number} ai 5-bit additional information
+     * @private
+     */
+    readArgument(ai) {
+      if (ai &lt; 24)
+        return ai; // simple value 0..23
+      switch (ai) {
+      case 24:
+        return this.readUint8(); // 32..255 in following byte
+      case 25: // IEEE 754 Half-Precision Float (16 bits follow)
+        return this.readUint16();
+      case 26: // IEEE 754 Single-Precision Float (32 bits follow)
+        return this.readUint32();
+      case 27: // IEEE 754 Double-Precision Float (64 bits follow)
+        return this.readUint64();
+      case 31:
+        return -1; // "break" stop code
+      }
+      throw Error(`Invalid additional information ${ai}`);
+    }
+
+    /**
+     * Read a known number of bytes.
+     * @param {number} length number of bytes to read
+     * @return {Uint8Array} the data read
+     */
+    readBytes(length) {
+      const val = new Uint8Array(
+        this.view.buffer, this.view.byteOffset + this.offset, length);
+      this.offset += length;
+      //console.log("readBytes",val);
+      return val;
+    }
+
+    /**
+     * Read an indefinite length byte array.
+     * @param {number} majorType major type of item, used for checking
+     * @private
+     */
+    readIndefiniteBytes(majorType) {
+      // series of zero or more strings of the specified type ("chunks")
+      // that have definite lengths, and finished by the "break" stop code
+      const readChunkLength = () => {
+        const initialByte = this.readUint8();
+        const type = initialByte >> 5;
+        const ai = initialByte &amp; 0x1f;
+        //console.debug(`\t${pad(type)}\t${ai}`);
+        if (ai === 31)
+          return -1; // "break"
+        if (type !== majorType)
+          throw Error("Major type mismatch on chunk");
+        const len = this.readArgument(ai);
+        if (len &lt; 0)
+          throw Error(`Invalid chunk length ${len}`);
+        return len;
+      };
+      const elements = [];
+      let fullArrayLength = 0;
+      let length;
+      while ((length = readChunkLength()) >= 0) {
+        fullArrayLength += length;
+        elements.push(this.readBytes(length));
+      }
+      const fullArray = new Uint8Array(fullArrayLength);
+      let fullArrayOffset = 0;
+      for (let i = 0; i &lt; elements.length; i++) {
+        fullArray.set(elements[i], fullArrayOffset);
+        fullArrayOffset += elements[i].length;
+      }
+      return fullArray;
+    }
+
+    /**
+     * Read an item array.
+     * @private
+     * @param {number} length length of the array
+     */
+    readItemArray(length) {
+      let ret = [];
+      for (let i = 0; i &lt; length; i++)
+        ret.push(this.decodeItem());
+      return ret;
+    }
+
+    /**
+     * Read an indefinite length item array.
+     * @private
+     */
+    readIndefiniteItemArray() {
+      const retArray = [];
+      while (!this.readBreak())
+        retArray.push(this.decodeItem());
+      return retArray;
+    }
+
+    /**
+     * Read a list of key-value pairs.
+     * @private
+     * @param {number} length length of the list
+     */
+    readKV(length) {
+      const retObject = {};
+      for (let i = 0; i &lt; length; i++) {
+        const key = this.decodeItem();
+        retObject[key] = this.decodeItem();
+      }
+      return retObject;
+    }
+
+    /**
+     * Read a list of key-value pairs.
+     * @private
+     */
+    readIndefiniteKV() {
+      const retObject = {};
+      while (!this.readBreak()) {
+        const key = this.decodeItem();
+        retObject[key] = this.decodeItem();
+      }
+      return retObject;
+    }
+
+    /**
+     * Decode the next item on the input stream.
+     * Provided for use by {@linkcode CBORTagger} implementations.
+     */
+    decodeItem() {
+      const initialByte = this.readUint8();
+      const majorType = initialByte >> 5;
+      const ai = initialByte &amp; 0x1f; // additional information
+
+      //console.debug(`${pad(majorType)}\t${pad(ai)}`);
+
+      switch (majorType) {
+
+      case 0: // unsigned integer
+        if (ai === 31)
+          throw Error("Invalid 0 AI");
+        return this.readArgument(ai);
+
+      case 1: // negative integer
+        if (ai === 31)
+          throw Error("Invalid 1 AI");
+        return -1 - this.readArgument(ai);
+
+      case 2: // byte string
+        if (ai === 31)
+          return this.readIndefiniteBytes(majorType);
+        return this.readBytes(this.readArgument(ai));
+
+      case 3: // UTF-8 encoded text string
+        if (ai === 31)
+          return new TextDecoder().decode(this.readIndefiniteBytes(majorType));
+        return new TextDecoder().decode(this.readBytes(this.readArgument(ai)));
+
+      case 4: // array of data items
+        if (ai === 31)
+          return this.readIndefiniteItemArray();
+        return this.readItemArray(this.readArgument(ai));
+
+      case 5: // map of pairs of data items
+        if (ai === 31)
+          return this.readIndefiniteKV();
+        return this.readKV(this.readArgument(ai));
+
+      case 6: // tagged data item
+        if (ai === 31)
+          throw Error("Invalid 6 AI");
+        {
+          const tag = this.readArgument(ai);
+          if (this.tagger) {
+            const thaw = this.tagger.decode(tag, this);
+            //console.log("\tthawed", thaw);
+            if (typeof thaw !== "undefined")
+              return thaw;
+          }
+        }
+        // Ignore the tag
+        return this.decodeItem();
+
+      case 7: // floating point number and values with no content
+        // https://www.rfc-editor.org/rfc/rfc8949.html#name-floating-point-numbers-and-
+        switch (ai) {
+        case 20:
+          return false;
+        case 21:
+          return true;
+        case 22:
+          return null;
+        case 23:
+          return undefined;
+        case 24:
+          return this.readUint8();
+        case 25:
+          return this.readFloat16();
+        case 26:
+          return this.readFloat32();
+        case 27:
+          return this.readFloat64();
+        }
+        return ai;
+      }
+
+      throw Error(`Unrecognised major type ${majorType}`);
+    }
+  }
+
+  return CBORDecoder;
+});
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="BackendGame.html">BackendGame</a></li><li><a href="Board.html">Board</a></li><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserDatabase.html">BrowserDatabase</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="CBORDecoder.html">CBORDecoder</a></li><li><a href="CBOREncoder.html">CBOREncoder</a></li><li><a href="CBORTagger.html">CBORTagger</a></li><li><a href="Channel.html">Channel</a></li><li><a href="ClientGamesUI.html">ClientGamesUI</a></li><li><a href="ClientGameUI.html">ClientGameUI</a></li><li><a href="Compressor.html">Compressor</a></li><li><a href="Configurator.html">Configurator</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="Explorer.html">Explorer</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameDialog.html">GameDialog</a></li><li><a href="GameSetupDialog.html">GameSetupDialog</a></li><li><a href="InvitePlayersDialog.html">InvitePlayersDialog</a></li><li><a href="JSAnalyser.html">JSAnalyser</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="LoginDialog.html">LoginDialog</a></li><li><a href="Move.html">Move</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="StandaloneGamesUI.html">StandaloneGamesUI</a></li><li><a href="StandaloneGameUI.html">StandaloneGameUI</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tagger.html">Tagger</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Interfaces</h3><ul><li><a href="Database.html">Database</a></li><li><a href="Platform.html">Platform</a></li></ul><h3>Mixins</h3><ul><li><a href="browser_GamesUIMixin.html">browser/GamesUIMixin</a></li><li><a href="browser_GameUIMixin.html">browser/GameUIMixin</a></li><li><a href="browser_SquareMixin.html">browser/SquareMixin</a></li><li><a href="browser_SurfaceMixin.html">browser/SurfaceMixin</a></li><li><a href="client_ClientUIMixin.html">client/ClientUIMixin</a></li><li><a href="client_PasswordMixin.html">client/PasswordMixin</a></li><li><a href="game_Commands.html">game/Commands</a></li><li><a href="game_Replay.html">game/Replay</a></li><li><a href="game_Undo.html">game/Undo</a></li><li><a href="standalone_StandaloneUIMixin.html">standalone/StandaloneUIMixin</a></li></ul><h3>Global</h3><ul><li><a href="global.html#backend/findBestPlay">backend/findBestPlay</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Dec 02 2022 17:41:09 GMT+0000 (Coordinated Universal Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

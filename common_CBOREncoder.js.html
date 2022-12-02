@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: common/CBOREncoder.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: common/CBOREncoder.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*
+ * Based on cbor-js, Copyright (c) 2014-2016 Patrick Gansterer &lt;paroga@paroga.com> and (c) 2021 Taisuke Fukuno &lt;fukuno@jig.jp>
+ * This version Copyright (C) 2022 The Xanado Project
+ */
+
+define(() => {
+
+  const POW_2_32 = 2 ** 32;
+  const POW_2_53 = 2 ** 53;
+
+  /**
+   * Binary encoder for Javascript objects, following the CBOR specification.
+   * CBOR specification is at https://www.rfc-editor.org/rfc/rfc8949.html
+   */
+  class CBOREncoder {
+
+    /**
+     * DataView being written to.
+     * @private
+     * @member {DataView}
+     */
+    view = undefined;
+
+    /**
+     * Write offset into the DataView.
+     * @private
+     * @member {number}
+     */
+    offset = undefined;
+
+    /**
+     * @param {CBORTagger} tagger tagger object, called on all objects
+     */
+    constructor(tagger) {
+      /**
+       * Tagger object.
+       * @member {CBORTagger}
+       * @private
+       */
+      this.tagger = tagger;
+    }
+
+    /**
+     * Make space in the buffer for the given number of bytes.
+     * @param {number} length number of bytes being written
+     * @private
+     */
+    makeSpaceFor(length) {
+      const requiredLength = this.offset + length;
+      const curByteLength = this.view.buffer.byteLength;
+      let newByteLength = curByteLength;
+      while (newByteLength &lt; requiredLength)
+        // Double the size of the buffer
+        newByteLength &lt;&lt;= 1;
+      if (newByteLength !== curByteLength) {
+        const newBuffer = new ArrayBuffer(newByteLength);
+        new Uint8Array(newBuffer).set(new Uint8Array(this.view.buffer));
+        this.view = new DataView(newBuffer);
+      }
+    }
+
+    /**
+     * Write a long float.
+     * @private
+     * @param {number} value number to write
+     */
+    writeFloat64(value) {
+      this.makeSpaceFor(8);
+      this.view.setFloat64(this.offset, value);
+      this.offset += 8;
+    }
+
+    /**
+     * Write an unsigned byte.
+     * @private
+     * @param {number} value number to write
+     */
+    writeUint8(value) {
+      this.makeSpaceFor(1);
+      this.view.setUint8(this.offset, value);
+      this.offset++;
+    }
+
+    /**
+     * Write an unsigned byte array.
+     * @private
+     * @param {number} value byte array to write
+     */
+    writeUint8Array(value) {
+      this.makeSpaceFor(value.length);
+      for (let i = 0; i &lt; value.length; ++i)
+        this.view.setUint8(this.offset++, value[i]);
+    }
+
+    /**
+     * Write an unsigned short.
+     * @private
+     * @param {number} value number to write
+     */
+    writeUint16(value) {
+      this.makeSpaceFor(2);
+      this.view.setUint16(this.offset, value);
+      this.offset += 2;
+    }
+
+    /**
+     * Write an unsigned int.
+     * @private
+     * @param {number} value number to write
+     */
+    writeUint32(value) {
+      this.makeSpaceFor(4);
+      this.view.setUint32(this.offset, value);
+      this.offset += 4;
+    }
+
+    /**
+     * Write an unsigned long.
+     * @private
+     * @param {number} value number to write
+     */
+    writeUint64(value) {
+      const low = value % POW_2_32;
+      const high = (value - low) / POW_2_32;
+      this.makeSpaceFor(8);
+      this.view.setUint32(this.offset, high);
+      this.view.setUint32(this.offset + 4, low);
+      this.offset += 8;
+    }
+
+    /**
+     * Write a major type and the argument to that type.
+     * @private
+     * @param {number} type CBOR major type
+     * @param {number} argument to that type
+     */
+    writeTypeAndArgument(type, arg) {
+      if (arg &lt; 24) {
+        this.writeUint8(type &lt;&lt; 5 | arg);
+      } else if (arg &lt; 0x100) {
+        this.writeUint8(type &lt;&lt; 5 | 24);
+        this.writeUint8(arg);
+      } else if (arg &lt; 0x10000) {
+        this.writeUint8(type &lt;&lt; 5 | 25);
+        this.writeUint16(arg);
+      } else if (arg &lt; 0x100000000) {
+        this.writeUint8(type &lt;&lt; 5 | 26);
+        this.writeUint32(arg);
+      } else {
+        this.writeUint8(type &lt;&lt; 5 | 27);
+        this.writeUint64(arg);
+      }
+    }
+
+    /**
+     * Write a tag. Data associated with the tag can be
+     * written following it using `encodeItem()`
+     * @private
+     * @param {number} id tag to write
+     */
+    writeTag(id) {
+      this.writeTypeAndArgument(6, id);
+    }
+
+    /**
+     * Write a Javascript object of any type.
+     * Provided for use by {@linkcode CBORTagger} implementations.
+     * @param {number} id tag to write
+     */
+    encodeItem(value) {
+
+      if (value === false) {
+        // CBOR Appendix B Jump Table - false
+        this.writeUint8(0xf4);
+        return;
+      }
+
+      if (value === true) {
+        // CBOR Appendix B Jump Table - true
+        this.writeUint8(0xf5);
+        return;
+      }
+
+      if (value === null) {
+        // CBOR Appendix B Jump Table - null
+        this.writeUint8(0xf6);
+        return;
+      }
+
+      if (value === undefined) {
+        // CBOR Appendix B Jump Table - undefined
+        this.writeUint8(0xf7);
+        return;
+      }
+
+      switch (typeof value) {
+
+      case "number":
+        if (Math.floor(value) === value) {
+          if (0 &lt;= value &amp;&amp; value &lt;= POW_2_53) {
+            // CBOR major type 0 - unsigned integer 0..2^64-1
+            this.writeTypeAndArgument(0, value);
+            return;
+          }
+
+          if (-POW_2_53 &lt;= value &amp;&amp; value &lt; 0) {
+            // CBOR major type 1 - negative integer -2^64..-1
+            this.writeTypeAndArgument(1, -(value + 1));
+            return;
+          }
+        }
+        // CBOR Appendix B Jump Table - double-precision float
+        this.writeUint8(0xfb);
+        this.writeFloat64(value);
+        return;
+
+      case "string":
+        // CBOR major type 3 - text string encoded as UTF8
+        {
+          const utf8data = new TextEncoder().encode(value);
+          this.writeTypeAndArgument(3, utf8data.length);
+          this.writeUint8Array(utf8data);
+        }
+        return;
+      }
+
+      if (Array.isArray(value)) {
+        // CBOR major type 4 - array of data items
+        this.writeTypeAndArgument(4, value.length);
+        for (let i = 0; i &lt; value.length; ++i)
+          this.encodeItem(value[i]);
+        return;
+      }
+
+      if (value instanceof Uint8Array) {
+        // CBOR major type 2 - byte string
+        this.writeTypeAndArgument(2, value.length);
+        this.writeUint8Array(value);
+        return;
+      }
+
+      assert(typeof value !== "function", "Can't CBOR functions");
+
+      if (this.tagger) {
+        value = this.tagger.encode(value, this);
+        if (!value)
+          return; // no more needs to be written
+      }
+
+      // Filter keys the tagger wants to skip
+      const keys = Object.keys(value)
+            .filter(k => !this.tagger || !this.tagger.skip(k));
+      const length = keys.length;
+      // CBOR major type 5 - map of pairs of data items
+      this.writeTypeAndArgument(5, length);
+      for (const key of keys) {
+        this.encodeItem(key);
+        this.encodeItem(value[key]);
+      }
+    }
+
+    /**
+     * Encode a value as a Uint8Array. This is the main entry point to the
+     * encoder.
+     * @param {object} value value to encode
+     */
+    encode(value) {
+      this.view = new DataView(new ArrayBuffer(256));
+      this.offset = 0;
+
+      this.encodeItem(value);
+
+      if (this.tagger)
+        this.tagger.cleanUp();
+
+      return new Uint8Array(this.view.buffer, 0, this.offset);
+    }
+  }
+
+  return CBOREncoder;
+});
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="BackendGame.html">BackendGame</a></li><li><a href="Board.html">Board</a></li><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserDatabase.html">BrowserDatabase</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="CBORDecoder.html">CBORDecoder</a></li><li><a href="CBOREncoder.html">CBOREncoder</a></li><li><a href="CBORTagger.html">CBORTagger</a></li><li><a href="Channel.html">Channel</a></li><li><a href="ClientGamesUI.html">ClientGamesUI</a></li><li><a href="ClientGameUI.html">ClientGameUI</a></li><li><a href="Compressor.html">Compressor</a></li><li><a href="Configurator.html">Configurator</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="Explorer.html">Explorer</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameDialog.html">GameDialog</a></li><li><a href="GameSetupDialog.html">GameSetupDialog</a></li><li><a href="InvitePlayersDialog.html">InvitePlayersDialog</a></li><li><a href="JSAnalyser.html">JSAnalyser</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="LoginDialog.html">LoginDialog</a></li><li><a href="Move.html">Move</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="StandaloneGamesUI.html">StandaloneGamesUI</a></li><li><a href="StandaloneGameUI.html">StandaloneGameUI</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tagger.html">Tagger</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Interfaces</h3><ul><li><a href="Database.html">Database</a></li><li><a href="Platform.html">Platform</a></li></ul><h3>Mixins</h3><ul><li><a href="browser_GamesUIMixin.html">browser/GamesUIMixin</a></li><li><a href="browser_GameUIMixin.html">browser/GameUIMixin</a></li><li><a href="browser_SquareMixin.html">browser/SquareMixin</a></li><li><a href="browser_SurfaceMixin.html">browser/SurfaceMixin</a></li><li><a href="client_ClientUIMixin.html">client/ClientUIMixin</a></li><li><a href="client_PasswordMixin.html">client/PasswordMixin</a></li><li><a href="game_Commands.html">game/Commands</a></li><li><a href="game_Replay.html">game/Replay</a></li><li><a href="game_Undo.html">game/Undo</a></li><li><a href="standalone_StandaloneUIMixin.html">standalone/StandaloneUIMixin</a></li></ul><h3>Global</h3><ul><li><a href="global.html#backend/findBestPlay">backend/findBestPlay</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Dec 02 2022 17:41:09 GMT+0000 (Coordinated Universal Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
