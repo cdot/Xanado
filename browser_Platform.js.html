@@ -31,7 +31,7 @@
   and license information. Author Crawford Currie http://c-dot.co.uk*/
 /* eslint-env browser, jquery */
 
-define([ "common/Platform", "jquery" ], Platform => {
+define([ "common/Platform" ], Platform => {
 
   assert = (cond, mess) => {
     if (!cond) {
@@ -41,45 +41,6 @@ define([ "common/Platform", "jquery" ], Platform => {
     }
   };
   assert.fail = mess => assert(false, mess);
-
-  // Set up an ajax transport to read binary data
-  $.ajaxTransport("+binary", function (options, originalOptions, jqXHR) {
-    return {
-      // create new XMLHttpRequest
-      send: function (headers, callback) {
-        // setup all variables
-        var xhr = new XMLHttpRequest(),
-            url = options.url,
-            type = options.type,
-            async = options.async || true,
-            // blob or arraybuffer. Default is blob
-            dataType = options.responseType || "blob",
-            data = options.data || null,
-            username = options.username || null,
-            password = options.password || null;
-
-        xhr.addEventListener('load', function () {
-          var data = {};
-          data[options.dataType] = xhr.response;
-          // make callback and send data
-          callback(xhr.status, xhr.statusText, data, xhr.getAllResponseHeaders());
-        });
-
-        xhr.open(type, url, async, username, password);
-
-        // setup custom headers
-        for (var i in headers) {
-          xhr.setRequestHeader(i, headers[i]);
-        }
-
-        xhr.responseType = dataType;
-        xhr.send(data);
-      },
-      abort: function () {
-        jqXHR.abort();
-      }
-    };
-  });
 
   /**
    * Browser implementation of {@linkcode Platform}.
@@ -114,16 +75,80 @@ define([ "common/Platform", "jquery" ], Platform => {
     }
 
     /**
+     * Like jQuery $.get.  We would like to use the features of
+     * jQuery.ajax, but by default it doesn't handle binary files. We
+     * could add a jQuery transport, as described in
+     * https://stackoverflow.com/questions/33902299/using-jquery-ajax-to-download-a-binary-file
+     * but that's more work than simply using XMLHttpRequest
+     *
+     * So this static method performs a HTTP request, and returns a
+     * Promise. Note that the response is handled as an Uint8Array, it
+     * is up to the caller to transform that to any other type.
+     * @param {string} method HTTP method e.g. GET
+     * @param {string} url Relative or absolute url
+     * @param {Object} headers HTTP headers
+     * @param {string|Uint8Array} body request body
+     * @return {Promise} a promise which will be resolved with
+     * {status:, xhr:, body:}
+		 * @private
+     */
+    static request(method, url, headers, body) {
+
+      headers = headers || {};
+
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+
+        // for binary data
+        xhr.responseType = "arraybuffer";
+        xhr.open(method, url, true);
+
+        for (let ii in headers) {
+          xhr.setRequestHeader(ii, headers[ii]);
+        }
+
+        // Workaround for Edge
+        try {
+          if (body === undefined)
+            xhr.send();
+          else {
+            xhr.send(body);
+          }
+        } catch (e) {
+          reject(`xhr.send error: ${e}`);
+        }
+
+        xhr.onload = () => {
+          if (xhr.status === 401) {
+            throw new Error("http no 401 handler");
+          }
+          resolve({
+            body: new Uint8Array(xhr.response),
+            status: xhr.status,
+            xhr: xhr
+          });
+        };
+
+        xhr.onerror = e => {
+          reject(new Error(400, `http error: ${e}`));
+        };
+
+        xhr.ontimeout = function() {
+          reject(new Error(408, 'Timeout exceeded'));
+        };
+      });
+    }
+
+    /**
      * @implements Platform
      */
     static readBinaryFile(path) {
-      return $.ajax({
-        type: "GET",
-        url: path,
-        dataType: "binary",
-        processData: "false"
-      })
-      .then(res => new Uint8Array(res));
+      return BrowserPlatform.request("GET", path)
+      .then(res => {
+        if (200 &lt;= res.status &amp;&amp; res.status &lt; 300)
+          return res.body;
+        throw new Error(res.status, `${path} ${res.status} read failed`);
+      });
     }
 
     /**
@@ -181,13 +206,13 @@ define([ "common/Platform", "jquery" ], Platform => {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="BackendGame.html">BackendGame</a></li><li><a href="Board.html">Board</a></li><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserDatabase.html">BrowserDatabase</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="CBORDecoder.html">CBORDecoder</a></li><li><a href="CBOREncoder.html">CBOREncoder</a></li><li><a href="Channel.html">Channel</a></li><li><a href="ClientGamesUI.html">ClientGamesUI</a></li><li><a href="ClientGameUI.html">ClientGameUI</a></li><li><a href="Compressor.html">Compressor</a></li><li><a href="Configurator.html">Configurator</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="Explorer.html">Explorer</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameDialog.html">GameDialog</a></li><li><a href="GameSetupDialog.html">GameSetupDialog</a></li><li><a href="InvitePlayersDialog.html">InvitePlayersDialog</a></li><li><a href="JSAnalyser.html">JSAnalyser</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="LoginDialog.html">LoginDialog</a></li><li><a href="Move.html">Move</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="StandaloneGamesUI.html">StandaloneGamesUI</a></li><li><a href="StandaloneGameUI.html">StandaloneGameUI</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tagger.html">Tagger</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Interfaces</h3><ul><li><a href="CBORTagger.html">CBORTagger</a></li><li><a href="Database.html">Database</a></li><li><a href="Platform.html">Platform</a></li></ul><h3>Mixins</h3><ul><li><a href="browser_GamesUIMixin.html">browser/GamesUIMixin</a></li><li><a href="browser_GameUIMixin.html">browser/GameUIMixin</a></li><li><a href="browser_SquareMixin.html">browser/SquareMixin</a></li><li><a href="browser_SurfaceMixin.html">browser/SurfaceMixin</a></li><li><a href="client_ClientUIMixin.html">client/ClientUIMixin</a></li><li><a href="client_PasswordMixin.html">client/PasswordMixin</a></li><li><a href="game_Commands.html">game/Commands</a></li><li><a href="game_Replay.html">game/Replay</a></li><li><a href="game_Undo.html">game/Undo</a></li><li><a href="standalone_StandaloneUIMixin.html">standalone/StandaloneUIMixin</a></li></ul><h3>Global</h3><ul><li><a href="global.html#backend/findBestPlay">backend/findBestPlay</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="BackendGame.html">BackendGame</a></li><li><a href="Board.html">Board</a></li><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserDatabase.html">BrowserDatabase</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Channel.html">Channel</a></li><li><a href="ClientGamesUI.html">ClientGamesUI</a></li><li><a href="ClientGameUI.html">ClientGameUI</a></li><li><a href="Compressor.html">Compressor</a></li><li><a href="Configurator.html">Configurator</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="Explorer.html">Explorer</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameDialog.html">GameDialog</a></li><li><a href="GameSetupDialog.html">GameSetupDialog</a></li><li><a href="InvitePlayersDialog.html">InvitePlayersDialog</a></li><li><a href="JSAnalyser.html">JSAnalyser</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="LoginDialog.html">LoginDialog</a></li><li><a href="Move.html">Move</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="StandaloneGamesUI.html">StandaloneGamesUI</a></li><li><a href="StandaloneGameUI.html">StandaloneGameUI</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Interfaces</h3><ul><li><a href="Database.html">Database</a></li><li><a href="Platform.html">Platform</a></li></ul><h3>Mixins</h3><ul><li><a href="browser_GamesUIMixin.html">browser/GamesUIMixin</a></li><li><a href="browser_GameUIMixin.html">browser/GameUIMixin</a></li><li><a href="browser_SquareMixin.html">browser/SquareMixin</a></li><li><a href="browser_SurfaceMixin.html">browser/SurfaceMixin</a></li><li><a href="client_ClientUIMixin.html">client/ClientUIMixin</a></li><li><a href="client_PasswordMixin.html">client/PasswordMixin</a></li><li><a href="game_Commands.html">game/Commands</a></li><li><a href="game_Replay.html">game/Replay</a></li><li><a href="game_Undo.html">game/Undo</a></li><li><a href="standalone_StandaloneUIMixin.html">standalone/StandaloneUIMixin</a></li></ul><h3>Global</h3><ul><li><a href="global.html#backend/findBestPlay">backend/findBestPlay</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Sun Dec 04 2022 17:54:53 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Dec 09 2022 15:51:54 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

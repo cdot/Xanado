@@ -372,7 +372,7 @@ this will be a WebSocket. For standalone, it will be a
     
 
     
-    <h4 class="name" id="alert"><span class="type-signature"></span>alert<span class="signature">(args, title<span class="signature-attributes">nullable</span>)</span><span class="type-signature"> &rarr; {jQuery}</span></h4>
+    <h4 class="name" id=".report"><span class="type-signature">(static) </span>report<span class="signature">(args)</span><span class="type-signature"></span></h4>
     
 
     
@@ -380,7 +380,7 @@ this will be a WebSocket. For standalone, it will be a
 
 
 <div class="description">
-    <p>Report an error.</p>
+    <p>Report an error.  Access in mixins using this.constructor.report.</p>
 </div>
 
 
@@ -403,8 +403,6 @@ this will be a WebSocket. For standalone, it will be a
 
         <th>Type</th>
 
-        
-        <th>Attributes</th>
         
 
         
@@ -440,53 +438,12 @@ this will be a WebSocket. For standalone, it will be a
             </td>
 
             
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
 
             
 
             <td class="description last"><p>This will either be a
 simple i18n string ID, or an array containing an i18n ID and a
 series of arguments, or a jqXHR.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>title</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-                    &lt;nullable><br>
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>title for the error dialog</p></td>
         </tr>
 
     
@@ -527,7 +484,7 @@ series of arguments, or a jqXHR.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line53">line 53</a>
+        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line51">line 51</a>
     </li></ul></dd>
     
 
@@ -552,28 +509,6 @@ series of arguments, or a jqXHR.</p></td>
 
 
 
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>the dialog</p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">jQuery</span>
-
-
-    </dd>
-</dl>
-
-    
 
 
 
@@ -638,7 +573,7 @@ class, calling super in the overriding method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line334">line 334</a>
+        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line325">line 325</a>
     </li></ul></dd>
     
 
@@ -726,7 +661,7 @@ class, calling super in the overriding method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line292">line 292</a>
+        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line283">line 283</a>
     </li></ul></dd>
     
 
@@ -836,7 +771,7 @@ class, calling super in the overriding method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line284">line 284</a>
+        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line275">line 275</a>
     </li></ul></dd>
     
 
@@ -859,18 +794,6 @@ class, calling super in the overriding method.</p>
 
 
 
-<h5>Throws:</h5>
-
-        
-
-    <div class="param-desc">
-    
-        <p>Error if there is no session active</p>
-    
-    </div>
-
-
-    
 
 
 <h5>Returns:</h5>
@@ -878,9 +801,9 @@ class, calling super in the overriding method.</p>
         
 <div class="param-desc">
     <p>a promise that resolves to an simple
-session object if someone is logged in, or throws otherwise.
+session object if someone is logged in, or undefined otherwise.
 The object is expected to define <code>key</code>, the logged-in player, and
-may set <code>provider</code>.</p>
+can set provider to <code>xanado</code>.</p>
 </div>
 
 
@@ -1010,7 +933,7 @@ may set <code>provider</code>.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line251">line 251</a>
+        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line247">line 247</a>
     </li></ul></dd>
     
 
@@ -1100,7 +1023,7 @@ The theme CS can override some or all of the default CSS.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line303">line 303</a>
+        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line294">line 294</a>
     </li></ul></dd>
     
 
@@ -1211,7 +1134,7 @@ a list of theme name strings.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line204">line 204</a>
+        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line200">line 200</a>
     </li></ul></dd>
     
 
@@ -1317,7 +1240,7 @@ a list of theme name strings.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line147">line 147</a>
+        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line143">line 143</a>
     </li></ul></dd>
     
 
@@ -1433,7 +1356,7 @@ invoke a Dispatcher.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line98">line 98</a>
+        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line94">line 94</a>
     </li></ul></dd>
     
 
@@ -1469,7 +1392,7 @@ invoke a Dispatcher.</p>
     
 
     
-    <h4 class="name" id="setSetting"><span class="type-signature"></span>setSetting<span class="signature">(key, value)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+    <h4 class="name" id="setSetting"><span class="type-signature"></span>setSetting<span class="signature">(key, value)</span><span class="type-signature"></span></h4>
     
 
     
@@ -1593,7 +1516,7 @@ invoke a Dispatcher.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line261">line 261</a>
+        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line256">line 256</a>
     </li></ul></dd>
     
 
@@ -1618,28 +1541,6 @@ invoke a Dispatcher.</p>
 
 
 
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>resolves when setting is complete</p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise</span>
-
-
-    </dd>
-</dl>
-
-    
 
 
 
@@ -1651,7 +1552,7 @@ invoke a Dispatcher.</p>
     
 
     
-    <h4 class="name" id="setSettings"><span class="type-signature"></span>setSettings<span class="signature">(settings)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+    <h4 class="name" id="setSettings"><span class="type-signature"></span>setSettings<span class="signature">(settings)</span><span class="type-signature"></span></h4>
     
 
     
@@ -1752,7 +1653,7 @@ invoke a Dispatcher.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line270">line 270</a>
+        <a href="browser_UI.js.html">browser/UI.js</a>, <a href="browser_UI.js.html#line263">line 263</a>
     </li></ul></dd>
     
 
@@ -1777,28 +1678,6 @@ invoke a Dispatcher.</p>
 
 
 
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>resolves when all settings are complete</p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise</span>
-
-
-    </dd>
-</dl>
-
-    
 
 
 
@@ -1820,13 +1699,13 @@ invoke a Dispatcher.</p>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="BackendGame.html">BackendGame</a></li><li><a href="Board.html">Board</a></li><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserDatabase.html">BrowserDatabase</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="CBORDecoder.html">CBORDecoder</a></li><li><a href="CBOREncoder.html">CBOREncoder</a></li><li><a href="Channel.html">Channel</a></li><li><a href="ClientGamesUI.html">ClientGamesUI</a></li><li><a href="ClientGameUI.html">ClientGameUI</a></li><li><a href="Compressor.html">Compressor</a></li><li><a href="Configurator.html">Configurator</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="Explorer.html">Explorer</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameDialog.html">GameDialog</a></li><li><a href="GameSetupDialog.html">GameSetupDialog</a></li><li><a href="InvitePlayersDialog.html">InvitePlayersDialog</a></li><li><a href="JSAnalyser.html">JSAnalyser</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="LoginDialog.html">LoginDialog</a></li><li><a href="Move.html">Move</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="StandaloneGamesUI.html">StandaloneGamesUI</a></li><li><a href="StandaloneGameUI.html">StandaloneGameUI</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tagger.html">Tagger</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Interfaces</h3><ul><li><a href="CBORTagger.html">CBORTagger</a></li><li><a href="Database.html">Database</a></li><li><a href="Platform.html">Platform</a></li></ul><h3>Mixins</h3><ul><li><a href="browser_GamesUIMixin.html">browser/GamesUIMixin</a></li><li><a href="browser_GameUIMixin.html">browser/GameUIMixin</a></li><li><a href="browser_SquareMixin.html">browser/SquareMixin</a></li><li><a href="browser_SurfaceMixin.html">browser/SurfaceMixin</a></li><li><a href="client_ClientUIMixin.html">client/ClientUIMixin</a></li><li><a href="client_PasswordMixin.html">client/PasswordMixin</a></li><li><a href="game_Commands.html">game/Commands</a></li><li><a href="game_Replay.html">game/Replay</a></li><li><a href="game_Undo.html">game/Undo</a></li><li><a href="standalone_StandaloneUIMixin.html">standalone/StandaloneUIMixin</a></li></ul><h3>Global</h3><ul><li><a href="global.html#backend/findBestPlay">backend/findBestPlay</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="BackendGame.html">BackendGame</a></li><li><a href="Board.html">Board</a></li><li><a href="BrowserBoard.html">BrowserBoard</a></li><li><a href="BrowserDatabase.html">BrowserDatabase</a></li><li><a href="BrowserGame.html">BrowserGame</a></li><li><a href="BrowserPlatform.html">BrowserPlatform</a></li><li><a href="BrowserPlayer.html">BrowserPlayer</a></li><li><a href="BrowserRack.html">BrowserRack</a></li><li><a href="BrowserTile.html">BrowserTile</a></li><li><a href="Channel.html">Channel</a></li><li><a href="ClientGamesUI.html">ClientGamesUI</a></li><li><a href="ClientGameUI.html">ClientGameUI</a></li><li><a href="Compressor.html">Compressor</a></li><li><a href="Configurator.html">Configurator</a></li><li><a href="Dialog.html">Dialog</a></li><li><a href="Dictionary.html">Dictionary</a></li><li><a href="Edition.html">Edition</a></li><li><a href="Explorer.html">Explorer</a></li><li><a href="FileDatabase.html">FileDatabase</a></li><li><a href="Fridge.html">Fridge</a></li><li><a href="Game.html">Game</a></li><li><a href="GameDialog.html">GameDialog</a></li><li><a href="GameSetupDialog.html">GameSetupDialog</a></li><li><a href="InvitePlayersDialog.html">InvitePlayersDialog</a></li><li><a href="JSAnalyser.html">JSAnalyser</a></li><li><a href="LetterBag.html">LetterBag</a></li><li><a href="LetterNode.html">LetterNode</a></li><li><a href="LoginDialog.html">LoginDialog</a></li><li><a href="Move.html">Move</a></li><li><a href="Player.html">Player</a></li><li><a href="Rack.html">Rack</a></li><li><a href="Server.html">Server</a></li><li><a href="ServerPlatform.html">ServerPlatform</a></li><li><a href="Square.html">Square</a></li><li><a href="StandaloneGamesUI.html">StandaloneGamesUI</a></li><li><a href="StandaloneGameUI.html">StandaloneGameUI</a></li><li><a href="Surface.html">Surface</a></li><li><a href="Tile.html">Tile</a></li><li><a href="Trie.html">Trie</a></li><li><a href="TrieNode.html">TrieNode</a></li><li><a href="Turn.html">Turn</a></li><li><a href="UI.html">UI</a></li><li><a href="UserManager.html">UserManager</a></li><li><a href="XanadoPass.html">XanadoPass</a></li></ul><h3>Interfaces</h3><ul><li><a href="Database.html">Database</a></li><li><a href="Platform.html">Platform</a></li></ul><h3>Mixins</h3><ul><li><a href="browser_GamesUIMixin.html">browser/GamesUIMixin</a></li><li><a href="browser_GameUIMixin.html">browser/GameUIMixin</a></li><li><a href="browser_SquareMixin.html">browser/SquareMixin</a></li><li><a href="browser_SurfaceMixin.html">browser/SurfaceMixin</a></li><li><a href="client_ClientUIMixin.html">client/ClientUIMixin</a></li><li><a href="client_PasswordMixin.html">client/PasswordMixin</a></li><li><a href="game_Commands.html">game/Commands</a></li><li><a href="game_Replay.html">game/Replay</a></li><li><a href="game_Undo.html">game/Undo</a></li><li><a href="standalone_StandaloneUIMixin.html">standalone/StandaloneUIMixin</a></li></ul><h3>Global</h3><ul><li><a href="global.html#backend/findBestPlay">backend/findBestPlay</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Sun Dec 04 2022 17:54:53 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Dec 09 2022 15:51:55 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>
