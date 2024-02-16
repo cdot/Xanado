@@ -357,19 +357,19 @@ class BrowserGame extends Undo(Commands(Game)) {
       // players. If negative, points lost to remaining tiles on rack.
       // tilesRemaining: {string} if tiles < 0, the letters that caused it
       // time: <number} points lost due to time penalties
-      const delta = turn.score.filter(s => s.key === player.key)[0];
+      const endState = turn.score.filter(s => s.key === player.key)[0];
 
       if (player.score === winningScore)
         winners.push(name);
 
       let rackAdjust;
-      if (delta.tiles > 0) {
+      if (endState.tiles > 0) {
         rackAdjust = $.i18n(
-          "log-got-from-racks", name, delta.tiles);
-      } else if (delta.tiles < 0) {
+          "log-got-from-racks", name, endState.tiles);
+      } else if (endState.tiles < 0) {
         // Lost sum of unplayed letters
         rackAdjust = $.i18n(
-          "log-lost-from-rack", name, -delta.tiles, delta.tilesRemaining);
+          "log-lost-from-rack", name, -endState.tiles, endState.tilesRemaining);
       }
 
       if (rackAdjust)
@@ -377,7 +377,7 @@ class BrowserGame extends Undo(Commands(Game)) {
           $(document.createElement("div"))
           .addClass("rack-adjust").text(rackAdjust));
 
-      const timePenalty = delta.time;
+      const timePenalty = endState.time;
       if (typeof timePenalty === "number" && timePenalty !== 0) {
         const $timeAdjust = $(document.createElement("div"))
               .addClass("time-adjust");

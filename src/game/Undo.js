@@ -56,11 +56,11 @@ const Undo = superclass => class extends superclass {
    * @param {Turn} turn the Turn to unplay
    */
   unconfirmGameOver(turn) {
-    // Re-adjust scores from the deltas
-    for (const delta of turn.score) {
-      const player = this.getPlayerWithKey(delta.key);
-      assert(player, delta.key);
-      player.score -= (delta.time || 0) + (delta.tiles || 0);
+    // Re-adjust scores from the player end states
+    for (const endState of turn.score) {
+      const player = this.getPlayerWithKey(endState.key);
+      assert(player, endState.key);
+      player.score -= (endState.time || 0) + (endState.tiles || 0);
     }
     this.state = Game.State.PLAYING;
     // TODO: Notify

@@ -424,8 +424,9 @@ class UI {
    */
   static makeURL(parts) {
     const args = Object.keys(parts)
-          .filter(f => !/^_/.test(f)).sort()
-          .map(k => parts[k] && typeof parts[k] === "boolean" ?
+          .filter(f => f && !/^_/.test(f))
+          .sort()
+          .map(k => (parts[k] && typeof parts[k] === "boolean") ?
                k : `${k}=${encodeURIComponent(parts[k])}`);
     return `${parts._URL}?${args.join(";")}`;
   }

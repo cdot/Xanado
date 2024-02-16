@@ -858,8 +858,7 @@ class Game {
 
   /**
    * Encode the game in a URI parameter block
-   * @return {string} parameter string for embedding in a URL to recreate
-   * the game.
+   * @return {object} parameter object
    */
   pack() {
     const params = {};
@@ -871,8 +870,9 @@ class Game {
 
     params.a = this.lastActivity();
     params.b = this.board.pack();
-    if (this.challengePenalty) {
-      params.c = PenaltyNames.indexOf(this.challengePenalty);
+    const cp = PenaltyNames.indexOf(this.challengePenalty);
+    if (cp >= 0) {
+      params.c = cp;
       params.o = this.penaltyPoints;
     }
     params.d = this.dictionary;
@@ -883,11 +883,15 @@ class Game {
     params.m = this.creationTimestamp;
     if (this.nextGameKey) params.n = this.nextGameKey;
     this.players.forEach((player, index) => {
+      // Transfer player parameters into flat param object indexed
+      // by player number
       const p = player.pack();
       for (const key in p)
         params[`P${index}${key}`] = p[key];
     });
     if (this.allowUndo) {
+      // Transfer turn parameters into flat param object indexed
+      // by turn number
       this.turns.forEach((turn, index) => {
         const t = turn.pack();
         for (const key in t)
@@ -901,21 +905,15 @@ class Game {
     params.s = StateNames.indexOf(this.state);
     if (this.timerType) params.t = TimerNames.indexOf(this.timerType);
     if (this.allowUndo) params.u = true;
-    if (this.wordCheck) params.v = WordCheckNames.indexOf(this.wordCheck);
+    const wc = WordCheckNames.indexOf(this.wordCheck);
+    if (wc >= 0) params.v = wc;
     if (this.whosTurnKey) params.w = this.whosTurnKey;
     if (this.timerType != Game.TIMER_NONE) {
       params.x = this.timeAllowed;
       params.y = this.timePenalty;
     }
 
-    const s = [];
-    for (const k in params) {
-      if (typeof params[k] === "boolean")
-        s.push(k);
-      else
-        s.push(`${k}=${encodeURI(params[k])}`);
-    }
-    return s.join(";");
+    return params;
   }
 
   /**
@@ -930,7 +928,7 @@ class Game {
     const WordCheckNames = Object.values(Game.WordCheck);
 
     let game;
-    return new Game({ edition: params.e })
+    return new this({ edition: params.e })
     .create()
     .then(g => game = g)
     .then(() => game.promiseEdition())

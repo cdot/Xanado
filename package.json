@@ -37,7 +37,7 @@
 	],
 	"dependencies": {
 		"@cdot/cbor": "^1.0.5",
-		"@cdot/dictionary": "^1.0.2",
+		"@cdot/dictionary": "^1.0.3",
 		"@rwap/jquery-ui-touch-punch": "^1.0.11",
 		"async-lock": "^1.4.0",
 		"banana-i18n": "^2.3.3",

@@ -335,9 +335,9 @@ const GameUIMixin = superclass => class extends superclass {
         player.$refreshScore();
         break;
       case "object":
-        for (const delta of turn.score) {
-          const p = this.game.getPlayerWithKey(delta.key);
-          p.score += (delta.tiles || 0) + (delta.time || 0);
+        for (const endState of turn.score) {
+          const p = this.game.getPlayerWithKey(endState.key);
+          p.score += (endState.tiles || 0) + (endState.time || 0);
           p.$refreshScore();
         }
       }
@@ -1185,7 +1185,7 @@ const GameUIMixin = superclass => class extends superclass {
    * move.
    * @memberof browser/GameUIMixin
    * @instance
-   * @param {number} col column deltae
+   * @param {number} col column delta
    * @param {number} row row delta
    * @private
    */
@@ -1881,7 +1881,7 @@ const GameUIMixin = superclass => class extends superclass {
       const notification = new Notification(
         title,
         {
-          icon: "../images/favicon.ico",
+          icon: "../images/xanado_favicon.png",
           body: body
         });
       this._notification = notification;

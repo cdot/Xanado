@@ -344,17 +344,8 @@ describe("game/Game", () => {
         })
       ];
 
-      const s = g.pack();
-      //console.debug(s);
-
-      const p = {};
-      s.split(";").forEach(part => {
-        const bits = part.split("=");
-        if (bits.length === 1)
-          p[bits[0]] = true;
-        else
-          p[bits[0]] = decodeURIComponent(bits[1]);
-      });
+      const p = g.pack();
+      //console.debug(p);
 
       assert.equal(p.b, '(225)'); // blank board
       assert.equal(p.c, 3);
@@ -419,9 +410,11 @@ describe("game/Game", () => {
       T0n:"robot1",
       T0p:"human2",
       T0t:3,
+      T0s:12,
       T1m:1,
       T1n:"human2",
-      T1s:12,
+      T1u:3,
+      T1v:4,
       T1p:"robot1",
       T1r:"AQ",
       T1t:1,
@@ -471,6 +464,7 @@ describe("game/Game", () => {
       assert.equal(t0.nextToGoKey, 'robot1');
       assert.equal(t0.playerKey, 'human2');
       assert.equal(t0.challengerKey, 'robot1');
+      assert.equal(t0.score, 12);
 
       const t1 = game.turns[1];
       assert.equal(t1.type, Turn.Type.SWAPPED);
@@ -481,6 +475,7 @@ describe("game/Game", () => {
       assert.equal(t1.replacements[0].score, 1);
       assert.equal(t1.replacements[1].letter, "Q");
       assert.equal(t1.replacements[1].score, 4);
+      assert.deepEqual(t1.score, { tiles: 3, time: 4 });
       //console.log(game.pack());
     });
   });

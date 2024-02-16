@@ -134,7 +134,7 @@ class StandaloneGameUI extends StandaloneUIMixin(GameUIMixin(UI)) {
           return game.onLoad(this.db);
         });
 
-      } else if (this.args.uri) {
+      } else if (this.args.b && this.args.d && this.args.e) {
         this.debug("Loading game from URI");
         return BackendGame.unpack(this.args)
         .then(game => {
@@ -191,7 +191,7 @@ class StandaloneGameUI extends StandaloneUIMixin(GameUIMixin(UI)) {
       $("#library-button")
       .icon_button()
       .on("click", () => {
-        const parts = UI.parseURLArguments(window.location.toString());
+        const parts = UI.parseURLArguments(window.location.href);
         parts._URL = parts._URL.replace(
           /standalone_game\./, "standalone_games.");
         window.location = UI.makeURL(parts);
@@ -199,10 +199,13 @@ class StandaloneGameUI extends StandaloneUIMixin(GameUIMixin(UI)) {
       $("#share-button")
       .icon_button()
       .on("click", () => {
-        const parts = UI.parseURLArguments(window.location.toString());
-        parts._URL = parts._URL.replace(
-          /standalone_game\./, "standalone_games.");
-        window.location = UI.makeURL(parts);
+        const parts = UI.parseURLArguments(window.location.href);
+        delete parts.game;
+        const pg = this.backendGame.pack();
+        for (const k in pg)
+          parts[k] = pg[k];
+        const url = UI.makeURL(parts);
+        console.log("Packed", url);
       });
     })
     .then(() => this.attachUIEventHandlers())

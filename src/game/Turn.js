@@ -108,13 +108,15 @@ class Turn extends Move {
        */
       this.challengerKey = params.challengerKey;
 
-    if (params.endState)
+    if (params.endState) {
+
       /**
        * String describing the reason the game ended. Only used when
        * type==Turn.Type.GAME_ENDED
        * @member {State?}
        */
       this.endState = params.endState;
+    }
 
     if (params.passes && params.passes > 0)
       /**
@@ -123,6 +125,25 @@ class Turn extends Move {
        * @member {number?}
        */
       this.passes = params.passes;
+
+    if (params.score)
+      // SMELL: this is nasty
+      /**
+       * For most turns this will be a number giving the score from
+       * the turn. For the exceptional GAME_OVER turn, this
+       * is an array giving the end state for each player in the game.
+       * An end state is an object with the fields:
+       * - `key` is the player key.
+       * - `tiles` is the points total for tiles, positive if this is
+       * the winning player and they are gaining from other player's
+       * racks, or negative if they are a losing player having unplayed
+       * tiles.
+       * - `time` is the points penalty for any time violation.
+       * - `tilesRemaining` is a string with a comma-separated list of tiles
+       * remaining on the player's rack.
+       * @member {number|object}
+       */
+      this.score = undefined;
   }
 
   /**
@@ -145,15 +166,33 @@ class Turn extends Move {
    * the turn.
    */
   pack() {
+    const StateNames = Object.values(Game.State);
+
     const params = {};
     if (this.challengerKey) params.c = this.challengerKey;
-    if (this.endState) params.e = this.endState;
+    const es = StateNames.indexOf(params.endState);
+    if (es >= 0)
+      params.e = es;
     params.m = this.timestamp;
-    params.n = this.nextToGoKey;
+    if (typeof this.nextToGoKey !== "undefined")
+      params.n = this.nextToGoKey;
     params.p = this.playerKey;
     if (this.replacements)
       params.r = this.replacements.map(t => t.letter).join("");
-    if (this.score)
+    if (typeof this.score === "object") {
+      // This is an array of object
+      let esi = 0;
+      for (const endState of this.score) {
+        params[`ek${esi}`] = endState.key;
+        params[`et${esi}`] = endState.tiles;
+        if (endState.time)
+          params[`eT${esi}`] = endState.time;
+        if (endState.tilesRemaining)
+          params[`er${esi}`] = endState.tilesRemaining;
+        esi++;
+      }
+    }
+    else if (typeof this.score === "number")
       params.s = this.score;
     params.t = Turn.TypeNames.indexOf(this.type);
     if (this.passes && this.passes > 0) params.x = this.passes;
@@ -168,26 +207,46 @@ class Turn extends Move {
    * tiles.
    */
   unpack(params, index, edition) {
-    if (params[`T${index}c`])
-      this.challengerKey = params[`T${index}c`];
-    if (params[`T${index}e`])
-      this.endState = params[`T${index}e`];
-    this.timestamp = Number(params[`T${index}m`]);
-    if (params[`T${index}n`])
-      this.nextToGoKey = params[`T${index}n`];
-    this.playerKey = params[`T${index}p`];
-    if (params[`T${index}r`]) {
-      const ls = params[`T${index}r`].split("");
+    const ti = `T${index}`;
+
+    if (params[`${ti}c`])
+      this.challengerKey = params[`${ti}c`];
+    if (params[`${ti}e`]) {
+      const StateNames = Object.values(Game.State);
+      this.endState = StateNames[Number(params[`${ti}e`])];
+    }
+    this.timestamp = Number(params[`${ti}m`]);
+    if (params[`${ti}n`])
+      this.nextToGoKey = params[`${ti}n`];
+    this.playerKey = params[`${ti}p`];
+    if (params[`${ti}r`]) {
+      const ls = params[`${ti}r`].split("");
       this.replacements = ls.map(l => new Tile({
         letter: l,
         score: edition.letterScore(l)
       }));
     }
-    if (params[`T${index}s`])
-      this.score = Number(params[`T${index}s`]);
-    this.type = Turn.TypeNames[params[`T${index}t`]];
-    if (params[`T${index}x`])
-      this.passes = params[`T${index}x`];
+    if (params[`${ti}s`])
+      // Numeric score
+      this.score = Number(params[`${ti}s`]);
+    else if (params[`${ti}ek0`]) {
+      // endState object for each player
+      this.score = [];
+      let esi = 0;
+      while (params[`${ti}ek${esi}`]) {
+        const es = {
+          key: params[`${ti}ek${esi}`],
+          tiles: params[`${ti}et${esi}`]
+        };
+        es.time = params[`${ti}eT${esi}`];
+        es.tilesRemaining = params[`${ti}er${esi}`];
+        this.score.push(es);
+        esi++;
+      };
+    }
+    this.type = Turn.TypeNames[params[`${ti}t`]];
+    if (params[`${ti}x`])
+      this.passes = params[`${ti}x`];
   }
 
   /**
@@ -212,9 +271,10 @@ class Turn extends Move {
     if (this.nextToGoKey && this.nextToGoKey !== this.playerKey)
       s += ` ->${this.nextToGoKey}`;
 
-    if (typeof this.score === "object")
-      s += ` (${this.score.tiles||0},${this.score.time||0})`;
-    else if (typeof this.score === "number")
+    if (typeof this.score === "object") {
+      for (const d of this.score)
+        s += ` ${d.key},${d.tiles},${d.time})`;
+    } else if (typeof this.score === "number")
       s += ` (${this.score})`;
 
     if (this.placements)

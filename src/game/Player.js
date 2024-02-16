@@ -171,8 +171,7 @@ class Player {
 
   /**
    * Encode the player in a URI parameter block
-   * @return {string} parameter string for embedding in a URL to recreate
-   * the player.
+   * @return {object} packed parameter object
    */
   pack() {
     const params = {};

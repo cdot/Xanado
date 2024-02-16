@@ -223,9 +223,13 @@ const Commands = superclass => class extends superclass {
     // unplayed letters is added to that player's score.
     let playerWithNoTiles;
     let pointsRemainingOnRacks = 0;
-    const deltas = {};
+    const playerEndStates = {};
     this.players.forEach(player => {
-      const delta = { key: player.key, tiles: 0 };
+
+      // SMELL: this is a hack. Player end states
+      // should not be overloaded onto .score.
+      const endState = { key: player.key, tiles: 0 };
+
       // Unless undo is enabled, the client receives redacted versions of
       // the rack tiles. We have to send the actual tiles remaining on racks
       // for the "game ended" message.
@@ -238,14 +242,16 @@ const Commands = superclass => class extends superclass {
       else {
         const rackScore = player.rack.score();
         player.score -= rackScore;
+
+        // Populate an object with end state information
         // Points lost for tiles remaining
-        delta.tiles -= rackScore;
-        // Tiles remaining on this player's rack
-        delta.tilesRemaining = player.rack.lettersLeft().join(",");
+        endState.tiles -= rackScore;
+        // Tiles remaining on this player's rack (string)
+        endState.tilesRemaining = player.rack.lettersLeft().join(",");
         pointsRemainingOnRacks += rackScore;
         /* c8 ignore next 2 */
         if (this._debug)
-          this._debug(`\t${player.name}: ${rackScore} points left ${delta.tilesRemaining}`);
+          this._debug(`\t${player.name}: ${rackScore} points left ${endState.tilesRemaining}`);
       }
       if (this.timerType === Game.Timer.GAME && player.clock < 0) {
         const points = Math.round(
@@ -255,14 +261,14 @@ const Commands = superclass => class extends superclass {
           this._debug(player.name, "over by", -player.clock,
                     "s, score", points, "points");
         if (points < 0)
-          delta.time = points;
+          endState.time = points;
       }
-      deltas[player.key] = delta;
+      playerEndStates[player.key] = endState;
     });
 
     if (playerWithNoTiles) {
       playerWithNoTiles.score += pointsRemainingOnRacks;
-      deltas[playerWithNoTiles.key].tiles = pointsRemainingOnRacks;
+      playerEndStates[playerWithNoTiles.key].tiles = pointsRemainingOnRacks;
       /* c8 ignore next 2 */
       if (this._debug)
         this._debug(playerWithNoTiles.name, "gains", pointsRemainingOnRacks);
@@ -271,7 +277,8 @@ const Commands = superclass => class extends superclass {
     return this.finishTurn(player, new factory.Turn({
       type: Turn.Type.GAME_ENDED,
       endState: endState,
-      score: Object.keys(deltas).map(k => deltas[k])
+      // non-array objects don't support Object.values
+      score: Object.keys(playerEndStates).map(k => playerEndStates[k])
     }));
   }
 
