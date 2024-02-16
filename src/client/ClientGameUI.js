@@ -8,8 +8,6 @@
 import { BrowserPlatform } from "../browser/BrowserPlatform.js";
 window.Platform = BrowserPlatform;
 
-import "../browser/icon_button.js";
-
 import { CBOR } from "../game/CBOR.js";
 import { BrowserGame } from "../browser/BrowserGame.js";
 import { UI } from "../browser/UI.js";
@@ -100,7 +98,7 @@ class ClientGameUI extends ClientUIMixin(GameUIMixin(UI)) {
   sendCommand(command, args) {
     if (command !== BrowserGame.Command.REDO) {
       this.undoStack = [];
-      $("#redoButton").hide();
+      $("#redo-button").hide();
     }
     console.debug(`POST /command/${command}`);
     this.cancelNotification();

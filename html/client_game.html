@@ -50,26 +50,27 @@ and license information. Author Crawford Currie http://c-dot.co.uk-->
             <!-- board will be created here in code -->
           </table>
           <div id="playRack">
-            <button id="distributionButton" data-i18n-tooltip="tt-distribution">{...}</button>
+            <button id="distribution-button" data-i18n-tooltip="tt-distribution">{...}</button>
             <table class="Surface rack">
               <!-- rack will be created here in code -->
             </table>
             <div class="controls">
-              <button class="shuffle-button fat-button"></button>
-              <button class="unplace-button fat-button"></button>
+              <button id="shuffle-button" data-icon="shuffle-icon" class="fat-button"></button>
+              <button id="unplace-button" data-icon="unplace-icon" class="fat-button"></button>
+              <!-- identified by class because there are several -->
               <button class="action-button" data-action="pass" data-i18n="Pass">
             </div>
           </div>
         </div>
         <div id="blocks" class="ui-widget">
           <div id="signinBlock" class="block">
-            <div class="signed-in block-title">
-              <span id="whoami"></span>
+            <div class="signed-in block-title client-game">
+              <div id="id"></div>
               <div id="client_toolbox">
-                <span id="personaliseButton" data-i18n-tooltip="tt-personalise">&#9881;</span>
-                <span id="pauseButton" data-i18n-tooltip="tt-pause">&#128336;</span>
-                <span id="redoButton" data-i18n-tooltip="tt-redo">&#11023;</span>
-                <span id="undoButton" data-i18n-tooltip="Undo the last play">&#11024;</span>
+                <button id="personalise-button" data-icon="personalise-icon" data-i18n-tooltip="tt-personalise"></button>
+                <button id="pause-button" data-icon="pause-icon" data-i18n-tooltip="tt-pause"></button>
+                <button id="redo-button" data-icon="redo-icon" data-i18n-tooltip="tt-redo"></button>
+                <button id="undo-button" data-icon="undo-icon" data-i18n-tooltip="tt-undo"></button>
               </div>
             </div>
             <div class="bad-user">

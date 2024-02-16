@@ -179,26 +179,26 @@ describe("browser/UI", () => {
     let $dlg = $("#alertDialog").parent();
     assert.equal($dlg.find(".ui-dialog-title").text(), "Alert");
     assert.equal($dlg.find(".alert").text(), "simple string");
-    assert.equal(caught, "ALERT simple string");
+    assert.equal(caught, "ALERT Alert simple string");
 
     dlg = ui.alert(new Error("Oops!"), "Apocalypse", catcher);
     $dlg = $("#alertDialog").parent();
     assert.equal($dlg.find(".ui-dialog-title").text(), "Apocalypse");
     assert.equal($dlg.find(".alert").text(), "Oops!");
-    assert(/^ALERT Oops!/.test(caught));
+    assert(/^ALERT Apocalypse Oops!/.test(caught), caught);
     assert(/browser\/UI.js:/.test(caught));
 
     dlg = ui.alert([ "h-won", "The winner"], "Podium", catcher);
     $dlg = $("#alertDialog").parent();
     assert.equal($dlg.find(".ui-dialog-title").text(), "Podium");
     assert.equal($dlg.find(".alert").text(), "The winner won");
-    assert.equal(caught, "ALERT The winner won");
+    assert.equal(caught, "ALERT Podium The winner won");
 
     dlg = ui.alert({ won: "The winner" }, "Medal", catcher);
     $dlg = $("#alertDialog").parent();
     assert.equal($dlg.find(".ui-dialog-title").text(), "Medal");
     assert.equal($dlg.find(".alert").text(), `{won:"The winner"}`);
-    assert.equal(caught, `ALERT {won:"The winner"}`);
+    assert.equal(caught, `ALERT Medal {won:"The winner"}`);
   });
 
   it("plays audio", () => {

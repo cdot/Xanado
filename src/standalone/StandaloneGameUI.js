@@ -13,6 +13,7 @@ import { Game } from "../game/Game.js";
 import { BackendGame } from "../backend/BackendGame.js";
 import { BrowserGame } from "../browser/BrowserGame.js";
 import { UI } from "../browser/UI.js";
+import "../browser/icon_button.js";
 import { GameUIMixin } from "../browser/GameUIMixin.js";
 import { StandaloneUIMixin } from "./StandaloneUIMixin.js";
 import { CBOR } from "../game/CBOR.js";
@@ -166,7 +167,8 @@ class StandaloneGameUI extends StandaloneUIMixin(GameUIMixin(UI)) {
     })
     .then(() => this.createUI(this.frontendGame))
     .then(() => {
-      $("#gameSetupButton")
+      $("#setup-button")
+      .icon_button({ icon: "setup-icon" })
       .on("click", () => {
         import(
           /* webpackChunkName: "GameSetupDialog" */
@@ -186,7 +188,16 @@ class StandaloneGameUI extends StandaloneUIMixin(GameUIMixin(UI)) {
           error: e => this.alert(e, $.i18n("failed", $.i18n("Game setup")))
         }));
       });
-      $("#libraryButton")
+      $("#library-button")
+      .icon_button()
+      .on("click", () => {
+        const parts = UI.parseURLArguments(window.location.toString());
+        parts._URL = parts._URL.replace(
+          /standalone_game\./, "standalone_games.");
+        window.location = UI.makeURL(parts);
+      });
+      $("#share-button")
+      .icon_button()
       .on("click", () => {
         const parts = UI.parseURLArguments(window.location.toString());
         parts._URL = parts._URL.replace(

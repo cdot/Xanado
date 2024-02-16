@@ -318,7 +318,7 @@ const GameUIMixin = superclass => class extends superclass {
     this.debug("f<b turn ", turn);
     this.game.pushTurn(turn);
 
-    $("#undoButton").toggle(this.game.allowUndo === true);
+    $("#undo-button").toggle(this.game.allowUndo === true);
 
     this.removeMoveActionButtons();
     const player = this.game.getPlayerWithKey(turn.playerKey);
@@ -604,17 +604,17 @@ const GameUIMixin = superclass => class extends superclass {
     this.updatePlayerTable();
     this.updateWhosTurn();
     this.updateGameStatus();
-    $("#redoButton").show();
+    $("#redo-button").show();
     $(".last-placement")
     .removeClass("last-placement");
     if (this.game.turns.length === 0)
-      $("#undoButton").hide();
+      $("#undo-button").hide();
     this.lockBoard(!isMyGo);
     this.enableTurnButton(isMyGo);
     this.$log(true, $.i18n(
       "undone",
       turn.type, this.game.getPlayer().name));
-    $("#undoButton")
+    $("#undo-button")
     .toggle(this.game.allowUndo
             && this.game.turns.length > 0);
 
@@ -894,7 +894,7 @@ const GameUIMixin = superclass => class extends superclass {
     this.$log(true, ""); // Force scroll to end of log
 
     if (game.turns.length > 0)
-      $("#undoButton").toggle(this.game.allowUndo ? true : false);
+      $("#undo-button").toggle(this.game.allowUndo ? true : false);
 
     if (game.hasEnded()) {
       if (game.nextGameKey)
@@ -903,12 +903,15 @@ const GameUIMixin = superclass => class extends superclass {
         this.setAction("action_anotherGame", $.i18n("Another game?"));
     }
 
-    $("#pauseButton").toggle(game.timerType ? true : false);
+    $("#pause-button")
+    .icon_button()
+    .toggle(game.timerType ? true : false);
 
-    $("#distributionButton")
+    $("#distribution-button")
     .on("click", () => this.showLetterDistributions());
 
-    $("#undoButton")
+    $("#undo-button")
+    .icon_button()
     .on(
       "click", () => {
         // unplace any pending move
@@ -916,7 +919,8 @@ const GameUIMixin = superclass => class extends superclass {
         this.sendCommand(Game.Command.UNDO);
       });
 
-    $("#redoButton")
+    $("#redo-button")
+    .icon_button()
     .hide()
     .on(
       "click", () => {
@@ -924,9 +928,27 @@ const GameUIMixin = superclass => class extends superclass {
           const turn = this.undoStack.pop();
           this.sendCommand(Game.Command.REDO, turn);
           if (this.undoStack.length === 0)
-            $("#redoButton").hide();
+            $("#redo-button").hide();
         }
       });
+
+    if (this.player) {
+      $("#shuffle-button")
+      .icon_button()
+      .on("click", () => this.player.rack.shuffle());
+
+      $("#unplace-button")
+      .icon_button()
+      .on("click", () => this.takeBackTiles());
+
+      $(".action-button")
+      .button()
+      .on("click", () => this.click_actionButton());
+
+    } else {
+      $("#shuffle-button").hide();
+      $(".action-button").hide();
+    }
 
     let myGo = this.isThisPlayer(game.whosTurnKey);
     this.updateWhosTurn();
@@ -946,33 +968,6 @@ const GameUIMixin = superclass => class extends superclass {
       } else
         // It wasn't our go, enable a challenge
         this.addChallengePreviousButton(lastTurn);
-    }
-
-    if (this.player) {
-      $(".shuffle-button")
-      .button({
-        showLabel: false,
-        icon: "shuffle-icon",
-        classes: {
-          "ui-button-icon": "fat-icon"
-        }
-      })
-      .on("click", () => this.player.rack.shuffle());
-
-      $(".unplace-button").button({
-        showLabel: false,
-        icon: "unplace-icon",
-        classes: {
-          "ui-button-icon": "fat-icon"
-        }
-      })
-      .on("click", () => this.takeBackTiles());
-
-      $(".action-button")
-      .on("click", () => this.click_actionButton());
-    } else {
-      $(".shuffle-button").hide();
-      $(".action-button").hide();
     }
 
     if (game.pausedBy)
@@ -1126,7 +1121,7 @@ const GameUIMixin = superclass => class extends superclass {
       $("body").focus();
     });
 
-    $("#pauseButton")
+    $("#pause-button")
     .on("click", () => this.sendCommand(Game.Command.PAUSE));
 
     // Events raised by game components
@@ -1544,7 +1539,7 @@ const GameUIMixin = superclass => class extends superclass {
       }
 
       // Use 'visibility' and not 'display' to keep the layout stable
-      $(".unplace-button").css("visibility", "inherit");
+      $("#unplace-button").css("visibility", "inherit");
 
       $("#swapRack").hide();
       return;
@@ -1557,7 +1552,7 @@ const GameUIMixin = superclass => class extends superclass {
       this.setAction("action_swap", $.i18n("Swap"));
       this.lockBoard(true);
       this.enableTurnButton(true);
-      $(".unplace-button").css("visibility", "inherit");
+      $("#unplace-button").css("visibility", "inherit");
       return;
     }
 
@@ -1565,7 +1560,7 @@ const GameUIMixin = superclass => class extends superclass {
     this.setAction("action_pass", $.i18n("Pass"));
     this.lockBoard(false);
     this.enableTurnButton(true);
-    $(".unplace-button").css("visibility", "hidden");
+    $("#unplace-button").css("visibility", "hidden");
   }
 
   /**

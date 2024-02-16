@@ -9,6 +9,7 @@ import "jquery";
 import "jquery-ui";
 
 import "./i18n.js";
+import "./icon_button.js";
 
 import { stringify } from "../common/Utils.js";
 
@@ -251,7 +252,6 @@ class UI {
       });
     })
     .then(() => {
-      $("button").button();
       $("[data-i18n-tooltip]")
       .tooltip({
         items: "[data-i18n-tooltip]",
@@ -375,7 +375,8 @@ class UI {
    * class, calling super in the overriding method.
    */
   attachUIEventHandlers() {
-    $("#personaliseButton")
+    $("#personalise-button")
+    .icon_button()
     .on("click", () => {
       import(
         /* webpackMode: "lazy" */

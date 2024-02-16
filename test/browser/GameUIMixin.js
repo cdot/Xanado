@@ -62,7 +62,7 @@ describe("browser/GameUIMixin", () => {
  <div class="distribution"></div>
 </div>
 
-<button id="distributionButton">
+<button id="distribution-button">
 
 <div id="logBlock">
  <div class="messages">
@@ -104,7 +104,7 @@ describe("browser/GameUIMixin", () => {
   });
 
   it("distribution", () => {
-    $("#distributionButton").trigger("click");
+    $("#distribution-button").trigger("click");
   });
 
   it("letters", () => {

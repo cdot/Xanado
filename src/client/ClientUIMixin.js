@@ -302,8 +302,7 @@ const ClientUIMixin = superclass => class extends superclass {
       $(".not-signed-in").hide();
       $(".signed-in")
       .show()
-      .find("span")
-      .first()
+      .find("#id")
       .text(session.name);
       this.session = session;
       return session;
