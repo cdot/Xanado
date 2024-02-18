@@ -93,9 +93,9 @@ class GameDialog extends Dialog {
 
     this.$dlg.find("div[name=headline]")
     .empty()
-    .append($.i18n("text-edition", game.edition))
+    .append($.i18n("txt-edition", game.edition))
     .append(game.dictionary
-            ? ("<br>" + $.i18n("text-dictionary", game.dictionary))
+            ? ("<br>" + $.i18n("txt-dictionary", game.dictionary))
             : "");
 
     const $table = this.$dlg.find(".player-table")

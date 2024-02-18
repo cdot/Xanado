@@ -602,7 +602,7 @@ describe("server/Server.js", () => {
             assert.equal(email.from, "test_user<test@email.com>");
             assert(email.to === "test@email.com"
                    || email.to === "user@email.com");
-            assert.equal(email.subject, Platform.i18n("email-invited"));
+            assert.equal(email.subject, Platform.i18n("eml-invited"));
             assert(email.text);
             assert(email.text.indexOf("Hollow Wurld") >= 0);
             assert(email.text.indexOf(`/html/client_games.html?untwist=${gamekey}`) >= 0);
@@ -681,7 +681,7 @@ describe("server/Server.js", () => {
           sendMail: function(email) {
             assert.equal(email.from, "test_user<test@email.com>");
             assert.equal(email.to, "test@email.com");
-            assert.equal(email.subject, Platform.i18n("email-remind"));
+            assert.equal(email.subject, Platform.i18n("eml-remind"));
             assert(email.text);
             return Promise.resolve();
           }

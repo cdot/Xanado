@@ -334,8 +334,7 @@ const GamesUIMixin = superclass => class extends superclass {
         const $gt = $("#playerList");
         $gt.empty();
         data.forEach(player => {
-          const s = $.i18n(
-            "leader-board-row", n++, player.name, player.score,
+          const s = $.i18n("txt-leader", n++, player.name, player.score,
             player.games, player.wins);
           $gt.append(`<div class="player-cumulative">${s}</div>`);
         });

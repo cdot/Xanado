@@ -787,12 +787,12 @@ class Server {
     const gameURL =
           `${req.protocol}://${req.get("Host")}/html/client_games.html?untwist=${gameKey}`;
     let textBody = (req.body.message || "") + "\n" + Platform.i18n(
-      "email-invite-plain", gameURL);
+      "fuck off", gameURL);
     // Handle XSS risk posed by HTML in the textarea
     let htmlBody = (req.body.message.replace(/</g, "&lt;") || "")
         + "<br>" + Platform.i18n(
-          "email-html-link", gameURL);
-    let subject = Platform.i18n("email-invited");
+          "eml-html-link", gameURL);
+    let subject = Platform.i18n("eml-invited");
     return Promise.all(req.body.player.map(
       to => this.sendMail(
         to, req, res, req.body.gameKey,
@@ -839,14 +839,9 @@ class Server {
         if (this.debug)
           this.debug("Sending reminder mail to", `${player.name}/${player.key}`);
 
-        const subject = Platform.i18n(
-          "email-remind");
-        const textBody = Platform.i18n(
-          "email-invite-plain",
-          gameURL);
-        const htmlBody = Platform.i18n(
-          "email-html-link",
-          gameURL);
+        const subject = Platform.i18n("eml-remind");
+        const textBody = Platform.i18n("eml-text-link", gameURL);
+        const htmlBody = Platform.i18n("eml-html-link", gameURL);
         return this.sendMail(
           player, req, res, game.key,
           subject, textBody, htmlBody);

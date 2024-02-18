@@ -343,7 +343,7 @@ describe("server/UserManager", () => {
       //console.log(res.text, token);
       assert.equal(res.status, 200);
       sparseEqual(res.body, [
-        "text-reset-sent",
+        "txt-reset-sent",
         "test_user"
       ]);
       assert(token);

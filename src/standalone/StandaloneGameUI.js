@@ -206,12 +206,12 @@ class StandaloneGameUI extends StandaloneUIMixin(GameUIMixin(UI)) {
           parts[k] = pg[k];
         const url = UI.makeURL(parts);
         await this.copyToClipboard(url)
-        .then(() => this.alert(url, $.i18n("text-clipped")))
+        .then(() => this.alert(url, $.i18n("txt-clipped")))
         .catch(e => {
           $("#alertDialog")
           .dialog({
             modal: true,
-            title: $.i18n("text-link")
+            title: $.i18n("txt-link")
           })
           .html(`<a href="${url}">${url}</a>`);
         });

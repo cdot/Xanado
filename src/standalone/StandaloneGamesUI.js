@@ -47,8 +47,8 @@ class StandaloneGamesUI extends StandaloneUIMixin(GamesUIMixin(UI)) {
           onSubmit(dialog, vals) {
             this.ui.createGame(vals)
             .then(game => game.save())
-            .then(game => this.ui.alert($.i18n("text-enjoy"),
-                                        $.i18n("text-created", game.key)))
+            .then(game => this.ui.alert($.i18n("txt-enjoy"),
+                                        $.i18n("txt-created", game.key)))
             .then(() => this.ui.refreshGames());
           },
           error: e => this.alert(e, "Create game failed")

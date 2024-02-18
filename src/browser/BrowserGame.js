@@ -253,7 +253,7 @@ class BrowserGame extends Undo(Commands(Game)) {
             "log-no-tiles"));
         else
           $narrative.append($.i18n(
-            "log-no-more-tiles",
+            "log-no-more",
             playerIndicative));
         $description.append($narrative);
       }
@@ -279,11 +279,11 @@ class BrowserGame extends Undo(Commands(Game)) {
 
     case Turn.Type.CHALLENGE_WON:
       $action.append($.i18n(
-        "log-challenge-won",
+        "log-challwon",
         challengerIndicative, playerPossessive)
                      + " "
                      + $.i18n(
-                       "log-lost-to-chall",
+                       "log-challloss",
                        playerIndicative, turn.score));
       break;
 
@@ -295,7 +295,7 @@ class BrowserGame extends Undo(Commands(Game)) {
       case Game.Penalty.PER_WORD:
       case Game.Penalty.PER_TURN:
         $action.append(" " + $.i18n(
-          "log-lost-to-chall",
+          "log-challloss",
           challengerIndicative, -turn.score));
         break;
       case Game.Penalty.MISS:
@@ -336,7 +336,7 @@ class BrowserGame extends Undo(Commands(Game)) {
     case Game.State.TIMED_OUT:
       $state.text($.i18n("log-timed-out")); break;
     case Game.State.FAILED_CHALLENGE:
-      $state.text($.i18n("log-challenge-failed")); break;
+      $state.text($.i18n("log-challfail")); break;
     case Game.State.GAME_OVER:
     default:
       $state.text($.i18n("log-game-over")); break;
@@ -365,11 +365,11 @@ class BrowserGame extends Undo(Commands(Game)) {
       let rackAdjust;
       if (endState.tiles > 0) {
         rackAdjust = $.i18n(
-          "log-got-from-racks", name, endState.tiles);
+          "log-fromracks", name, endState.tiles);
       } else if (endState.tiles < 0) {
         // Lost sum of unplayed letters
         rackAdjust = $.i18n(
-          "log-lost-from-rack", name, -endState.tiles, endState.tilesRemaining);
+          "log-rackloss", name, -endState.tiles, endState.tilesRemaining);
       }
 
       if (rackAdjust)
@@ -382,7 +382,7 @@ class BrowserGame extends Undo(Commands(Game)) {
         const $timeAdjust = $(document.createElement("div"))
               .addClass("time-adjust");
         $timeAdjust.text($.i18n(
-          "log-lost-to-clock", name, -timePenalty));
+          "lock-clkloss", name, -timePenalty));
         $narrative.append($timeAdjust);
       }
 

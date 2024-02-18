@@ -395,8 +395,8 @@ const GameUIMixin = superclass => class extends superclass {
         this.notify($.i18n("nfy-you-failedH"),
                     $.i18n("nfy-you-failedB"));
       } else {
-        this.notify($.i18n("nfy-they-failedH"),
-                    $.i18n("nfy-they-failedB", player.name));
+        this.notify($.i18n("nfy-theyfailH"),
+                    $.i18n("nfy-theyfailB", player.name));
       }
 
       break;

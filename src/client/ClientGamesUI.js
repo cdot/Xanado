@@ -47,8 +47,8 @@ class ClientGamesUI extends ClientUIMixin(GamesUIMixin(UI)) {
     $("#reminders-button")
     .on("click", () => {
       $.post("/sendReminder/*")
-      .then(info => this.alert(info.join(", "), $.i18n("label-send-rems")))
-      .catch(e => this.alert(e, $.i18n("failed", $.i18n("tt-send-rems"))));
+      .then(info => this.alert(info.join(", "), $.i18n("btn-sendrems")))
+      .catch(e => this.alert(e, $.i18n("failed", $.i18n("btn-sendrems"))));
     });
 
     $("#chpw_button")
@@ -60,7 +60,7 @@ class ClientGamesUI extends ClientUIMixin(GamesUIMixin(UI)) {
         .then(mod => new mod.ChangePasswordDialog({
           postAction: "/change-password",
           postResult: () => this.refresh(),
-          error: e => this.alert(e, $.i18n("failed", $.i18n("Change password")))
+          error: e => this.alert(e, $.i18n("failed", $.i18n("btn-chpw")))
         })));
   }
 
@@ -289,9 +289,9 @@ class ClientGamesUI extends ClientUIMixin(GamesUIMixin(UI)) {
       $box.append(
         $(document.createElement("button"))
         .attr("name", "email")
-        .button({ label: $.i18n("Send reminder") })
+        .button({ label: $.i18n("btn-sendrem") })
         .tooltip({
-          content: $.i18n("tt-send-rem")
+          content: $.i18n("tt-sendrem")
         })
         .on("click", () => {
           console.debug("Send reminder");
@@ -302,7 +302,7 @@ class ClientGamesUI extends ClientUIMixin(GamesUIMixin(UI)) {
                   title: $.i18n("player-reminded", player.name),
                   modal: true
                 }))
-          .catch(e => this.alert(e, $.i18n("failed", $.i18n("Send reminder"))));
+          .catch(e => this.alert(e, $.i18n("failed", $.i18n("tt-sendrem"))));
         }));
     }
 

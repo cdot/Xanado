@@ -15,13 +15,14 @@ class Check extends CheckStrings {
   // Prompt to change the id of string
   // return -2 to abort the run, -1 to ask again, 0 for no change, 1
   // if the string was changed
-  async changeLabel(lang, string, probably) {
+  changeLabel(lang, string, probably) {
+    console.log(this.strings[lang][string]);
+    const q = `Change ID "${string}"${probably ? (' to "'+probably+'"') : ""} in ${lang} [yNq]? `;
     const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout
     });
-    console.log(this.strings[lang][string]);
-    const q = `Change ID "${string}"${probably ? (' to "'+probably+'"') : ""} in ${lang} [yNq]? `;
+
     return rl.question(q)
     .then(answer => {
       rl.close();
@@ -54,8 +55,11 @@ class Check extends CheckStrings {
           // A i18n/.json file. If the label is changed in qqq, change it everywhere.
           // If it's just changing local to a single lang, only change it there
           if (lang === "qqq" || m[1] === lang) {
-            this.fileContents[file] = JSON.stringify(this.strings[m[1]], null, "  ");
-            filesChanged[file] = true;
+            const newContents = JSON.stringify(this.strings[m[1]], null, "  ");
+            if (newContents) {
+              this.fileContents[file] = newContents;
+              filesChanged[file] = true;
+            }
           }
         } else if (lang === "qqq" && re.test(this.fileContents[file])) {
           // Another file, only change the label when qqq is changing

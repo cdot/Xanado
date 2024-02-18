@@ -807,19 +807,17 @@ class UserManager {
           from: this.config.mail.sender,
           to:  user.email,
           subject: Platform.i18n("Password reset"),
-          text: Platform.i18n(
-            "email-reset-plain", url),
-          html: Platform.i18n(
-            "email-reset-body", url)
+          text: Platform.i18n("eml-resplain", url),
+          html: Platform.i18n("eml-reset", url)
         })
         .then(() => this.sendResult(
-          res, 200, [ /*i18n*/"text-reset-sent", user.name ]))
+          res, 200, [ /*i18n*/"txt-reset-sent", user.name ]))
         /* c8 ignore start */
         .catch(
           e => {
             console.error("WARNING: Mail misconfiguration?", e);
             return this.sendResult(
-              res, 500, [  /*i18n*/"text-no-email" ]);
+              res, 500, [  /*i18n*/"txt-no-email" ]);
           });
         /* c8 ignore stop */
       });

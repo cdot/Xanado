@@ -29,8 +29,8 @@ class CheckStrings {
     this.strings = {};
   }
 
-  async changeLabel(lang, string, probably) {
-    return 0;
+  changeLabel(lang, string, probably) {
+    return Promise.resolve(0);
   }
 
   // Add string to found list
@@ -114,7 +114,7 @@ class CheckStrings {
       .then(files => this.scan(files, /\/\*i18n\*\/\s*(["'])(.*?)\1/g)),
       // just to get fileContents
       this.load(path.join(basePath, "test"), /\.ut$/),
-      this.load(path.join(basePath, "i18n"), /\.json$/, /^index\.json$/),
+      this.load(path.join(basePath, "i18n"), /\.json$/, /\/index\.json/),
       Fs.readdir(`${__dirname}/../i18n`)
       .then(lingos => Promise.all(
         lingos.filter(f => /\.json$/.test(f) && !/^index\.json$/.test(f))
@@ -192,9 +192,7 @@ class CheckStrings {
         if (lang !== "en") {
           mess = [];
           for (const id of Object.keys(this.strings[lang])) {
-            if (!this.strings.en[id])
-              console.debug("WANK",id, lang);
-            if (this.strings[lang][id] == this.strings.en[id] && this.strings.en[id].length > 1)
+            if (this.strings[lang][id] == this.strings.en[id] && this.strings.en[id] && this.strings.en[id].length > 1)
               mess.push(`\t${id} : "${this.strings.en[id]}"`);
           }
           if (mess.length > 0)
