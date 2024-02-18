@@ -104,8 +104,7 @@ describe("server/UserManager", () => {
           .send(details))
     .then(res => {
       assert.equal(res.status, 403);
-      assert.deepEqual(res.body, [
-        "already-registered", "test_user"]);
+      assert.deepEqual(res.body, ["already-reg", "test_user"]);
     });
   });
 

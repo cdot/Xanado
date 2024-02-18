@@ -676,7 +676,7 @@ class UserManager {
     return this.getUser({name: username }, true)
     .then(() => {
       this.sendResult(
-        res, 403, [ /*i18n*/"already-registered", username ]);
+        res, 403, [ /*i18n*/"already-reg", username ]);
     })
     .catch(() => {
       // New user

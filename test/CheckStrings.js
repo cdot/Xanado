@@ -77,7 +77,7 @@ class CheckStrings {
       let p = m[1];
       const reb = new RegExp(`\\${p}([^\\d]|\$)`);
       if (!reb.test(langString))
-        mess.push(`\t"${id}": ${p} not this.found in "${langString}"`);
+        mess.push(`\t"${id}": ${p} not found in "${langString}"`);
     }
     while ((m = rea.exec(langString))) {
       let p = m[1];
@@ -134,7 +134,7 @@ class CheckStrings {
       // Check strings are in qqq and add to en if necessary
       for (const string of Object.keys(this.found).sort()) {
         if (!this.strings.qqq[string]) {
-          this.report.error(`"${string}" not this.found in qqq`);
+          this.report.error(`"${string}" not found in qqq`);
           this.strings.qqq[string] = string;
           qqqError = true;
         }
@@ -192,6 +192,8 @@ class CheckStrings {
         if (lang !== "en") {
           mess = [];
           for (const id of Object.keys(this.strings[lang])) {
+            if (!this.strings.en[id])
+              console.debug("WANK",id, lang);
             if (this.strings[lang][id] == this.strings.en[id] && this.strings.en[id].length > 1)
               mess.push(`\t${id} : "${this.strings.en[id]}"`);
           }

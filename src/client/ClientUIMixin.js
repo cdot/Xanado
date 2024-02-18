@@ -238,14 +238,14 @@ const ClientUIMixin = superclass => class extends superclass {
       // (server died, maybe?) Back off and try to reconnect.
       console.debug(`--> disconnect`);
       const mess = $.i18n("text-disconnected");
-      $reconnectDialog = this.alert(mess, $.i18n("Server disconnected"));
+      $reconnectDialog = this.alert(mess, $.i18n("err-servdisco"));
       setTimeout(() => {
         // Try and rejoin after a 3s timeout
         this.readyToListen()
         .catch(e => {
           console.debug(e);
           if (!$reconnectDialog)
-            this.alert(e, $.i18n("Reconnect failed"));
+            this.alert(e, $.i18n("err-reconnect"));
         });
       }, 3000);
     });
