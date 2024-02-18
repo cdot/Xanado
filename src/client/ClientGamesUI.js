@@ -190,7 +190,7 @@ class ClientGamesUI extends ClientUIMixin(GamesUIMixin(UI)) {
   anotherGame(game) {
     $.post(`/anotherGame/${game.key}`)
     .then(() => this.refreshGames())
-    .catch(e => this.alert(e, $.i18n("failed", $.i18n("Another game?"))));
+    .catch(e => this.alert(e, $.i18n("failed", $.i18n("btn-another"))));
   }
 
   /**
@@ -320,7 +320,7 @@ class ClientGamesUI extends ClientUIMixin(GamesUIMixin(UI)) {
 
     if (this.session && this.getSetting("canEmail") && simples.length > 0) {
       const games = simples.map(simple =>
-                                Game.fromJsonable(simple, Game.CLASSES));
+                                Game.fromSendable(simple, Game.CLASSES));
       if (games.reduce((em, game) => {
         // game is Game.simple, not a Game object
         // Can't remind a game that hasn't started or has ended.

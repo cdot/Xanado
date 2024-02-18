@@ -60,7 +60,7 @@ class StandaloneGameUI extends StandaloneUIMixin(GameUIMixin(UI)) {
     .then(nextGame => {
       this.backendGame.nextGameKey =
       this.frontendGame.nextGameKey = nextGame.key;
-      this.setAction("action_nextGame", $.i18n("Next game"));
+      this.setAction("action_nextGame", /*i18n*/"btn-next");
       this.enableTurnButton(true);
     })
     .catch(assert.fail);
@@ -198,16 +198,25 @@ class StandaloneGameUI extends StandaloneUIMixin(GameUIMixin(UI)) {
       });
       $("#share-button")
       .icon_button()
-      .on("click", () => {
+      .on("click", async () => {
         const parts = UI.parseURLArguments(window.location.href);
         delete parts.game;
         const pg = this.backendGame.pack();
         for (const k in pg)
           parts[k] = pg[k];
         const url = UI.makeURL(parts);
-        console.log("Packed", url);
+        await this.copyToClipboard(url)
+        .then(() => this.alert(url, $.i18n("text-clipped")))
+        .catch(e => {
+          $("#alertDialog")
+          .dialog({
+            modal: true,
+            title: $.i18n("text-link")
+          })
+          .html(`<a href="${url}">${url}</a>`);
+        });
       });
-    })
+    })    
     .then(() => this.attachUIEventHandlers())
     // Tell the backend what channel to use to send and receive
     // notifications

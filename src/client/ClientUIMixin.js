@@ -181,7 +181,7 @@ const ClientUIMixin = superclass => class extends superclass {
           .then(mod => new mod.LoginDialog({
             // postAction is set in code
             postResult: () => window.location.reload(),
-            error: e => this.alert(e, $.i18n("failed", $.i18n("Sign in")))
+            error: e => this.alert(e, $.i18n("failed", $.i18n("btn-signin")))
           })));
 
       $("#signout-button")
@@ -190,7 +190,7 @@ const ClientUIMixin = superclass => class extends superclass {
         .then(() => {
           if (this.debug) this.debug("Logged out");
         })
-        .catch(e => this.alert(e, $.i18n("failed", $.i18n("Sign out"))))
+        .catch(e => this.alert(e, $.i18n("failed", $.i18n("btn-signout"))))
         .then(() => {
           this.session = undefined;
           this.refresh();
@@ -324,7 +324,7 @@ const ClientUIMixin = superclass => class extends superclass {
     $.post(`/anotherGame/${this.game.key}`)
     .then(nextGameKey => {
       this.game.nextGameKey = nextGameKey;
-      this.setAction("action_nextGame", /*i18n*/"Next game");
+      this.setAction("action_nextGame", /*i18n*/"btn-next");
       this.enableTurnButton(true);
     })
     .catch(console.error);

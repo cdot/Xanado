@@ -6,7 +6,7 @@
 
 import { genKey, stringify } from "../common/Utils.js";
 import { Game } from "./Game.js";
-import { Turn } from "./Turn.js";
+import { Turn, EndState } from "./Turn.js";
 
 /**
  * Mixin to {@linkcode Game} that provides handlers for game
@@ -221,31 +221,31 @@ const Commands = superclass => class extends superclass {
     // the sum of their unplayed letters. If a player has used
     // all of his or her letters, the sum of the other players'
     // unplayed letters is added to that player's score.
-    let playerWithNoTiles;
+    let playerWithNoTiles, pwntes;
     let pointsRemainingOnRacks = 0;
-    const playerEndStates = {};
+    const playerEndStates = [];
     this.players.forEach(player => {
 
-      // SMELL: this is a hack. Player end states
-      // should not be overloaded onto .score.
-      const endState = { key: player.key, tiles: 0 };
+      const endState = new EndState({ key: player.key });
+      playerEndStates.push(endState);
 
-      // Unless undo is enabled, the client receives redacted versions of
-      // the rack tiles. We have to send the actual tiles remaining on racks
-      // for the "game ended" message.
+      // Note: Unless undo is enabled, the client receives redacted versions of
+      // the rack tiles. However we still have to send the actual tiles
+      // remaining on racks for the "game ended" message.
+
       if (player.rack.isEmpty()) {
         assert(
           !playerWithNoTiles,
           "Found more than one player with no tiles when finishing game");
         playerWithNoTiles = player;
+        pwntes = endState; // player with no tiles end state
       }
       else {
         const rackScore = player.rack.score();
         player.score -= rackScore;
 
-        // Populate an object with end state information
         // Points lost for tiles remaining
-        endState.tiles -= rackScore;
+        endState.tiles = -rackScore;
         // Tiles remaining on this player's rack (string)
         endState.tilesRemaining = player.rack.lettersLeft().join(",");
         pointsRemainingOnRacks += rackScore;
@@ -263,12 +263,11 @@ const Commands = superclass => class extends superclass {
         if (points < 0)
           endState.time = points;
       }
-      playerEndStates[player.key] = endState;
     });
 
     if (playerWithNoTiles) {
       playerWithNoTiles.score += pointsRemainingOnRacks;
-      playerEndStates[playerWithNoTiles.key].tiles = pointsRemainingOnRacks;
+      pwntes.tiles = pointsRemainingOnRacks;
       /* c8 ignore next 2 */
       if (this._debug)
         this._debug(playerWithNoTiles.name, "gains", pointsRemainingOnRacks);
@@ -277,8 +276,7 @@ const Commands = superclass => class extends superclass {
     return this.finishTurn(player, new factory.Turn({
       type: Turn.Type.GAME_ENDED,
       endState: endState,
-      // non-array objects don't support Object.values
-      score: Object.keys(playerEndStates).map(k => playerEndStates[k])
+      endStates: playerEndStates
     }));
   }
 

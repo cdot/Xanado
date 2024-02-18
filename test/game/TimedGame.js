@@ -67,12 +67,12 @@ describe("game/TimedGame", function() {
         assert.equal(turn.nextToGoKey, human1.key);
         break;
       case 9:
-        assert.deepEqual(turn.score, [
+        assert.equal(turn.type, Turn.Type.GAME_ENDED);
+        assert.equal(turn.endState, Game.State.TWO_PASSES);
+        assert.deepEqual(turn.endStates, [
           { key: "human1", tiles: -1, tilesRemaining: "A" },
           { key: "human2", tiles: -1, tilesRemaining: "A" }
         ]);
-        assert.equal(turn.type, Turn.Type.GAME_ENDED);
-        assert.equal(turn.endState, Game.State.TWO_PASSES);
         assert(!turn.nextToGoKey);
         socket.done();
         break;
@@ -150,13 +150,15 @@ describe("game/TimedGame", function() {
       case 7:
         assert.equal(turn.type, Turn.Type.GAME_ENDED);
         assert.equal(turn.endState, Game.State.TWO_PASSES);
-        assert.equal(turn.score[0].tiles, -1);
-        assert.equal(turn.score[1].tiles, -1);
+        assert.equal(turn.endStates[0].key, human1.key);
+        assert.equal(turn.endStates[0].tiles, -1);
+        assert.equal(turn.endStates[1].key, human2.key);
+        assert.equal(turn.endStates[1].tiles, -1);
         // Human 1 should be over-time by one clock tick, which
         // is 1/60th of a minute.
-        assert.equal(turn.score[0].time, -1);
+        assert.equal(turn.endStates[0].time, -1);
         // human2 has no time penalty
-        assert(!turn.score[1].time);
+        assert(!turn.endStates[1].time);
         assert(!turn.nextToGoKey);
         socket.done();
         break;

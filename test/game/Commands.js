@@ -543,7 +543,7 @@ describe("game/Commands.js", () => {
       assert.equal(event, Game.Notify.TURN);
       assert.equal(turn.type, Turn.Type.GAME_ENDED);
       assert.deepEqual(
-        turn.score,
+        turn.endStates,
         [
           { key: "human1", tiles: -remains, tilesRemaining: "X,Y,Z" },
           { key: "human2", tiles: remains }

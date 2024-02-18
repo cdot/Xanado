@@ -6,6 +6,9 @@
     "locale": "en",
     "NOTE": "Use checkStrings.js to determine what needs to be translated."
   },
+  "Anagrams": "Anagrams",
+  "Hangmen": "Hangmen",
+  "Letters": "Letters",
   "Accept last move": "Accept last move",
   "Add robot": "Add robot",
   "Add": "Add",

@@ -17,7 +17,7 @@ class LoginDialog extends PasswordMixin(Dialog) {
       this.options.postAction = this.getAction();
     };
     super("LoginDialog", $.extend({
-      title: $.i18n("Sign in")
+      title: $.i18n("btn-signin")
     }, options));
   }
 
@@ -65,7 +65,7 @@ class LoginDialog extends PasswordMixin(Dialog) {
         for (let provider of list) {
           const $td = $(document.createElement("td"))
                 .addClass("provider-logo")
-                .attr("title", $.i18n("sign-in-using", provider.name));
+                .attr("title", $.i18n("text-signusing", provider.name));
           const $logo = $(`<img src="${provider.logo}" />`);
           // Note: this MUST be done using from an href and
           // not an AJAX request, or CORS will foul up.
@@ -78,7 +78,7 @@ class LoginDialog extends PasswordMixin(Dialog) {
           $table.append($td);
         }
         $("#signin-tab")
-        .prepend($(`<div class="sign-in-using">${$.i18n("Sign in using:")}</div>`)
+        .prepend($(`<div class="sign-in-using">${$.i18n("text-signin")}</div>`)
                  .append($table)
                  .append(`<br /><div class="sign-in-using">${$.i18n("text-or-xanado")}</div>`));
       });

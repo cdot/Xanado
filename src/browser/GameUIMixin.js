@@ -329,13 +329,12 @@ const GameUIMixin = superclass => class extends superclass {
       challenger.score += turn.score;
       challenger.$refreshScore();
     } else {
-      switch (typeof turn.score) {
-      case "number":
+      if (typeof turn.score === "number") {
         player.score += turn.score;
         player.$refreshScore();
-        break;
-      case "object":
-        for (const endState of turn.score) {
+      }
+      if (turn.endStates) {
+        for (const endState of turn.endStates) {
           const p = this.game.getPlayerWithKey(endState.key);
           p.score += (endState.tiles || 0) + (endState.time || 0);
           p.$refreshScore();
@@ -435,7 +434,7 @@ const GameUIMixin = superclass => class extends superclass {
       if (wasUs)
         this.takeBackTiles();
       this.game.state = Game.State.GAME_OVER;
-      this.setAction("action_anotherGame", $.i18n("Another game?"));
+      this.setAction("action_anotherGame", /*i18n*/"btn-another");
       this.enableTurnButton(true);
       this.notify($.i18n("nfy-game-overH"),
                   $.i18n("nfy-game-overB"));
@@ -503,7 +502,7 @@ const GameUIMixin = superclass => class extends superclass {
   handle_NEXT_GAME(info) {
     this.debug("f<b nextGame", info.gameKey);
     this.game.nextGameKey = info.gameKey;
-    this.setAction("action_nextGame", $.i18n("Next game"));
+    this.setAction("action_nextGame", /*i18n*/"btn-next");
   }
 
   /**
@@ -898,9 +897,9 @@ const GameUIMixin = superclass => class extends superclass {
 
     if (game.hasEnded()) {
       if (game.nextGameKey)
-        this.setAction("action_nextGame", $.i18n("Next game"));
+        this.setAction("action_nextGame", /*i18n*/"btn-next");
       else
-        this.setAction("action_anotherGame", $.i18n("Another game?"));
+        this.setAction("action_anotherGame", /*i18n*/"btn-another");
     }
 
     $("#pause-button")
@@ -1511,8 +1510,7 @@ const GameUIMixin = superclass => class extends superclass {
     if (finishedPlayer && finishedPlayer.key !== this.player.key) {
       this.lockBoard(true);
       if (this.player.key === this.game.whosTurnKey)
-        this.setAction("action_confirmGameOver",
-                       $.i18n("Accept last move"));
+        this.setAction("action_confirmGameOver", /*i18n*/"btn-accept");
       else
         $(".action-button").hide();
       return;
@@ -1521,7 +1519,7 @@ const GameUIMixin = superclass => class extends superclass {
     // Check if player has placed any tiles
     if (this.game.board.hasUnlockedTiles()) {
       // move action is to make the move
-      this.setAction("action_commitMove", $.i18n("Finished Turn"));
+      this.setAction("action_commitMove", /*i18n*/"btn-done");
       // Check that the play is legal
       const move = this.game.board.analysePlay();
       const $move = $("#playBlock > .your-move");
@@ -1549,7 +1547,7 @@ const GameUIMixin = superclass => class extends superclass {
 
     if (this.swapRack.squaresUsed() > 0) {
       // Swaprack has tiles on it, change the move action to swap
-      this.setAction("action_swap", $.i18n("Swap"));
+      this.setAction("action_swap", /*i18n*/"btn-swap");
       this.lockBoard(true);
       this.enableTurnButton(true);
       $("#unplace-button").css("visibility", "inherit");
@@ -1557,7 +1555,7 @@ const GameUIMixin = superclass => class extends superclass {
     }
 
     // Otherwise nothing has been placed, turn action is a pass
-    this.setAction("action_pass", $.i18n("Pass"));
+    this.setAction("action_pass", /*i18n*/"btn-pass");
     this.lockBoard(false);
     this.enableTurnButton(true);
     $("#unplace-button").css("visibility", "hidden");
@@ -1600,7 +1598,7 @@ const GameUIMixin = superclass => class extends superclass {
     if (!player)
       return;
     const text = $.i18n(
-      "button-challenge", player.name);
+      "btn-challenge", player.name);
     const $button =
           $(`<button>${text}</button>`)
           .addClass("moveAction")
@@ -1752,14 +1750,14 @@ const GameUIMixin = superclass => class extends superclass {
    * @memberof browser/GameUIMixin
    * @instance
    * @param {string} action function name e.g. action_commitMove
-   * @param {string} title button title e.g. "Commit Move"
+   * @param {string} title i18n identifier for button title e.g. "btn-pass"
    */
   setAction(action, title) {
     if (this.player) {
       $(".action-button")
       .data("action", action)
       .empty()
-      .append(title)
+      .append($.i18n(title))
       .show();
     }
   }

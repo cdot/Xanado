@@ -6,7 +6,7 @@ import { assert } from "chai";
 import { TestSocket } from '../TestSocket.js';
 import { MemoryDatabase } from "../MemoryDatabase.js";
 import sparseEqual from "../sparseEqual.js";
-import { setupPlatform, getTestGame } from "../TestPlatform.js";
+import { setupPlatform, getTestGame, UNit } from "../TestPlatform.js";
 
 import { CBOR } from "../../src/game/CBOR.js";
 import { Game } from "../../src/game/Game.js";
@@ -290,12 +290,12 @@ describe("backend/BackendGame", () => {
       reload._debug = game._debug;
       delete(game.nextGameKey);
 
-      return Promise.all([reload.jsonable(), game.jsonable()])
+      return Promise.all([reload.sendable(), game.sendable()])
       .then(s => assert.deepEqual(s[0], s[1]));
     })
     .then(() => reload.playIfReady()) // should start the clock
     .then(() => assert(reload.stopTheClock()))
-    .then(() => Promise.all([reload.jsonable(), game.jsonable()]))
+    .then(() => Promise.all([reload.sendable(), game.sendable()]))
     .then(s => assert.deepEqual(s[0], s[1]));
 	});
 

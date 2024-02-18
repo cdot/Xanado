@@ -47,8 +47,8 @@ class StandaloneGamesUI extends StandaloneUIMixin(GamesUIMixin(UI)) {
           onSubmit(dialog, vals) {
             this.ui.createGame(vals)
             .then(game => game.save())
-            .then(game => this.ui.alert($.i18n("Enjoy your game!"),
-                                        $.i18n("Created", game.key)))
+            .then(game => this.ui.alert($.i18n("text-enjoy"),
+                                        $.i18n("text-created", game.key)))
             .then(() => this.ui.refreshGames());
           },
           error: e => this.alert(e, "Create game failed")
@@ -116,7 +116,7 @@ class StandaloneGamesUI extends StandaloneUIMixin(GamesUIMixin(UI)) {
     .then(games => Promise.all(games.map(game => game.onLoad(this.db))))
     .then(games => Promise.all(
       games
-      .map(game => game.jsonable(this.userManager))))
+      .map(game => game.sendable(this.userManager))))
     // Sort the resulting list by last activity, so the most
     // recently active game bubbles to the top
     .catch(e => this.alert(e))

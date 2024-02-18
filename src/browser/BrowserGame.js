@@ -126,7 +126,7 @@ class BrowserGame extends Undo(Commands(Game)) {
       let player = this.getPlayerWithKey(watcher.key);
       if (!player) {
         // New player in game
-        player = BrowserPlayer.fromJsonable(watcher, BrowserGame.CLASSES);
+        player = BrowserPlayer.fromSendable(watcher, BrowserGame.CLASSES);
         this.addPlayer(player, true);
         player._debug = this._debug;
       }

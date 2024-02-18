@@ -302,7 +302,7 @@ describe("client/ClientGamesUI", () => {
           getTestGame("unfinished_game", Game),
           getTestGame("good_game", Game)
         ])
-        .then(games => Promise.all(games.map(game => game.jsonable()))),
+        .then(games => Promise.all(games.map(game => game.sendable()))),
         count: 2
       }
     });

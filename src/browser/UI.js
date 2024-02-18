@@ -148,6 +148,67 @@ class UI {
     });
   }
 
+  /**
+   * Copies the specified text to the clipboard, using fallback methods
+   * for older browsers.
+   * @param {String} text The text to copy.
+   * @return {Promise} a promise that resolves when the text is copied,
+   * or rejects if the copy fails.
+   */
+  copyToClipboard(text) {
+    // Modern versions of Chromium browsers, Firefox, etc. in
+    // a secure (https) context
+    function navi() {
+      if (navigator.clipboard)
+        return navigator.clipboard.writeText(text)
+      .then(r => "Clipboard");
+      return Promise.reject("navigator.clipboard not available");
+    }
+
+    // Venerable IE
+    function ie() {
+      if (window.clipboardData)
+        return new Promise((resolve, reject) => {
+          if (window.clipboardData.setData("Text", text))
+            resolve("clipboardData");
+          else
+            reject("window.clipboardData.setData failed");
+        });
+      return Promise.reject("window.clipboardData not available");
+    }
+
+    function execCmd() {
+      return new Promise((resolve, reject) => {
+        // execCommand, which is deprecated but is still available
+        // in most browsers
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.top = "-999999px";
+        textArea.style.left = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        let e = undefined;
+        try {
+          if (!document.execCommand("copy"))
+            e = "execCommand failed";
+        } catch (error) {
+          e = error;
+        }
+        document.body.removeChild(textArea);
+        if (e)
+          reject(e);
+        else
+          resolve("execCommand");
+      });
+    }
+    return Promise.reject();
+    return navi()
+    .catch(e => ie())
+    .catch(e => execCmd());
+  }
+
   /* c8 ignore stop */
 
   /**
