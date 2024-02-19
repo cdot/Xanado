@@ -357,7 +357,7 @@ class BrowserGame extends Undo(Commands(Game)) {
       // players. If negative, points lost to remaining tiles on rack.
       // tilesRemaining: {string} if tiles < 0, the letters that caused it
       // time: <number} points lost due to time penalties
-      const endState = turn.score.filter(s => s.key === player.key)[0];
+      const endState = turn.endStates.filter(s => s.key === player.key)[0];
 
       if (player.score === winningScore)
         winners.push(name);

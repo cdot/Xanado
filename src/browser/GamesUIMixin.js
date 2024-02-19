@@ -199,7 +199,7 @@ const GamesUIMixin = superclass => class extends superclass {
       $box.append(
         $(document.createElement("button"))
         .attr("name", `join${game.key}`)
-        .button({ label: $.i18n("Open game") })
+        .button({ label: $.i18n("btn-open-game") })
         .tooltip({
           content: $.i18n("tt-open")
         })

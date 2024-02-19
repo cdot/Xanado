@@ -104,7 +104,7 @@ describe("client/ClientUIMixin", () => {
       ui.promiseSession()
       .then(e => assert.fail(`Flawed ${e}`))
       .catch(e => {
-        assert.equal(e.message, $.i18n("Not signed in"));
+        assert.equal(e.message, $.i18n("txt-nosign"));
         return undefined;
       }),
 

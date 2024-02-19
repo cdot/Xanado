@@ -11,7 +11,7 @@ class AddRobotDialog extends Dialog {
 
   constructor(options) {
     super("AddRobotDialog", $.extend({
-      title: $.i18n("Add robot")
+      title: $.i18n("btn-add-robot")
     }, options));
   }
 

@@ -11,7 +11,7 @@ import path from "path";
 import { fileURLToPath } from 'url';
 
 // Maximum length for a string identifier
-const MAX_ID_LENGTH = 15;
+const MAX_ID_LENGTH = 20;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const basePath = path.normalize(path.join(__dirname, ".."));
 
@@ -144,7 +144,7 @@ class CheckStrings {
       for (const string of Object.keys(this.strings.qqq)
                  .filter(s => !this.found[s])) {
         this.report.error(
-          `"${string}" was this.found in qqq, but is not used in code`);
+          `"${string}" was found in qqq, but is not used in code`);
         delete this.strings.qqq[string];
         qqqError = true;
       }

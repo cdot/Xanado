@@ -56,7 +56,9 @@ const Undo = superclass => class extends superclass {
    * @param {Turn} turn the Turn to unplay
    */
   unconfirmGameOver(turn) {
-    if (!turn.endStates) turn.endStates = turn.score;
+    // Compatibility with old code
+    if (!turn.endStates && typeof turn.score === "object")
+      turn.endStates = turn.score;
     // Re-adjust scores from the player end states
     for (const endState of turn.endStates) {
       const player = this.getPlayerWithKey(endState.key);

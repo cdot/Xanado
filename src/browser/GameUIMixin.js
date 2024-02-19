@@ -559,7 +559,7 @@ const GameUIMixin = superclass => class extends superclass {
       modal: true,
       buttons: [
         {
-          text: $.i18n("label-unpause"),
+          text: $.i18n("btn-unpause"),
           click: () => {
             this.sendCommand(Game.Command.UNPAUSE);
             $("#pauseDialog").dialog("close");
@@ -610,12 +610,8 @@ const GameUIMixin = superclass => class extends superclass {
       $("#undo-button").hide();
     this.lockBoard(!isMyGo);
     this.enableTurnButton(isMyGo);
-    this.$log(true, $.i18n(
-      "undone",
-      turn.type, this.game.getPlayer().name));
-    $("#undo-button")
-    .toggle(this.game.allowUndo
-            && this.game.turns.length > 0);
+    this.$log(true, $.i18n("undone", turn.type, this.game.getPlayer().name));
+    $("#undo-button").toggle(this.game.allowUndo && this.game.turns.length > 0);
 
     // Trigger an event to wake the automaton (if there is one)
     if (isMyGo)
@@ -884,7 +880,7 @@ const GameUIMixin = superclass => class extends superclass {
     game.board.$populate($board);
     this.handle_resize();
 
-    this.$log(true, $.i18n("Game started"), "game-state");
+    this.$log(true, $.i18n("txt-game-start"), "game-state");
 
     game.forEachTurn(
       (turn, isLast) => this.$log(
@@ -903,14 +899,14 @@ const GameUIMixin = superclass => class extends superclass {
     }
 
     $("#pause-button")
-    .icon_button()
+    .icon_button({ icon: "pause-icon" })
     .toggle(game.timerType ? true : false);
 
     $("#distribution-button")
     .on("click", () => this.showLetterDistributions());
 
     $("#undo-button")
-    .icon_button()
+    .icon_button({ icon: "undo-icon" })
     .on(
       "click", () => {
         // unplace any pending move
@@ -919,7 +915,7 @@ const GameUIMixin = superclass => class extends superclass {
       });
 
     $("#redo-button")
-    .icon_button()
+    .icon_button({ icon: "redo-icon" })
     .hide()
     .on(
       "click", () => {
@@ -933,11 +929,13 @@ const GameUIMixin = superclass => class extends superclass {
 
     if (this.player) {
       $("#shuffle-button")
-      .icon_button()
+      .addClass("fat-button")
+      .icon_button({ icon: "shuffle-icon" })
       .on("click", () => this.player.rack.shuffle());
 
       $("#unplace-button")
-      .icon_button()
+      .addClass("fat-button")
+      .icon_button({ icon: "unplace-icon" })
       .on("click", () => this.takeBackTiles());
 
       $(".action-button")
@@ -1618,7 +1616,7 @@ const GameUIMixin = superclass => class extends superclass {
   addTakeBackPreviousButton() {
     const $button =
           $(`<button name="takeBack" class="moveAction"></button>`)
-          .text($.i18n("Take back"))
+          .text($.i18n("btn-takeback"))
           .button()
           .on("click", () => this.takeBackMove());
     this.$log(true, $button, "turn-control");

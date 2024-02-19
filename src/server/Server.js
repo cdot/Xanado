@@ -555,7 +555,7 @@ class Server {
             .then(uo => resolve(uo)))
           .then(uo => {
             if (!uo.email) // no email
-              return Platform.i18n("no-email",
+              return Platform.i18n("txt-has-no-email",
                                    uo.name || uo.key);
             /* c8 ignore next 2 */
             if (this.debug)
@@ -589,10 +589,12 @@ class Server {
    */
   GET_games(req, res) {
     const send = req.params.send;
+
     // Make list of keys we are interested in
     return ((send === "all" || send === "active")
             ? this.db.keys()
             : Promise.resolve([send]))
+
     // Load those games
     .then(keys => Promise.all(
       keys.map(
@@ -601,15 +603,19 @@ class Server {
           console.error("Failed to load", key, e);
           return undefined;
         }))))
+
     // Filter the list and generate simple data
     .then(games => games.filter(game => game
                                 && !(send === "active" && game.hasEnded())))
+
     .then(games => Promise.all(
       games.map(game => game.sendable(this.userManager))))
+    
     // Sort the resulting list by last activity, so the most
     // recently active game bubbles to the top
     .then(games => games.sort((a, b) => a.lastActivity < b.lastActivity ? 1
                               : a.lastActivity > b.lastActivity ? -1 : 0))
+          
     // Finally send the result
     .then(games => reply(res, games));
   }
@@ -787,7 +793,7 @@ class Server {
     const gameURL =
           `${req.protocol}://${req.get("Host")}/html/client_games.html?untwist=${gameKey}`;
     let textBody = (req.body.message || "") + "\n" + Platform.i18n(
-      "fuck off", gameURL);
+      "txt-join-game", gameURL);
     // Handle XSS risk posed by HTML in the textarea
     let htmlBody = (req.body.message.replace(/</g, "&lt;") || "")
         + "<br>" + Platform.i18n(

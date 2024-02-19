@@ -176,7 +176,7 @@ class StandaloneGameUI extends StandaloneUIMixin(GameUIMixin(UI)) {
           "../browser/GameSetupDialog.js")
         .then(mod => new mod.GameSetupDialog({
           html: "standalone_GameSetupDialog",
-          title: $.i18n("Game setup"),
+          title: $.i18n("btn-game-setup"),
           ui: this,
           game: this.backendGame,
           onSubmit: (dlg, vals) => {
@@ -185,11 +185,11 @@ class StandaloneGameUI extends StandaloneUIMixin(GameUIMixin(UI)) {
             this.backendGame.save();
             this.redirectToGame(this.backendGame.key);
           },
-          error: e => this.alert(e, $.i18n("failed", $.i18n("Game setup")))
+          error: e => this.alert(e, $.i18n("failed", $.i18n("btn-game-setup")))
         }));
       });
       $("#library-button")
-      .icon_button()
+      .icon_button({ icon: "library-icon" })
       .on("click", () => {
         const parts = UI.parseURLArguments(window.location.href);
         parts._URL = parts._URL.replace(
@@ -197,7 +197,7 @@ class StandaloneGameUI extends StandaloneUIMixin(GameUIMixin(UI)) {
         window.location = UI.makeURL(parts);
       });
       $("#share-button")
-      .icon_button()
+      .icon_button({ icon: "share-icon" })
       .on("click", async () => {
         const parts = UI.parseURLArguments(window.location.href);
         delete parts.game;

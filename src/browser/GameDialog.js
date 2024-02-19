@@ -122,7 +122,7 @@ class GameDialog extends Dialog {
         if (!game.getPlayerWithKey(this.options.ui.session.key)
             && ((game.maxPlayers || 0) === 0
                 || game.getPlayers().length < game.maxPlayers))
-          $join.show().button("option", { label: $.i18n("Join game") });
+          $join.show().button("option", { label: $.i18n("btn-join") });
         if (this.options.ui.getSetting("canEmail"))
           $invite.show();
         if (!game.getPlayers().find(p => p.isRobot))

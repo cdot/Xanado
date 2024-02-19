@@ -54,7 +54,7 @@ describe("browser/GameUIMixin", () => {
     $("head").empty();
     $("body").html(`
 <div id="blankDialog" class="dialog">
- <span data-i18n="label-blank-dlg"></span>
+ <span data-i18n="txt-blank-dlg"></span>
  <table class="letterTable"></table>
 </div>
 

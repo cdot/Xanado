@@ -597,13 +597,13 @@ const Commands = superclass => class extends superclass {
       {
         sender: /*i18n*/"Advisor",
         text: (player.wantsAdvice
-               ? /*i18n*/"Enabled"
-               : /*i18n*/"Disabled")
+               ? /*i18n*/"txt-enabled"
+               : /*i18n*/"txt-disabled")
       });
     if (player.wantsAdvice)
       this.notifyAll(Game.Notify.MESSAGE, {
         sender: /*i18n*/"Advisor",
-        text: /*i18n*/"advised",
+        text: /*i18n*/"txt-advised",
         classes: "warning",
         args: [ player.name ]
       });
@@ -625,7 +625,7 @@ const Commands = superclass => class extends superclass {
         player, Game.Notify.MESSAGE,
         {
           sender: /*i18n*/"Advisor",
-          text: /*i18n*/"No dictionary"
+          text: /*i18n*/"txt-nodict"
         });
       return Promise.resolve();
     }
@@ -687,7 +687,7 @@ const Commands = superclass => class extends superclass {
         player, Game.Notify.MESSAGE,
         {
           sender: /*i18n*/"Advisor",
-          text: /*i18n*/"No dictionary"
+          text: /*i18n*/"txt-nodict"
         });
       return;
     }

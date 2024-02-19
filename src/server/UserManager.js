@@ -676,7 +676,7 @@ class UserManager {
     return this.getUser({name: username }, true)
     .then(() => {
       this.sendResult(
-        res, 403, [ /*i18n*/"already-reg", username ]);
+        res, 403, [ /*i18n*/"txt-already-reg", username ]);
     })
     .catch(() => {
       // New user
@@ -709,7 +709,7 @@ class UserManager {
         /*i18n*/"signed-out", departed ]));
     }
     return this.sendResult(
-      res, 401, [ "Not signed in" ]);
+      res, 401, [ "txt-nosign" ]);
   }
 
   /**
@@ -729,7 +729,7 @@ class UserManager {
       })));
 
     return this.sendResult(
-      res, 401, [ "Not signed in" ]);
+      res, 401, [ "txt-nosign" ]);
   }
 
   /**
@@ -777,7 +777,7 @@ class UserManager {
         req.session.passport.user.name ]));
     }
     return this.sendResult(
-      res, 401, [ "Not signed in" ]);
+      res, 401, [ "txt-nosign" ]);
   }
 
   /**
@@ -847,7 +847,7 @@ class UserManager {
         key: req.user.key,
         settings: req.user.settings
       });
-    return this.sendResult(res, 401, [ "Not signed in" ]);
+    return this.sendResult(res, 401, [ "txt-nosign" ]);
   }
 
   /**
@@ -869,7 +869,7 @@ class UserManager {
         .then(() => this.sendResult(res, 200, req.user.settings));
       });
     }
-    return this.sendResult(res, 401, [ "Not signed in" ]);
+    return this.sendResult(res, 401, [ "txt-nosign" ]);
   }
 
   /**
@@ -882,7 +882,7 @@ class UserManager {
   checkLoggedIn(req, res, next) {
     if (req.isAuthenticated())
       return next();
-    return this.sendResult(res, 401, [ "Not signed in" ]);
+    return this.sendResult(res, 401, [ "txt-nosign" ]);
   }
 }
 

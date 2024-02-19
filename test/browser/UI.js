@@ -106,7 +106,7 @@ describe("browser/UI", () => {
   */
 
   it("initLocale(fr)", () => {
-    $("body").append(`<div id="test" data-i18n="label-pick-player" data-i18n-tooltip="label-placed"></div>`);
+    $("body").append(`<div id="test" data-i18n="lbl-pickplayer" data-i18n-tooltip="lbl-place-snd"></div>`);
     class NUI extends UI {
       getSetting(t) {
         switch (t) {
@@ -120,12 +120,12 @@ describe("browser/UI", () => {
     .then(() => {
       assert.equal($.i18n("not a valid string"), "not a valid string");
       assert.equal($.i18n("h-won", "Nobody"), "Nobody gagne");
-      assert.equal($("#test").text(), $.i18n("label-pick-player"));
+      assert.equal($("#test").text(), $.i18n("lbl-pickplayer"));
     });
   });
 
   it("initLocale(en)", () => {
-    $("body").append(`<div id="test" data-i18n="label-pick-player" data-i18n-tooltip="label-placed"></div>`);
+    $("body").append(`<div id="test" data-i18n="lbl-pickplayer" data-i18n-tooltip="lbl-place-snd"></div>`);
     class NUI extends UI {
       getSetting(t) {
         switch (t) {
@@ -141,12 +141,12 @@ describe("browser/UI", () => {
     .then(() => {
       assert.equal($.i18n("not a valid string"), "not a valid string");
       assert.equal($.i18n("h-won", "Nobody"), "Nobody won");
-      assert.equal($("#test").text(), $.i18n("label-pick-player"));
+      assert.equal($("#test").text(), $.i18n("lbl-pickplayer"));
 
       const it = $("#test");
       it.tooltip("open");
       assert.equal((it.tooltip("option", "content")).call(it[0]),
-                   $.i18n("label-placed"));
+                   $.i18n("lbl-place-snd"));
     });
   });
 

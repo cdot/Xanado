@@ -258,7 +258,9 @@ class Turn extends Move {
       params.e = es;
       let esi = 0;
       for (const pk in this.endStates) {
-        const endState = this.endStates[pk];
+        let endState = this.endStates[pk];
+        if (!(endState instanceof EndState))
+          this.endStates[pk] = endState = new EndState(endState);
         params[`e${esi}k`] = endState.key; // map key to index
         const p = endState.pack();
         for (const k in p)

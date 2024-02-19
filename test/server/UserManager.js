@@ -61,7 +61,7 @@ describe("server/UserManager", () => {
     .get("/session")
     .then(res => {
       assert.equal(res.status, 401);
-      assert.deepEqual(res.body, ["Not signed in"]);
+      assert.deepEqual(res.body, ["txt-nosign"]);
     });
   });
 
@@ -104,7 +104,7 @@ describe("server/UserManager", () => {
           .send(details))
     .then(res => {
       assert.equal(res.status, 403);
-      assert.deepEqual(res.body, ["already-reg", "test_user"]);
+      assert.deepEqual(res.body, ["txt-already-reg", "test_user"]);
     });
   });
 
@@ -171,7 +171,7 @@ describe("server/UserManager", () => {
           }))
     .then(res => {
       assert.equal(res.status, 401);
-      // NO! assert.deepEqual(res.body, ["Not signed in"]);
+      // NO! assert.deepEqual(res.body, ["txt-nosign"]);
     })
     // Right password
     .then(() => signin(server, {
@@ -192,7 +192,7 @@ describe("server/UserManager", () => {
     })
     .then(res => {
       assert.equal(res.status, 401);
-      assert.deepEqual(res.body, ["Not signed in"]);
+      assert.deepEqual(res.body, ["txt-nosign"]);
 
       // User with null password
       return register(server, {
@@ -208,7 +208,7 @@ describe("server/UserManager", () => {
           }))
     .then(res => {
       assert.equal(res.status, 401);
-      // NO! assert.deepEqual(res.body, ["Not signed in"]);
+      // NO! assert.deepEqual(res.body, ["txt-nosign"]);
       return signin(server, { signin_username: "test2_user" });
     });
   });
@@ -374,7 +374,7 @@ describe("server/UserManager", () => {
           .send({password: "wtf"}))
     .then(res => {
       assert.equal(res.status, 401);
-      sparseEqual(res.body, ["Not signed in"]);
+      sparseEqual(res.body, ["txt-nosign"]);
 
       return signin(server, {
         signin_username: "test_user",
@@ -418,7 +418,7 @@ describe("server/UserManager", () => {
     })
     .then(res => {
       assert.equal(res.status, 401);
-      // NO! assert.deepEqual(res.body, ["Not signed in"]);
+      // NO! assert.deepEqual(res.body, ["txt-nosign"]);
     });
   });
 });

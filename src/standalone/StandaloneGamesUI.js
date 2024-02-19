@@ -42,7 +42,7 @@ class StandaloneGamesUI extends StandaloneUIMixin(GamesUIMixin(UI)) {
           "../browser/GameSetupDialog.js")
         .then(mod => new mod.GameSetupDialog({
           html: "standalone_GameSetupDialog",
-          title: $.i18n("Create game"),
+          title: $.i18n("btn-create-game"),
           ui: this,
           onSubmit(dialog, vals) {
             this.ui.createGame(vals)
@@ -66,7 +66,7 @@ class StandaloneGamesUI extends StandaloneUIMixin(GamesUIMixin(UI)) {
       "../browser/GameSetupDialog.js")
     .then(mod => new mod.GameSetupDialog({
       html: "standalone_GameSetupDialog",
-      title: $.i18n("Game setup"),
+      title: $.i18n("btn-game-setup"),
       game: game,
       onSubmit: (dialog, desc) => {
         for (const key of Object.keys(desc))
@@ -75,7 +75,7 @@ class StandaloneGamesUI extends StandaloneUIMixin(GamesUIMixin(UI)) {
         this.refreshGame(game.key, true);
       },
       ui: this,
-      error: e => this.alert(e, $.i18n("failed", $.i18n("Game setup")))
+      error: e => this.alert(e, $.i18n("failed", $.i18n("btn-game-setup")))
     }));
   }
 

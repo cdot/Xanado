@@ -37,11 +37,11 @@ class ClientGamesUI extends ClientUIMixin(GamesUIMixin(UI)) {
           /* webpackChunkName: "GameSetupDialog" */
           "../browser/GameSetupDialog.js")
         .then(mod => new mod.GameSetupDialog({
-          title: $.i18n("Create game"),
+          title: $.i18n("btn-create-game"),
           ui: this,
           postAction: "/createGame",
           postResult: () => this.refreshGames(),
-          error: e => this.alert(e, $.i18n("failed", $.i18n("Create game")))
+          error: e => this.alert(e, $.i18n("failed", $.i18n("btn-create-game")))
         })));
 
     $("#reminders-button")
@@ -119,17 +119,17 @@ class ClientGamesUI extends ClientUIMixin(GamesUIMixin(UI)) {
       "../browser/GameSetupDialog.js")
     .then(mod => new mod.GameSetupDialog({
       // use the generic html
-      title: $.i18n("Game setup"),
+      title: $.i18n("btn-game-setup"),
       game: game,
       onSubmit: (dialog, desc) => {
         for (const key of Object.keys(desc))
           game[key] = desc[key];
         $.post("/gameSetup/${game.key}", desc)
-        .catch(e => this.alert(e, $.i18n("failed", $.i18n("Game setup"))));
+        .catch(e => this.alert(e, $.i18n("failed", $.i18n("btn-game-setup"))));
         this.refreshGame(game.key);
       },
       ui: this,
-      error: e => this.alert(e, $.i18n("failed", $.i18n("Game setup")))
+      error: e => this.alert(e, $.i18n("failed", $.i18n("btn-game-setup")))
     }));
   }
 
@@ -146,7 +146,7 @@ class ClientGamesUI extends ClientUIMixin(GamesUIMixin(UI)) {
         this.refreshGame(game.key);
       }
     })
-    .catch(e => this.alert(e, $.i18n("failed", $.i18n("Open game"))));
+    .catch(e => this.alert(e, $.i18n("failed", $.i18n("btn-open-game"))));
   }
 
   /**
@@ -162,7 +162,7 @@ class ClientGamesUI extends ClientUIMixin(GamesUIMixin(UI)) {
       ui: this,
       postAction: `/addRobot/${game.key}`,
       postResult: () => this.refreshGame(game.key),
-      error: e => this.alert(e, $.i18n("failed", $.i18n("Add robot")))
+      error: e => this.alert(e, $.i18n("failed", $.i18n("btn-add-robot")))
     }));
   }
 
@@ -180,7 +180,7 @@ class ClientGamesUI extends ClientUIMixin(GamesUIMixin(UI)) {
         $.i18n("sent-invite", names.join(", ")),
         $.i18n("Invitations")
       ),
-      error: e => this.alert(e, $.i18n("failed", $.i18n("Invite players")))
+      error: e => this.alert(e, $.i18n("failed", $.i18n("btn-send-invite")))
     }));
   }
 
@@ -199,14 +199,14 @@ class ClientGamesUI extends ClientUIMixin(GamesUIMixin(UI)) {
   deleteGame(game) {
     $.post(`/deleteGame/${game.key}`)
     .then(() => this.refreshGames())
-    .catch(e => this.alert(e, $.i18n("failed", $.i18n("Delete"))));
+    .catch(e => this.alert(e, $.i18n("failed", $.i18n("btn-delete"))));
   }
 
   /**
    * @implements browser/GamesUIMixin#observe
    */
   observe(game) {
-    const obs = $.i18n("Observe game");
+    const obs = $.i18n("btn-observe");
     const ui = this;
     $("#observeDialog")
     .dialog({
@@ -230,7 +230,7 @@ class ClientGamesUI extends ClientUIMixin(GamesUIMixin(UI)) {
             ui.refreshGame(game.key);
           }
         })
-        .catch(e => ui.alert(e, $.i18n("failed", $.i18n("Open game"))));
+        .catch(e => ui.alert(e, $.i18n("failed", $.i18n("btn-observe"))));
       }
     });
   }
@@ -253,7 +253,7 @@ class ClientGamesUI extends ClientUIMixin(GamesUIMixin(UI)) {
         $(document.createElement("button"))
         .addClass("risky")
         .attr("name", `leave${game.key}`)
-        .button({ label: $.i18n("Leave game") })
+        .button({ label: $.i18n("btn-leave-game") })
         .tooltip({
           content: $.i18n("tt-leave")
         })
@@ -261,7 +261,7 @@ class ClientGamesUI extends ClientUIMixin(GamesUIMixin(UI)) {
           console.debug(`Leave game ${game.key}`);
           $.post(`/leave/${game.key}`)
           .then(() => this.refreshGame(game.key))
-          .catch(e => this.alert(e, $.i18n("failed", $.i18n("Leave game"))));
+          .catch(e => this.alert(e, $.i18n("failed", $.i18n("btn-leave-game"))));
         }));
 
       return $tr;
@@ -270,7 +270,7 @@ class ClientGamesUI extends ClientUIMixin(GamesUIMixin(UI)) {
       $box.append(
         $(document.createElement("button"))
         .attr("name", "removeRobot")
-        .button({ label: $.i18n("Remove robot") })
+        .button({ label: $.i18n("btn-remove-robot") })
         .tooltip({
           content: $.i18n("tt-remove-robot")
         })
@@ -278,7 +278,7 @@ class ClientGamesUI extends ClientUIMixin(GamesUIMixin(UI)) {
           console.debug(`Remove robot from ${game.key}`);
           $.post(`/removeRobot/${game.key}`)
           .then(() => this.refreshGame(game.key))
-          .catch(e => this.alert(e, $.i18n("failed", $.i18n("Remove robot"))));
+          .catch(e => this.alert(e, $.i18n("failed", $.i18n("btn-remove-robot"))));
         }));
     }
 

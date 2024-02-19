@@ -437,7 +437,7 @@ class UI {
    */
   attachUIEventHandlers() {
     $("#personalise-button")
-    .icon_button()
+    .icon_button({ icon: "personalise-icon" })
     .on("click", () => {
       import(
         /* webpackMode: "lazy" */

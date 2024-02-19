@@ -313,7 +313,7 @@ const ClientUIMixin = superclass => class extends superclass {
       if (typeof this.observer === "string")
         $(".observer").show().text($.i18n(
           "observer", this.observer));
-      throw Error($.i18n("Not signed in"));
+      throw Error($.i18n("txt-nosign"));
     });
   }
 
