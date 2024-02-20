@@ -98,8 +98,8 @@ describe("browser/GamesUIMixin", () => {
 
     return ui.readyToListen()
     .then(() => {
-      const p1 = $.i18n("leader-board-row", 1, "one", 1, 2, 3);
-      const p2 = $.i18n("leader-board-row", 2, "two", 4, 5, 6);
+      const p1 = $.i18n("txt-leader", 1, "one", 1, 2, 3);
+      const p2 = $.i18n("txt-leader", 2, "two", 4, 5, 6);
       let html = $("body").html();
       assert(html.indexOf(p1) > 0);
       assert(html.indexOf(p2) > 0);

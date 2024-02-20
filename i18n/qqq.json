@@ -270,9 +270,9 @@
   "warn-disco": "Scores message when placement is invalid",
   "warn-empty-bag": "message in Scores block",
   "warn-uncentred": "output to the score block when the centre hasn't got a letter in it",
-  "was-advised": "log: message re $1",
-  "word-not-found": "log: message when a word $1 is not found in dictionary $2",
-  "word-rejected": "Log message when a player word is auto-rejected $1 is just used for pluralisation, $2 is the missing word",
+  "txt-was-advised": "log: message re $1",
+  "txt-word-not-found": "log: message when a word $1 is not found in dictionary $2",
+  "txt-word-rejected": "Log message when a player word is auto-rejected $1 is just used for pluralisation, $2 is the missing word",
   "word-there": "output when an allowed word $1 didn't need to be added to dictionary $2",
   "wrong-pass": "reporting a bad password during signin, $1 is the user name",
   "your": "posessive embedded in a sentence e.g. 'It's your go'"

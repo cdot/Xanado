@@ -276,7 +276,7 @@ describe("server/UserManager", () => {
     .then(res => {
       //console.log(res.body);
       assert.equal(res.status, 401);
-      sparseEqual(res.body, [ 'Not signed in']);
+      sparseEqual(res.body, [ 'txt-nosign']);
 
       return signin(server, {
         signin_username: "test_user", signin_password: "test_pass"

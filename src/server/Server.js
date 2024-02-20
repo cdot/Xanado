@@ -900,7 +900,7 @@ class Server {
         pram = `observer=${encodeURI(req.query.observer)}`;
         prom = Promise.resolve();
       } else {
-        replyAndThrow(res, 400, "Not signed in and no ?observer");
+        replyAndThrow(res, 400, "Not signed in and no observer");
       }
 
       // Work out the URL for the game interface

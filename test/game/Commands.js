@@ -272,11 +272,11 @@ describe("game/Commands.js", () => {
       switch (seqNo) {
       case 1:
         assert.equal(m.sender, 'Advisor');
-        assert.equal(m.text, 'Enabled');
+        assert.equal(m.text, 'txt-enabled');
         break;
       case 2:
         assert.equal(m.sender, 'Advisor');
-        assert.equal(m.text, "advised");
+        assert.equal(m.text, "txt-advised");
         assert.equal(m.args[0], human1.name);
         break;
       case 4:
@@ -320,12 +320,12 @@ describe("game/Commands.js", () => {
       switch (seqNo) {
       case 0:
         assert.equal(m.sender, 'Advisor');
-        assert.equal(m.text, "advised");
+        assert.equal(m.text, "txt-advised");
         assert.equal(m.args[0], human1.name);
         break;
       case 2:
         assert.equal(m.sender, 'Advisor');
-        assert.equal(m.text, "was-advised");
+        assert.equal(m.text, "txt-was-advised");
         assert.equal(m.args[0], human1.name);
         break;
       default:
@@ -406,7 +406,7 @@ describe("game/Commands.js", () => {
       case 2:
       case 3:
         assert.equal(m.sender, 'Advisor');
-        assert.equal(m.text, "word-not-found");
+        assert.equal(m.text, "txt-word-not-found");
         assert.equal(m.args[0], "XYZ");
         if (seqNo === 3)
           socket1.done();

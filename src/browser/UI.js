@@ -203,7 +203,6 @@ class UI {
           resolve("execCommand");
       });
     }
-    return Promise.reject();
     return navi()
     .catch(e => ie())
     .catch(e => execCmd());

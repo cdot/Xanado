@@ -105,7 +105,7 @@ const Commands = superclass => class extends superclass {
                 player, Game.Notify.MESSAGE,
                 {
                   sender: /*i18n*/"Advisor",
-                  text: /*i18n*/"word-not-found",
+                  text: /*i18n*/"txt-word-not-found",
                   args: [ w.word, dict.name ]
                 });
             }
@@ -660,7 +660,7 @@ const Commands = superclass => class extends superclass {
         });
         this.notifyOthers(player, Game.Notify.MESSAGE, {
           sender: /*i18n*/"Advisor",
-          text: /*i18n*/"was-advised",
+          text: /*i18n*/"txt-was-advised",
           classes: "warning",
           args: [ player.name ]
         });

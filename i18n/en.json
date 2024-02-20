@@ -272,9 +272,9 @@
   "warn-disco": "Disconnected placement",
   "warn-empty-bag": "The letter bag is empty",
   "warn-uncentred": "Centre must be used",
-  "was-advised": "$1 has received advice from the robot",
-  "word-not-found": "$1 not found in $2",
-  "word-rejected": "The {{PLURAL:$1|word|words}} $2 {{PLURAL:$1|was|were}} not found in the dictionary",
+  "txt-was-advised": "$1 has received advice from the robot",
+  "txt-word-not-found": "$1 not found in $2",
+  "txt-word-rejected": "The {{PLURAL:$1|word|words}} $2 {{PLURAL:$1|was|were}} not found in the dictionary",
   "word-there": "'$1' is already in $2",
   "wrong-pass": "Wrong password for '$1'",
   "your": "your"

@@ -527,7 +527,7 @@ const GameUIMixin = superclass => class extends superclass {
     if (this.getSetting("warnings"))
       this.playAudio("oops");
     this.$log(true, $.i18n(
-      "word-rejected",
+      "txt-word-rejected",
       rejection.words.length,
       rejection.words.join(", ")), "turn-narrative");
 

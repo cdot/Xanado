@@ -197,22 +197,22 @@ class Turn extends Move {
        * @member {State?}
        */
       this.endState = params.endState;
+    }
 
+    if (typeof params.endStates === "object")
       /**
        * End state information for each player, indexed on player key.
        * @member {Object.<string,EndState>[]}
        */
-      if (params.endStates)
-        this.endStates = params.endStates;
-      else if (typeof params.score === "object") {
-        // Compatibility, end states used to be packed into an
-        // array on score
-        this.endStates = [];
-        for (const es of params.score)
-          this.endStates.push(new EndState(es));
-        delete params.score;
-      }
-    }
+      this.endStates = params.endStates;
+
+    else if (typeof params.score === "object") {
+      // Compatibility, end states used to be overloaded into score
+      this.endStates = [];
+      for (const es of params.score)
+        this.endStates.push(new EndState(es));
+      delete params.score;
+    }   
 
     if (params.passes && params.passes > 0)
       /**
