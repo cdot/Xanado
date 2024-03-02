@@ -168,11 +168,11 @@ const GamesUIMixin = superclass => class extends superclass {
     if (isActive) {
       const info = [];
       if (player.dictionary && player.dictionary !== game.dictionary) {
-        const dic = $.i18n("using-dic", player.dictionary);
+        const dic = $.i18n("txt-using-dic", player.dictionary);
         info.push(dic);
       }
       if (game.timerType && player.clock) {
-        const left = $.i18n("left-to-play", player.clock);
+        const left = $.i18n("txt-left-to-play", player.clock);
         info.push(left);
       }
       if (info.length > 0)

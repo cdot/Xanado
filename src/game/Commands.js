@@ -655,7 +655,7 @@ const Commands = superclass => class extends superclass {
         const words = bestPlay.words.map(w => w.word).join(",");
         this.notifyPlayer(player, Game.Notify.MESSAGE, {
           sender: /*i18n*/"Advisor",
-          text: /*i18n*/"possible-score",
+          text: /*i18n*/"txt-possible-score",
           args: [ words, start.row + 1, start.col + 1, bestPlay.score ]
         });
         this.notifyOthers(player, Game.Notify.MESSAGE, {
@@ -727,7 +727,7 @@ const Commands = superclass => class extends superclass {
       // Tell *everyone else* that they asked for a hint
       this.notifyOthers(player, Game.Notify.MESSAGE, {
         sender: /*i18n*/"Advisor",
-        text: /*i18n*/"hinted",
+        text: /*i18n*/"txt-hinted",
         classes: "warning",
         args: [ player.name ]
       });
@@ -771,7 +771,7 @@ const Commands = superclass => class extends superclass {
             player,
             Game.Notify.MESSAGE, {
               sender: /*i18n*/"Advisor",
-              text: /*i18n*/"word-there",
+              text: /*i18n*/"nfy-already-there",
               args: [ word, dict.name ]
             });
         }

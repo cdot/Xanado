@@ -311,7 +311,7 @@ describe("server/UserManager", () => {
           //console.log("Email", email);
           assert.equal(email.from, "unit tests");
           assert.equal(email.to, "test@email.com");
-          assert.equal(email.subject, "Password reset");
+          assert.equal(email.subject, "eml-respw-subject");
           assert(email.text);
           token = email.text.replace(
             /^.*\/password-reset\/(\w+).*$/, "$1");
@@ -331,7 +331,7 @@ describe("server/UserManager", () => {
       //console.log(res.body);
       assert.equal(res.status, 403);
       sparseEqual(res.body, [
-        "player-unknown",
+        "err-player-unknown",
         "unknown@email.com"
       ]);
 
@@ -343,7 +343,7 @@ describe("server/UserManager", () => {
       //console.log(res.text, token);
       assert.equal(res.status, 200);
       sparseEqual(res.body, [
-        "txt-reset-sent",
+        "txt-respw-sent",
         "test_user"
       ]);
       assert(token);

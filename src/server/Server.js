@@ -468,7 +468,7 @@ class Server {
       // Tell *everyone else* that they asked for a hint
       socket.game.notifyOthers(socket.player, BackendGame.Notify.MESSAGE, {
         sender: /*i18n*/"Advisor",
-        text: /*i18n*/"played-for",
+        text: /*i18n*/"nfy-played-for",
         classes: "warning",
         args: [ socket.player.name ]
       });

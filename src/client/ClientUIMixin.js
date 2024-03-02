@@ -237,8 +237,8 @@ const ClientUIMixin = superclass => class extends superclass {
       // Socket has disconnected for some reason
       // (server died, maybe?) Back off and try to reconnect.
       console.debug(`--> disconnect`);
-      const mess = $.i18n("txt-servdisco");
-      $reconnectDialog = this.alert(mess, $.i18n("err-servdisco"));
+      const mess = $.i18n("txt-server-disconn");
+      $reconnectDialog = this.alert(mess, $.i18n("err-server-disconn"));
       setTimeout(() => {
         // Try and rejoin after a 3s timeout
         this.readyToListen()

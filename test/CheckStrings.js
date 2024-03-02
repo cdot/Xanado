@@ -29,10 +29,6 @@ class CheckStrings {
     this.strings = {};
   }
 
-  changeLabel(lang, string, probably) {
-    return Promise.resolve(0);
-  }
-
   // Add string to found list
   addString(string, file) {
     if (!this.found[string])
@@ -92,13 +88,6 @@ class CheckStrings {
       if (string.length > MAX_ID_LENGTH
           && !/^Types\./.test(this.strings.qqq[string])) {
         this.report.error(`"${string}" is too long for a label`);
-        let go = -1;
-        while (go === -1) {
-          await this.changeLabel("qqq", string)
-          .then(g => go = g);
-        }
-        if (go === -2)
-          break;
       }
     }
   }
@@ -164,18 +153,18 @@ class CheckStrings {
           this.report.error(`${lang} is missing translations for:\n${mess.join("\n")}`);
         
         // check that the same parameters are present in translated strings
-        let messes = 0;
+        let messes = [];
         for (const string of Object.keys(this.strings[lang])) {
           if (this.strings.qqq[string] && this.strings[lang][string]) {
             mess = [];
             this.checkParameters(string, this.strings.qqq[string], this.strings[lang][string], mess);
             if (mess.length > 0) {
-              messes++;
-              if (messes == 1)
-                this.report.warn(`${lang} has parameter inconsistencies:\n${mess.join("\n")}`);
+              messes.push(mess);
             }
           }
         }
+        if (messes.length > 0)
+          this.report.warn(`${lang} has parameter inconsistencies:\n${messes.join("\n")}`);
         
         for (const string of Object.keys(this.strings[lang])) {
           if (!this.strings.qqq[string]) {
@@ -183,7 +172,6 @@ class CheckStrings {
             for (const enlabel in this.strings.en) {
               if (this.strings.en[enlabel] == string) {
                 this.report.log(`${string} is the English translation for id ${enlabel}`);
-                await this.changeLabel(lang, string, enlabel);
               }
             }
           }

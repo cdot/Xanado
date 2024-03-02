@@ -47,8 +47,8 @@ class ClientGamesUI extends ClientUIMixin(GamesUIMixin(UI)) {
     $("#reminders-button")
     .on("click", () => {
       $.post("/sendReminder/*")
-      .then(info => this.alert(info.join(", "), $.i18n("btn-sendrems")))
-      .catch(e => this.alert(e, $.i18n("failed", $.i18n("btn-sendrems"))));
+      .then(info => this.alert(info.join(", "), $.i18n("btn-send-reminders")))
+      .catch(e => this.alert(e, $.i18n("failed", $.i18n("btn-send-reminders"))));
     });
 
     $("#chpw_button")
@@ -289,20 +289,20 @@ class ClientGamesUI extends ClientUIMixin(GamesUIMixin(UI)) {
       $box.append(
         $(document.createElement("button"))
         .attr("name", "email")
-        .button({ label: $.i18n("btn-sendrem") })
+        .button({ label: $.i18n("btn-send-reminder") })
         .tooltip({
-          content: $.i18n("tt-sendrem")
+          content: $.i18n("tt-send-reminder")
         })
         .on("click", () => {
           console.debug("Send reminder");
           $.post(`/sendReminder/${game.key}`)
           .then(names => $("#alertDialog")
-                .text($.i18n("player-reminded", names.join(", ")))
+                .text($.i18n("txt-player-reminded", names.join(", ")))
                 .dialog({
-                  title: $.i18n("player-reminded", player.name),
+                  title: $.i18n("txt-player-reminded", player.name),
                   modal: true
                 }))
-          .catch(e => this.alert(e, $.i18n("failed", $.i18n("tt-sendrem"))));
+          .catch(e => this.alert(e, $.i18n("failed", $.i18n("btn-send-reminder"))));
         }));
     }
 

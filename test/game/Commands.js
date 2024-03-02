@@ -281,7 +281,7 @@ describe("game/Commands.js", () => {
         break;
       case 4:
         assert.equal(m.sender, 'Advisor');
-        assert.equal(m.text, "possible-score");
+        assert.equal(m.text, "txt-possible-score");
         break;
       default:
         socket1.done();

@@ -304,14 +304,14 @@ describe("backend/BackendGame", () => {
 		const socket1 = new TestSocket("one");
 		const socket2 = new TestSocket("two");
 		socket1.on(BackendGame.Notify.MESSAGE, mess => {
-      if (mess.text === "hinted")
+      if (mess.text === "txt-hinted")
         return;
       assert.equal(mess.args[0], "TRAWL", mess);
       socket1.done();
 		})
     .on("*", () => {});
 		socket2.on(BackendGame.Notify.MESSAGE, mess => {
-      if (mess.text === "hinted")
+      if (mess.text === "txt-hinted")
         return;
       assert.equal(mess.text, "log-no-play");
       socket2.done();

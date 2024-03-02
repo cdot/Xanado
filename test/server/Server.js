@@ -294,7 +294,7 @@ describe("server/Server.js", () => {
             "test_user", "FROBNOZZ", "Oxford_5000" ]);
           return;
 
-        case "word-there":
+        case "nfy-already-there":
           assert.deepEqual(data.args, [ "ABSTRACT", "Oxford_5000" ]);
           return;
 

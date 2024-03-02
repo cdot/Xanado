@@ -3,7 +3,7 @@
 /* eslint-env mocha */
 
 import { assert } from "chai";
-import { setupPlatform} from "../TestPlatform.js";
+import { setupPlatform, UNit} from "../TestPlatform.js";
 
 import { Game } from "../../src/game/Game.js";
 import { findBestPlay } from "../../src/game/findBestPlay.js";
@@ -16,7 +16,7 @@ describe("game/findBestPlay", () => {
 
   before(setupPlatform);
 
-  it("blanks", () => {
+  UNit("blanks", () => {
     let bestMoves = [];
     return new Game({
       edition:"English_WWF",
@@ -67,7 +67,7 @@ describe("game/findBestPlay", () => {
     });
   });
 
-  it("acts", () => {
+  UNit("acts", () => {
     let bestMoves = [];
     let rack = new Rack(Game.CLASSES, { id: "base", size: 3 });
     rack.addTile(new Tile({letter:"A", isBlank:false, score:1}));
@@ -133,7 +133,7 @@ describe("game/findBestPlay", () => {
     });
   });
 
-  it("noe", () => {
+  UNit("noe", () => {
     let bestMoves = [];
     let rack = new Rack(Game.CLASSES, { id: "best", size: 7 });
     rack.addTile(new Tile({letter:"L", isBlank:false, score:1}));
@@ -190,7 +190,7 @@ describe("game/findBestPlay", () => {
     });
   });
 
-  it("town", () => {
+  UNit("town", () => {
     let bestMoves = [];
     const rack = new Rack(Game.CLASSES, { id: "best", size: 7 });
     rack.addTile(new Tile({letter:"U", isBlank:false, score:1}));
@@ -241,7 +241,7 @@ describe("game/findBestPlay", () => {
     });
   });
 
-  it("obliques", () => {
+  UNit("obliques", () => {
     let bestMoves = [];
     return new Game({
       edition:"English_WWF",
@@ -285,7 +285,58 @@ describe("game/findBestPlay", () => {
       },
       game.dictionary))
     .then(() => {
-      //console.log(bestMoves[bestMoves.length-1]);
+      const bm = bestMoves.pop();
+      assert.equal(bm.words[0].word, "OBLIQUES");
+      assert.equal(bm.words[0].score, 228);
+    });
+  });
+
+  it("girths/use", () => {
+    let bestMoves = [];
+    return new Game({
+      edition:"English_Scrabble",
+      dictionary:"British_English",
+      _debug: console.debug
+    }).create()
+    .then(game => {
+      game.addPlayer(new Player(
+        {name:"test", key:"turntable", isRobot:true},
+        Game.CLASSES), true);
+      return game.loadBoard(
+        "| | | | | | | | | | | | | | | |\n" +
+        "| | | | | | | | | | | |P| | | |\n" +
+        "| | | | | | | | | | | |A| | | |\n" +
+        "| | | | | | | | | | | |T| | | |\n" +
+        "| | | | | | | | | |A|C|E| | | |\n" +
+        "| | | | | | | | | |J| | | | | |\n" +
+        "| | | | | | | | |D|A| | | | | |\n" +
+        "| | | | | | | |G|I|R|T|H| | | |\n" +
+        "| | | | | | | | |V| |E| | | | |\n" +
+        "| |L| | | |R| | |A| |N| | |K| |\n" +
+        "| |O| | |W|A|G|E|S| |C| | |O| |\n" +
+        "| |A| |M|E|N| |X| | |H|A|B|I|T|\n" +
+        "| |F|R|O|N|D| |P|I| | | |U| |R|\n" +
+        "| |E| |W| |Y| |O|F| | | |R| |I|\n" +
+        "| |D| |N| | | |S| |L|A|Z|Y| |M|\n");
+    })
+    .then(game => findBestPlay(
+      game, [
+        new Tile({letter:"I", isBlank:false, score:1}),
+        new Tile({letter:"U", isBlank:false, score:1}),
+        new Tile({letter:"E", isBlank:false, score:1}),
+        new Tile({letter:"U", isBlank:false, score:1}),
+        new Tile({letter:"S", isBlank:false, score:1}),
+        new Tile({letter:"I", isBlank:false, score:1}),
+        new Tile({letter:"E", isBlank:false, score:1})
+      ],
+      move => {
+        console.log(move);
+        if (move instanceof Move)
+          bestMoves.push(move);
+      },
+      game.dictionary))
+    .then(() => {
+      console.log(bestMoves[bestMoves.length-1]);
     });
   });
 });

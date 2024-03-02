@@ -49,7 +49,7 @@ class BrowserGame extends Undo(Commands(Game)) {
     if (list.length == 1)
       return list[0];
 
-    return $.i18n("players-tail",
+    return $.i18n("txt-players-tail",
                   list.slice(0, list.length - 1).join(", "),
                   list[list.length - 1]);
   }
@@ -90,8 +90,8 @@ class BrowserGame extends Undo(Commands(Game)) {
         return this.hasEnded()
         ? (this.getWinner() ? $.i18n("h-won", this.getWinner().name) : "?")
         : (this.state === Game.State.WAITING
-           ? $.i18n("state-waiting")
-           : $.i18n("state-playing"));
+           ? $.i18n("txt-state-waiting")
+           : $.i18n("txt-state-playing"));
       default:
         assert.fail(`Bad ${p1}`);
       }
@@ -165,7 +165,7 @@ class BrowserGame extends Undo(Commands(Game)) {
     if (!hideScore && move.words.length > 1 || move.score > sum) {
       $span
       .append($(`<span class="turn-total"></span>`)
-              .append($.i18n("play-score", move.score)));
+              .append($.i18n("txt-play-score", move.score)));
     }
     return $span;
   }
@@ -382,7 +382,7 @@ class BrowserGame extends Undo(Commands(Game)) {
         const $timeAdjust = $(document.createElement("div"))
               .addClass("time-adjust");
         $timeAdjust.text($.i18n(
-          "lock-clkloss", name, -timePenalty));
+          "log-lost-to-clock", name, -timePenalty));
         $narrative.append($timeAdjust);
       }
 

@@ -396,19 +396,19 @@ class UserManager {
           if (typeof uo.pass === "undefined") {
             if (desc.pass === uo.pass)
               return uo;
-            throw new Error(/*i18n*/"wrong-pass");
+            throw new Error(/*i18n*/"err-wrong-pass");
           }
           return pw_compare(desc.pass, uo.pass)
           .then(ok => {
             if (ok)
               return uo;
-            throw new Error(/*i18n*/"wrong-pass");
+            throw new Error(/*i18n*/"err-wrong-pass");
           })
           .catch(e => {
             /* c8 ignore next 2 */
             if (this.debug)
               this.debug("UserManager: getUser", desc, "failed; bad pass", e);
-            throw new Error(/*i18n*/"wrong-pass");
+            throw new Error(/*i18n*/"err-wrong-pass");
           });
         }
 
@@ -420,7 +420,7 @@ class UserManager {
       if (this.debug)
         this.debug("UserManager: getUser", desc, "failed; no such user in",
                    db.map(uo=>uo.key).join(";"));
-      throw new Error(/*i18n*/"player-unknown");
+      throw new Error(/*i18n*/"err-player-unknown");
     });
   }
 
@@ -806,12 +806,12 @@ class UserManager {
         return this.config.mail.transport.sendMail({
           from: this.config.mail.sender,
           to:  user.email,
-          subject: Platform.i18n("Password reset"),
-          text: Platform.i18n("eml-resplain", url),
-          html: Platform.i18n("eml-reset", url)
+          subject: Platform.i18n("eml-respw-subject"),
+          text: Platform.i18n("eml-respw-plain", url),
+          html: Platform.i18n("eml-respw-html", url)
         })
         .then(() => this.sendResult(
-          res, 200, [ /*i18n*/"txt-reset-sent", user.name ]))
+          res, 200, [ /*i18n*/"txt-respw-sent", user.name ]))
         /* c8 ignore start */
         .catch(
           e => {

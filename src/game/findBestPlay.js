@@ -459,6 +459,13 @@ function bestOpeningPlay(rackTiles) {
 /**
  * Find the best play for the given rack. The results are reported
  * using the listener.
+ *
+ * The algorithm works by finding all squares that have a tile in them and an adjacent
+ * empty square blank that can be extended into to form a word. These starting squares are termed "anchors".
+ *
+ * TODO: the algorithm doesn't find all possible moves. For example, if you have a word "LAMP" and a rack that contains
+ * U, S and E, it won't find "LAMPS/USE".
+ *
  * @param {Tile[]} rack rack of tiles to pick from
  * @private
  */
@@ -489,12 +496,14 @@ function find(rack) {
   // Has at least one anchor been explored? If there are
   // no anchors, we need to compute an opening play
   let anchored = false;
+
+  // Scan each anchor. An anchor is any square that has a tile
+  // and has an adjacent blank that can be extended into to form a word
   for (let col = 0; col < board.cols; col++) {
     for (let row = 0; row < board.rows; row++) {
-      // An anchor is any square that has a tile and has an
-      // adjacent blank that can be extended into to form a word
       if (isAnchor(col, row)) {
         if (!anchored) {
+          // This is the first anchor found.
           // What letters can be used to form a valid cross
           // word? The whole alphabet if the rack contains a
           // blank, the rack otherwise.
@@ -502,6 +511,8 @@ function find(rack) {
                 ? edition.alphabet
                 : (rackTiles.filter(t => !t.isBlank)
                    .map(t => t.letter));
+          // Determine which letters can fit in each square and form a valid
+          // horizontal or vertical cross word.
           computeCrossChecks(available);
           anchored = true;
         }
@@ -510,6 +521,7 @@ function find(rack) {
         for (let anchorNode of roots) {
           // Try and back up then forward through
           // the dictionary to find longer sequences
+
           // across
           back(
             col, row,

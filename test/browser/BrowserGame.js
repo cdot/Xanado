@@ -69,7 +69,7 @@ describe("browser/BrowserGame", () => {
         game.tableRow("%l"),
         `${ts.toLocaleDateString()} ${ts.toLocaleTimeString()}`);
       assert.equal(
-        game.tableRow("%s"), $.i18n("state-playing"));
+        game.tableRow("%s"), $.i18n("txt-state-playing"));
       game.state = BrowserGame.State.GAME_OVER;
       assert.equal(
         game.tableRow("%s"), "Human 1 won");

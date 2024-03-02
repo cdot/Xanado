@@ -177,6 +177,9 @@ Ukranian) and edit the new file to provide the translation. `qqq.json`
 contains descriptions of all the strings requiring translation. You
 can use `npm run tx` to check the completeness of your translations.
 
+There is a helper script `bin/txAssist.js` that can help with your
+translation activities. Run it to get help.
+
 If you create a new translation, you will have to add it to
 `i18n/index.json` for the standalone game to pick it up (or run
 `npm run indexing`, which will do that for you).
