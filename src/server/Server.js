@@ -797,7 +797,7 @@ class Server {
     // Handle XSS risk posed by HTML in the textarea
     let htmlBody = (req.body.message.replace(/</g, "&lt;") || "")
         + "<br>" + Platform.i18n(
-          "eml-html-link", gameURL);
+          /*i18n*/"eml-link-html", gameURL);
     let subject = Platform.i18n("eml-invited");
     return Promise.all(req.body.player.map(
       to => this.sendMail(
@@ -846,8 +846,8 @@ class Server {
           this.debug("Sending reminder mail to", `${player.name}/${player.key}`);
 
         const subject = Platform.i18n("eml-remind");
-        const textBody = Platform.i18n("eml-text-link", gameURL);
-        const htmlBody = Platform.i18n("eml-html-link", gameURL);
+        const textBody = Platform.i18n("eml-link-text", gameURL);
+        const htmlBody = Platform.i18n("eml-link-html", gameURL);
         return this.sendMail(
           player, req, res, game.key,
           subject, textBody, htmlBody);

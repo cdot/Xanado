@@ -211,7 +211,7 @@ class StandaloneGameUI extends StandaloneUIMixin(GameUIMixin(UI)) {
           $("#alertDialog")
           .dialog({
             modal: true,
-            title: $.i18n("txt-link")
+            title: $.i18n("hey-share-link-title")
           })
           .html(`<a href="${url}">${url}</a>`);
         });

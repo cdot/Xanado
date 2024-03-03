@@ -80,7 +80,7 @@ class UI {
     return $("#alertDialog")
     .dialog({
       modal: true,
-      title: title || $.i18n("XANADO problem")
+      title: title || $.i18n("hey-problem")
     })
     .html(`<p class="alert">${message}</p>`);
   }

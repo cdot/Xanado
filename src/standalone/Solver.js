@@ -15,12 +15,14 @@ import "jquery-ui";
 import { Dictionary, Explorer } from "@cdot/dictionary";
 
 import { UI } from "../browser/UI.js";
+import { StandaloneUIMixin } from "./StandaloneUIMixin.js";
 import { loadDictionary } from "../game/loadDictionary.js";
 
 /**
  * Management interface for word solver web app
  */
-class Solver extends UI {
+class Solver extends StandaloneUIMixin(UI) {
+  // pull in StandaloneUIMixin to get promiseLocales and getSetting
 
   search(action) {
     const $results = $("#results");
@@ -37,7 +39,9 @@ class Solver extends UI {
    * Create the UI and start interacting
    */
   create() {
-    return Platform.readFile(Platform.getFilePath("dictionaries/index.json"))
+    super.create();
+    this.initLocale()
+    .then(() => Platform.readFile(Platform.getFilePath("dictionaries/index.json")))
     .then(dictionaries => {
       const $dics = $("#dictionary");
       dictionaries

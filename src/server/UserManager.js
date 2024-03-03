@@ -807,7 +807,7 @@ class UserManager {
           from: this.config.mail.sender,
           to:  user.email,
           subject: Platform.i18n("eml-respw-subject"),
-          text: Platform.i18n("eml-respw-plain", url),
+          text: Platform.i18n("eml-respw-text", url),
           html: Platform.i18n("eml-respw-html", url)
         })
         .then(() => this.sendResult(

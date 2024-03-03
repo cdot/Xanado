@@ -165,7 +165,7 @@ Fs.readdir(i18n_path)
     const news = [];
     for (const k of qqqks)
       if (k != "@metadata") news.push(`${k}: ${langs.en[k]}`);
-    console.log(news.join("\n"));
+    console.log(news.join(".\n"));
     break;
 
   case "keys":
@@ -190,7 +190,7 @@ Fs.readdir(i18n_path)
   case "json":
     return Fs.readFile(path.join(i18n_path, `${lingo}.txt`))
     .then(b => {
-      const tx = b.toString().split(/[\r\n]+/);
+      const tx = b.toString().split(/\.*[\r\n]+/);
       const newlang = {
         "@metadata": {
           authors: [ "txAssist.js" ],

@@ -282,7 +282,7 @@ class ClientGamesUI extends ClientUIMixin(GamesUIMixin(UI)) {
         }));
     }
 
-    // Not the signed in player
+    // Don't remind the signed in player
     if (this.getSetting("canEmail")
         && !player.isRobot
         && game.whosTurnKey === player.key) {
@@ -296,12 +296,13 @@ class ClientGamesUI extends ClientUIMixin(GamesUIMixin(UI)) {
         .on("click", () => {
           console.debug("Send reminder");
           $.post(`/sendReminder/${game.key}`)
-          .then(names => $("#alertDialog")
-                .text($.i18n("txt-player-reminded", names.join(", ")))
+          .then(names =>
+                $("#alertDialog")
                 .dialog({
-                  title: $.i18n("txt-player-reminded", player.name),
+                  title: $.i18n("hey-reminded-title", player.name),
                   modal: true
-                }))
+                })
+                .html($.i18n("hey-reminded-body", names.join(", "))))
           .catch(e => this.alert(e, $.i18n("failed", $.i18n("btn-send-reminder"))));
         }));
     }
