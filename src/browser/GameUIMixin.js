@@ -1733,20 +1733,21 @@ const GameUIMixin = superclass => class extends superclass {
    * @private
    */
   action_swap() {
-    const tiles = this.swapRack.empty();
     // Cannot swap unless we know the letter bag has enough tiles
     const remains = this.game.letterBag.remainingTileCount();
-    if (tiles.length > remains) {
+    const swapsies = this.swapRack.letters();
+    if (swapsies.length > remains) {
       $("#alertDialog")
       .dialog({
         modal: true,
-        title: $.i18n("hey-cant-swap-title", tiles.length)
+        title: $.i18n("hey-cant-swap-title", swapsies.length)
       })
       .html($.i18n("hey-cant-swap-body", remains));
       return;
     }
     // Move the swapRack tiles back to the playRack until the play
     // is confirmed
+    const tiles = this.swapRack.empty();
     this.player.rack.addTiles(tiles);
     this.sendCommand(Game.Command.SWAP, tiles);
   }
