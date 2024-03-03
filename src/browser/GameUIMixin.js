@@ -550,19 +550,17 @@ const GameUIMixin = superclass => class extends superclass {
     this.debug(`f<b pause ${params.playerName}`);
     $(".Surface .letter").hide();
     $(".Surface .score").hide();
-    $("#pauseDialog > .banner")
-    .text($.i18n("game-paused", params.playerName));
-    $("#pauseDialog")
+    $("#alertDialog")
     .dialog({
       dialogClass: "no-close",
-      title: $.i18n("title-paused"),
+      title: $.i18n("hey-paused-title", params.playerName),
       modal: true,
       buttons: [
         {
           text: $.i18n("btn-unpause"),
           click: () => {
             this.sendCommand(Game.Command.UNPAUSE);
-            $("#pauseDialog").dialog("close");
+            $("#alertDialog").dialog("close");
           }
         }
       ]});
@@ -582,7 +580,7 @@ const GameUIMixin = superclass => class extends superclass {
     this.debug(`f<b unpause ${params.playerName}`);
     $(".Surface .letter").show();
     $(".Surface .score").show();
-    $("#pauseDialog")
+    $("#alertDialog")
     .dialog("close");
   }
 
@@ -1259,8 +1257,7 @@ const GameUIMixin = superclass => class extends superclass {
           } else if (!square.isBoard
                      && square.surface === this.selectedSquare.surface) {
             // Both squares are on the same rack and both have tiles,
-            // swap the tiles
-            console.debug("FUCK WANK");
+            // Do nothing
           }
         }
 
@@ -1737,6 +1734,17 @@ const GameUIMixin = superclass => class extends superclass {
    */
   action_swap() {
     const tiles = this.swapRack.empty();
+    // Cannot swap unless we know the letter bag has enough tiles
+    const remains = this.game.letterBag.remainingTileCount();
+    if (tiles.length > remains) {
+      $("#alertDialog")
+      .dialog({
+        modal: true,
+        title: $.i18n("hey-cant-swap-title", tiles.length)
+      })
+      .html($.i18n("hey-cant-swap-body", remains));
+      return;
+    }
     // Move the swapRack tiles back to the playRack until the play
     // is confirmed
     this.player.rack.addTiles(tiles);
