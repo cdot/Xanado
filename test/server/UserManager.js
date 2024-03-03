@@ -311,7 +311,7 @@ describe("server/UserManager", () => {
           //console.log("Email", email);
           assert.equal(email.from, "unit tests");
           assert.equal(email.to, "test@email.com");
-          assert.equal(email.subject, "eml-respw-subject");
+          assert.equal(email.subject, "Password reset");
           assert(email.text);
           token = email.text.replace(
             /^.*\/password-reset\/(\w+).*$/, "$1");

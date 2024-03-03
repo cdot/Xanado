@@ -119,7 +119,7 @@ describe("browser/UI", () => {
     return ui.initLocale()
     .then(() => {
       assert.equal($.i18n("not a valid string"), "not a valid string");
-      assert.equal($.i18n("h-won", "Nobody"), "Nobody gagne");
+      assert.equal($.i18n("h-won", "Nobody"), "Nobody gagné");
       assert.equal($("#test").text(), $.i18n("lbl-pickplayer"));
     });
   });
