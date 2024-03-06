@@ -11,20 +11,6 @@ import { Dialog } from "./Dialog.js";
  */
 class GameSetupDialog extends Dialog {
 
-  // ordered types for <select>s in UI
-  static Penalty_types = [
-    Game.Penalty.PER_WORD, Game.Penalty.PER_TURN,
-    Game.Penalty.MISS, Game.Penalty.NONE
-  ];
-
-  static Timer_types = [
-    Game.Timer.NONE, Game.Timer.TURN, Game.Timer.GAME
-  ];
-
-  static WordCheck_types = [
-    Game.WordCheck.NONE, Game.WordCheck.AFTER, Game.WordCheck.REJECT
-  ];
-
   /**
    * @override
    */
@@ -86,44 +72,48 @@ class GameSetupDialog extends Dialog {
   }
 
   createDialog() {
-    function makeOptions(list, $sel) {
-      for (const p of list)
-        $sel.append(
-          `<option value="${p ? p : 'none'}">${p ? $.i18n(p) : $.i18n("None")}</option>`);
+    // list is an ordered list of type names
+    // type is the Game. enumerated type
+    // dflt is default pick
+    // $el is the <select> jObject
+    function orderEnum(list, type, deflt, $el) {
+      for (const p of list) {
+        const txt = $.i18n(type[p] || "None");
+        const sel = (p === deflt) ? ` selected="selected"` : "";
+        $el.append(`<option value="${p}"${sel}>${txt}</option>`);
+      }
     }
 
-    return super.createDialog()
-    .then(() => {
-      const $pen = this.$dlg.find("[name=challengePenalty]");
-      makeOptions(GameSetupDialog.Penalty_types, $pen);
-      $pen.on("selectmenuchange", () => this.showPenaltyFields());
-      this.showPenaltyFields();
+    const $pen = this.$dlg.find("[name=challengePenalty]");
+    orderEnum(["MISS", "PER_WORD", "PER_TURN", "NONE"], Game.Penalty, "MISS", $pen);
+    $pen.on("selectmenuchange", () => this.showPenaltyFields());
+    this.showPenaltyFields();
 
-      const $tim = this.$dlg.find("[name=timerType]");
-      makeOptions(GameSetupDialog.Timer_types, $tim);
-      $tim.on("selectmenuchange", () => this.showTimerFields());
-      this.showTimerFields();
+    const $tim = this.$dlg.find("[name=timerType]");
+    orderEnum(["NONE", "TURN", "GAME"], Game.Timer, "NONE", $tim);
+    $tim.on("selectmenuchange", () => this.showTimerFields());
+    this.showTimerFields();
 
-      const $wc = this.$dlg.find("[name=wordCheck]");
-      makeOptions(GameSetupDialog.WordCheck_types, $wc);
+    const $wc = this.$dlg.find("[name=wordCheck]");
+    orderEnum(["NONE", "AFTER", "REJECT"], Game.WordCheck, "NONE", $wc);
 
-      const ui = this.options.ui;
-      return Promise.all([
-        ui.promiseEditions()
-        .then(editions => {
-          const $eds = this.$dlg.find("[name=edition]");
-          editions.forEach(e => $eds.append(`<option value="${e}">${e}</option>`));
-        }),
-        ui.promiseDictionaries()
-        .then(dictionaries => {
-          const $dics = this.$dlg.find("[name=dictionary]");
-          dictionaries
-          .forEach(d => $dics.append($(`<option value="${d}">${d}</option>`)));
-          $dics.on("selectmenuchange", () => this.showFeedbackFields());
-          this.showFeedbackFields();
-        })
-      ]);
-    });
+    const ui = this.options.ui;
+    return Promise.all([
+      ui.promiseEditions()
+      .then(editions => {
+        const $eds = this.$dlg.find("[name=edition]");
+        editions.forEach(e => $eds.append(`<option value="${e}">${e}</option>`));
+      }),
+      ui.promiseDictionaries()
+      .then(dictionaries => {
+        const $dics = this.$dlg.find("[name=dictionary]");
+        dictionaries
+        .forEach(d => $dics.append($(`<option value="${d}">${d}</option>`)));
+        $dics.on("selectmenuchange", () => this.showFeedbackFields());
+        this.showFeedbackFields();
+      })
+    ])
+    .then(() => super.createDialog());
   }
 
   openDialog() {
@@ -146,9 +136,12 @@ class GameSetupDialog extends Dialog {
         const val = (game ? game[field] : undefined) || ui.getSetting(field);
         if (el.tagName === "INPUT" && el.type === "checkbox")
           $el.prop("checked", val).checkboxradio("refresh");
-        else if (el.tagName === "SELECT")
-          $el.val(val).selectmenu("refresh");
-        else if (val)
+        else if (el.tagName === "SELECT") {
+          // If the game doesn't have a value for the option then keep
+          // the default, which will have been set in createDialog
+          if (typeof val !== "undefined")
+            $el.val(val).selectmenu("refresh");
+        } else if (val)
           $el.val(val);
         return true;
       });
