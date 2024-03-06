@@ -169,6 +169,7 @@ class Dialog {
 
     const $selects = this.$dlg.find("select");
     if ($selects.length > 0) {
+
       $selects
       .selectmenu()
       .on("selectmenuchange",
@@ -214,16 +215,16 @@ class Dialog {
         }, 100);
       */
 
-      this.$dlg.find("[data-i18n-tooltip]")
-      .tooltip({
-        items: "[data-i18n-tooltip]",
-        content: function() {
-          return $.i18n($(this).data("i18n-tooltip"));
-        }
-        /* c8 ignore stop */
-      });
-
     }
+
+    this.$dlg.find("[data-i18n-tooltip]")
+    .tooltip({
+      items: "[data-i18n-tooltip]",
+      content: function() {
+        return $.i18n($(this).data("i18n-tooltip"));
+      }
+      /* c8 ignore stop */
+    });
 
     $(".submit", this.$dlg)
     .on("click", () => this.submit());
