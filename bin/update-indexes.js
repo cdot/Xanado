@@ -48,14 +48,14 @@ function updateIndexes(root) {
   console.debug("These files are used by the standalone version");
   return Promise.all([
     index(path.resolve(root, "css"),
-          f => /\.css$/i.test(f),
+          f => /(^|\W)[^_]\w*\.css$/i.test(f),
          /\.css$/),
     index(path.resolve(root, "i18n"),
           f => !/(^|\W)(index|qqq)\.json$/.test(f)
           && /\.json$/.test(f),
           /\.json?$/),
     index(path.resolve(root, "editions"),
-          f => !/^index\.json$/.test(f)
+          f => !/(^|\W)(index|Test|Tiny)\.json$/.test(f)
           && /\.json$/.test(f),
           /\.json$/),
     index(path.resolve(root, "dictionaries"),

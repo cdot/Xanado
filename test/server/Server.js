@@ -212,8 +212,8 @@ describe("server/Server.js", () => {
     return chai.request(s.express)
     .get("/dictionaries")
     .then(res => {
-      assert(res.body.indexOf('SOWPODS_English') >= 0);
-      assert(res.body.indexOf('CSW2019_English') >= 0);
+      assert(res.body.indexOf('British_English') >= 0);
+      assert(res.body.indexOf('CSW2021_English') >= 0);
       assert.equal(res.status, 200);
     });
   });
