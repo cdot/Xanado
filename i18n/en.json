@@ -76,7 +76,7 @@
   "failed": "'$1' failed",
   "h-leader-board": "Leader Board",
   "h-won": "$1 won",
-  "hey-cant-swap-body": "There are only $1 {{PLURAL:$1|tile|tiles}} left in the bag",
+  "hey-cant-swap-body": "There {{PLURAL:$1|is|are}} only $1 {{PLURAL:$1|tile|tiles}} left in the bag",
   "hey-cant-swap-title": "Cannot swap $1 {{PLURAL:$1|tile|tiles}}",
   "hey-paused-title": "$1 has paused the game",
   "hey-problem": "XANADO problem",
