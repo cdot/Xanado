@@ -13,6 +13,7 @@ import { setupPlatform, setup$, setupI18n,
          getTestGame, StubServer, UNit } from "../TestPlatform.js";
 import { TestSocket } from "../TestSocket.js";
 import { Game } from "../../src/game/Game.js";
+import { UIEvents } from "../../src/browser/UIEvents.js";
 
 describe("client/ClientGamesUI", () => {
 
@@ -63,11 +64,19 @@ describe("client/ClientGamesUI", () => {
       window.open = () => {};
       keep.location = global.location;
       global.location = { href: "here", hash: "" };
+      for (const key of Object.keys(UIEvents))
+        $(document).off(key);
     }));
 
   after(() => {
     window.open = keep.open;
     global.location = keep.location;
+  });
+
+  beforeEach(() => {
+    for (const key of Object.values(UIEvents)) {
+      $(document).off(key);
+    }
   });
 
   it("handlers", () => {
@@ -106,26 +115,28 @@ describe("client/ClientGamesUI", () => {
       () => {
         assert($("#signin-button").length === 1);
         $("#signin-button").trigger("click");
-      }, {
-        //debug: console.debug
-      }))
+      }
+      //,{ debug: console.debug }
+    ))
     .then(() => {
-      //console.debug("Logged in");
+      console.debug("Logged in");
       $("#signout-button").trigger("click");
     })
     .then(() => expectDialog(
       "UserSettingsDialog",
-      () => $("#personaliseButton").trigger("click")))
-    .then(() => {
-      return expectDialog(
-        "GameSetupDialog",
-        () => $("#create-game").trigger("click"));
-    })
+      () => $("#personalise-button").trigger("click")
+      //,{ debug: console.debug }
+    ))
+    .then(() => expectDialog(
+      "GameSetupDialog",
+      () => $("#create-game").trigger("click")
+      //,{ debug: console.debug }
+    ))
     .then(() => {
       $("#reminders-button").trigger("click");
       $("#chpw-button").trigger("click");
     })
-    .then(() => server.wait());
+    .then(() => server.wait(true));
   });
 
   it("gameOptions", () => {
@@ -161,17 +172,22 @@ describe("client/ClientGamesUI", () => {
       "/defaults/user": Promise.resolve(USER_DEFAULTS),
       "/defaults/game": Promise.resolve(GAME_DEFAULTS),
       "/games/active": Promise.resolve([]),
-      "/games/unfinished_game": getTestGame("unfinished_game", Game)
-      .then(game => Promise.resolve([game])),
-      "/join/unfinished_game": Promise.resolve({}),
+      "/join/unfinished_game": {
+        promise: Promise.resolve({}),
+        count: 1
+      },
       "/locales": Platform.readFile(Platform.getFilePath("/i18n/index.json"))
-    });
+    }
+                                  //, console.debug
+                                 );
     const ui = new ClientGamesUI();
     ui.channel = new TestSocket("client");
     ui.session = session;
     return ui.create()
     .then(() => getTestGame("unfinished_game", Game))
-    .then(game => ui.joinGame(game))
+    .then(game => {
+      $(document).trigger(UIEvents.JOIN_GAME, [ game.key ]);
+    })
     .then(() => server.wait());
   });
 

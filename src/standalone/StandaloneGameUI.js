@@ -17,6 +17,7 @@ import "../browser/icon_button.js";
 import { GameUIMixin } from "../browser/GameUIMixin.js";
 import { StandaloneUIMixin } from "./StandaloneUIMixin.js";
 import { CBOR } from "../game/CBOR.js";
+import { UIEvents } from "../browser/UIEvents.js";
 
 /**
  * Game that runs solely in the browser (no server).
@@ -70,7 +71,7 @@ class StandaloneGameUI extends StandaloneUIMixin(GameUIMixin(UI)) {
    * @implements browser/GameUIMixin#action_nextGame
    */
   action_nextGame() {
-    this.redirectToGame(this.backendGame.nextGameKey);
+    $(document).trigger(UIEvents.JOIN_GAME, [ this.backendGame.nextGameKey ]);
   }
 
   /**
@@ -183,7 +184,7 @@ class StandaloneGameUI extends StandaloneUIMixin(GameUIMixin(UI)) {
             for (const key of Object.keys(vals))
               this.backendGame[key] = vals[key];
             this.backendGame.save();
-            this.redirectToGame(this.backendGame.key);
+            $(document).trigger(UIEvents.JOIN_GAME, [ this.backendGame.key ]);
           },
           error: e => this.alert(e, $.i18n("failed", $.i18n("btn-game-setup")))
         }));

@@ -23,6 +23,7 @@ import { Game } from "../game/Game.js";
 import { Turn } from "../game/Turn.js";
 import { Tile } from "../game/Tile.js";
 import { UI } from "../browser/UI.js";
+import { UIEvents } from "../browser/UIEvents.js";
 
 /**
  * Mixin with common code shared between client game and games interfaces
@@ -208,6 +209,22 @@ const ClientUIMixin = superclass => class extends superclass {
     });
   }
 
+  attachUIEventHandlers() {
+    super.attachUIEventHandlers();
+
+    // Custom UI event for joining a game
+    $(document).on(UIEvents.JOIN_GAME, (event, key) => {
+      $.post(`/join/${key}`)
+      .then(url => {
+        if (this.getSetting("one_window"))
+          location.replace(url);
+        else
+          window.open(url, "_blank");
+      })
+      .catch(e => this.alert(e, $.i18n("failed", $.i18n("btn-open-game"))));
+    });
+  }
+
   /**
    * @override
    * @instance
@@ -313,7 +330,7 @@ const ClientUIMixin = superclass => class extends superclass {
       if (typeof this.observer === "string")
         $(".observer").show().text($.i18n(
           "observer", this.observer));
-      throw Error($.i18n("txt-nosign"));
+      throw new Error($.i18n("txt-nosign"));
     });
   }
 
@@ -334,13 +351,7 @@ const ClientUIMixin = superclass => class extends superclass {
    * @implements browser/GameUIMixin#action_nextGame
    */
   action_nextGame() {
-    const key = this.game.nextGameKey;
-    $.post(`/join/${key}`)
-    .then(() => {
-      const s = location.href;
-      location.replace(s.replace(/game=[^;&]*/, `game=${key}`));
-    })
-    .catch(console.error);
+    $(document).trigger(UIEvents.JOIN_GAME, [ this.game.nextGameKey ]);
   }
 
   /**

@@ -12,6 +12,7 @@ window.Platform = BrowserPlatform;
 import { UI } from "../browser/UI.js";
 import { Game } from "../game/Game.js";
 import { GamesUIMixin } from "../browser/GamesUIMixin.js";
+import { UIEvents } from "../browser/UIEvents.js";
 import { ClientUIMixin } from "./ClientUIMixin.js";
 
 /**
@@ -131,22 +132,6 @@ class ClientGamesUI extends ClientUIMixin(GamesUIMixin(UI)) {
       ui: this,
       error: e => this.alert(e, $.i18n("failed", $.i18n("btn-game-setup")))
     }));
-  }
-
-  /**
-   * @implements browser/GamesUIMixin#joinGame
-   */
-  joinGame(game) {
-    $.post(`/join/${game.key}`)
-    .then(url => {
-      if (this.getSetting("one_window"))
-        location.replace(url);
-      else {
-        window.open(url, "_blank");
-        this.refreshGame(game.key);
-      }
-    })
-    .catch(e => this.alert(e, $.i18n("failed", $.i18n("btn-open-game"))));
   }
 
   /**

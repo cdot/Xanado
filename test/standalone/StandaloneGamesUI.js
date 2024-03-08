@@ -6,10 +6,12 @@ import { assert } from "chai";
 import { setupPlatform, setup$, setupI18n } from "../TestPlatform.js";
 import { Game } from "../../src/game/Game.js";
 import { Player } from "../../src/game/Player.js";
+import { UIEvents } from "../../src/browser/UIEvents.js";
 
 describe("standalone/StandaloneGamesUI", () => {
 
-  let StandaloneGamesUI, keep = {};;
+  let StandaloneGamesUI, keep = {};
+  let joinSeen;
 
   before(
     () => setupPlatform()
@@ -30,6 +32,10 @@ describe("standalone/StandaloneGamesUI", () => {
         hash: "",
         replace: hr => location.href = hr
       };
+      $(document).on(UIEvents.JOIN_GAME, (event, key) => {
+        assert(!joinSeen);
+        joinSeen = key;
+      });
     }));
   
   after(() => {
@@ -70,12 +76,13 @@ describe("standalone/StandaloneGamesUI", () => {
         assert.equal(games.length, 1);
         assert.equal(games[0].key, game.key);
       });
-      assert(ui.joinGame(game).indexOf(game.key) > 0);
+      $(document).trigger(UIEvents.JOIN_GAME, [ game.key ]);
     })
     .then(() => ui.getGame(game.key))
     .then(g2 => assert.equal(g2.key, game.key))
     .then(() => ui.getHistory())
     .then(hist => {
+      assert.equal(joinSeen, game.key);
       assert.equal(hist.length, 2);
       assert.equal(hist[0].key, "human1");
       assert.equal(hist[0].wins, 1);

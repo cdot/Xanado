@@ -442,7 +442,7 @@ describe("server/Server.js", () => {
       .set('Cookie', cookie)
       .send({
         edition: "English_Scrabble",
-        dictionary:"CSW2019_English"
+        dictionary:"CSW2021_English"
       });
     })
     .then(res => {
@@ -494,7 +494,7 @@ describe("server/Server.js", () => {
       .set('Cookie', cookie)
       .send({
         edition: "English_Scrabble",
-        dictionary:"CSW2019_English"
+        dictionary:"CSW2021_English"
       });
     })
     .then(res => {
@@ -586,7 +586,7 @@ describe("server/Server.js", () => {
           .set('Cookie', cookie)
           .send({
             edition: "English_Scrabble",
-            dictionary:"CSW2019_English"
+            dictionary:"CSW2021_English"
           }))
     .then(res => {
       assert.equal(res.status, 200);
@@ -652,7 +652,7 @@ describe("server/Server.js", () => {
       .set('Cookie', cookie)
       .send({
         edition: "English_Scrabble",
-        dictionary:"CSW2019_English"
+        dictionary:"CSW2021_English"
       });
     })
     .then(res => {

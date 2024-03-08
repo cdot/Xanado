@@ -1,4 +1,4 @@
-/*Copyright (C) 2019-2022 The Xanado Project https://github.com/cdot/Xanado
+/*Copyright (C) 2019-2024 The Xanado Project https://github.com/cdot/Xanado
   License MIT. See README.md at the root of this distribution for full copyright
   and license information. Author Crawford Currie http://c-dot.co.uk*/
 
@@ -70,6 +70,8 @@ let bestScore = 0;
  * we anchor plays on a square with a tile that has an adjacent
  * (horizontal or vertical) non-empty square. This significantly
  * reduces the number of anchors that have to be evaluated.
+ * However it does mean we have to do some gymnastics to find
+ * cross words at the start and end of existing words.
  * @param {number} col the square to inspect
  * @param {number} row the square to inspect
  * @return {boolean} true if this square is a valid anchor
@@ -90,7 +92,7 @@ function isAnchor(col, row) {
  * chars and another of valid horizontal chars. The [0] lists give
  * the letters that are valid for forming a vertical cross word,
  * and the [1] lists give the letters valid for creating a
- * horizontal cross word.  The indices are chosen such that the
+ * horizontal cross word. The indices are chosen such that the
  * cells can be indexed using the dcol parameter in the other
  * functions.
  * @param {string[]} available the set of available letters
@@ -493,8 +495,16 @@ function find(rack) {
               + " on " + board.stringify());
   bestScore = 0;
 
+  // What letters can be used to form a valid cross
+  // word? The whole alphabet if the rack contains a
+  // blank, the rack otherwise.
+  const available = rackTiles.find(l => l.isBlank)
+        ? edition.alphabet
+        : (rackTiles.filter(t => !t.isBlank)
+           .map(t => t.letter));
+
   // Has at least one anchor been explored? If there are
-  // no anchors, we need to compute an opening play
+  // no anchors, we will need to compute an opening play
   let anchored = false;
 
   // Scan each anchor. An anchor is any square that has a tile
@@ -504,13 +514,6 @@ function find(rack) {
       if (isAnchor(col, row)) {
         if (!anchored) {
           // This is the first anchor found.
-          // What letters can be used to form a valid cross
-          // word? The whole alphabet if the rack contains a
-          // blank, the rack otherwise.
-          const available = rackTiles.find(l => l.isBlank)
-                ? edition.alphabet
-                : (rackTiles.filter(t => !t.isBlank)
-                   .map(t => t.letter));
           // Determine which letters can fit in each square and form a valid
           // horizontal or vertical cross word.
           computeCrossChecks(available);

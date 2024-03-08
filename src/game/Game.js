@@ -174,7 +174,7 @@ class Game {
    */
   static DEFAULTS = {
 	  edition:         "English_Scrabble",
-	  dictionary:      "CSW2019_English",
+	  dictionary:      "CSW2021_English",
 
     timerType:        Game.Timer.NONE,
 		timeAllowed:      25, // minutes per game

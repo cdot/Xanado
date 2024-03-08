@@ -6,6 +6,8 @@
  * Dialog for game display. Demand loads the HTML.
  */
 import { Dialog } from "./Dialog.js";
+import { GamesUIMixin } from "./GamesUIMixin.js";
+import { UIEvents } from "./UIEvents.js";
 
 /**
  * Dialog for opening / editing a game
@@ -42,7 +44,7 @@ class GameDialog extends Dialog {
       .on("click", () => {
         this.$dlg.dialog("close");
         const dlg = this.$dlg.data("this");
-        dlg.options.ui.joinGame(dlg.options.game);
+        $(document).trigger(UIEvents.JOIN_GAME, [ dlg.options.game ]);
       });
 
       this.$dlg.find("button[name=robot]")

@@ -9,6 +9,8 @@ import { setupPlatform, setup$, setupI18n, StubServer, getTestGame } from "../Te
 import { TestSocket } from "../TestSocket.js";
 import { Game } from "../../src/game/Game.js";
 import { CBOR } from "../../src/game/CBOR.js";
+import { BrowserGame } from "../../src/browser/BrowserGame.js";
+import { UIEvents } from "../../src/browser/UIEvents.js";
 
 describe("client/ClientGameUI", () => {
 
@@ -50,7 +52,6 @@ describe("client/ClientGameUI", () => {
   };
 
   let ClientGameUI, keep = {};
-  let received = {}, expected = {};
   before(
     () => setupPlatform()
     .then(() => setup$(
@@ -71,31 +72,39 @@ describe("client/ClientGameUI", () => {
   });
 
   beforeEach(() => {
-    $("head").html("");
-    $("body").html("");
+    for (const key of Object.values(UIEvents)) {
+      $(document).off(key);
+    }
   });
 
   it("handlers", () => {
-    const server = new StubServer({
-      "/session": {
-        promise: Promise.resolve(session),
-        count: 2
-      },
-      "/defaults/user": Promise.resolve(USER_DEFAULTS),
-      "/defaults/game": Promise.resolve(GAME_DEFAULTS),
-      "/locales": {
-        promise: Platform.readFile(Platform.getFilePath("/i18n/index.json")),
-        count: 1
-      },
-      "/game/unfinished_game": getTestGame("unfinished_game", Game)
-      .then(game => CBOR.encode(game, Game.CLASSES))
+    return getTestGame("unfinished_game", BrowserGame)
+    .then(game => {
+      const server = new StubServer({
+        //"/session": {
+        //  promise: Promise.resolve(session),
+        //  count: 2
+        //},
+        //"/defaults/user": Promise.resolve(USER_DEFAULTS),
+        //"/defaults/game": Promise.resolve(GAME_DEFAULTS),
+        //"/locales": {
+        //  promise: Platform.readFile(Platform.getFilePath("/i18n/index.json")),
+        //  count: 1
+        //},
+        //"/game/unfinished_game": CBOR.encode(game, Game.CLASSES)
+      }
+                                    //, console.debug
+                                   );
+      const ui = new ClientGameUI();
+      ui.session = session;
+      ui.channel = new TestSocket("socket");
+      ui.attachChannelHandlers();
+      // createGame both calls $(.action-button).button() and also invokes
+      // a button method. This is OK in the browser but fails in node.js.
+      $(".action-button").button();
+      return ui.createUI(game)
+      .then(() => server.wait());
+      // TODO: actually test a game!
     });
-    const ui = new ClientGameUI();
-    ui.session = session;
-    ui.channel = new TestSocket("socket");
-    ui.attachChannelHandlers();
-    return ui.create()
-    .then(() => server.wait());
-    // TODO: actually test a game!
   });
 });

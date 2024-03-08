@@ -1710,7 +1710,7 @@ const GameUIMixin = superclass => class extends superclass {
    * @abstract
    */
   action_anotherGame() {
-    assert.fail("GameUIMixin.action_nextGame");
+    assert.fail("GameUIMixin.action_anotherGame");
   }
 
   /**

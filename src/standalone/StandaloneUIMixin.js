@@ -15,6 +15,7 @@ import { Edition } from "../game/Edition.js";
 import { BackendGame } from "../backend/BackendGame.js";
 import { BrowserDatabase } from "../browser/BrowserDatabase.js";
 import { UI } from "../browser/UI.js";
+import { UIEvents } from "../browser/UIEvents.js";
 
 /**
  * For promiseDefaults.
@@ -268,6 +269,20 @@ const StandaloneUIMixin = superclass => class extends superclass {
       this.debug = console.debug;
 
     this.session.key = this.constructor.HUMAN_KEY;
+  }
+
+  /**
+   * @implements browser/GamesUIMixin#attachUIEventHandlers
+   * @override
+   */
+  attachUIEventHandlers() {
+    super.attachUIEventHandlers();
+
+    // Custom UI event for joining a game
+    $(document)
+    .on(UIEvents.JOIN_GAME, (event, key) => {
+      this.redirectToGame(key);
+    });
   }
 };
 

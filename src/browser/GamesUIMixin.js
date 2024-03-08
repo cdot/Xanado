@@ -7,6 +7,8 @@
 
 import { Game } from "../game/Game.js";
 import { BrowserGame } from "./BrowserGame.js";
+import { UIEvents } from "./UIEvents.js";
+
 const Player = BrowserGame.CLASSES.Player;
 
 /**
@@ -36,15 +38,6 @@ const GamesUIMixin = superclass => class extends superclass {
    */
   gameOptions(game) {
     assert.fail(`GamesUIMixin.gameOptions ${game}`);
-  }
-
-  /**
-   * Used by GameDialog
-   * @instance
-   * @memberof browser/GamesUIMixin
-   */
-  joinGame(game) {
-    assert.fail(`GamesUIMixin.joinGame ${game}`);
   }
 
   /**
@@ -204,8 +197,8 @@ const GamesUIMixin = superclass => class extends superclass {
           content: $.i18n("tt-open")
         })
         .on("click", () => {
-          console.debug(`Open game ${game.key}/${this.session.key}`);
-          this.joinGame(game);
+          //console.debug(`Open game ${game.key}/${this.session.key}`);
+          $(document).trigger(UIEvents.JOIN_GAME, [ game.key ]);
         }));
     }
     return $tr;
