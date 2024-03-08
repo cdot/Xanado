@@ -23,7 +23,7 @@ let db = new MemoryDatabase();
 let game = new Game({
   //_debug: console.debug,
   edition: "Test",
-  dictionary: "CSW2019_English"
+  dictionary: "CSW2021_English"
 });
 let gameKey = game.key;
 let player = 0;
