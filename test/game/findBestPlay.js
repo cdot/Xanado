@@ -16,7 +16,7 @@ describe("game/findBestPlay", () => {
 
   before(setupPlatform);
 
-  UNit("blanks", () => {
+  it("blanks", () => {
     let bestMoves = [];
     return new Game({
       edition:"English_WWF",
@@ -67,7 +67,7 @@ describe("game/findBestPlay", () => {
     });
   });
 
-  UNit("acts", () => {
+  it("crag/acts", () => {
     let bestMoves = [];
     let rack = new Rack(Game.CLASSES, { id: "base", size: 3 });
     rack.addTile(new Tile({letter:"A", isBlank:false, score:1}));
@@ -75,7 +75,7 @@ describe("game/findBestPlay", () => {
     rack.addTile(new Tile({letter:"R", isBlank:false, score:1}));
     return new Game({
       edition:"English_WWF",
-      dictionary:"SOWPODS_English"
+      dictionary:"British_English"
     })
     .create()
     .then(game => {
@@ -108,8 +108,8 @@ describe("game/findBestPlay", () => {
       game.dictionary))
 
     .then(() => {
-      assert.equal(bestMoves.length, 3);
-      const last = bestMoves[2];
+      assert.equal(bestMoves.length, 2);
+      const last = bestMoves.pop();
       assert.equal(last.words.length, 2);
       assert.equal(last.words[0].word, "ACTS");
       assert.equal(last.words[0].score, 7);
@@ -133,7 +133,7 @@ describe("game/findBestPlay", () => {
     });
   });
 
-  UNit("noe", () => {
+  it("noe", () => {
     let bestMoves = [];
     let rack = new Rack(Game.CLASSES, { id: "best", size: 7 });
     rack.addTile(new Tile({letter:"L", isBlank:false, score:1}));
@@ -145,7 +145,7 @@ describe("game/findBestPlay", () => {
     rack.addTile(new Tile({letter:"A", isBlank:false, score:1}));
     return new Game({
       edition:"English_Scrabble",
-      dictionary:"SOWPODS_English"
+      dictionary:"British_English"
     }).create()
     .then(game => {
       game.addPlayer(new Player(
@@ -178,19 +178,20 @@ describe("game/findBestPlay", () => {
       game.dictionary))
 
     .then(() => {
-      assert.equal(bestMoves.length, 2);
-
-      assert.equal(bestMoves[0].words.length, 1);
-      assert.equal(bestMoves[0].words[0].word, "ATAXIA");
-      assert.equal(bestMoves[0].words[0].score, 14);
-
-      assert.equal(bestMoves[1].words.length, 1);
-      assert.equal(bestMoves[1].words[0].word, "TOWABLE");
-      assert.equal(bestMoves[1].words[0].score, 24);
+      assert.equal(bestMoves.length, 4);
+      const bm = bestMoves.pop();
+      assert.equal(bm.words.length, 3);
+      assert.equal(bm.words[0].word, "PA");
+      assert.equal(bm.words[0].score, 5);
+      assert.equal(bm.words[1].word, "ONE");
+      assert.equal(bm.words[1].score, 4);
+      assert.equal(bm.words[2].word, "AXE");
+      assert.equal(bm.words[2].score, 12);
+      assert.equal(bm.score, 21);
     });
   });
 
-  UNit("town", () => {
+  it("town", () => {
     let bestMoves = [];
     const rack = new Rack(Game.CLASSES, { id: "best", size: 7 });
     rack.addTile(new Tile({letter:"U", isBlank:false, score:1}));
@@ -241,7 +242,7 @@ describe("game/findBestPlay", () => {
     });
   });
 
-  UNit("obliques", () => {
+  it("obliques", () => {
     let bestMoves = [];
     return new Game({
       edition:"English_WWF",
@@ -291,52 +292,256 @@ describe("game/findBestPlay", () => {
     });
   });
 
-  it("girths/use", () => {
+  it("quit/qi up/down", () => {
     let bestMoves = [];
     return new Game({
       edition:"English_Scrabble",
-      dictionary:"British_English",
-      _debug: console.debug
+      dictionary:"British_English"//, _debug: console.debug
     }).create()
     .then(game => {
       game.addPlayer(new Player(
         {name:"test", key:"turntable", isRobot:true},
         Game.CLASSES), true);
       return game.loadBoard(
-        "| | | | | | | | | | | | | | | |\n" +
-        "| | | | | | | | | | | |P| | | |\n" +
-        "| | | | | | | | | | | |A| | | |\n" +
-        "| | | | | | | | | | | |T| | | |\n" +
-        "| | | | | | | | | |A|C|E| | | |\n" +
-        "| | | | | | | | | |J| | | | | |\n" +
-        "| | | | | | | | |D|A| | | | | |\n" +
-        "| | | | | | | |G|I|R|T|H| | | |\n" +
-        "| | | | | | | | |V| |E| | | | |\n" +
-        "| |L| | | |R| | |A| |N| | |K| |\n" +
-        "| |O| | |W|A|G|E|S| |C| | |O| |\n" +
-        "| |A| |M|E|N| |X| | |H|A|B|I|T|\n" +
-        "| |F|R|O|N|D| |P|I| | | |U| |R|\n" +
-        "| |E| |W| |Y| |O|F| | | |R| |I|\n" +
-        "| |D| |N| | | |S| |L|A|Z|Y| |M|\n");
+        "| | |X|Y|Y|Y|X|X|X|X|X|X|X|X|X|\n" +
+        "| |U|I|T| |Y|X|X|X|X|X|X|X|X|X|\n" +
+        "| | |X|Y|Y|Y|X|X|X|X|X|X|X|X|X|\n" +
+        "| |X|X|X|Y|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n");
     })
     .then(game => findBestPlay(
       game, [
-        new Tile({letter:"I", isBlank:false, score:1}),
-        new Tile({letter:"U", isBlank:false, score:1}),
-        new Tile({letter:"E", isBlank:false, score:1}),
-        new Tile({letter:"U", isBlank:false, score:1}),
-        new Tile({letter:"S", isBlank:false, score:1}),
-        new Tile({letter:"I", isBlank:false, score:1}),
-        new Tile({letter:"E", isBlank:false, score:1})
+        new Tile({letter:"Q", isBlank:false, score:1}),
+        new Tile({letter:"I", isBlank:false, score:1})
       ],
       move => {
-        console.log(move);
+        //console.log(move);
         if (move instanceof Move)
           bestMoves.push(move);
       },
       game.dictionary))
     .then(() => {
-      console.log(bestMoves[bestMoves.length-1]);
+      let bm = bestMoves.pop();
+      assert.equal(bm.words[0].word, "QUIT");
+      assert.equal(bm.words[0].score, 4);
+      assert.equal(bm.words[1].word, "QI");
+      assert.equal(bm.words[1].score, 2);
+      assert.equal(bm.words.length, 2);
+      assert.equal(bm.score, 6);
+    });
+  });
+
+  it("quit/qi across", () => {
+    let bestMoves = [];
+    return new Game({
+      edition:"English_Scrabble",
+      dictionary:"British_English"//, _debug: console.debug
+    }).create()
+    .then(game => {
+      game.addPlayer(new Player(
+        {name:"test", key:"turntable", isRobot:true},
+        Game.CLASSES), true);
+      return game.loadBoard(
+        "| | | |Y|Y|Y|X|X|X|X|X|X|X|X|X|\n" +
+        "|U| |X|X|X|Y|X|X|X|X|X|X|X|X|X|\n" +
+        "|I|X|X|Y|Y|Y|X|X|X|X|X|X|X|X|X|\n" +
+        "|T|X|X|X|Y|X|X|X|X|X|X|X|X|X|X|\n" +
+        "| |X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n");
+    })
+    .then(game => findBestPlay(
+      game, [
+        new Tile({letter:"Q", isBlank:false, score:1}),
+        new Tile({letter:"I", isBlank:false, score:1})
+      ],
+      move => {
+        //console.log(move);
+        if (move instanceof Move)
+          bestMoves.push(move);
+      },
+      game.dictionary))
+    .then(() => {
+      const bm = bestMoves.pop();
+      assert.equal(bm.words[0].word, "QUIT");
+      assert.equal(bm.words[0].score, 12);
+      assert.equal(bm.words[1].word, "QI");
+      assert.equal(bm.words[1].score, 6);
+      assert.equal(bm.words.length, 2);
+      assert.equal(bm.score, 18);
+      //console.log(bm);
+    });
+  });
+
+  it("pee/eg up/down", () => {
+    let bestMoves = [];
+    return new Game({
+      edition:"English_Scrabble",
+      dictionary:"British_English"//, _debug: console.debug
+    }).create()
+    .then(game => {
+      game.addPlayer(new Player(
+        {name:"test", key:"turntable", isRobot:true},
+        Game.CLASSES), true);
+      return game.loadBoard(
+        "|P|E| | |Y|Y|X|X|X|X|X|X|X|X|X|\n" +
+        "| | | | |X|Y|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X| |Y|Y|Y|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|Y|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n");
+    })
+    .then(game => findBestPlay(
+      game, [
+        new Tile({letter:"E", isBlank:false, score:1}),
+        new Tile({letter:"G", isBlank:false, score:1})
+      ],
+      move => {
+        //console.log(move);
+        if (move instanceof Move)
+          bestMoves.push(move);
+      },
+      game.dictionary))
+    .then(() => {
+      const bm = bestMoves.pop();
+      assert.equal(bm.words[0].word, "PEE");
+      assert.equal(bm.words[1].word, "EG");
+      assert.equal(bm.words[0].score, 5);
+      assert.equal(bm.words[1].score, 2);
+      assert.equal(bm.words.length, 2);
+      assert.equal(bm.score, 7);
+      //console.log(bm);
+    });
+  });
+
+  it("pee/eg across", () => {
+    let bestMoves = [];
+    return new Game({
+      edition:"English_Scrabble",
+      dictionary:"British_English"//, _debug: console.debug
+    }).create()
+    .then(game => {
+      game.addPlayer(new Player(
+        {name:"test", key:"turntable", isRobot:true},
+        Game.CLASSES), true);
+      return game.loadBoard(
+        "|P|X|X|Y|Y|Y|X|X|X|X|X|X|X|X|X|\n" +
+        "|E| |X|X|X|Y|X|X|X|X|X|X|X|X|X|\n" +
+        "| | | |Y|Y|Y|X|X|X|X|X|X|X|X|X|\n" +
+        "| | |X|X|Y|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n");
+    })
+    .then(game => findBestPlay(
+      game, [
+        new Tile({letter:"E", isBlank:false, score:1}),
+        new Tile({letter:"G", isBlank:false, score:1})
+      ],
+      move => {
+        //console.log(move);
+        if (move instanceof Move)
+          bestMoves.push(move);
+      },
+      game.dictionary))
+    .then(() => {
+      const bm = bestMoves.pop();
+      assert.equal(bm.words[0].word, "PEE");
+      assert.equal(bm.words[1].word, "EG");
+      assert.equal(bm.words[0].score, 5);
+      assert.equal(bm.words[1].score, 2);
+      assert.equal(bm.words.length, 2);
+      assert.equal(bm.score, 7);
+      //console.log(bm);
+    });
+  });
+
+  it("ask/swig wigs/ask", () => {
+    let bestMoves = [];
+    return new Game({
+      edition:"English_Scrabble",
+      dictionary:"British_English"//, _debug: console.debug
+    }).create()
+    .then(game => {
+      game.addPlayer(new Player(
+        {name:"test", key:"turntable", isRobot:true},
+        Game.CLASSES), true);
+      return game.loadBoard(
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X| |X|X|X| |X|X|X|X|X|\n" +
+        "|X|X|X|X| | | |X| | | |X|X|X|X|\n" +
+        "|X|X|X|X| | |W|I|G| | |X|X|X|X|\n" +
+        "|X|X|X|X| | | |X| | | |X|X|X|X|\n" +
+        "|X|X|X|X|X| |X|X|X| |X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n" +
+        "|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|\n");
+    })
+    .then(game => findBestPlay(
+      game, [
+        new Tile({letter:"A", isBlank:false, score:1}),
+        new Tile({letter:"S", isBlank:false, score:1}),
+        new Tile({letter:"K", isBlank:false, score:1})
+      ],
+      move => {
+        //console.log(move);
+        if (move instanceof Move) {
+          bestMoves.push(move);
+        }
+      },
+      game.dictionary))
+    .then(() => {
+      // Only SWIG/ASK will be found, because WIGS/ASK scores
+      // the same.
+      let bm = bestMoves.pop();
+      assert.equal(bm.words[0].word, "SWIG");
+      assert.equal(bm.words[0].score, 8);
+      assert.equal(bm.words[1].word, "ASK");
+      assert.equal(bm.words[1].score, 3);
+      assert.equal(bm.words.length, 2);
+      assert.equal(bm.score, 11);
+      bm = bestMoves.pop();
     });
   });
 });
