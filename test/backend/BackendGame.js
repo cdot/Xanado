@@ -215,11 +215,7 @@ describe("backend/BackendGame", () => {
 		let game, newgame, reload;
 		const db = new MemoryDatabase();
     // Load from the test dir, but save to memory
-		return new FileDatabase({
-      dir: "test/data", ext: "game"
-    })
-    .get("unfinished_game")
-    .then(d => CBOR.decode(d, BackendGame.CLASSES))
+		return getTestGame("unfinished_game", BackendGame)
 		.then(g => game = g)
 		.then(() => game.onLoad(db))
     .then(() => {
@@ -306,7 +302,10 @@ describe("backend/BackendGame", () => {
 		socket1.on(BackendGame.Notify.MESSAGE, mess => {
       if (mess.text === "txt-hinted")
         return;
-      assert.equal(mess.args[0], "TRAWL", mess);
+      assert.equal(mess.args[0], "LO,TRAIL", mess);
+      assert.equal(mess.args[1], 4, mess); // col
+      assert.equal(mess.args[2], 1, mess); // row
+      assert.equal(mess.args[3], 14, mess); // points
       socket1.done();
 		})
     .on("*", () => {});
@@ -317,14 +316,8 @@ describe("backend/BackendGame", () => {
       socket2.done();
 		})
     .on("*", () => {});
-		const db = new FileDatabase({
-      dir: "test/data", ext: "game"
-    });
-		return db.get("unfinished_game")
-    .then(d => CBOR.decode(d, BackendGame.CLASSES))
+		return getTestGame("unfinished_game", BackendGame)
 		.then(g => game = g)
-    //.then(() => game._debug = console.debug)
-		.then(() => game.onLoad(db))
 		.then(() => game.connect(socket1, game.getPlayer().key))
 		.then(() => game.hint(game.getPlayer()))
     .then(() => socket1.wait())
@@ -342,13 +335,8 @@ describe("backend/BackendGame", () => {
 
 	it("advise", () => {
 		let game;
-		const db = new FileDatabase({
-      dir: "test/data", ext: "game"
-    });
-		return db.get("unfinished_game")
-    .then(d => CBOR.decode(d, BackendGame.CLASSES))
+		return getTestGame("unfinished_game", BackendGame)
 		.then(g => game = g)
-    .then(() => game.onLoad(new MemoryDatabase()))
 		.then(() => game.anotherGame("human"))
 		.then(() => game.toggleAdvice(game.getPlayer()))
 		.then(() => game.advise(game.getPlayer(), 1));
@@ -359,11 +347,8 @@ describe("backend/BackendGame", () => {
     const players = [];
     for (let i = 0; i < 8; i++)
       players.push(new Player( {key: i}, BackendGame.CLASSES));
-		const db = new FileDatabase({dir: "test/data", ext: "game" });
-		return db.get("unfinished_game")
-    .then(d => CBOR.decode(d, BackendGame.CLASSES))
+		return getTestGame("unfinished_game", BackendGame)
 		.then(g => game = g)
-    .then(() => game.onLoad(new MemoryDatabase()))
     .then(() => {
       game.turns = [];
       //game._debug = console.debug;
