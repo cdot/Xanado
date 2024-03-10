@@ -40,6 +40,7 @@ function findBestPlay(
 
     // Pass worker messages on to listener
     worker.addEventListener("message", data => {
+      // TODO: decode the packed game
       const mess = CBOR.decode(data.data, BackendGame.CLASSES);
       switch (mess.type) {
       case "play":

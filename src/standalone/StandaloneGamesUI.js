@@ -116,10 +116,11 @@ class StandaloneGamesUI extends StandaloneUIMixin(GamesUIMixin(UI)) {
                  console.error(`${key} loading failed: ${e.message}`);
                  return undefined;
                }))))
-    .then(games => games.filter(
-      g => g && !(send === "active" && g.hasEnded())))
+    .then(games => games.filter(g => g))
     .then(games => Promise.all(games.map(game => game.onLoad(this.db))))
+    .then(games => games.filter(g => !(send === "active" && g.hasEnded())))
     .then(games => Promise.all(
+      // use sendable() to strip the rack
       games
       .map(game => game.sendable(this.userManager))))
     // Sort the resulting list by last activity, so the most
@@ -158,8 +159,8 @@ class StandaloneGamesUI extends StandaloneUIMixin(GamesUIMixin(UI)) {
       keys.map(key => this.db.get(key)
                .then(d => CBOR.decode(d, Game.CLASSES))
                .catch(() => undefined))))
-    .then(games => games.filter(g => g && g.hasEnded()))
     .then(games => Promise.all(games.map(game => game.onLoad(this.db))))
+    .then(games => games.filter(g => g && g.hasEnded()))
     .then(games => {
       const results = {};
       games

@@ -517,7 +517,7 @@ describe("server/Server.js", () => {
       //console.log(res.text);
       assert.equal(res.status, 200, res.text);
       return chai.request(server.express)
-      .post(`/command/confirmGameOver/${gamekey}`)
+      .post(`/command/1/${gamekey}`)
       .set('Cookie', cookie);
     })
     .then(res => {

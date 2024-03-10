@@ -164,7 +164,7 @@ const GamesUIMixin = superclass => class extends superclass {
         const dic = $.i18n("txt-using-dic", player.dictionary);
         info.push(dic);
       }
-      if (game.timerType && player.clock) {
+      if (game.timerType !== Game.Timer.NONE && player.clock) {
         const left = $.i18n("txt-left-to-play", player.clock);
         info.push(left);
       }

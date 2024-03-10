@@ -18,6 +18,7 @@ import Express from "express";
 
 import { CBOR } from "../game/CBOR.js";
 import { Game } from "../game/Game.js";
+import { Commands } from "../game/Commands.js";
 import { Edition } from "../game/Edition.js";
 import { BackendGame } from "../backend/BackendGame.js";
 import { FileDatabase } from "./FileDatabase.js";
@@ -832,6 +833,7 @@ class Server {
       key => (this.games[key]
               ? Promise.resolve(this.games[key])
               : this.db.get(key)
+               // TODO: decode the packed game
               .then(d => CBOR.decode(d, BackendGame.CLASSES)))
       .then(game => {
         game.checkAge(this.config.maxAge);
@@ -1059,6 +1061,7 @@ class Server {
   GET_game(req, res) {
     const gameKey = req.params.gameKey;
     return this.db.get(gameKey)
+    // TODO: decode the packed game
     .then(d => CBOR.decode(d, Game.CLASSES))
     .catch(e => replyAndThrow(res, 400, `Game ${gameKey} load failed`, e))
     .then(game => {
@@ -1115,8 +1118,7 @@ class Server {
    * Handle /command/:command/:gameKey. Command results are broadcast
    * in Turn objects.
    * @param {Request} req the request object
-   * @param {string} req.params.command the command, one of
-   * Game.Command
+   * @param {string} req.params.command the command, from `Commands`
    * @param {string} req.params.gameKey the game key
    * @param {Response} res the response object
    * @return {Promise} promise that resolves to undefined
@@ -1131,7 +1133,7 @@ class Server {
     return this.loadGameFromDB(gameKey)
     .catch(e => replyAndThrow(res, 400, `Game ${gameKey} load failed`, e))
     .then(game => {
-      if (game.hasEnded() && command !== BackendGame.Command.UNDO)
+      if (game.hasEnded() && command !== Commands.UNDO)
         replyAndThrow(res, 400, `Game ${gameKey} has ended`);
       const player = game.getPlayerWithKey(playerKey);
       if (!player)

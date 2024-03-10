@@ -51,30 +51,34 @@ class Game {
    * @typedef {WAITING|PLAYING|GAME_OVER|TWO_PASSES|FAILED_CHALLENGE|TIMED_OUT} Game.State
    */
   static State = {
-    WAITING:          "Waiting for players",
-    PLAYING:          "Playing",
-    FAILED_CHALLENGE: "Challenge failed",
-
-    GAME_OVER:        "Game over",
-    TWO_PASSES:       "All players passed twice",
-    TIMED_OUT:        "Timed out"
+    WAITING:          0,
+    PLAYING:          1,
+    FAILED_CHALLENGE: 2,
+    GAME_OVER:        3,
+    TWO_PASSES:       4,
+    TIMED_OUT:        5
   };
 
-  /**
-   * Commands that can be sent from the UI to the Backend.
-   * @typedef {UNPAUSE|PAUSE|CHALLENGE|PLAY|TAKE_BACK|PASS|GAME_OVER|SWAP} Game.Command
-   */
-  static Command = {
-    CHALLENGE:         "challenge",
-    CONFIRM_GAME_OVER: "confirmGameOver",
-    PASS:              "pass",
-    PAUSE:             "pause",
-    PLAY:              "play",
-    REDO:              "redo",
-    SWAP:              "swap",
-    TAKE_BACK:         "takeBack",
-    UNDO:              "undo",
-    UNPAUSE:           "unpause"
+  ///**
+  // * Translation keys for states
+  // */
+  //static StateI18N = [
+  //  "Waiting for players",
+  //  "Playing",
+  //  "Challenge failed",
+  //  "Game over",
+  //  "All players passed twice",
+  //  "Timed out"
+  //];
+
+  // Compatibility; map old strings to new enum
+  static StateCompat = {
+    "Waiting for players": Game.State.WAITING,
+    "Playing": Game.State.PLAYING,
+    "Challenge failed": Game.State.FAILED_CHALLENGE,
+    "Game over": Game.State.GAME_OVER,
+    "All players passed twice": Game.State.TWO_PASSES,
+    "Timed out": Game.State.TIMED_OUT
   };
 
   /**
@@ -129,9 +133,23 @@ class Game {
    * @typedef {NONE|TURN|GAME} Game.Timer
    */
   static Timer = {
-    NONE:  undefined,
-    TURN:  /*i18n*/"Turn timer",
-    GAME:  /*i18n*/"Game timer"
+    NONE: 0,
+    TURN: 1,
+    GAME: 2
+  };
+
+  // Timer enum translation keys
+  static TimerI18N = [
+    /*i18n*/"e-none",
+    /*i18n*/"e-tturn",
+    /*i18n*/"e-tgame"
+  ];
+
+  // Compatibility; map old strings to new enum
+  static TimerCompat = {
+    "None": Game.Timer.NONE,
+    "Turn timer": Game.Timer.TURN,
+    "Game timer": Game.Timer.GAME
   };
 
   /**
@@ -143,10 +161,28 @@ class Game {
    * @typedef {NONE|MISS|PER_TURN|PER_WORD} Game.Penalty
    */
   static Penalty = {
-    NONE:     undefined,
-    MISS:     /*i18n*/"Miss next turn",
-    PER_TURN: /*i18n*/"Lose points",
-    PER_WORD: /*i18n*/"Lose points per word"
+    NONE:     0,
+    MISS:     1,
+    PER_TURN: 2,
+    PER_WORD: 3
+  };
+
+  /**
+   * Penalty enum translation keys
+   */
+  static PenaltyI18N = [
+    /*i18n*/"e-none",  // NONE
+    /*i18n*/"e-pmiss", // MISS
+    /*i18n*/"e-plose", // PER_TURN
+    /*i18n*/"e-pppw"   // PER_WORD
+  ];
+
+  // Compatibility; map old strings to new enum
+  static PenaltyCompat = {
+    "None": Game.Penalty.NONE,
+    "Miss next turn": Game.Penalty.MISS,
+    "Lose points": Game.Penalty.PER_TURN,
+    "Lose points per word": Game.Penalty.PER_WORD
   };
 
   /**
@@ -159,17 +195,34 @@ class Game {
    * @typedef {NONE|AFTER|REJECT} Game.WordCheck
    */
   static WordCheck = {
-    NONE:    undefined,
-    AFTER:   /*i18n*/"Check words after play",
-    REJECT:  /*i18n*/"Reject unknown words"
+    NONE:   0,
+    AFTER:  1,
+    REJECT: 2
   };
 
   /**
-   * Defaults. CAREFUL! These defaults are not automatically applied
-   * in the constructor; if a field isn't set in the object passed to
-   * the constructor, the default will not be automatically applied
-   * (except for edition, which is always required). So if you want
-   * to change any of the defaults, you need to make sure the
+   * WordCheck enum translation keys
+   */
+  static WordCheckI18N = [
+    /*i18n*/"e-none", // NONE
+    /*i18n*/"e-caft", // AFTER
+    /*i18n*/"e-crej", // REJECT
+  ];
+
+  // Compatibility; map old strings to new enum
+  static WordCheckCompat = {
+    "None": Game.WordCheck.NONE,
+    "Don't check words": Game.WordCheck.NONE,
+    "Check words after play": Game.WordCheck.AFTER,
+    "Reject unknown words": Game.WordCheck.REJECT
+  };
+
+  /**
+   * Defaults. CAREFUL! Not all of these defaults are automatically
+   * applied in the constructor; if a field isn't set in the object
+   * passed to the constructor, the default may not be automatically
+   * applied (except for edition, which is always required). So if you
+   * want to change any of the defaults, you need to make sure the
    * constructor code will pick the new value up.
    */
   static DEFAULTS = {
@@ -180,7 +233,7 @@ class Game {
 		timeAllowed:      25, // minutes per game
 		timePenalty:      0,
 
-    challengePenalty: Game.Penalty.NONE,
+    challengePenalty: Game.Penalty.MISS,
 		penaltyPoints:    5,
 
     wordCheck:        Game.WordCheck.NONE,
@@ -342,15 +395,16 @@ class Game {
        */
       this.dictionary = params.dictionary;
 
-    if (params.timerType && !/^none$/i.test(params.timerType)) {
+    if (params.timerType) {
       /**
        * Type of timer for this game.
        * @member {Timer?}
        */
       this.timerType = params.timerType;
-    }
+    } else
+      this.timerType = Game.DEFAULTS.timerType;
 
-    if (this.timerType) {
+    if (this.timerType !== Game.Timer.NONE) {
       if (typeof params.timeAllowed !== "undefined") {
         /**
          * Time limit for this game, in minutes. If `timerType` is
@@ -379,8 +433,10 @@ class Game {
      * The type of penalty to apply for a failed challenge.
      * @member {Penalty}
      */
-    if (params.challengePenalty && params.challengePenalty !== "none")
+    if (params.challengePenalty)
       this.challengePenalty = params.challengePenalty;
+    else
+      this.challengePenalty = Game.DEFAULTS.challengePenalty;
 
     if (this.challengePenalty === Game.Penalty.PER_TURN
         || this.challengePenalty === Game.Penalty.PER_WORD) {
@@ -392,13 +448,14 @@ class Game {
       this.penaltyPoints = params.penaltyPoints || Game.DEFAULTS.penaltyPoints;
     }
 
-    if (params.wordCheck && params.wordCheck !== "none") {
+    if (params.wordCheck) {
       /**
        * Whether or not to check plays against the dictionary.
        * @member {WordCheck?}
        */
       this.wordCheck = params.wordCheck;
-    }
+    } else
+      this.wordCheck = Game.DEFAULTS.wordCheck;
 
     if (params.minPlayers > 2) {
       /**
@@ -532,7 +589,7 @@ class Game {
       "Cannot addPlayer() to a full game");
     player._debug = this._debug;
     this.players.push(player);
-    if (this.timerType)
+    if (this.timerType !== Game.Timer.NONE)
       player.clock = this.timeAllowed * 60;
     if (fillRack)
       player.fillRack(this.letterBag, this.rackSize);
@@ -760,12 +817,12 @@ class Game {
     const options = [ `edition:${this.edition}` ];
     if (this.dictionary)
       options.push(`dictionary:${this.dictionary}`);
-    if (this.timerType) {
+    if (this.timerType !== Game.Timer.NONE) {
       options.push(`${this.timerType}:${this.timeAllowed}`);
       if (this.timerType === Game.Timer.GAME)
         options.push(`timePenalty:${this.timePenalty}`);
     }
-    if (this.challengePenalty) {
+    if (this.challengePenalty !== Game.Penalty.NONE) {
       options.push(this.challengePenalty);
       if (this.challengePenalty === Game.Penalty.PER_TURN
           || this.challengePenalty === Game.Penalty.PER_WORD)
@@ -775,7 +832,7 @@ class Game {
       options.push(`next:${this.whosTurnKey}`);
 
     if (this.wordCheck) options.push(this.wordCheck);
-    if (this.challengePenalty) options.push(this.challengePenalty);
+    if (this.challengePenalty !== Game.Penalty.NONE) options.push(this.challengePenalty);
     if (this.predictScore) options.push("Predict");
     if (this.allowTakeBack) options.push("Allow takeback");
     if (this.minPlayers)
@@ -839,7 +896,7 @@ class Game {
       };
       if (this.minPlayers) simple.minPlayers = this.minPlayers;
       if (this.maxPlayers) simple.maxPlayers = this.maxPlayers;
-      if (this.wordCheck) simple.wordCheck = this.wordCheck;
+      simple.wordCheck = this.wordCheck;
       if (this.timerType != Game.TIMER_NONE) {
         simple.timeAllowed = this.timeAllowed;
         simple.timePenalty = this.timePenalty;
@@ -863,14 +920,9 @@ class Game {
   pack() {
     const params = {};
 
-    const StateNames = Object.values(Game.State);
-    const TimerNames = Object.values(Game.Timer);
-    const PenaltyNames = Object.values(Game.Penalty);
-    const WordCheckNames = Object.values(Game.WordCheck);
-
     params.a = this.lastActivity();
     params.b = this.board.pack();
-    const cp = PenaltyNames.indexOf(this.challengePenalty);
+    const cp = this.challengePenalty;
     if (cp >= 0) {
       params.c = cp;
       params.o = this.penaltyPoints;
@@ -902,11 +954,10 @@ class Game {
       for (const key in t)
         params[`T0${key}`] = t[key];
     }
-    params.s = StateNames.indexOf(this.state);
-    if (this.timerType) params.t = TimerNames.indexOf(this.timerType);
+    params.s = this.state;
+    params.t = this.timerType;
     if (this.allowUndo) params.u = true;
-    const wc = WordCheckNames.indexOf(this.wordCheck);
-    if (wc >= 0) params.v = wc;
+    params.v = this.wordCheck;
     if (this.whosTurnKey) params.w = this.whosTurnKey;
     if (this.timerType != Game.TIMER_NONE) {
       params.x = this.timeAllowed;
@@ -922,11 +973,6 @@ class Game {
    * @return {Promise} a promise that resolves to a new game
    */
   static unpack(params) {
-    const StateNames = Object.values(Game.State);
-    const TimerNames = Object.values(Game.Timer);
-    const PenaltyNames = Object.values(Game.Penalty);
-    const WordCheckNames = Object.values(Game.WordCheck);
-
     let game;
     return new this({ edition: params.e })
     .create()
@@ -939,23 +985,23 @@ class Game {
         return false;
       });
       if (params.c) {
-        game.challengePenalty = PenaltyNames[params.c];
+        game.challengePenalty = params.c;
         game.penaltyPoints = params.o;
       }
       game.dictionary = params.d;
       game.edition = params.e;
-      game.state = StateNames[params.s];
+      game.state = params.s;
       if (params.g) game.allowTakeBack = true;
       if (params.i) game.predictScore = true;
       game.key = params.k;
       game.creationTimestamp = Number(params.m);
       if (params.t) {
-        game.timerType = TimerNames[params.t];
+        game.timerType = params.t;
         game.timeAllowed = Number(params.x);
         game.timePenalty = Number(params.y);
       }
       if (params.u) game.allowUndo = true;
-      if (params.v) game.wordCheck = WordCheckNames[params.v];
+      if (params.v) game.wordCheck = params.v;
       if (params.w) game.whosTurnKey = params.w;
       if (params.n) game.nextGameKey = params.n;
 
@@ -998,8 +1044,29 @@ class Game {
   onLoad(db) {
     // if this onLoad follows a load from serialisation, which
     // does not invoke the constructor.
-    // We always set the _db
 
+    const toEnum = (n, compat) => {
+      // assume undefined=>0, which should be the case for all enums
+      if (typeof n === "undefined") return 0;
+      if (typeof n === "number") return n;
+      let nn = Number(n);
+      if (Number.isNaN(nn)) {
+        // Map to enum through string->enum mapping
+        nn = compat[n];
+        if (nn < 0) debugger;
+        assert(nn >= 0, n);
+        return nn;
+      }
+      return nn;
+    };
+
+    // Compatibility: Remap enums from text strings to numbers. Previously
+    // we stored the whole string, now just a number.
+    this.state = toEnum(this.state, Game.StateCompat);
+    this.timerType = toEnum(this.timerType, Game.TimerCompat);
+    this.challengePenalty = toEnum(this.challengePenalty, Game.PenaltyCompat);
+    this.wordCheck = toEnum(this.wordCheck, Game.WordCheckCompat);
+    
     /**
      * Database containing this game. Only available server-side,
      * and not serialised.
@@ -1230,7 +1297,7 @@ class Game {
    */
   startTheClock() {
     if (typeof this._intervalTimer === "undefined"
-        && this.timerType
+        && this.timerType !== Game.Timer.NONE
         && this.state === Game.State.PLAYING
         && !this.pausedBy) {
 
@@ -1321,12 +1388,12 @@ class Game {
     // For a timed game, make sure the clock is running and
     // start the player's timer.
 
-    if (this.timerType) {
+    if (this.timerType !== Game.Timer.NONE) {
       /* c8 ignore next 2 */
       if (this._debug)
         this._debug("\ttimed game,", player.name,
                     "has", (timeout || this.timeAllowed),
-                    "left to play",this.timerType);
+                    "left to play", this.timerType);
       this.startTheClock(); // does nothing if already started
     }
     else {

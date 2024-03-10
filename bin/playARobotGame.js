@@ -44,6 +44,7 @@ game.create()
   let finished = false;
   while (!finished) {
     await db.get(gameKey)
+    // TODO: decode the packed game
     .then(d => CBOR.decode(d, Game.CLASSES))
     .then(game => game.onLoad(db))
     .then(game => {

@@ -249,13 +249,10 @@ class Turn extends Move {
    * @return {object} parameter block unpackable using `unpack`
    */
   pack() {
-    const StateNames = Object.values(Game.State);
-
     const params = {};
     if (this.challengerKey) params.c = this.challengerKey;
-    const es = StateNames.indexOf(this.endState);
-    if (es >= 0) {
-      params.e = es;
+    if (this.endState >= 0) {
+      params.e = this.endState;
       let esi = 0;
       for (const pk in this.endStates) {
         let endState = this.endStates[pk];
@@ -294,8 +291,7 @@ class Turn extends Move {
     if (typeof params[`${ti}c`] !== "undefined")
       this.challengerKey = params[`${ti}c`];
     if (typeof params[`${ti}e`] !== "undefined") {
-      const StateNames = Object.values(Game.State);
-      this.endState = StateNames[Number(params[`${ti}e`])];
+      this.endState = Number(params[`${ti}e`]);
       // endState object for each player
       this.endStates = [];
       let esi = 0;

@@ -25,6 +25,7 @@ function send(type, data) {
 }
 
 addEventListener("message", event => {
+  // TODO: decode the packed game
   const info = CBOR.decode(event.data, BackendGame.CLASSES);
   /* Note: ServerPlatform.js is excluded from webpacking in webpack_config.js */
   const plaf = info.Platform == "ServerPlatform"

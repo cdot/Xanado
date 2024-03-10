@@ -51,7 +51,7 @@ class GameSetupDialog extends Dialog {
   }
 
   showPenaltyFields() {
-    const type = this.$dlg.find("[name=challengePenalty]").val();
+    const type = Number(this.$dlg.find("[name=challengePenalty]").val());
     switch (type) {
     default:
       this.$dlg.find("[name=penaltyPoints]")
@@ -72,30 +72,43 @@ class GameSetupDialog extends Dialog {
   }
 
   createDialog() {
-    // list is an ordered list of type names
-    // type is the Game. enumerated type
-    // dflt is default pick
+    // list is an ordered list of enum values
+    // i18n is an array of i18n keys
+    // dflt is default enum value
     // $el is the <select> jObject
-    function orderEnum(list, type, deflt, $el) {
-      for (const p of list) {
-        const txt = $.i18n(type[p] || "None");
+    function orderEnum(enums, i18n, deflt, $el) {
+      for (const p of enums) {
+        const txt = $.i18n(i18n[p]);
         const sel = (p === deflt) ? ` selected="selected"` : "";
         $el.append(`<option value="${p}"${sel}>${txt}</option>`);
       }
     }
 
     const $pen = this.$dlg.find("[name=challengePenalty]");
-    orderEnum(["MISS", "PER_WORD", "PER_TURN", "NONE"], Game.Penalty, "MISS", $pen);
+    orderEnum([
+      Game.Penalty.NONE,
+      Game.Penalty.MISS,
+      Game.Penalty.PER_WORD,
+      Game.Penalty.PER_TURN
+    ], Game.PenaltyI18N, Game.Penalty.MISS, $pen);
     $pen.on("selectmenuchange", () => this.showPenaltyFields());
     this.showPenaltyFields();
 
     const $tim = this.$dlg.find("[name=timerType]");
-    orderEnum(["NONE", "TURN", "GAME"], Game.Timer, "NONE", $tim);
+    orderEnum([
+      Game.Timer.NONE,
+      Game.Timer.TURN,
+      Game.Timer.GAME
+    ], Game.TimerI18N, Game.Timer.NONE, $tim);
     $tim.on("selectmenuchange", () => this.showTimerFields());
     this.showTimerFields();
 
     const $wc = this.$dlg.find("[name=wordCheck]");
-    orderEnum(["NONE", "AFTER", "REJECT"], Game.WordCheck, "NONE", $wc);
+    orderEnum([
+      Game.WordCheck.NONE,
+      Game.WordCheck.AFTER,
+      Game.WordCheck.REJECT
+    ], Game.WordCheckI18N, Game.WordCheck.NONE, $wc);
 
     const ui = this.options.ui;
     return Promise.all([
@@ -133,15 +146,14 @@ class GameSetupDialog extends Dialog {
       $fields.each((i, el) => {
         const $el = $(el);
         const field = $el.attr("name");
-        const val = (game ? game[field] : undefined) || ui.getSetting(field);
+        const val = (game ? game[field] : undefined);
+        // WHY? || ui.getSetting(field);
         if (el.tagName === "INPUT" && el.type === "checkbox")
           $el.prop("checked", val).checkboxradio("refresh");
         else if (el.tagName === "SELECT") {
-          // If the game doesn't have a value for the option then keep
-          // the default, which will have been set in createDialog
           if (typeof val !== "undefined")
             $el.val(val).selectmenu("refresh");
-        } else if (val)
+        } else
           $el.val(val);
         return true;
       });

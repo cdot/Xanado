@@ -5,17 +5,17 @@
 import { Game } from "../game/Game.js";
 import { Undo } from "../game/Undo.js";
 import { Replay } from "../game/Replay.js";
-import { Commands } from "../game/Commands.js";
+import { CommandsMixin } from "../game/CommandsMixin.js";
 
 /**
  * Back end implementation of {@linkcode Game}.
  * Combines all the game components into a playable game.
  * @mixes game/Undo
  * @mixes game/Replay
- * @mixes game/Commands
+ * @mixes game/CommandsMixin
  * @extends Game
  */
-class BackendGame extends Undo(Replay(Commands(Game))) {
+class BackendGame extends Undo(Replay(CommandsMixin(Game))) {
 
   /**
    * Override factory classes from Game

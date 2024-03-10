@@ -10,8 +10,8 @@ import { TestSocket } from '../TestSocket.js';
 import { stringify } from "../../src/common/Utils.js";
 import { Game as _Game } from "../../src/game/Game.js";
 import { Turn as _Turn } from "../../src/game/Turn.js";
-import { Commands } from "../../src/game/Commands.js";
-const Game = Commands(_Game);
+import { CommandsMixin } from "../../src/game/CommandsMixin.js";
+const Game = CommandsMixin(_Game);
 const Player = Game.CLASSES.Player;
 const Turn = Game.CLASSES.Turn;
 

@@ -1,26 +1,18 @@
 {
   "@metadata": {
-    "last-updated": "2024-03-03T17:44:22.126Z"
+    "last-updated": "2024-03-10T15:57:47.457Z"
   },
   "Advisor": "Asesor",
   "BLANK": "EN BLANCO",
-  "Check words after play": "Comprobar palabras después del juego",
-  "Game timer": "Temporizador de juego",
   "Games": "Juegos",
   "Invitations": "Invitaciones",
   "Log": "Registro",
-  "Lose points": "Pierde puntos",
-  "Lose points per word": "Perder puntos por palabra",
-  "Miss next turn": "Perder el siguiente turno",
-  "None": "Ninguno",
   "Options": "Opciones",
   "Play": "El juego",
-  "Reject unknown words": "Rechazar palabras desconocidas",
   "Robot": "Computadora",
   "SWAP": "INTERCAMBIAR",
   "Scores": "Puntuaciones",
   "Timer": "Temporizador",
-  "Turn timer": "Temporizador de giro",
   "You": "Tu",
   "Your": "Tu",
   "_hint_": "Pista: $1 en la fila $2 columna $3 por $4",
@@ -275,5 +267,13 @@
   "hey-reminded-body": "Enviado un recordatorio a $1",
   "eml-link-text": "Únete al juego siguiendo este enlace: $1",
   "eml-link-html": "Haz clic <a href='$1'>aquí</a> para unirte al juego.",
-  "eml-respw-text": "Siga este enlace para restablecer su contraseña: $1"
+  "eml-respw-text": "Siga este enlace para restablecer su contraseña: $1",
+  "e-none": "Ninguno",
+  "e-crej": "Rechazar palabras desconocidas",
+  "e-caft": "Comprobar palabras después del juego",
+  "e-pmiss": "Perder el siguiente turno",
+  "e-plose": "Pierde puntos",
+  "e-pppw": "Perder puntos por palabra",
+  "e-tturn": "Temporizador de giro",
+  "e-tgame": "Temporizador de juego"
 }

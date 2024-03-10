@@ -20,6 +20,7 @@ import "jquery";
 import "jquery-ui";
 
 import { Game } from "../game/Game.js";
+import { Commands } from "../game/Commands.js";
 import { Turn } from "../game/Turn.js";
 import { Tile } from "../game/Tile.js";
 import { UI } from "../browser/UI.js";
@@ -97,7 +98,7 @@ const ClientUIMixin = superclass => class extends superclass {
         if (nTiles > 0) {
           while (tiles.length > nTiles)
             tiles.shift();
-          this.sendCommand(Game.Command.SWAP, tiles.map(t => new Tile(t)));
+          this.sendCommand(Commands.SWAP, tiles.map(t => new Tile(t)));
           return;
         }
       }
@@ -108,7 +109,7 @@ const ClientUIMixin = superclass => class extends superclass {
       // Can we challenge the last turn?
       let challengeable = this.game.turns[this.game.turns.length - 1];
       if (challengeable.type === Turn.Type.PLAYED) {
-        this.sendCommand(Game.Command.CHALLENGE, {
+        this.sendCommand(Commands.CHALLENGE, {
           challengedKey: challengeable.playerKey
         });
         return;
@@ -118,7 +119,7 @@ const ClientUIMixin = superclass => class extends superclass {
 
     // If not swapped and not challenged, try to pass 1 turn in 10
     if (prob < 0.1) {
-      this.sendCommand(Game.Command.PASS);
+      this.sendCommand(Commands.PASS);
       return;
     }
 

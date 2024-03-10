@@ -157,6 +157,7 @@ Fs.readdir(i18n_path)
       langs[lang]["@metadata"]["last-updated"] = isoNow;
       writes.push(Fs.writeFile(path.join(i18n_path, `${lang}.json`),
                                JSON.stringify(langs[lang], null, 2)));
+      console.log(`Renamed in ${lang}.json`);
     }
     return Promise.all(writes);
     break;

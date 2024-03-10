@@ -6,7 +6,7 @@
 /* global assert */
 
 import { Undo } from "../game/Undo.js";
-import { Commands } from "../game/Commands.js";
+import { CommandsMixin } from "../game/CommandsMixin.js";
 import { Game } from "../game/Game.js";
 import { Turn } from "../game/Turn.js";
 import { BrowserSquare } from "./BrowserSquare.js";
@@ -21,7 +21,7 @@ import { BrowserRack } from "./BrowserRack.js";
  * @mixes game/Commands
  * @mixes game/Undo
  */
-class BrowserGame extends Undo(Commands(Game)) {
+class BrowserGame extends Undo(CommandsMixin(Game)) {
 
   /**
    * Override factory classes from Game

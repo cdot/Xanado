@@ -9,13 +9,13 @@ import { TestSocket } from "../TestSocket.js";
 import sparseEqual from "../sparseEqual.js";
 
 import { stringify } from "../../src/common/Utils.js";
-import { Commands } from "../../src/game/Commands.js";
+import { CommandsMixin } from "../../src/game/CommandsMixin.js";
 import { Game as _Game } from "../../src/game/Game.js";
 import { Turn as _Turn } from "../../src/game/Turn.js";
 // disable worker threads
 _Game.USE_WORKERS = false;
 
-const Game = Commands(_Game);
+const Game = CommandsMixin(_Game);
 Game.CLASSES.Game = Game;
 const Turn = Game.CLASSES.Turn;
 const Tile = Game.CLASSES.Tile;
@@ -26,7 +26,7 @@ const Player = Game.CLASSES.Player;
  * Unit tests for Game commands that are issued during gameplay.
  */
 
-describe("game/Commands.js", () => {
+describe("game/Commands", () => {
 
   before(setupPlatform);
 

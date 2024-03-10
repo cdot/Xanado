@@ -180,6 +180,7 @@ function getTestGame(name, Class) {
       dir: `${__dirname}/data`, ext: "game"
     });
     return db.get(name)
+    // TODO: decode the packed game
     .then(data => CBOR.decode(data, Class.CLASSES))
     .then(game => game.onLoad(new MemoryDatabase()));
   });

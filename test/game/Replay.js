@@ -7,11 +7,11 @@ import { assert } from "chai";
 /* global Platform */ import { setupPlatform, getTestGame } from "../TestPlatform.js";
 
 import { MemoryDatabase } from "../MemoryDatabase.js";
-import { Commands } from "../../src/game/Commands.js";
+import { CommandsMixin } from "../../src/game/CommandsMixin.js";
 import { Replay } from "../../src/game/Replay.js";
 import { Undo } from "../../src/game/Undo.js";
 import { Game as _Game } from "../../src/game/Game.js";
-const Game = Undo(Replay(Commands(_Game)));
+const Game = Undo(Replay(CommandsMixin(_Game)));
 Game.CLASSES.Game = Game;
 const Tile = Game.CLASSES.Tile;
 

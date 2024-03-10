@@ -1,26 +1,18 @@
 {
   "@metadata": {
-    "last-updated": "2024-03-03T17:44:22.126Z"
+    "last-updated": "2024-03-10T15:57:47.457Z"
   },
   "Advisor": "title of the robot adviser, used for player hints and advice",
   "BLANK": "blank in letter distribution chart",
-  "Check words after play": "Types.WordCheck.AFTER: check played words after play is complete",
-  "Game timer": "Types.Timer.GAME: total game time limit",
   "Games": "title for games section",
   "Invitations": "title",
   "Log": "Title of the Log block",
-  "Lose points per word": "Types.Penalty.PER_WORD: failed challenge penalty",
-  "Lose points": "Types.Penalty.PER_TURN: failed challenge penalty, lose a fixed number of points",
-  "Miss next turn": "Types.Penalty.MISS: failed challenge penalty type",
-  "None": "'None' option in select lists in dialogs",
   "Options": "title for settings dialog",
   "Play": "title for the play block",
-  "Reject unknown words": "Types.WordCheck.REJECT: reject unknown words before play is accepted",
   "Robot": "name of robot player",
   "SWAP": "Letters underlying the swap rack",
   "Scores": "title of Scores block",
   "Timer": "title of fieldset",
-  "Turn timer": "Types.Timer.TURN: type of timer",
   "You": "Substitute for name of current player in player table",
   "Your": "Possessive at the start of a description e.g. 'Your go'",
   "_hint_": "Cheat log message; word $1, row $2, column $3, for $4 points",
@@ -275,5 +267,13 @@
   "hey-paused-title": "alert that $1 has paused a timed game",
   "eml-link-text": "link in email plain, $1 is the URL",
   "eml-link-html": "link in email html, $1 is the url",
-  "eml-respw-text": "plain text of password reset email. $1 is url of reset link"
+  "eml-respw-text": "plain text of password reset email. $1 is url of reset link",
+  "e-none": "'None' option in select lists in dialogs",
+  "e-crej": "Types.WordCheck.REJECT: reject unknown words before play is accepted",
+  "e-caft": "Types.WordCheck.AFTER: check played words after play is complete",
+  "e-pmiss": "Types.Penalty.MISS: failed challenge penalty type",
+  "e-plose": "Types.Penalty.PER_TURN: failed challenge penalty, lose a fixed number of points",
+  "e-pppw": "Types.Penalty.PER_WORD: failed challenge penalty",
+  "e-tturn": "Types.Timer.TURN: type of timer",
+  "e-tgame": "Types.Timer.GAME: total game time limit"
 }

@@ -14,6 +14,7 @@ import "./icon_button.js";
 import { stringify } from "../common/Utils.js";
 import { loadDictionary } from "../game/loadDictionary.js";
 import { Game } from "../game/Game.js";
+import { Commands } from "../game/Commands.js";
 import { Turn } from "../game/Turn.js";
 import { UI } from "./UI.js";
 import { UIEvents } from "./UIEvents.js";
@@ -559,7 +560,7 @@ const GameUIMixin = superclass => class extends superclass {
         {
           text: $.i18n("btn-unpause"),
           click: () => {
-            this.sendCommand(Game.Command.UNPAUSE);
+            this.sendCommand(Commands.UNPAUSE);
             $("#alertDialog").dialog("close");
           }
         }
@@ -799,7 +800,7 @@ const GameUIMixin = superclass => class extends superclass {
   updatePlayerTable() {
     const $playerTable = this.game.$playerTable(this.player);
     $("#scoresBlock > .playerList").html($playerTable);
-    $(".player-clock").toggle(typeof this.game.timerType !== "undefined");
+    $(".player-clock").toggle(this.game.timerType !== Game.Timer.NONE);
     this.updateWhosTurn();
   }
 
@@ -898,7 +899,7 @@ const GameUIMixin = superclass => class extends superclass {
 
     $("#pause-button")
     .icon_button({ icon: "pause-icon" })
-    .toggle(game.timerType ? true : false);
+    .toggle(game.timerType !== Game.Timer.NONE);
 
     $("#distribution-button")
     .on("click", () => this.showLetterDistributions());
@@ -909,7 +910,7 @@ const GameUIMixin = superclass => class extends superclass {
       "click", () => {
         // unplace any pending move
         this.takeBackTiles();
-        this.sendCommand(Game.Command.UNDO);
+        this.sendCommand(Commands.UNDO);
       });
 
     $("#redo-button")
@@ -919,7 +920,7 @@ const GameUIMixin = superclass => class extends superclass {
       "click", () => {
         if (this.undoStack.length > 0) {
           const turn = this.undoStack.pop();
-          this.sendCommand(Game.Command.REDO, turn);
+          this.sendCommand(Commands.REDO, turn);
           if (this.undoStack.length === 0)
             $("#redo-button").hide();
         }
@@ -1117,7 +1118,7 @@ const GameUIMixin = superclass => class extends superclass {
     });
 
     $("#pause-button")
-    .on("click", () => this.sendCommand(Game.Command.PAUSE));
+    .on("click", () => this.sendCommand(Commands.PAUSE));
 
     // Events raised by game components
     $(document)
@@ -1638,7 +1639,7 @@ const GameUIMixin = superclass => class extends superclass {
    */
   issueChallenge(challengedKey) {
     this.takeBackTiles();
-    this.sendCommand(Game.Command.CHALLENGE, {
+    this.sendCommand(Commands.CHALLENGE, {
       challengedKey: challengedKey
     });
   }
@@ -1662,7 +1663,7 @@ const GameUIMixin = superclass => class extends superclass {
     if (bonus > 0 && this.getSetting("cheers"))
       this.playAudio("bonusCheer");
 
-    this.sendCommand(Game.Command.PLAY, move);
+    this.sendCommand(Commands.PLAY, move);
   }
 
   /**
@@ -1674,7 +1675,7 @@ const GameUIMixin = superclass => class extends superclass {
    */
   takeBackMove() {
     this.takeBackTiles();
-    this.sendCommand(Game.Command.TAKE_BACK);
+    this.sendCommand(Commands.TAKE_BACK);
   }
 
   /**
@@ -1685,7 +1686,7 @@ const GameUIMixin = superclass => class extends superclass {
    */
   action_pass() {
     this.takeBackTiles();
-    this.sendCommand(Game.Command.PASS);
+    this.sendCommand(Commands.PASS);
   }
 
   /**
@@ -1697,7 +1698,7 @@ const GameUIMixin = superclass => class extends superclass {
    */
   action_confirmGameOver() {
     this.takeBackTiles();
-    this.sendCommand(Game.Command.CONFIRM_GAME_OVER);
+    this.sendCommand(Commands.CONFIRM_GAME_OVER);
   }
 
   /* c8 ignore start */
@@ -1749,7 +1750,7 @@ const GameUIMixin = superclass => class extends superclass {
     // is confirmed
     const tiles = this.swapRack.empty();
     this.player.rack.addTiles(tiles);
-    this.sendCommand(Game.Command.SWAP, tiles);
+    this.sendCommand(Commands.SWAP, tiles);
   }
 
   /**

@@ -1,26 +1,18 @@
 {
   "@metadata": {
-    "last-updated": "2024-03-03T17:44:22.126Z"
+    "last-updated": "2024-03-10T15:57:47.457Z"
   },
   "Advisor": "Berater",
   "BLANK": "LEER",
-  "Check words after play": "Überprüfen Sie die Wörter nach dem Spielen",
-  "Game timer": "Spieltimer",
   "Games": "Spiele",
   "Invitations": "Einladungen",
   "Log": "Protokoll",
-  "Lose points": "Punkte verlieren",
-  "Lose points per word": "Punkte pro Wort verlieren",
-  "Miss next turn": "Nächste Runde verpassen",
-  "None": "Keine",
   "Options": "Optionen",
   "Play": "Spielen",
-  "Reject unknown words": "Unbekannte Wörter ablehnen",
   "Robot": "Computer",
   "SWAP": "TAUSCHEN",
   "Scores": "Punkte",
   "Timer": "Timer",
-  "Turn timer": "Timer drehen",
   "You": "Sie",
   "Your": "Ihr",
   "_hint_": "Hinweis: $1 in Zeile $2 Spalte $3 für $4",
@@ -275,5 +267,13 @@
   "hey-paused-title": "$1 hat das Spiel pausiert",
   "eml-link-text": "Nehmen Sie am Spiel teil, indem Sie diesem Link folgen: $1",
   "eml-link-html": "Klicken Sie <a href='$1'>hier</a>, um am Spiel teilzunehmen.",
-  "eml-respw-text": "Folgen Sie diesem Link, um Ihr Passwort zurückzusetzen: $1"
+  "eml-respw-text": "Folgen Sie diesem Link, um Ihr Passwort zurückzusetzen: $1",
+  "e-none": "Keine",
+  "e-crej": "Unbekannte Wörter ablehnen",
+  "e-caft": "Überprüfen Sie die Wörter nach dem Spielen",
+  "e-pmiss": "Nächste Runde verpassen",
+  "e-plose": "Punkte verlieren",
+  "e-pppw": "Punkte pro Wort verlieren",
+  "e-tturn": "Timer drehen",
+  "e-tgame": "Spieltimer"
 }

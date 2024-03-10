@@ -1,26 +1,18 @@
 {
   "@metadata": {
-    "last-updated": "2024-03-03T17:44:22.126Z"
+    "last-updated": "2024-03-10T15:57:47.457Z"
   },
   "Advisor": "Conseiller",
   "BLANK": "VIDE",
-  "Check words after play": "Vérifiez les mots après le jeu",
-  "Game timer": "Minuteur de jeu",
   "Games": "Jeux",
   "Invitations": "invitations",
   "Log": "Journal",
-  "Lose points": "perdre des points",
-  "Lose points per word": "perdre des points par mot",
-  "Miss next turn": "Manquer le prochain tour",
-  "None": "Aucun",
   "Options": "Options",
   "Play": "joue",
-  "Reject unknown words": "Rejeter les mots inconnus",
   "Robot": "ordinateur",
   "SWAP": "ÉCHANGE",
   "Scores": "Partitions",
   "Timer": "Minuterie",
-  "Turn timer": "Tourner la minuterie",
   "You": "Vous",
   "Your": "Votre",
   "_hint_": "indice : $1 à la ligne $2, colonne $3 pour $4",
@@ -275,5 +267,13 @@
   "hey-paused-title": "$1 a mis le jeu en pause",
   "eml-link-text": "Rejoignez le jeu en suivant ce lien : $1",
   "eml-link-html": "cliquez <a href='$1'>ici</a> pour rejoindre le jeu.",
-  "eml-respw-text": "Suivez ce lien pour réinitialiser votre mot de passe : $1"
+  "eml-respw-text": "Suivez ce lien pour réinitialiser votre mot de passe : $1",
+  "e-none": "Aucun",
+  "e-crej": "Rejeter les mots inconnus",
+  "e-caft": "Vérifiez les mots après le jeu",
+  "e-pmiss": "Manquer le prochain tour",
+  "e-plose": "perdre des points",
+  "e-pppw": "perdre des points par mot",
+  "e-tturn": "Tourner la minuterie",
+  "e-tgame": "Minuteur de jeu"
 }
