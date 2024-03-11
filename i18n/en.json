@@ -157,7 +157,7 @@
   "observer": "Observer '$1'",
   "observers": "+ $1 {{PLURAL:$1|observer|observers}}",
   "pass-changed": "Password for $1 changed",
-  "ph-email": "Adreça electrònica",
+  "ph-email": "Email address",
   "ph-minutes": "minutes",
   "ph-name": "Name",
   "ph-new-pass": "Password",
