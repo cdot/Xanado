@@ -838,21 +838,32 @@ body.games-ui {
 .Tile .glyph {
 }
 
-/* 2 or more letters in a glyph shrink it proportionally.
- * Add glyph-length-4 etc as needed.
+/* Used to scale the letters and score in a tile to fit. See
+ * src/browser/BrowserTile.js
  * TODO: this would be better done as part of the
  * edition, as unicode characters may vary in width. */
-.glyph-length-2 {
+.letter-scale-1 {
+  font-size: 120%;
+}
+
+.letter-scale-2 {
+  font-size: 75%;
+}
+
+.letter-scale-3 {
+  font-size: 60%;
+}
+
+.score-scale-1 {
   font-size: 80%;
 }
 
-.glyph.length-3 {
-  font-size: 60%;
+.score-scale-2 {
+  font-size: 55%;
 }
 
 /* The letter represented by a tile */
 .Tile .glyph .letter {
-  font-size: 120%;
   font-weight: normal;
   line-height: 160%;
   padding-left: 2px;
@@ -860,7 +871,6 @@ body.games-ui {
 
 /* The score for a tile */
 .Tile .glyph .score {
-  font-size: 80%;
   vertical-align: sub;
   padding-left: 2px;
 }
