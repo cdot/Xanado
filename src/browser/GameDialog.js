@@ -44,7 +44,7 @@ class GameDialog extends Dialog {
       .on("click", () => {
         this.$dlg.dialog("close");
         const dlg = this.$dlg.data("this");
-        $(document).trigger(UIEvents.JOIN_GAME, [ dlg.options.game ]);
+        $(document).trigger(UIEvents.JOIN_GAME, [ dlg.options.game.key ]);
       });
 
       this.$dlg.find("button[name=robot]")
