@@ -46,6 +46,7 @@
   "btn-signin": "label: Button for signing in",
   "btn-signout": "label: button",
   "btn-signup": "label: button",
+  "btn-subwords": "label: button in solver",
   "btn-swap": "label: button",
   "btn-takeback": "label: button",
   "btn-unpause": "label: button to un-pause the game",

@@ -28,11 +28,21 @@ class Solver extends StandaloneUIMixin(UI) {
     const $results = $("#results");
     $results.empty();
     loadDictionary($("#dictionary").val())
-    .then(dict => Explorer[action].call(
-      null,
-      dict, [ $("#letters").val() ], word => {
-        $results.append(`${word} `);
-      }));
+    .then(dict => {
+      if (typeof Explorer[action] === "function") {
+        Explorer[action].call(
+          null,
+          dict, [ $("#letters").val() ], word => {
+            $results.append(`${word} `);
+          });
+      } else if (action === "subwords") {
+        const w = $("#letters").val().replace(/\./g, " ");
+        const anag = Object.keys(dict.findAnagrams(w));
+        anag.forEach(word => {
+          $results.append(`${word} `);
+        });
+      }
+    });
   }
 
   /**
@@ -49,6 +59,7 @@ class Solver extends StandaloneUIMixin(UI) {
 
       $("#anagrams").on("click", () => this.search("anagrams"));
       $("#hangmen").on("click", () => this.search("hangmen"));
+      $("#subwords").on("click", () => this.search("subwords"));
 
       $("select").selectmenu();
       $("button").button();
