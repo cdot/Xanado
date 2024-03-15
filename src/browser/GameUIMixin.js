@@ -1251,8 +1251,11 @@ const GameUIMixin = superclass => class extends superclass {
         if (square) {
           if (square.isEmpty()) {
             // Square being moved to is empty, so this is a move
-            this.moveTile(this.selectedSquare, square);
+            const fromSquare = this.selectedSquare;
+            // clear the selection, should remove .selected from the
+            // fromSquare.tile.$ui
             this.selectSquare();
+            this.moveTile(fromSquare, square);
             return;
 
           } else if (!square.isBoard
