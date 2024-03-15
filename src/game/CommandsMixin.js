@@ -140,7 +140,9 @@ const CommandsMixin = superclass => class extends superclass {
       words: move.words,
       passes: prepasses
     })
-    .then(() => this.startTurn(nextPlayer));
+    // Use setTimeout to delay the start of the next turn to allow
+    // time for UI updates
+    .then(() => setTimeout(() => this.startTurn(nextPlayer), 10));
   }
 
   /**
