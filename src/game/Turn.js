@@ -46,7 +46,7 @@ class EndState {
   }
 
   /**
-   * Encode the state in a URI parameter block
+   * Encode the end state in a URI parameter block
    * @return {object} parameter block for embedding in a URL to recreate
    * the end state.
    */
@@ -171,6 +171,14 @@ class Turn extends Move {
     this.nextToGoKey = params.nextToGoKey;
     this.timestamp = params.timestamp || Date.now();
 
+    if (params.placements)
+      /**
+       * List of tiles played in this turn. These tiles will have positions.
+       * @member {Tile[]?}
+       */
+      this.placements = params.placements.map(
+        tilespec => new Tile(tilespec));
+
     if (params.replacements)
       /**
        * List of tiles drawn from the bag to replace the tiles played
@@ -259,9 +267,9 @@ class Turn extends Move {
         if (!(endState instanceof EndState))
           this.endStates[pk] = endState = new EndState(endState);
         params[`e${esi}k`] = endState.key; // map key to index
-        const p = endState.pack();
-        for (const k in p)
-          params[`e${esi}${k}`] = p[k];
+        const packed = endState.pack();
+        for (const k of Object.keys(packed))
+          params[`e${esi}${k}`] = packed[k];
         esi++;
       }
     }
@@ -269,6 +277,10 @@ class Turn extends Move {
     if (typeof this.nextToGoKey !== "undefined")
       params.n = this.nextToGoKey;
     params.p = this.playerKey;
+    if (this.placements) {
+      for (let pi = 0; pi < this.placements.length; pi++)
+        params[`P${pi}`] = this.placements[pi].pack();
+    }
     if (this.replacements)
       params.r = this.replacements.map(t => t.letter).join("");
     if (typeof this.score === "number")
@@ -279,46 +291,51 @@ class Turn extends Move {
   }
 
   /**
-   * Repopulate the turn from a parameter block.
+   * Repopulate the turn from a URI parameter block.
    * @param {Object} params parameter block
-   * @param {number} index index of this player in the parameter block
+   * @param {string} base base of keys of this turn in the parameter block
    * @param {Edition} edition edition, used to get letter scores for
    * tiles.
    */
-  unpack(params, index, edition) {
-    const ti = `T${index}`;
-
-    if (typeof params[`${ti}c`] !== "undefined")
-      this.challengerKey = params[`${ti}c`];
-    if (typeof params[`${ti}e`] !== "undefined") {
-      this.endState = Number(params[`${ti}e`]);
+  unpack(params, base, edition) {
+    if (typeof params[`${base}c`] !== "undefined")
+      this.challengerKey = params[`${base}c`];
+    if (typeof params[`${base}e`] !== "undefined") {
+      this.endState = Number(params[`${base}e`]);
       // endState object for each player
       this.endStates = [];
       let esi = 0;
-      while (params[`${ti}e${esi}k`]) {
-        const es = new EndState({ key: params[`${ti}e${esi}k`] });
-        es.unpack(params, `${ti}e${esi}`);
+      while (params[`${base}e${esi}k`]) {
+        const es = new EndState({ key: params[`${base}e${esi}k`] });
+        es.unpack(params, `${base}e${esi}`);
         this.endStates.push(es);
         esi++;
       };
     }
-    this.timestamp = Number(params[`${ti}m`]);
-    if (typeof params[`${ti}n`] !== "undefined")
-      this.nextToGoKey = params[`${ti}n`];
-    this.playerKey = params[`${ti}p`];
-    if (typeof params[`${ti}r`] !== "undefined") {
-      const ls = params[`${ti}r`].split("");
+    this.timestamp = Number(params[`${base}m`]);
+    if (typeof params[`${base}n`] !== "undefined")
+      this.nextToGoKey = params[`${base}n`];
+    this.playerKey = params[`${base}p`];
+    let pn = 0;
+    while (typeof params[`${base}P${pn}`] !== "undefined") {
+      if (!this.placements) this.placements = [];
+      const t = new Tile();
+      t.unpack(params, `${base}P${pn++}`, edition);
+      this.placements.push(t);
+    }
+    if (typeof params[`${base}r`] !== "undefined") {
+      const ls = params[`${base}r`].split("");
       this.replacements = ls.map(l => new Tile({
         letter: l,
         score: edition.letterScore(l)
       }));
     }
-    if (typeof params[`${ti}s`] !== "undefined")
+    if (typeof params[`${base}s`] !== "undefined")
       // Numeric score
-      this.score = Number(params[`${ti}s`]);
-    this.type = Turn.TypeNames[params[`${ti}t`]];
-    if (typeof params[`${ti}x`] !== "undefined")
-      this.passes = params[`${ti}x`];
+      this.score = Number(params[`${base}s`]);
+    this.type = Turn.TypeNames[params[`${base}t`]];
+    if (typeof params[`${base}x`] !== "undefined")
+      this.passes = params[`${base}x`];
   }
 
   /**

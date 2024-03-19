@@ -79,6 +79,10 @@ class Surface {
    * @param {number?} row the column containing the square, 0 if undefined
    */
   at(col, row) {
+    assert(col >= 0);
+    assert(col < this.cols);
+    //assert(row >= 0);
+    //assert(row < this.rows);
     return this.squares[col][row || 0];
   }
 
@@ -219,13 +223,15 @@ class Surface {
     this.forEachSquare(sq => {
       if (d[i] != NO_TILE) { // NO_TILE means no tile at that position.
         let c = d[i].toUpperCase();
+        const isBlank = (c !== d[i]);
         sq.tile = new this._factory.Tile({
           letter: c,
           isLocked: true, // will be reset if the surface is a rack
-          score: edition.letterScore(c)
+          isBlank: isBlank,
+          score: edition.letterScore(isBlank ? " " : c),
+          col: sq.col,
+          row: sq.row
         });
-        if (c !== d[i])
-          sq.tile.isBlank = true;
       }
       i++;
     });

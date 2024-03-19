@@ -15,7 +15,7 @@ class Tile {
   /**
    * @param {Tile|object} spec optional Tile to copy or spec of tile
    */
-  constructor(spec) {
+  constructor(spec = {}) {
 
     /**
      * Character(s) represented by this tile.
@@ -51,7 +51,7 @@ class Tile {
 
     if (spec.isBlank)
       /**
-       * True if this tile is a blank (irresepective of letter)
+       * True if this tile is a blank (irrespective of letter)
        * @member {boolean?}
        */
       this.isBlank = true;
@@ -104,6 +104,56 @@ class Tile {
       this.letter = " ";
 
     return this;
+  }
+
+  /**
+   * Encode the tile in a URI parameter block
+   * @return {string} parameter block for embedding in a URL to recreate
+   * the tile.
+   */
+  pack() {
+    let params = "";
+    if (this.isBlank) {
+      if (this.isLocked)
+        params += "B";
+      else
+        params = "b";
+    } else if (this.isLocked)
+      params = "l";
+
+    if (typeof this.col !== "undefined")
+      params += `${this.col}-${this.row}`;
+    return params + `!${this.letter}`;
+  }
+
+  /**
+   * Unpack a tile encoded in a URI parameter block.
+   * @param {Object} params parameter block
+   * @param {string} base relative base to lookup parameters in the
+   * params block. For a tile this is simply the key for the encoded
+   * tile.
+   * @param {Edition} edition edition, used to get letter scores for
+   * tiles.
+   */
+  unpack(params, base, edition) {
+    const packed = params[base];
+    switch (packed[0]) {
+    case "B":
+      this.isBlank = true;
+      // fall-through deliberate
+    case "l":
+      this.isLocked = true;
+      break;
+    case "b":
+      this.isBlank = true;
+    }
+    const match = /^[Bbl]?(?:(\d+)-(\d+))?!(.*)$/.exec(packed);
+    if (typeof match[1] !== "undefined") {
+      this.col = parseInt(match[1]);
+      this.row = parseInt(match[2]);
+    }
+    this.letter = match[3];
+    this.score = edition.letterScore(this.isBlank ? " " : this.letter);
   }
 
   /* c8 ignore start */

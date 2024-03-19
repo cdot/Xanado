@@ -337,9 +337,15 @@ describe("game/Game", () => {
           type: Turn.Type.SWAPPED,
           playerKey: robot1.key,
           nextToGoKey: human2.key,
+          placements: [
+            { letter: "S", score: 0, row: 1, col: 2 },
+            { letter: "H", score: 4, row: 1, col: 3, isBlank: true, isLocked: true },
+            { letter: "I", score: 4, row: 1, col: 4, isBlank: true },
+            { letter: "T", score: 4, row: 1, col: 5, isLocked: true }
+          ],
           replacements: [
-            new Tile({ letter: "A", score: 1 }),
-            new Tile({ letter: "Q", score: 10 })
+            { letter: "A", score: 1 },
+            { letter: "Q", score: 10 }
           ],
           timestamp: g.creationTimestamp + 1
         }),
@@ -365,7 +371,6 @@ describe("game/Game", () => {
           timestamp: g.creationTimestamp + 1
         })
       ];
-
       const p = g.pack();
       //console.debug(p);
 
@@ -401,6 +406,10 @@ describe("game/Game", () => {
       assert(p.T1m);
       assert.equal(p.T1n, human2.key);
       assert.equal(p.T1p, robot1.key);
+      assert.equal(p.T1P0, "2-1!S");
+      assert.equal(p.T1P1, "B3-1!H");
+      assert.equal(p.T1P2, "b4-1!I");
+      assert.equal(p.T1P3, "l5-1!T");
       assert.equal(p.T1r, 'AQ');
       assert.equal(p.T1t, 1);
 
@@ -421,56 +430,60 @@ describe("game/Game", () => {
 
   it("unpack", () => {
     const params = {
-  a: 1708256848751,
-  b: '(225)',
-  c: 3,
-  o: 5,
-  d: 'Oxford_5000',
-  e: 'English_Scrabble',
-  g: true,
-  i: true,
-  k: '2d091ced0251b1f3',
-  m: 1708256848750,
-  P0k: 'robot1',
-  P0n: 'Robot',
-  P0r: true,
-  P0R: 'DOYOEAB-',
-  P0s: 0,
-  P1k: 'human2',
-  P1n: 'Human',
-  P1R: 'RSEEMSR-',
-  P1s: 0,
-  T0c: 'robot1',
-  T0m: 1708256848750,
-  T0n: 'robot1',
-  T0p: 'human2',
-  T0s: -5,
-  T0t: 3,
-  T1m: 1708256848751,
-  T1n: 'human2',
-  T1p: 'robot1',
-  T1r: 'AQ',
-  T1s: 0,
-  T1t: 1,
-  T2e: 4,
-  T2e0k: 'robot1',
-  T2e0t: 1,
-  T2e0T: 2,
-  T2e0r: 'X,Y',
-  T2e1k: 'human2',
-  T2e1t: 3,
-  T2e1T: 4,
-  T2e1r: 'Z',
-  T2m: 1708256848751,
-  T2p: 'robot1',
-  T2s: 0,
-  T2t: 2,
-  s: 0,
-  t: 2,
-  u: true,
-  v: 1,
-  x: 60,
-  y: 100
+      a: 1708256848751,
+      b: '(225)',
+      c: 3,
+      o: 5,
+      d: 'Oxford_5000',
+      e: 'English_Scrabble',
+      g: true,
+      i: true,
+      k: '2d091ced0251b1f3',
+      m: 1708256848750,
+      P0k: 'robot1',
+      P0n: 'Robot',
+      P0r: true,
+      P0R: 'DOYOEAB-',
+      P0s: 0,
+      P1k: 'human2',
+      P1n: 'Human',
+      P1R: 'RSEEMSR-',
+      P1s: 0,
+      T0c: 'robot1',
+      T0m: 1708256848750,
+      T0n: 'robot1',
+      T0p: 'human2',
+      T0s: -5,
+      T0t: 3,
+      T1m: 1708256848751,
+      T1n: 'human2',
+      T1p: 'robot1',
+      T1r: 'AQ',
+  T1P0: '2-1!S',
+  T1P1: 'B3-1!H',
+  T1P2: 'b4-1!I',
+  T1P3: 'l5-1!T',
+      T1s: 0,
+      T1t: 1,
+      T2e: 4,
+      T2e0k: 'robot1',
+      T2e0t: 1,
+      T2e0T: 2,
+      T2e0r: 'X,Y',
+      T2e1k: 'human2',
+      T2e1t: 3,
+      T2e1T: 4,
+      T2e1r: 'Z',
+      T2m: 1708256848751,
+      T2p: 'robot1',
+      T2s: 0,
+      T2t: 2,
+      s: 0,
+      t: 2,
+      u: true,
+      v: 1,
+      x: 60,
+      y: 100
     };
 
     return Game.unpack(params)
@@ -518,6 +531,34 @@ describe("game/Game", () => {
       assert.equal(t1.timestamp, 1708256848751);
       assert.equal(t1.nextToGoKey, 'human2');
       assert.equal(t1.playerKey, 'robot1');
+
+      assert.equal(t1.placements[0].letter, "S");
+      assert.equal(t1.placements[0].row, 1);
+      assert.equal(t1.placements[0].col, 2);
+      assert(!t1.placements[0].isBlank);
+      assert(!t1.placements[0].isLocked);
+      assert.equal(t1.placements[0].score, 1);
+      assert.equal(t1.placements[1].letter, "H");
+      assert.equal(t1.placements[1].row, 1);
+      assert.equal(t1.placements[1].col, 3);
+      assert.equal(t1.placements[1].score, 0);
+      assert(t1.placements[1].isBlank);
+      assert(t1.placements[1].isLocked);
+      
+      assert.equal(t1.placements[2].letter, "I");
+      assert.equal(t1.placements[2].row, 1);
+      assert.equal(t1.placements[2].col, 4);
+      assert.equal(t1.placements[2].score, 0);
+      assert(t1.placements[2].isBlank);
+      assert(!t1.placements[2].isLocked);
+
+      assert.equal(t1.placements[3].letter, "T");
+      assert.equal(t1.placements[3].row, 1);
+      assert.equal(t1.placements[3].col, 5);
+      assert.equal(t1.placements[3].score, 1);
+      assert(!t1.placements[3].isBlank);
+      assert(t1.placements[3].isLocked);
+
       assert.equal(t1.replacements[0].letter, "A");
       assert.equal(t1.replacements[0].score, 1);
       assert.equal(t1.replacements[1].letter, "Q");
@@ -535,4 +576,3 @@ describe("game/Game", () => {
     });
   });
 });
-

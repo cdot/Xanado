@@ -422,7 +422,7 @@ class Game {
       if (this.timerType === Game.Timer.GAME) {
         /**
          * Time penalty for this game, points lost per minute over
-         * timeAllowed. Only used if `timerType` is `TIMER_GAME`.
+         * timeAllowed. Only used if `timerType` is `GAME`.
          * @member {number?}
          */
         this.timePenalty = params.timePenalty || Game.DEFAULTS.timePenalty;
@@ -897,7 +897,7 @@ class Game {
       if (this.minPlayers) simple.minPlayers = this.minPlayers;
       if (this.maxPlayers) simple.maxPlayers = this.maxPlayers;
       simple.wordCheck = this.wordCheck;
-      if (this.timerType != Game.TIMER_NONE) {
+      if (this.timerType != Game.Timer.NONE) {
         simple.timeAllowed = this.timeAllowed;
         simple.timePenalty = this.timePenalty;
       }
@@ -925,7 +925,7 @@ class Game {
     const cp = this.challengePenalty;
     if (cp >= 0) {
       params.c = cp;
-      params.o = this.penaltyPoints;
+      if (this.penaltyPoints > 0) params.o = this.penaltyPoints;
     }
     params.d = this.dictionary;
     params.e = this.edition;
@@ -959,7 +959,7 @@ class Game {
     if (this.allowUndo) params.u = true;
     params.v = this.wordCheck;
     if (this.whosTurnKey) params.w = this.whosTurnKey;
-    if (this.timerType != Game.TIMER_NONE) {
+    if (this.timerType != Game.Timer.NONE) {
       params.x = this.timeAllowed;
       params.y = this.timePenalty;
     }
@@ -1024,7 +1024,7 @@ class Game {
       game.turns = [];
       while (params[`T${index}t`]) {
         const t = new Turn();
-        t.unpack(params, index, edition);
+        t.unpack(params, `T${index}`, edition);
         game.turns.push(t);
         index++;
       }

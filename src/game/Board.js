@@ -79,7 +79,7 @@ class Board extends Surface {
           const tile = new factory.Tile({
             letter: letter.toUpperCase(),
             isBlank: isBlank,
-            score: isBlank ? 0 : edition.letterScore(letter)
+            score: edition.letterScore(isBlank ? " " : letter)
           });
           this.at(col, row).placeTile(tile, true);
         }
