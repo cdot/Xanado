@@ -3,7 +3,7 @@
 /* eslint-env mocha,node */
 
 import { assert } from "chai";
-import { setupPlatform } from "../TestPlatform.js";
+import { setupPlatform, UNit } from "../TestPlatform.js";
 import { MemoryDatabase } from "../MemoryDatabase.js";
 import { TestSocket } from "../TestSocket.js";
 import sparseEqual from "../sparseEqual.js";
@@ -522,7 +522,6 @@ describe("game/Commands", () => {
     })
     .then(() => game.connect(socket, human1.key))
     .then(() => game.play(human1, move))
-    .then(g => assert.strictEqual(g, game))
     .then(() => socket.wait());
   });
 

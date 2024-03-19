@@ -1363,7 +1363,8 @@ class Game {
    * `Game.Timer.TURN`. Turn timeout for this turn. Set if
    * this is a restart of an unfinished turn, defaults to
    * this.timeAllowed if undefined.
-   * @return {Promise} a promise that resolves to undefined
+   * @return {Promise} a promise that resolves to the game. Note
+   * that waiting on this promise will stall the UI.
    * @private
    */
   startTurn(player, timeout) {

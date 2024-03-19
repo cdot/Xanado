@@ -22,9 +22,10 @@ const CommandsMixin = superclass => class extends superclass {
    * @memberof game/Commands
    * @param {Player} player player requesting the move
    * @param {Move} move a Move (or the spec of a Move)
-   * @return {Promise} resolving to a the game
+   * @return {Promise} resolves to the game when the move has been
+   * completed BUT before any following robot player has completed.
    */
-  async play(player, move) {
+  async play(player, move, waitForRobot) {
     assert(move, "No move");
     assert(player && player.key === this.whosTurnKey,
            `Not ${player.name}'s turn`);
@@ -140,9 +141,12 @@ const CommandsMixin = superclass => class extends superclass {
       words: move.words,
       passes: prepasses
     })
-    // Use setTimeout to delay the start of the next turn to allow
-    // time for UI updates
-    .then(() => setTimeout(() => this.startTurn(nextPlayer), 10));
+    .then(() => {
+      // Use setTimeout to allow time for UI updates before triggering
+      // any following robot
+      setTimeout(() => this.startTurn(nextPlayer), 10);
+      return this;
+    });
   }
 
   /**
