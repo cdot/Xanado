@@ -1062,8 +1062,8 @@ const GameUIMixin = superclass => class extends superclass {
     const available = landscape ? (wh * 0.9) : Math.min(ww, wh * 0.9);
     // A .Surface td has a 2px border-width
     const $aTD = $(".Surface td").first();
-    const bl = parseInt($aTD.css("border-left"));
-    const br = parseInt($aTD.css("border-right"));
+    const bl = parseFloat($aTD.css("border-left"));
+    const br = parseFloat($aTD.css("border-right"));
     const tdSize = available / sz - (bl + br);
     this.editCSSRule(".Surface td", {
       width: tdSize,

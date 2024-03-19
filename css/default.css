@@ -287,7 +287,7 @@ body.games-ui {
 
 @media screen and (max-aspect-ratio: 1/1) {
   body {
-    margin: 10px;
+/*    margin: 10px;*/
   }
 
   #signinState {
@@ -613,12 +613,10 @@ body.games-ui {
 
   /* Override Surface - Board is full width */
   #board {
-    margin-top: 30px;
-    margin-left: 0;
+    margin-top: 16px;
     width: 100vw;
     aspect-ratio: 1/1;
     height: auto;
-    padding: 2px;
   }
 
   /* Blocks are full width. flex layout deals with it. */
@@ -723,14 +721,14 @@ body.games-ui {
 }
 
 .Surface td {
-  width: 2.3em;      /* Edited in code */
-  height: 2.3em;     /* Edited in code */
-  font-size: 2em;    /* Edited in code */
-  line-height: 1em;  /* Edited in code */
+  width: 6.25vh;      /* Edited in GameUIMixin.handle_resize() */
+  height: 6.25vh;     /* Edited in GameUIMixin.handle_resize() */
+  font-size: 5vh;    /* Edited in GameUIMixin.handle_resize() */
+  line-height: 2.5vh;  /* Edited in GameUIMixin.handle_resize() */
 
   background-color: #BEB9A6;
   border-style: solid;
-  border-width: 2px;
+  border-width: 0.002vh;
   border-color: #AAA38E;
   white-space: normal;
   overflow: hidden;
