@@ -452,64 +452,6 @@ class UI {
       }));
     });
   }
-
-  /**
-   * Parse the URL to extract parameters. Arguments are returned
-   * as keys in a map. Argument names are not decoded, but values
-   * are. The portion of the URL before `?` is returned in the
-   * argument map using the key `_URL`. Arguments in the URL that
-   * have no value are set to boolean `true`. Repeated arguments are
-   * not supported (the last value will be the one taken).
-   * @return {Object<string,string>} key-value map
-   */
-  static parseURLArguments(url) {
-    const bits = url.split("?");
-    const urlArgs = { _URL: bits.shift() };
-    const sargs = bits.join("?").split(/[;&]/);
-    for (const sarg of sargs) {
-      const kv = sarg.split("=");
-      const key = kv.shift();
-      urlArgs[decodeURIComponent(key)] =
-      (kv.length === 0) ? true : decodeURIComponent(kv.join("="));
-    }
-    return urlArgs;
-  }
-
-  /**
-   * Reassemble a URL that has been parsed into parts by parseURLArguments.
-   * Argument are output sorted alphabetically.
-   * @param {object} args broken down URL in the form created by
-   * parseURLArguments
-   * @return {string} a URL string
-   */
-  static makeURL(parts) {
-    const args = Object.keys(parts)
-          .filter(f => f && !/^_/.test(f))
-          .sort()
-          .map(k => (parts[k] && typeof parts[k] === "boolean") ?
-               k : `${k}=${encodeURIComponent(parts[k])}`);
-    return `${parts._URL}?${args.join(";")}`;
-  }
-
-  /**
-   * Format a time interval in seconds for display in a string e.g
-   * `formatTimeInterval(601)` -> `"10:01"`
-   * Maximum ordinal is days.
-   * @param {number} t time period in seconds
-   */
-  static formatTimeInterval(t) {
-    const neg = (t < 0) ? "-" : "";
-    t = Math.abs(t);
-    const s = `0${t % 60}`.slice(-2);
-    t = Math.floor(t / 60);
-    const m = `0${t % 60}`.slice(-2);
-    t = Math.floor(t / 60);
-    if (t === 0) return `${neg}${m}:${s}`;
-    const h = `0${t % 24}`.slice(-2);
-    t = Math.floor(t / 24);
-    if (t === 0) return `${neg}${h}:${m}:${s}`;
-    return `${neg}${t}:${h}:${m}:${s}`;
-  }
 }
 
 export { UI }

@@ -9,6 +9,7 @@
 import "jquery";
 import "jquery-ui";
 
+import { parseURLArguments, makeURL } from "../common/Utils.js";
 import { Game } from "../game/Game.js";
 const Player = Game.CLASSES.Player;
 import { Edition } from "../game/Edition.js";
@@ -79,7 +80,7 @@ const StandaloneUIMixin = superclass => class extends superclass {
 
   /**
    * Arguments passed in the URL and parsed out using
-   * {@linkcode UI#parseURLArguments}
+   * {@linkcode Utils#parseURLArguments}
    * @member {object}
    */
   args = undefined;
@@ -246,10 +247,10 @@ const StandaloneUIMixin = superclass => class extends superclass {
    * @return {string} the new url
    */
   redirectToGame(key) {
-    const parts = UI.parseURLArguments(window.location.toString());
+    const parts = parseURLArguments(window.location.toString());
     parts._URL = parts._URL.replace(/standalone_games./, "standalone_game.");
     parts.game = key;
-    const nurl = UI.makeURL(parts);
+    const nurl = makeURL(parts);
     if (this.getSetting("one_window"))
       location.replace(nurl);
     else
@@ -264,7 +265,7 @@ const StandaloneUIMixin = superclass => class extends superclass {
    * @memberof standalone/StandaloneUIMixin
    */
   create() {
-    this.args = UI.parseURLArguments(document.URL);
+    this.args = parseURLArguments(document.URL);
     if (this.args.debug)
       this.debug = console.debug;
 

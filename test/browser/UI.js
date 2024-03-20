@@ -32,33 +32,6 @@ describe("browser/UI", () => {
     $("body").empty();
   });
 
-  it("parseURLArguments", () => {
-    const a = UI.parseURLArguments("http://a.b/c?a=1&b=2;c=3");
-    assert.deepEqual(a, { _URL: "http://a.b/c", a: "1", b: "2", c : "3" });
-
-    const b = UI.parseURLArguments("https://q:9?x&a=&b=c=3;c=?");
-    assert.deepEqual(b, { _URL: "https://q:9", x: true, a: "", b: "c=3", c: "?" });
-
-    const c = UI.parseURLArguments("ftp://q?a=a%20b&b");
-    assert.deepEqual(c, { _URL: "ftp://q", a: "a b", b: true });
-  });
-
-  it("makeURL", () => {
-    const args = { _URL: "x", a: "b", b: true, c: "a b" };
-    assert.deepEqual(UI.parseURLArguments(UI.makeURL(args)), args);
-  });
-
-  it("formatTimeInterval", () => {
-    assert.equal(UI.formatTimeInterval(0), "00:00");
-    assert.equal(UI.formatTimeInterval(1 * 60 + 1), "01:01");
-    assert.equal(UI.formatTimeInterval(10 * 60 + 1), "10:01");
-    assert.equal(UI.formatTimeInterval(60 * 60 + 1), "01:00:01");
-    assert.equal(UI.formatTimeInterval(24 * 60 * 60 + 1), "1:00:00:01");
-    assert.equal(UI.formatTimeInterval(2 * 24 * 60 * 60 + 1), "2:00:00:01");
-    assert.equal(UI.formatTimeInterval(365 * 24 * 60 * 60 + 1), "365:00:00:01");
-    assert.equal(UI.formatTimeInterval(-(60 * 60 + 1)), "-01:00:01");
-  });
-
   it("themes", () => {
     $("head")
     .append(`<link id="xanadoCSS" href="../css/default.css" rel="stylesheet" type="text/css">`)

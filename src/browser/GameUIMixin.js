@@ -11,7 +11,7 @@ import "jquery-ui";
 
 import "./icon_button.js";
 
-import { stringify } from "../common/Utils.js";
+import { stringify, formatTimeInterval } from "../common/Utils.js";
 import { loadDictionary } from "../game/loadDictionary.js";
 import { Game } from "../game/Game.js";
 import { Commands } from "../game/Commands.js";
@@ -273,7 +273,7 @@ const GameUIMixin = superclass => class extends superclass {
     let remains = params.clock;
     ticked.clock = remains;
 
-    const clocks = UI.formatTimeInterval(remains);
+    const clocks = formatTimeInterval(remains);
 
     let extraClass = "tick-alert-none";
     const allowedSecs = this.game.timeAllowed * 60;

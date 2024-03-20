@@ -9,6 +9,7 @@ import { BrowserPlatform } from "../browser/BrowserPlatform.js";
 window.Platform = BrowserPlatform;
 
 import { Channel } from "../common/Channel.js";
+import { parseURLArguments, makeURL } from "../common/Utils.js";
 import { Game } from "../game/Game.js";
 import { BackendGame } from "../backend/BackendGame.js";
 import { BrowserGame } from "../browser/BrowserGame.js";
@@ -192,20 +193,20 @@ class StandaloneGameUI extends StandaloneUIMixin(GameUIMixin(UI)) {
       $("#library-button")
       .icon_button({ icon: "library-icon" })
       .on("click", () => {
-        const parts = UI.parseURLArguments(window.location.href);
+        const parts = parseURLArguments(window.location.href);
         parts._URL = parts._URL.replace(
           /standalone_game\./, "standalone_games.");
-        window.location = UI.makeURL(parts);
+        window.location = makeURL(parts);
       });
       $("#share-button")
       .icon_button({ icon: "share-icon" })
       .on("click", async () => {
-        const parts = UI.parseURLArguments(window.location.href);
+        const parts = parseURLArguments(window.location.href);
         delete parts.game;
         const pg = this.backendGame.pack();
         for (const k in pg)
           parts[k] = pg[k];
-        const url = UI.makeURL(parts);
+        const url = makeURL(parts);
         await this.copyToClipboard(url)
         .then(() => this.alert(url, $.i18n("txt-clipped")))
         .catch(e => {

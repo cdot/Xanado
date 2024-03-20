@@ -19,6 +19,7 @@ if (typeof io === "undefined")
 import "jquery";
 import "jquery-ui";
 
+import { parseURLArguments } from "../common/Utils.js";
 import { Game } from "../game/Game.js";
 import { Commands } from "../game/Commands.js";
 import { Turn } from "../game/Turn.js";
@@ -154,7 +155,7 @@ const ClientUIMixin = superclass => class extends superclass {
       this.promiseDefaults("game")
     ])
     .then(() => {
-      this.args = UI.parseURLArguments(document.URL);
+      this.args = parseURLArguments(document.URL);
       if (this.args.debug) {
         console.debug("Enable debug");
         this.debug = console.debug;
