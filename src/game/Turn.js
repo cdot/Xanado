@@ -1,10 +1,10 @@
-/*Copyright (C) 2019-2022 The Xanado Project https://github.com/cdot/Xanado
+/*Copyright (C) 2019-2024 The Xanado Project https://github.com/cdot/Xanado
   License MIT. See README.md at the root of this distribution for full copyright
   and license information. Author Crawford Currie http://c-dot.co.uk*/
 
+import { toEnum } from "../common/Utils.js";
 import { Tile } from "./Tile.js";
 import { Move } from "./Move.js";
-import { Game } from "./Game.js";
 
 /**
  * Object giving the the end state for each player in the game.
@@ -13,6 +13,7 @@ import { Game } from "./Game.js";
  * the `score` field of a Turn object.
  */
 class EndState {
+
   constructor(info = {}) {
 
     /**
@@ -46,7 +47,11 @@ class EndState {
   }
 
   /**
-   * Encode the end state in a URI parameter block
+   * Encode the end state in a URI parameter block.
+   * Keys:
+   * * t - points total for tiles (may be -ve)
+   * * T - time
+   * * r - tiles remaining, "," replaced with "_"
    * @return {object} parameter block for embedding in a URL to recreate
    * the end state.
    */
@@ -57,21 +62,22 @@ class EndState {
     if (typeof this.time !== "undefined")
       packed.T = this.time;
     if (typeof this.tilesRemaining !== "undefined")
-      packed.r = this.tilesRemaining;
+      packed.r = this.tilesRemaining.replace(/,/g, "_");
     return packed;
   }
 
   /**
    * Unpack a parameter block.
-   * @param {Object} params parameter block
-   * @param {string} ti relative base to lookup parameters in the params block
+   * @param {object} packed packed parameter block
+   * @return {Turn} this
    */
-  unpack(params, ti) {
-    this.tiles = Number(params[`${ti}t`]);
-    if (typeof params[`${ti}T`] !== "undefined")
-      this.time = Number(params[`${ti}T`]);
-    if (typeof params[`${ti}r`] !== "undefined")
-      this.tilesRemaining = params[`${ti}r`];
+  unpack(packed) {
+    this.tiles = Number(packed.t);
+    if (typeof packed.T !== "undefined")
+      this.time = Number(packed.T);
+    if (typeof packed.r !== "undefined")
+      this.tilesRemaining = packed.r.replace(/_/g, ",");
+    return this;
   }
 
   /**
@@ -109,53 +115,41 @@ class Turn extends Move {
    * @typedef {PLAYED|SWAPPED|GAME_ENDED|CHALLENGE_LOST|CHALLENGE_WON|TOOK_BACK|PASSED|TIMED_OUT} Turn.Type
    */
   static Type = {
-    PLAYED:         "play",
-    SWAPPED:        "swap",
-    GAME_ENDED:     "game-over",
-    CHALLENGE_LOST: "challenge-lost",
-    CHALLENGE_WON:  "challenge-won",
-    TOOK_BACK:      "took-back",
-    PASSED:         "passed",
-    TIMED_OUT:      "timed-out"
+    PLAYED:         0,
+    SWAPPED:        1,
+    GAME_ENDED:     2,
+    CHALLENGE_LOST: 3,
+    CHALLENGE_WON:  4,
+    TOOK_BACK:      5,
+    PASSED:         6,
+    TIMED_OUT:      7
   };
 
+  /**
+   * Map from Turn.Type enum values to translation keys
+   */
   static TypeNames = [
-    Turn.Type.PLAYED,
-    Turn.Type.SWAPPED,
-    Turn.Type.GAME_ENDED,
-    Turn.Type.CHALLENGE_LOST,
-    Turn.Type.CHALLENGE_WON,
-    Turn.Type.TOOK_BACK,
-    Turn.Type.PASSED,
-    Turn.Type.TIMED_OUT
+    /*i18n*/"go-played",
+    /*i18n*/"go-swapped",
+    /*i18n*/"go-ended",
+    /*i18n*/"go-lost",
+    /*i18n*/"go-won",
+    /*i18n*/"go-back",
+    /*i18n*/"go-pass",
+    /*i18n*/"go-timeout"
   ];
 
-  /**
-   * The 'type' of the turn.
-   * @member {Turns}
-   */
-  type;
-
-  /**
-   * Key of the player who has been affected by the turn. Normally
-   * this is the player who made the Move that resulted in the Turn,
-   * but in the case of a challenge it is the player who was
-   * challenged.
-   * @member {Key}
-   */
-  playerKey;
-
-  /**
-   * Key of the next player who's turn it is
-   * @member {Key}
-   */
-  nextToGoKey;
-
-  /**
-   * Time the turn was finished, assigned by the server.
-   * @member {number}
-   */
-  timestamp;
+  // Compatibility; map old strings to new enum
+  static TypeCompat = {
+    "play": Turn.Type.PLAYED,
+    "swap": Turn.Type.SWAPPED,
+    "game-over": Turn.Type.GAME_ENDED,
+    "challenge-lost": Turn.Type.CHALLENGE_LOST,
+    "challenge-won": Turn.Type.CHALLENGE_WON,
+    "took-back": Turn.Type.TOOK_BACK,
+    "passed": Turn.Type.PASSED,
+    "timed-out": Turn.Type.TIMED_OUT
+  };
 
   /**
    * @param {Game} game the game this is a turn in.
@@ -164,20 +158,35 @@ class Turn extends Move {
    * that member.
    */
   constructor(params = {}) {
+    // placements, score, words handled by Move
     super(params);
 
-    this.type = params.type;
-    this.playerKey = params.playerKey;
-    this.nextToGoKey = params.nextToGoKey;
-    this.timestamp = params.timestamp || Date.now();
+    /**
+     * The 'type' of the turn.
+     * @member {Turn.Type}
+     */
+    this.type = toEnum(params.type, Turn.TypeCompat);
 
-    if (params.placements)
-      /**
-       * List of tiles played in this turn. These tiles will have positions.
-       * @member {Tile[]?}
-       */
-      this.placements = params.placements.map(
-        tilespec => new Tile(tilespec));
+    /**
+     * Key of the player who has been affected by the turn. Normally
+     * this is the player who made the Move that resulted in the Turn,
+     * but in the case of a challenge it is the player who was
+     * challenged.
+     * @member {Key}
+     */
+    this.playerKey = params.playerKey;
+
+    /**
+     * Key of the next player who's turn it is
+     * @member {Key}
+     */
+    this.nextToGoKey = params.nextToGoKey;
+
+    /**
+     * Time the turn was finished.
+     * @member {number}
+     */
+    this.timestamp = params.timestamp || Date.now();
 
     if (params.replacements)
       /**
@@ -186,6 +195,7 @@ class Turn extends Move {
        * @member {Tile[]?}
        */
       this.replacements = params.replacements.map(
+        // See comment about use of game.Tile in Move constructor#placements.
         tilespec => new Tile(tilespec));
 
     if (params.challengerKey)
@@ -209,13 +219,14 @@ class Turn extends Move {
 
     if (typeof params.endStates === "object")
       /**
-       * End state information for each player, indexed on player key.
-       * @member {Object.<string,EndState>[]}
+       * End state information for each player, in player order.
+       * @member {Object.<string,EndState>[]?}
        */
       this.endStates = params.endStates;
 
+    // Compatibility, end states used to be overloaded into score
+    // (not since 3.2.0)
     else if (typeof params.score === "object") {
-      // Compatibility, end states used to be overloaded into score
       this.endStates = [];
       for (const es of params.score)
         this.endStates.push(new EndState(es));
@@ -229,13 +240,6 @@ class Turn extends Move {
        * @member {number?}
        */
       this.passes = params.passes;
-
-    if (typeof params.score === "number")
-      /**
-       * The score from the turn.
-       * @member {number?}
-       */
-      this.score = params.score;
   }
 
   /**
@@ -254,88 +258,76 @@ class Turn extends Move {
 
   /**
    * Pack parameters into a minimal size block.
+   * Keys:
+   * * Inherits `wN`, `PN`, `s` from Move.
+   * * `c` - challengerKey
+   * * `eN` - end states
+   * * `m` - timestamp
+   * * `n` - nextToGo
+   * * `p` - playerKey
+   * * `rN` - replacements
+   * * `t` - type
+   * * `x` - passes
    * @return {object} parameter block unpackable using `unpack`
    */
   pack() {
-    const params = {};
-    if (this.challengerKey) params.c = this.challengerKey;
+    const packed = super.pack();
+    if (this.challengerKey) packed.c = this.challengerKey;
     if (this.endState >= 0) {
-      params.e = this.endState;
-      let esi = 0;
-      for (const pk in this.endStates) {
-        let endState = this.endStates[pk];
+      packed.e = this.endState;
+      for (let esi = 0; esi < this.endStates.length; esi++) {
+        let endState = this.endStates[esi];
+        // Convert objects to EndStates painlessly
         if (!(endState instanceof EndState))
-          this.endStates[pk] = endState = new EndState(endState);
-        params[`e${esi}k`] = endState.key; // map key to index
-        const packed = endState.pack();
-        for (const k of Object.keys(packed))
-          params[`e${esi}${k}`] = packed[k];
-        esi++;
+          this.endStates[esi] = endState = new EndState(endState);
+        packed[`e${esi}`] = endState.pack();
       }
     }
-    params.m = this.timestamp;
+    packed.m = this.timestamp;
     if (typeof this.nextToGoKey !== "undefined")
-      params.n = this.nextToGoKey;
-    params.p = this.playerKey;
-    if (this.placements) {
-      for (let pi = 0; pi < this.placements.length; pi++)
-        params[`P${pi}`] = this.placements[pi].pack();
+      packed.n = this.nextToGoKey;
+    packed.p = this.playerKey;
+    if (this.replacements) {
+      for (let pi = 0; pi < this.replacements.length; pi++)
+        packed[`r${pi}`] = this.replacements[pi].pack();
     }
-    if (this.replacements)
-      params.r = this.replacements.map(t => t.letter).join("");
-    if (typeof this.score === "number")
-      params.s = this.score;
-    params.t = Turn.TypeNames.indexOf(this.type);
-    if (this.passes && this.passes > 0) params.x = this.passes;
-    return params;
+    packed.t = this.type;
+    if (this.passes && this.passes > 0) packed.x = this.passes;
+    return packed;
   }
 
   /**
    * Repopulate the turn from a URI parameter block.
-   * @param {Object} params parameter block
-   * @param {string} base base of keys of this turn in the parameter block
+   * @param {Object} packed parameter block
    * @param {Edition} edition edition, used to get letter scores for
    * tiles.
+   * @return {Turn} this
    */
-  unpack(params, base, edition) {
-    if (typeof params[`${base}c`] !== "undefined")
-      this.challengerKey = params[`${base}c`];
-    if (typeof params[`${base}e`] !== "undefined") {
-      this.endState = Number(params[`${base}e`]);
+  unpack(packed, edition) {
+    super.unpack(packed, edition);
+
+    if (typeof packed.c !== "undefined")
+      this.challengerKey = packed.c;
+    if (typeof packed.e !== "undefined") {
+      this.endState = Number(packed.e);
       // endState object for each player
       this.endStates = [];
-      let esi = 0;
-      while (params[`${base}e${esi}k`]) {
-        const es = new EndState({ key: params[`${base}e${esi}k`] });
-        es.unpack(params, `${base}e${esi}`);
-        this.endStates.push(es);
-        esi++;
-      };
+      for (let esi = 0; packed[`e${esi}`]; esi++)
+        this.endStates.push(new EndState().unpack(packed[`e${esi}`]));
     }
-    this.timestamp = Number(params[`${base}m`]);
-    if (typeof params[`${base}n`] !== "undefined")
-      this.nextToGoKey = params[`${base}n`];
-    this.playerKey = params[`${base}p`];
-    let pn = 0;
-    while (typeof params[`${base}P${pn}`] !== "undefined") {
-      if (!this.placements) this.placements = [];
-      const t = new Tile();
-      t.unpack(params, `${base}P${pn++}`, edition);
-      this.placements.push(t);
+    this.timestamp = Number(packed.m);
+    if (typeof packed.n !== "undefined")
+      this.nextToGoKey = packed.n;
+    this.playerKey = packed.p;
+    for (let ri = 0; packed[`r${ri}`]; ri++) {
+      if (!this.replacements) this.replacements = [];
+      this.replacements.push(new Tile().unpack(packed[`r${ri}`], edition));
     }
-    if (typeof params[`${base}r`] !== "undefined") {
-      const ls = params[`${base}r`].split("");
-      this.replacements = ls.map(l => new Tile({
-        letter: l,
-        score: edition.letterScore(l)
-      }));
-    }
-    if (typeof params[`${base}s`] !== "undefined")
-      // Numeric score
-      this.score = Number(params[`${base}s`]);
-    this.type = Turn.TypeNames[params[`${base}t`]];
-    if (typeof params[`${base}x`] !== "undefined")
-      this.passes = params[`${base}x`];
+    this.type = Number(packed.t);
+    if (typeof packed.x !== "undefined")
+      this.passes = packed.x;
+
+    return this;
   }
 
   /**

@@ -109,7 +109,7 @@ describe("browser/GamesUIMixin", () => {
       assert(html.indexOf("game2") > 0);
       // Detailed construction of table rows tested in BrowserGame
 
-      // Clicking on a gameTableRow should invoke GameDialog, which
+      // Clicking on a TR should invoke GameDialog, which
       // will invoke $player.
       // No testing here, see GameDialog.js for that.
       $("#game1").trigger("click");
