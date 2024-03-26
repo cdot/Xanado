@@ -51,8 +51,8 @@ describe("backend/findBestPlay", () => {
       game, rack.tiles(),
       move => {
         //console.log(move);
-        if (move instanceof Move)
-          bestMoves.push(move);
+        assert(move instanceof Move);
+        bestMoves.push(move);
       },
       game.dictionary))
 

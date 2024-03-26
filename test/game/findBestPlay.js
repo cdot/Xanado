@@ -12,6 +12,9 @@ const Tile = Game.CLASSES.Tile;
 const Rack = Game.CLASSES.Rack;
 const Move = Game.CLASSES.Move;
 
+import { CBOR } from "../../src/game/CBOR.js";
+import { Base64ToUint8Array } from "../../src/browser/BrowserDatabase.js";
+
 describe("game/findBestPlay", () => {
 
   before(setupPlatform);
@@ -53,15 +56,11 @@ describe("game/findBestPlay", () => {
         new Tile({letter:" ", isBlank:true, score:0}),
         new Tile({letter:" ", isBlank:true, score:0})
       ],
-      move => {
-        //console.log(move);
-        if (move instanceof Move)
-          bestMoves.push(move);
-      },
+      move => bestMoves.push(move),
       game.dictionary))
     .then(() => {
-      assert.equal(bestMoves[5].words[0].word, "HAIRIEST");
       assert.equal(bestMoves[5].words.length, 1);
+      assert.equal(bestMoves[5].words[0].word, "HAIRIEST");
       assert.equal(bestMoves[5].score, 42);
       assert.equal(bestMoves.length, 6);
     });
@@ -100,11 +99,7 @@ describe("game/findBestPlay", () => {
     })
     .then(game => findBestPlay(
       game, rack.tiles(),
-      move => {
-        //console.log(move);
-        if (move instanceof Move)
-          bestMoves.push(move);
-      },
+      move => bestMoves.push(move),
       game.dictionary))
 
     .then(() => {
@@ -172,8 +167,8 @@ describe("game/findBestPlay", () => {
       game, rack.tiles(),
       move => {
         //console.log(move);
-        if (move instanceof Move)
-          bestMoves.push(move);
+        assert(move instanceof Move);
+        bestMoves.push(move);
       },
       game.dictionary))
 
@@ -230,8 +225,8 @@ describe("game/findBestPlay", () => {
       game, rack.tiles(),
       move => {
         //console.log(move);
-        if (move instanceof Move)
-          bestMoves.push(move);
+        assert(move instanceof Move);
+        bestMoves.push(move);
       },
       game.dictionary))
     .then(() => {
@@ -281,8 +276,8 @@ describe("game/findBestPlay", () => {
       ],
       move => {
         //console.log(move);
-        if (move instanceof Move)
-          bestMoves.push(move);
+        assert(move instanceof Move);
+        bestMoves.push(move);
       },
       game.dictionary))
     .then(() => {
@@ -326,8 +321,8 @@ describe("game/findBestPlay", () => {
       ],
       move => {
         //console.log(move);
-        if (move instanceof Move)
-          bestMoves.push(move);
+        assert(move instanceof Move);
+        bestMoves.push(move);
       },
       game.dictionary))
     .then(() => {
@@ -375,8 +370,8 @@ describe("game/findBestPlay", () => {
       ],
       move => {
         //console.log(move);
-        if (move instanceof Move)
-          bestMoves.push(move);
+        assert(move instanceof Move);
+        bestMoves.push(move);
       },
       game.dictionary))
     .then(() => {
@@ -425,8 +420,8 @@ describe("game/findBestPlay", () => {
       ],
       move => {
         //console.log(move);
-        if (move instanceof Move)
-          bestMoves.push(move);
+        assert(move instanceof Move);
+        bestMoves.push(move);
       },
       game.dictionary))
     .then(() => {
@@ -475,8 +470,8 @@ describe("game/findBestPlay", () => {
       ],
       move => {
         //console.log(move);
-        if (move instanceof Move)
-          bestMoves.push(move);
+        assert(move instanceof Move);
+        bestMoves.push(move);
       },
       game.dictionary))
     .then(() => {
@@ -526,9 +521,8 @@ describe("game/findBestPlay", () => {
       ],
       move => {
         //console.log(move);
-        if (move instanceof Move) {
-          bestMoves.push(move);
-        }
+        assert(move instanceof Move);
+        bestMoves.push(move);
       },
       game.dictionary))
     .then(() => {
@@ -550,90 +544,110 @@ describe("game/findBestPlay", () => {
     // it might have been a UI problem.
     let bestMoves = [];
     return Game.unpack({
-      P0R: "IAWIONY-",
-      P0k: "Computer",
-      P0n: "Computer",
-      P0r: true,
-      P0s: 119,
-      P1R: "GUISIPD-",
-      P1k: "You",
-      P1n: "You",
-      P1s: 124,
-      T0P0: "7-5!W",
-      T0P1: "7-6!E",
-      T0P2: "7-7!B",
-      T0m: 1710839719615,
-      T0n: "You",
-      T0p: "Computer",
-      T0r: "IAI",
-      T0s: 16,
-      T0t: 0,
-      T1P0: "8-7!E",
-      T1P1: "9-7!R",
-      T1P2: "10-7!A",
-      T1P3: "11-7!T",
-      T1P4: "12-7!I",
-      T1P5: "13-7!O",
-      T1P6: "14-7!N",
-      T1m: 1710841174038,
-      T1n: "Computer",
-      T1p: "You",
-      T1r: "AOIUIEE",
-      T1s: 83,
-      T1t: 0,
-      T2P0: "8-5!A",
-      T2P1: "9-5!V",
-      T2P2: "10-5!E",
-      T2m: 1710841174250,
-      T2n: "You",
-      T2p: "Computer",
-      T2r: "GRI",
-      T2s: 18,
-      T2t: 0,
-      T3P0: "9-4!O",
-      T3P1: "9-6!E",
-      T3m: 1710841220625,
-      T3n: "Computer",
-      T3p: "You",
-      T3r: "FM",
-      T3s: 7,
-      T3t: 0,
-      T4m: 1710841220888,
-      T4P0: "9-3!C",
-      T4P1: "10-3!R",
-      T4P2: "11-3!I",
-      T4P3: "12-3!B",
-      T4n: "You",
-      T4p: "Computer",
-      T4r: "JYAO",
-      T4s: 26,
-      T4t: 0,
-      T5P0: "12-1!F",
-      T5P1: "12-2!A",
-      T5m: 1710841322309,
-      T5n: "Computer",
-      T5p: "You",
-      T5r: " U",
-      T5s: 16,
-      T5t: 0,
-      T6P0: "12-6!J",
-      T6P1: "12-8!G",
-      T6m: 1710841322575,
-      T6n: "You",
-      T6p: "Computer",
-      T6r: "WN",
-      T6s: 21,
-      T6t: 0,
-      T7m: 1710841453538,
-      T7n: "Computer",
-      T7p: "You",
-      T7r: "GSPD",
-      T7s: 18,
-      T7t: 0,
-      T7P0: "10-9!M",
-      T7P1: "11-9!U",
-      T7P2: "b12-9!S",
-      T7P3: "13-9!E",
+      P0: {
+        R: "IAWIONY-",
+        k: "Computer",
+        n: "Computer",
+        r: true,
+        s: 119
+      },
+      P1: {
+        R: "GUISIPD-",
+        k: "You",
+        n: "You",
+        s: 124
+      },
+      T0: {
+        P0: "7-5!W",
+        P1: "7-6!E",
+        P2: "7-7!B",
+        m: 1710839719615,
+        n: "You",
+        p: "Computer",
+        r: "IAI",
+        s: 16,
+        t: 0
+      },
+      T1: {
+        P0: "8-7!E",
+        P1: "9-7!R",
+        P2: "10-7!A",
+        P3: "11-7!T",
+        P4: "12-7!I",
+        P5: "13-7!O",
+        P6: "14-7!N",
+        m: 1710841174038,
+        n: "Computer",
+        p: "You",
+        r: "AOIUIEE",
+        s: 83,
+        t: 0
+      },
+      T2: {
+        P0: "8-5!A",
+        P1: "9-5!V",
+        P2: "10-5!E",
+        m: 1710841174250,
+        n: "You",
+        p: "Computer",
+        r: "GRI",
+        s: 18,
+        t: 0
+      },
+      T3: {
+        P0: "9-4!O",
+        P1: "9-6!E",
+        m: 1710841220625,
+        n: "Computer",
+        p: "You",
+        r: "FM",
+        s: 7,
+        t: 0
+      },
+      T4: {
+        m: 1710841220888,
+        P0: "9-3!C",
+        P1: "10-3!R",
+        P2: "11-3!I",
+        P3: "12-3!B",
+        n: "You",
+        p: "Computer",
+        r: "JYAO",
+        s: 26,
+        t: 0
+      },
+      T5: {
+        P0: "12-1!F",
+        P1: "12-2!A",
+        m: 1710841322309,
+        n: "Computer",
+        p: "You",
+        r: " U",
+        s: 16,
+        t: 0
+      },
+      T6: {
+        P0: "12-6!J",
+        P1: "12-8!G",
+        m: 1710841322575,
+        n: "You",
+        p: "Computer",
+        r: "WN",
+        s: 21,
+        t: 0
+      },
+      T7: {
+        m: 1710841453538,
+        n: "Computer",
+        p: "You",
+        r: "GSPD",
+        s: 18,
+        t: 0,
+        P0: "10-9!M",
+        P1: "11-9!U",
+        P2: "b12-9!S",
+        P3: "13-9!E"
+      },
       a: 1710841453886,
       b: "(110)WEB(12)A-E(10)COVER(10)R-E-A-M(8)I---T-U(6)FAB--JIGs(12)O-E(12)N(7)",
       c: 1,
@@ -662,9 +676,8 @@ describe("game/findBestPlay", () => {
         ],
         move => {
           //console.log(move);
-          if (move instanceof Move) {
-            bestMoves.push(move);
-          }
+          assert(move instanceof Move);
+          bestMoves.push(move);
         },
         game.dictionary)
       .then(() => {
@@ -678,110 +691,3 @@ describe("game/findBestPlay", () => {
     });
   });
 });
-
-/*
-  P0R: IAWIONY-,
-  P0k: Computer,
-  P0n: Computer,
-  P0r;P0s: 115,
-  P1R: UUIRIS -,
-  P1k: You,
-  P1n: You,
-  P1s: 124,
-  T0P0: 7-5!W,
-  T0P1: 7-6!E,
-  T0P2: 7-7!B,
-  T0m: 1710839719615,
-  T0n: You,
-  T0p: Computer,
-  T0r: IAI,
-  T0s: 16,
-  T0t: 0,
-  T1P0: 8-7!E,
-  T1P1: 9-7!R,
-  T1P2: 10-7!A,
-  T1P3: 11-7!T,
-  T1P4: 12-7!I,
-  T1P5: 13-7!O,
-  T1P6: 14-7!N,
-  T1m: 1710841174038,
-  T1n: Computer,
-  T1p: You,
-  T1r: AOIUIEE,
-  T1s: 83,
-  T1t: 0,
-  T2P0: 8-5!A,
-  T2P1: 9-5!V,
-  T2P2: 10-5!E,
-  T2m: 1710841174250,
-  T2n: You,
-  T2p: Computer,
-  T2r: GRI,
-  T2s: 18,
-  T2t: 0,
-  T3P0: 9-4!O,
-  T3P1: 9-6!E,
-  T3m: 1710841220625,
-  T3n: Computer,
-  T3p: You,
-  T3r: FM,
-  T3s: 7,
-  T3t: 0,
-  T4P0: 9-3!C,
-  T4P1: 10-3!R,
-  T4P2: 11-3!I,
-  T4P3: 12-3!B,
-  T4m: 1710841220888,
-  T4n: You,
-  T4p: Computer,
-  T4r: JYAO,
-  T4s: 26,
-  T4t: 0,
-  T5P0: 12-1!F,
-  T5P1: 12-2!A,
-  T5m: 1710841322309,
-  T5n: Computer,
-  T5p: You,
-  T5r: %20U,
-  T5s: 16,
-  T5t: 0,
-  T6P0: 12-6!J,
-  T6P1: 12-8!G,
-  T6m: 1710841322575,
-  T6n: You,
-  T6p: Computer,
-  T6r: WN,
-  T6s: 21,
-  T6t: 0,
-  T7P0: 10-9!M,
-  T7P1: 11-9!U,
-  T7P2: b12-9!S,
-  T7P3: 13-9!E,
-  T7m: 1710841827715,
-  T7n: Computer,
-  T7p: You,
-  T7r: URS%20,
-  T7s: 18,
-  T7t: 0,
-  T8P0: 12-10!A,
-  T8P1: 12-11!W,
-  T8P2: 12-12!N,
-  T8m: 1710841828066,
-  T8n: You,
-  T8p: Computer,
-  T8r: LXD,
-  T8s: 34,
-  T8t: 0,
-  a: 1710841828066,
-  b: (110)WEB(12)A-E(10)COVER(10)R-E-A-M(8)I---T-U(6)FAB--JIGsAWN(9)O-E(12)N(7),
-  c: 1,
-  d: British_English,
-  debug;e: English_Scrabble,
-  i: true,
-  k: 8549caf1c9275a9a,
-  m: 1710839719502,
-  s: 1,
-  t: 0,
-  u: true,
-  ;v: 0,
-  w: You*/
