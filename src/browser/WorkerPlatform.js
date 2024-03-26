@@ -2,6 +2,7 @@
   License MIT. See README.md at the root of this distribution for full copyright
   and license information. Author Crawford Currie http://c-dot.co.uk*/
 /* eslint-env worker */
+/* global assert */
 
 self.assert = (cond, mess) => {
   if (!cond) {
@@ -10,26 +11,13 @@ self.assert = (cond, mess) => {
   }
 };
 
-self.assert.fail = mess => self.assert(false, mess);
+assert.fail = mess => self.assert(false, mess);
 
 /**
  * Web Worker implementation of {@linkcode Platform}.
  * @implements Platform
  */
 class WorkerPlatform /*extends Platform*/ {
-
-  /**
-   * @implements Platform
-   */
-  static trigger(e, args) {
-    // Pass events straight to the document
-    assert(false);
-    //return $(document).trigger(e, args);
-  }
-
-  static i18n() {
-    assert(false);
-  }
 
   /**
    * @implements Platform

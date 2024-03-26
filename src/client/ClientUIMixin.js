@@ -24,7 +24,6 @@ import { Game } from "../game/Game.js";
 import { Commands } from "../game/Commands.js";
 import { Turn } from "../game/Turn.js";
 import { Tile } from "../game/Tile.js";
-import { UI } from "../browser/UI.js";
 import { UIEvents } from "../browser/UIEvents.js";
 
 /**

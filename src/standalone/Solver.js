@@ -2,6 +2,7 @@
   License MIT. See README.md at the root of this distribution for full copyright
   and license information. Author Crawford Currie http://c-dot.co.uk*/
 /* eslint-env browser */
+/* global Platform */
 
 /**
  * Browser app for solver.html
@@ -12,7 +13,7 @@ window.Platform = BrowserPlatform;
 import "jquery";
 import "jquery-ui";
 
-import { Dictionary, Explorer } from "@cdot/dictionary";
+import { Explorer } from "@cdot/dictionary";
 
 import { UI } from "../browser/UI.js";
 import { StandaloneUIMixin } from "./StandaloneUIMixin.js";
@@ -51,7 +52,7 @@ class Solver extends StandaloneUIMixin(UI) {
   create() {
     super.create();
     this.initLocale()
-    .then(() => Platform.readFile(Platform.getFilePath("dictionaries/index.json")))
+    .then(() => Platform.readJSONFile(Platform.getFilePath("dictionaries/index.json")))
     .then(dictionaries => {
       const $dics = $("#dictionary");
       dictionaries

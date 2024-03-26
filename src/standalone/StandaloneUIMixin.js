@@ -15,7 +15,6 @@ const Player = Game.CLASSES.Player;
 import { Edition } from "../game/Edition.js";
 import { BackendGame } from "../backend/BackendGame.js";
 import { BrowserDatabase } from "../browser/BrowserDatabase.js";
-import { UI } from "../browser/UI.js";
 import { UIEvents } from "../browser/UIEvents.js";
 
 /**
@@ -153,7 +152,7 @@ const StandaloneUIMixin = superclass => class extends superclass {
    * @override
    */
   promiseLayouts() {
-    return Platform.readFile(Platform.getFilePath("css/index.json"));
+    return Platform.readJSONFile(Platform.getFilePath("css/index.json"));
   }
 
   /**
@@ -163,7 +162,7 @@ const StandaloneUIMixin = superclass => class extends superclass {
    * @override
    */
   promiseLocales() {
-    return Platform.readFile(Platform.getFilePath("i18n/index.json"));
+    return Platform.readJSONFile(Platform.getFilePath("i18n/index.json"));
   }
 
   /**
@@ -173,7 +172,7 @@ const StandaloneUIMixin = superclass => class extends superclass {
    * @override
    */
   promiseEditions() {
-    return Platform.readFile(Platform.getFilePath("editions/index.json"));
+    return Platform.readJSONFile(Platform.getFilePath("editions/index.json"));
   }
 
   /**
@@ -183,7 +182,7 @@ const StandaloneUIMixin = superclass => class extends superclass {
    * @override
    */
   promiseDictionaries() {
-    return Platform.readFile(Platform.getFilePath("dictionaries/index.json"));
+    return Platform.readJSONFile(Platform.getFilePath("dictionaries/index.json"));
   }
 
   /**

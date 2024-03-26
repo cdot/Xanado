@@ -60,9 +60,9 @@ const Undo = superclass => class extends superclass {
     if (!turn.endStates && typeof turn.score === "object")
       turn.endStates = turn.score;
     // Re-adjust scores from the player end states
-    for (const endState of turn.endStates) {
-      const player = this.getPlayerWithKey(endState.key);
-      assert(player, endState.key);
+    for (let pi = 0; pi < turn.endStates.length; pi++) {
+      const endState = turn.endStates[pi];
+      const player = this.players[pi];
       player.score -= (endState.time || 0) + (endState.tiles || 0);
     }
     this.state = Game.State.PLAYING;

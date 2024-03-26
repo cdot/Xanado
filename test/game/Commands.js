@@ -52,7 +52,6 @@ describe("game/Commands", () => {
                          ["A","C","E"]);// tiles that were replaced
         assert.deepEqual(turn.replacements.map(t=>t.letter).sort(),
                          ["P","Q","R"]);
-        assert.equal(turn.score, 0);
         assert.equal(turn.playerKey, human1.key);
         assert.equal(turn.nextToGoKey, human2.key);
         socket1.done();
@@ -75,7 +74,6 @@ describe("game/Commands", () => {
                        ["A","C","E"]);// tiles that were replaced
       assert.deepEqual(turn.replacements.map(t=>t.letter).sort(),
                        ["#","#","#"]);
-      assert.equal(turn.score, 0);
       assert.equal(turn.playerKey, human1.key);
       assert.equal(turn.nextToGoKey, human2.key);
       socket2.done();
@@ -195,7 +193,6 @@ describe("game/Commands", () => {
         assert(!turn.words);
         assert(!turn.placements);
         assert(!turn.replacements);
-        assert.equal(turn.score, 0);
         assert.equal(turn.playerKey, human1.key);
         assert.equal(turn.nextToGoKey, human2.key);
         // Player1 rack should be unchanged

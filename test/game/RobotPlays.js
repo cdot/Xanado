@@ -120,7 +120,7 @@ describe("game/RobotPlays", () => {
     socket.on(Game.Notify.TURN, (data, event, seqNo) => {
       assert.equal(seqNo, 1);
       assert.equal(event, Game.Notify.TURN);
-      assert(data.type, Turn.Type.PLAYED);
+      assert.equal(data.type, Turn.Type.PLAYED);
       assert.deepEqual(data.words, [ { word: "AGO", score: 6 } ]);
       assert.equal(data.placements.length, 3);
       assert.equal(data.placements[0].letter, "A");

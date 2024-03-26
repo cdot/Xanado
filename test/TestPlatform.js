@@ -244,7 +244,7 @@ class StubServer {
       //console.debug("Fallback", args.url);
       assert(args.url && args.url.length > 0, args.url);
       return $.when(
-        Platform.readFile(args.url)
+        Fs.readFile(args.url)
         .then(d => d.toString()));
     };
     assert($.ajax);

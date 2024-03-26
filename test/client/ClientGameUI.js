@@ -88,7 +88,7 @@ describe("client/ClientGameUI", () => {
         //"/defaults/user": Promise.resolve(USER_DEFAULTS),
         //"/defaults/game": Promise.resolve(GAME_DEFAULTS),
         //"/locales": {
-        //  promise: Platform.readFile(Platform.getFilePath("/i18n/index.json")),
+        //  promise: Platform.readJSONFile(Platform.getFilePath("/i18n/index.json")),
         //  count: 1
         //},
         //"/game/unfinished_game": CBOR.encode(game, Game.CLASSES)

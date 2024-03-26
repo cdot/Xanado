@@ -3,10 +3,16 @@
 /* eslint-env mocha */
 
 import { assert } from "chai";
+import { setupPlatform } from "../TestPlatform.js";
+import { Edition } from "../../src/game/Edition.js";
 import { Game } from "../../src/game/Game.js";
 const Player = Game.CLASSES.Player;
+const Tile = Game.CLASSES.Tile;
+/* global describe, it, before */
 
 describe("game/Player", () => {
+
+  before(setupPlatform);
 
   it("construct", () => {
     const p = {
@@ -68,6 +74,30 @@ describe("game/Player", () => {
       assert(!pp.missNextTurn);
       assert(pp.isRobot);
       assert.deepEqual(pp, player);
+    });
+  });
+
+  it("pack / unpack", () => {
+    return Edition.load("English_Scrabble")
+    .then(edition => {
+      const player = new Player({
+        name:"Human", key:"player", isRobot: false}, Game.CLASSES);
+      player.rack.addTile(new Tile({letter:"D",
+                                    score: edition.letterScore("D")}));
+      player.rack.addTile(new Tile({letter:"E",
+                                    score: edition.letterScore("E")}));
+      player.rack.addTile(new Tile({letter:"F",
+                                    score: edition.letterScore("F")}));
+      player.score = 99;
+
+      const p = player.pack();
+      const expected = { k: 'player', n: 'Human', R: 'DEF(5)', s: 99 };
+
+      assert.deepEqual(p, expected);
+
+      const up = new Player({key: "player"}, Game.CLASSES)
+            .unpack(expected, edition);
+      assert.deepEqual(up, player);
     });
   });
 });

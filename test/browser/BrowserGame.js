@@ -28,7 +28,7 @@ describe("browser/BrowserGame", () => {
     assert.equal(BrowserGame.andList(["A", "B", "C"]), "A, B and C");
   });
 
-  it("headline", () => {
+  it("format game info", () => {
 		const p = {
 			//_debug: console.debug,
 			edition:"English_Scrabble",
@@ -58,23 +58,21 @@ describe("browser/BrowserGame", () => {
       game.creationTimestamp = 0;
 
       game.state = BrowserGame.State.PLAYING;
+      assert.equal(game.formatGameInfo("%e"), `English_Scrabble`);
       assert.equal(
-        game.tableRow("%e"),
-        `English_Scrabble`);
+        game.formatGameInfo("%p"), "Human 1 and Robot 1");
       assert.equal(
-        game.tableRow("%p"), "Human 1 and Robot 1");
+        game.formatGameInfo("%c"), "Thu Jan 01 1970");
       assert.equal(
-        game.tableRow("%c"), "Thu Jan 01 1970");
-      assert.equal(
-        game.tableRow("%l"),
+        game.formatGameInfo("%l"),
         `${ts.toLocaleDateString()} ${ts.toLocaleTimeString()}`);
       assert.equal(
-        game.tableRow("%s"), $.i18n("txt-state-playing"));
+        game.formatGameInfo("%s"), $.i18n("txt-state-playing"));
       game.state = BrowserGame.State.GAME_OVER;
       assert.equal(
-        game.tableRow("%s"), "Human 1 won");
+        game.formatGameInfo("%s"), "Human 1 won");
       assert.equal(
-        game.tableRow("%k"), game.key);
+        game.formatGameInfo("%k"), game.key);
     });
   });
 
@@ -106,10 +104,10 @@ describe("browser/BrowserGame", () => {
 
 			let $tab = $(document.createElement("table")).addClass("player-table");
 			let $tr;
-			$tr = human1.$tableRow(human1, false);
+			$tr = human1.$TR(human1, false);
 			assert($tr.hasClass("whosTurn"));
 			$tab.append($tr);
-			$tr = robot1.$tableRow(human1, false);
+			$tr = robot1.$TR(human1, false);
 			$tab.append($tr);
 			assert(!$tr.hasClass("whosTurn"));
 
@@ -122,14 +120,14 @@ describe("browser/BrowserGame", () => {
 
 			game.whosTurnKey = human2.key;
 			human1.missNextTurn = true;
-			$tr = human2.$tableRow(human1, false);
+			$tr = human2.$TR(human1, false);
 			$tab.append($tr);
 			assert(!$tr.hasClass("whosTurn"));
 			$tab = $(document.createElement("table")).addClass("player-table");
-			$tr = human1.$tableRow(human2, true);
+			$tr = human1.$TR(human2, true);
 			$tab.append($tr);
 			assert(!$tr.hasClass("whosTurn"));
-			$tr = robot1.$tableRow(human2, false);
+			$tr = robot1.$TR(human2, false);
 			$tab.append($tr);
 			assert(!$tr.hasClass("whosTurn"));
 
@@ -146,7 +144,7 @@ describe("browser/BrowserGame", () => {
       game.updatePlayerList(game.players.concat([ human2 ]));
 
 			//console.log(game.players);
-			$tr = human2.$tableRow(human2, false);
+			$tr = human2.$TR(human2, false);
 			assert($tr.hasClass("whosTurn"));
 			$tab.append($tr);
     });

@@ -12,7 +12,6 @@ window.Platform = BrowserPlatform;
 import { UI } from "../browser/UI.js";
 import { Game } from "../game/Game.js";
 import { GamesUIMixin } from "../browser/GamesUIMixin.js";
-import { UIEvents } from "../browser/UIEvents.js";
 import { ClientUIMixin } from "./ClientUIMixin.js";
 
 /**

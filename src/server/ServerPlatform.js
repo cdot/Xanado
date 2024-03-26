@@ -52,9 +52,17 @@ class ServerPlatform /* extends Platform */ {
   /**
    * @implements Platform
    */
-  static readFile(p) {
+  static readTextFile(p) {
     return Fs.readFile(p)
-    .then(d => /\.json$/.test(p) ? JSON.parse(d.toString()) : d);
+    .then(d => d.toString());
+  }
+
+  /**
+   * @implements Platform
+   */
+  static readJSONFile(p) {
+    return Fs.readFile(p)
+    .then(d => JSON.parse(d.toString()));
   }
 
   /**

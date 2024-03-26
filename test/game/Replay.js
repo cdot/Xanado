@@ -1,6 +1,7 @@
 /* See README.md at the root of this distribution for copyright and
    license information */
 /* eslint-env mocha,node */
+/* global describe, it, before */
 
 import { assert } from "chai";
 
@@ -14,6 +15,7 @@ import { Game as _Game } from "../../src/game/Game.js";
 const Game = Undo(Replay(CommandsMixin(_Game)));
 Game.CLASSES.Game = Game;
 const Tile = Game.CLASSES.Tile;
+const Turn = Game.CLASSES.Turn;
 
 /**
  * Unit tests for replaying a game.
@@ -273,7 +275,7 @@ describe("game/Replay", () => {
       .then(() => assert.fail("Unexpected"))
       .catch(e => {
         game.stopTheClock();
-        assert.equal(e.message, "Cannot challenge a challenge-won");
+        assert.equal(e.message, `Cannot challenge a ${Turn.Type.CHALLENGE_WON}`);
       });
     });
   });

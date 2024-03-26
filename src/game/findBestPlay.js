@@ -29,8 +29,6 @@ function intersection(a, b) {
  */
 let dictionary;
 
-let noisy = false; // debug
-
 /**
  * Edition being played.
  * @private
@@ -59,7 +57,7 @@ let board;
  * and still report back via the main event loop.
  * @private
  */
-let report;
+let sendMove;
 
 /**
  * Best score found so far when searching for a move.
@@ -208,7 +206,7 @@ function forward(col, row,
   const ecol = col + dcol;
   const erow = row + drow;
 
-  //if (noisy)console.debug(`forward ${dcol==0?"down":"across"} '${wordSoFar.map(t=>t.letter).join("")}'+[${dNode.isEndOfWord?"_":""}${dNode.postLetters.join('')}] at ${col},${row}`);
+  //console.debug(`forward ${dcol==0?"down":"across"} '${wordSoFar.map(t=>t.letter).join("")}'+[${dNode.isEndOfWord?"_":""}${dNode.postLetters.join('')}] at ${col},${row}`);
 
   // Tail recurse; report words as soon as we find them
   // Are we sitting at the end of a scoring word?
@@ -225,8 +223,8 @@ function forward(col, row,
 
     if (score > bestScore) {
       bestScore = score;
-      //if (noisy) console.debug(drow > 0 ? "vertical" : "horizontal");
-      report(new Move({
+      //console.debug(drow > 0 ? "vertical" : "horizontal");
+      sendMove(new Move({
         placements: placements,
         words: words,
         score: score
@@ -241,7 +239,6 @@ function forward(col, row,
       const pseudoAnchorTile = placements[0];
       const roots = dictionary.getSequenceRoots(pseudoAnchorTile.letter);
       //console.debug(`CROSS ${dcol==0?"across":"up/down"} AT ${pseudoAnchorTile.col},${pseudoAnchorTile.row} with "${pseudoAnchorTile.letter}" and ${roots.length} roots`);
-      noisy = true;
       for (let anchorNode of roots) {
         //noisy = makeNoisy && anchorNode.preLetters.join('') === "A";
         back(
@@ -251,7 +248,6 @@ function forward(col, row,
           anchorNode, anchorNode,
           [ pseudoAnchorTile ]);
       }
-      noisy = false;
     }
   }
 
@@ -337,7 +333,7 @@ function back(col, row,
   let available; // the set of possible candidate letters
   let playedTile = 0;
 
-  //if (noisy) console.debug(`back ${dcol==0?"up":"down"} [${dNode.preLetters.join('')}]+'${wordSoFar.map(t=>t.letter).join("")}' at ${col},${row}`);
+  //console.debug(`back ${dcol==0?"up":"down"} [${dNode.preLetters.join('')}]+'${wordSoFar.map(t=>t.letter).join("")}' at ${col},${row}`);
 
   // Do we have an adjacent empty cell we can back up into?
   if (ecol >= 0 && erow >= 0) {
@@ -399,7 +395,7 @@ function back(col, row,
   // empty, then we have a valid word start.
   if (dNode.preNodes.length == 0
       && (erow < 0 || ecol < 0 || board.at(ecol, erow).isEmpty())) {
-    //if (noisy) console.debug(`back: ${dcol==0?"down":"across"} word starts at ${col},${row}`);
+    //console.debug(`back: ${dcol==0?"down":"across"} word starts at ${col},${row}`);
     // try extending down beyond the anchor, with the letters
     // that we have determined comprise a valid rooted sequence.
     forward(col + dcol * (wordSoFar.length - 1),
@@ -420,7 +416,7 @@ function back(col, row,
 function bestOpeningPlay(rackTiles) {
   const ruck = rackTiles.map(l => l.letter ? l.letter : " ").join("");
   const choices = dictionary.findAnagrams(ruck);
-  //console.debug("Choices", choices);
+
   // Random whether it is played across or down
   const drow = Math.round(Math.random());
   const dcol = (drow + 1) % 2;
@@ -468,7 +464,7 @@ function bestOpeningPlay(rackTiles) {
           placements[i].row = drow == 0 ? board.midrow : pos * drow;
         }
         //console.debug(drow > 0 ? "vertical" : "horizontal")
-        report(new Move({
+        sendMove(new Move({
           placements: placements,
           words: [{ word: choice, score: score }],
           score: score
@@ -500,12 +496,12 @@ function find(rack) {
     return a.letter < b.letter ? -1  : a.score > b.score ? 1 : 0;
   }).reverse();
 
-  report(`Finding best play with dictionary ${dictionary.name} in edition ${edition.name}`);
+  //console.debug(`Finding best play with dictionary ${dictionary.name} in edition ${edition.name}`);
 
   //assert(dictionary instanceof Dictionary, "Setup failure");
   assert(edition instanceof Edition, "Setup failure");
 
-  report(`Rack ${rackTiles.map(t => t.stringify()).join(",")} on\n${board.stringify()}`);
+  //console.debug(`Rack ${rackTiles.map(t => t.stringify()).join(",")} on\n${board.stringify()}`);
   bestScore = 0;
 
   // What letters can be used to form a valid cross
@@ -577,15 +573,14 @@ function find(rack) {
  * @param {BackendGame} game the Game
  * @param {Tile[]} rack rack in the form of a simple list of Tile
  * @param {function} listener Function that is called with a Move each time
- * a new best play is found, or a string containing a progress or error
- * message.
+ * a new best play is found.
  * @param {string?} dictionary name of (or path to) dictionary to use,
  * defaults to game dictionary
  * @return {Promise} Promise that resolves when all best moves have been
  * identified
  */
 function findBestPlay(game, rack, listener, dict) {
-  report = listener;
+  sendMove = listener;
   board = game.board;
   return Promise.all([
     loadDictionary(dict)

@@ -64,12 +64,21 @@ class Platform {
   }
 
   /**
-   * Read a file. This automatically parses .json files.
+   * Read a text file.
    * @return {Promise} resolves to the file contents.
    * @abstract
    */
-  static readFile(path) {
-    throw Error(`Platform.readFile ${path}`);
+  static readTextFile(path) {
+    throw Error(`Platform.readTextFile ${path}`);
+  }
+
+  /**
+   * Read a file containing JSON.
+   * @return {Promise} resolves to the (parsed) file contents.
+   * @abstract
+   */
+  static readJSONFile(path) {
+    throw Error(`Platform.readJSON ${path}`);
   }
 
   /**

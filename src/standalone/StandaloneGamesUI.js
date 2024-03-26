@@ -54,7 +54,6 @@ class StandaloneGamesUI extends StandaloneUIMixin(GamesUIMixin(UI)) {
               .find("button[name=join]")
               .on("click", () => {
                 $dlg.dialog("close");
-                const dlg = $dlg.data("this");
                 $(document).trigger(UIEvents.JOIN_GAME, [ game.key ]);
               });
               $dlg.dialog({

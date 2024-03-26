@@ -88,21 +88,21 @@ describe("client/ClientUIMixin", () => {
     const server = new StubServer({
       "/session": Promise.resolve(undefined),
 
-      "/css": Platform.readFile(Platform.getFilePath("/css/index.json")),
+      "/css": Platform.readJSONFile(Platform.getFilePath("/css/index.json")),
 
       "/editions":
-      Platform.readFile(Platform.getFilePath("/editions/index.json")),
+      Platform.readJSONFile(Platform.getFilePath("/editions/index.json")),
 
       "/dictionaries":
-      Platform.readFile(Platform.getFilePath("/dictionaries/index.json")),
+      Platform.readJSONFile(Platform.getFilePath("/dictionaries/index.json")),
 
       "/locales": {
-        promise: Platform.readFile(Platform.getFilePath("/i18n/index.json")),
+        promise: Platform.readJSONFile(Platform.getFilePath("/i18n/index.json")),
         count: 2
       },
 
       "/edition/English_Scrabble":
-      Platform.readFile(Platform.getFilePath("/editions/English_Scrabble.json")),
+      Platform.readJSONFile(Platform.getFilePath("/editions/English_Scrabble.json")),
 
       "/defaults/game": Promise.resolve(GAME_DEFAULTS),
 

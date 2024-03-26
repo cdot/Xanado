@@ -14,7 +14,6 @@ const Rack = Game.CLASSES.Rack;
 const Move = Game.CLASSES.Move;
 
 import { CBOR } from "../../src/game/CBOR.js";
-import { Base64ToUint8Array } from "../../src/browser/BrowserDatabase.js";
 
 describe("game/findBestPlay", () => {
   before(setupPlatform);

@@ -16,7 +16,6 @@ import { loadDictionary } from "../game/loadDictionary.js";
 import { Game } from "../game/Game.js";
 import { Commands } from "../game/Commands.js";
 import { Turn } from "../game/Turn.js";
-import { UI } from "./UI.js";
 import { UIEvents } from "./UIEvents.js";
 
 let BEEP;
@@ -335,8 +334,9 @@ const GameUIMixin = superclass => class extends superclass {
         player.$refreshScore();
       }
       if (turn.endStates) {
-        for (const endState of turn.endStates) {
-          const p = this.game.getPlayerWithKey(endState.key);
+        for (let esi = 0; esi < turn.endStates.length; esi++) {
+          const p = this.game.players[esi];
+          const endState = turn.endStates[esi];
           p.score += (endState.tiles || 0) + (endState.time || 0);
           p.$refreshScore();
         }
@@ -609,7 +609,9 @@ const GameUIMixin = superclass => class extends superclass {
       $("#undo-button").hide();
     this.lockBoard(!isMyGo);
     this.enableTurnButton(isMyGo);
-    this.$log(true, $.i18n("undone", turn.type, this.game.getPlayer().name));
+    this.$log(true, $.i18n("undone",
+                           $.i18n(Turn.TypeNames[turn.type]),
+                           this.game.getPlayer().name));
     $("#undo-button").toggle(this.game.allowUndo && this.game.turns.length > 0);
 
     // Trigger an event to wake the automaton (if there is one)

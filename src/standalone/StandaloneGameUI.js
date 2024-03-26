@@ -209,7 +209,7 @@ class StandaloneGameUI extends StandaloneUIMixin(GameUIMixin(UI)) {
         const url = makeURL(parts);
         await this.copyToClipboard(url)
         .then(() => this.alert(url, $.i18n("txt-clipped")))
-        .catch(e => {
+        .catch(() => {
           $("#alertDialog")
           .dialog({
             modal: true,
@@ -218,7 +218,7 @@ class StandaloneGameUI extends StandaloneUIMixin(GameUIMixin(UI)) {
           .html(`<a href="${url}">${url}</a>`);
         });
       });
-    })    
+    })
     .then(() => this.attachUIEventHandlers())
     // Tell the backend what channel to use to send and receive
     // notifications

@@ -130,7 +130,6 @@ class GameSetupDialog extends Dialog {
   }
 
   openDialog() {
-    const ui = this.options.ui;
     return super.openDialog()
     .then(() => {
       this.$dlg.find(".dialog-row").show();

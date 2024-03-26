@@ -64,7 +64,6 @@ describe("game/Challenges", () => {
         break;
       case 2:
         assert.equal(turn.type, Turn.Type.CHALLENGE_LOST);
-        assert.equal(turn.score, 0);
         assert.equal(turn.playerKey, human1.key); // who was challenged
         assert.equal(turn.challengerKey, human2.key); // who issued the challenged
         assert.equal(turn.nextToGoKey, human1.key);
@@ -872,7 +871,6 @@ describe("game/Challenges", () => {
         assert.equal(turn.type, Turn.Type.PASSED);
         assert.equal(turn.playerKey, human2.key);
         assert.equal(turn.nextToGoKey, human1.key);
-        assert.equal(turn.score, 0);
         break;
       case 4:
         assert.equal(turn.type, Turn.Type.PLAYED);

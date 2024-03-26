@@ -41,6 +41,7 @@ class BrowserSquare extends Square {
   /**
    * Create the jquery representation of the square.
    * @param {jQuery} $td TD to make into a square
+   * @return {jQuery} $td
    */
   $populate($td) {
     $td

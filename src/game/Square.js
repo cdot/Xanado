@@ -132,7 +132,10 @@ class Square {
     tile.col = this.col;
     if (typeof this.row !== "undefined")
       tile.row = this.row;
-    tile.isLocked = lock;
+    if (lock)
+      tile.isLocked = true;
+    else
+      delete tile.isLocked;
     if (tile === this.tile)
       return false; // Tile hasn't changed
     this.tile = tile;

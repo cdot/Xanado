@@ -161,7 +161,7 @@ class UI {
     function navi() {
       if (navigator.clipboard)
         return navigator.clipboard.writeText(text)
-      .then(r => "Clipboard");
+      .then(() => "Clipboard");
       return Promise.reject("navigator.clipboard not available");
     }
 
@@ -204,8 +204,8 @@ class UI {
       });
     }
     return navi()
-    .catch(e => ie())
-    .catch(e => execCmd());
+    .catch(() => ie())
+    .catch(() => execCmd());
   }
 
   /* c8 ignore stop */

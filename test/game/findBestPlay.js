@@ -1,10 +1,10 @@
 /* See README.md at the root of this distribution for copyright and
    license information */
 /* eslint-env mocha */
+/* global describe, before, it */
 
 import { assert } from "chai";
 import { setupPlatform, UNit} from "../TestPlatform.js";
-
 import { Game } from "../../src/game/Game.js";
 import { findBestPlay } from "../../src/game/findBestPlay.js";
 const Player = Game.CLASSES.Player;
@@ -13,7 +13,6 @@ const Rack = Game.CLASSES.Rack;
 const Move = Game.CLASSES.Move;
 
 import { CBOR } from "../../src/game/CBOR.js";
-import { Base64ToUint8Array } from "../../src/browser/BrowserDatabase.js";
 
 describe("game/findBestPlay", () => {
 

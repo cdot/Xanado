@@ -611,12 +611,12 @@ class Server {
 
     .then(games => Promise.all(
       games.map(game => game.sendable(this.userManager))))
-    
+
     // Sort the resulting list by last activity, so the most
     // recently active game bubbles to the top
     .then(games => games.sort((a, b) => a.lastActivity < b.lastActivity ? 1
                               : a.lastActivity > b.lastActivity ? -1 : 0))
-          
+
     // Finally send the result
     .then(games => reply(res, games));
   }

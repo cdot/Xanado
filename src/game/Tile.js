@@ -30,7 +30,10 @@ class Tile {
     this.letter = spec.letter;
 
     /**
-     * Value of this tile
+     * Value of this tile. This is easily retrievable using
+     * {@link Edition#letterScore} but we duplicate it here
+     * so it's available in contexts where the Edition hasn't
+     * beed loaded.
      * @member {number}
      */
     this.score = spec.score || 0;
@@ -121,22 +124,22 @@ class Tile {
     } else if (this.isLocked)
       params = "l";
 
-    if (typeof this.col !== "undefined")
-      params += `${this.col}-${this.row}`;
+    if (typeof this.col !== "undefined") {
+      params += this.col;
+      if (typeof this.row !== "undefined")
+        params += `-${this.row}`;
+    }
     return params + `!${this.letter}`;
   }
 
   /**
    * Unpack a tile encoded in a URI parameter block.
-   * @param {Object} params parameter block
-   * @param {string} base relative base to lookup parameters in the
-   * params block. For a tile this is simply the key for the encoded
-   * tile.
+   * @param {string} packed packed tile
    * @param {Edition} edition edition, used to get letter scores for
    * tiles.
+   * @return {Tile} this
    */
-  unpack(params, base, edition) {
-    const packed = params[base];
+  unpack(packed, edition) {
     switch (packed[0]) {
     case "B":
       this.isBlank = true;
@@ -147,13 +150,15 @@ class Tile {
     case "b":
       this.isBlank = true;
     }
-    const match = /^[Bbl]?(?:(\d+)-(\d+))?!(.*)$/.exec(packed);
+    const match = /^[Bbl]?(?:(\d+)(?:-(\d+))?)?!(.*)$/.exec(packed);
     if (typeof match[1] !== "undefined") {
       this.col = parseInt(match[1]);
-      this.row = parseInt(match[2]);
+      if (typeof match[2] !== "undefined")
+        this.row = parseInt(match[2]);
     }
     this.letter = match[3];
     this.score = edition.letterScore(this.isBlank ? " " : this.letter);
+    return this;
   }
 
   /* c8 ignore start */

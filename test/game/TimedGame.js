@@ -43,25 +43,21 @@ describe("game/TimedGame", function() {
     const handle = (turn, event, seqNo) => {
       switch (seqNo) {
       case 2:
-        assert.equal(turn.score, 0);
         assert.equal(turn.type, Turn.Type.TIMED_OUT);
         assert.equal(turn.playerKey, human1.key);
         assert.equal(turn.nextToGoKey, human2.key);
         break;
       case 4:
-        assert.equal(turn.score, 0);
         assert.equal(turn.type, Turn.Type.TIMED_OUT);
         assert.equal(turn.playerKey, human2.key);
         assert.equal(turn.nextToGoKey, human1.key);
         break;
       case 6:
-        assert.equal(turn.score, 0);
         assert.equal(turn.type, Turn.Type.TIMED_OUT);
         assert.equal(turn.playerKey, human1.key);
         assert.equal(turn.nextToGoKey, human2.key);
         break;
       case 8:
-        assert.equal(turn.score, 0);
         assert.equal(turn.type, Turn.Type.TIMED_OUT);
         assert.equal(turn.playerKey, human2.key);
         assert.equal(turn.nextToGoKey, human1.key);
@@ -124,25 +120,21 @@ describe("game/TimedGame", function() {
     const handle = (turn, event, seqNo) => {
       switch (seqNo) {
       case 2:
-        assert.equal(turn.score, 0);
         assert.equal(turn.type, Turn.Type.PASSED);
         assert.equal(turn.playerKey, human1.key);
         assert.equal(turn.nextToGoKey, human2.key);
         break;
       case 3:
-        assert.equal(turn.score, 0);
         assert.equal(turn.type, Turn.Type.PASSED);
         assert.equal(turn.playerKey, human2.key);
         assert.equal(turn.nextToGoKey, human1.key);
         break;
       case 5:
-        assert.equal(turn.score, 0);
         assert.equal(turn.type, Turn.Type.PASSED);
         assert.equal(turn.playerKey, human1.key);
         assert.equal(turn.nextToGoKey, human2.key);
         break;
       case 6:
-        assert.equal(turn.score, 0);
         assert.equal(turn.type, Turn.Type.PASSED);
         assert.equal(turn.playerKey, human2.key);
         assert.equal(turn.nextToGoKey, human1.key);

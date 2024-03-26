@@ -25,7 +25,7 @@ const CommandsMixin = superclass => class extends superclass {
    * @return {Promise} resolves to the game when the move has been
    * completed BUT before any following robot player has completed.
    */
-  async play(player, move, waitForRobot) {
+  async play(player, move) {
     assert(move, "No move");
     assert(player && player.key === this.whosTurnKey,
            `Not ${player.name}'s turn`);
@@ -645,14 +645,7 @@ const CommandsMixin = superclass => class extends superclass {
 
     let bestPlay = null;
     return this.findBestPlay(
-      player.rack.tiles(), data => {
-        if (typeof data === "string") {
-          /* c8 ignore next 2 */
-          if (this._debug)
-            this._debug(data);
-        } else
-          bestPlay = data;
-      }, this.dictionary)
+      player.rack.tiles(), play => { bestPlay = play; }, this.dictionary)
     .then(() => {
       if (this._debug)
         this._debug("Incoming",bestPlay);
@@ -705,14 +698,7 @@ const CommandsMixin = superclass => class extends superclass {
 
     let bestPlay = null;
     this.findBestPlay(
-      player.rack.tiles(), data => {
-        if (typeof data === "string") {
-          /* c8 ignore next 2 */
-          if (this._debug)
-            this._debug(data);
-        } else
-          bestPlay = data;
-      }, this.dictionary)
+      player.rack.tiles(), play => { bestPlay = play; }, this.dictionary)
     .then(() => {
       const hint = {
         sender: /*i18n*/"Advisor"

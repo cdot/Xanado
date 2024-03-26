@@ -52,12 +52,12 @@ function loadDictionary(name) {
   })
   .catch(e => {
     // Mostly harmless, .dict load failed, relying on .white
-    console.error("Failed to read", fp, e);
+    console.debug("Failed to read", fp, e);
   })
   .then(() => {
     path.ext = ".white";
     const wp = Platform.formatPath(path);
-    return Platform.readFile(wp)
+    return Platform.readTextFile(wp)
     .then(text => {
       if (!dict)
         dict = new Dictionary(name);
@@ -71,9 +71,9 @@ function loadDictionary(name) {
       words.forEach(w => dict._addWord(w));
       //console.debug("Added", added, "whitelisted words");
     })
-    .catch(() => {
+    .catch(e => {
       // Mostly harmless, whitelist load failed, relying on .dict
-      //console.debug("Failed to read", wp, e);
+      console.debug("Failed to read", wp, e);
     });
   })
   .then(() => {

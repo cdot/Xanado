@@ -4,9 +4,8 @@
   and license information. Author Crawford Currie http://c-dot.co.uk*/
 
 /* global assert */
-/* global Platform */
 
-import { genKey, stringify } from "../common/Utils.js";
+import { genKey, stringify, toEnum } from "../common/Utils.js";
 import { CBOR } from "./CBOR.js";
 import { loadDictionary } from "./loadDictionary.js";
 import { Board } from "./Board.js";
@@ -58,18 +57,6 @@ class Game {
     TWO_PASSES:       4,
     TIMED_OUT:        5
   };
-
-  ///**
-  // * Translation keys for states
-  // */
-  //static StateI18N = [
-  //  "Waiting for players",
-  //  "Playing",
-  //  "Challenge failed",
-  //  "Game over",
-  //  "All players passed twice",
-  //  "Timed out"
-  //];
 
   // Compatibility; map old strings to new enum
   static StateCompat = {
@@ -918,100 +905,84 @@ class Game {
    * @return {object} parameter object
    */
   pack() {
-    const params = {};
+    const packed = {};
 
-    params.a = this.lastActivity();
-    params.b = this.board.pack();
+    packed.a = this.lastActivity();
+    packed.b = this.board.pack();
     const cp = this.challengePenalty;
     if (cp >= 0) {
-      params.c = cp;
-      if (this.penaltyPoints > 0) params.o = this.penaltyPoints;
+      packed.c = cp;
+      if (this.penaltyPoints > 0) packed.o = this.penaltyPoints;
     }
-    params.d = this.dictionary;
-    params.e = this.edition;
-    if (this.allowTakeBack) params.g = true;
-    if (this.predictScore) params.i = true;
-    params.k = this.key;
-    params.m = this.creationTimestamp;
-    if (this.nextGameKey) params.n = this.nextGameKey;
+    packed.d = this.dictionary;
+    packed.e = this.edition;
+    if (this.allowTakeBack) packed.g = true;
+    if (this.predictScore) packed.i = true;
+    packed.k = this.key;
+    packed.m = this.creationTimestamp;
+    if (this.nextGameKey) packed.n = this.nextGameKey;
     this.players.forEach((player, index) => {
-      // Transfer player parameters into flat param object indexed
-      // by player number
-      const p = player.pack();
-      for (const key in p)
-        params[`P${index}${key}`] = p[key];
+      packed[`P${index}`] = player.pack();
     });
-    if (this.allowUndo) {
-      // Transfer turn parameters into flat param object indexed
-      // by turn number
-      this.turns.forEach((turn, index) => {
-        const t = turn.pack();
-        for (const key in t)
-          params[`T${index}${key}`] = t[key];
-      });
-    } else if (this.turns.length > 0) {
-      const t = this.turns[this.turns.length - 1].pack();
-      for (const key in t)
-        params[`T0${key}`] = t[key];
-    }
-    params.s = this.state;
-    params.t = this.timerType;
-    if (this.allowUndo) params.u = true;
-    params.v = this.wordCheck;
-    if (this.whosTurnKey) params.w = this.whosTurnKey;
+    this.turns.forEach((turn, index) => {
+      packed[`T${index}`] = turn.pack();
+    });
+    packed.s = this.state;
+    packed.t = this.timerType;
+    if (this.allowUndo) packed.u = true;
+    packed.v = this.wordCheck;
+    if (this.whosTurnKey) packed.w = this.whosTurnKey;
     if (this.timerType != Game.Timer.NONE) {
-      params.x = this.timeAllowed;
-      params.y = this.timePenalty;
+      packed.x = this.timeAllowed;
+      packed.y = this.timePenalty;
     }
 
-    return params;
+    return packed;
   }
 
   /**
    * Promise to construct a game from URI parameters.
-   * @param {Object} params URI parameters
+   * @param {Object} packed URI parameters
    * @return {Promise} a promise that resolves to a new game
    */
-  static unpack(params) {
+  static unpack(packed) {
     let game;
-    return new this({ edition: params.e })
+    return new this({ edition: packed.e })
     .create()
     .then(g => game = g)
     .then(() => game.promiseEdition())
     .then(edition => {
-      game.board.unpack(params.b, edition);
+      game.board.unpack(packed.b, edition);
       game.board.forEachTiledSquare(sq => {
         game.letterBag.removeTile(sq.tile);
         return false;
       });
-      if (params.c) {
-        game.challengePenalty = params.c;
-        game.penaltyPoints = params.o;
+      if (packed.c) {
+        game.challengePenalty = packed.c;
+        game.penaltyPoints = packed.o;
       }
-      game.dictionary = params.d;
-      game.edition = params.e;
-      game.state = params.s;
-      if (params.g) game.allowTakeBack = true;
-      if (params.i) game.predictScore = true;
-      game.key = params.k;
-      game.creationTimestamp = Number(params.m);
-      if (params.t) {
-        game.timerType = params.t;
-        game.timeAllowed = Number(params.x);
-        game.timePenalty = Number(params.y);
+      game.dictionary = packed.d;
+      game.edition = packed.e;
+      game.state = packed.s;
+      if (packed.g) game.allowTakeBack = true;
+      if (packed.i) game.predictScore = true;
+      game.key = packed.k;
+      game.creationTimestamp = Number(packed.m);
+      if (packed.t) {
+        game.timerType = packed.t;
+        game.timeAllowed = Number(packed.x);
+        game.timePenalty = Number(packed.y);
       }
-      if (params.u) game.allowUndo = true;
-      if (params.v) game.wordCheck = params.v;
-      if (params.w) game.whosTurnKey = params.w;
-      if (params.n) game.nextGameKey = params.n;
+      if (packed.u) game.allowUndo = true;
+      if (packed.v) game.wordCheck = packed.v;
+      if (packed.w) game.whosTurnKey = packed.w;
+      if (packed.n) game.nextGameKey = packed.n;
 
       game.players = [];
       let index = 0;
-      while (params[`P${index}k`]) {
-        const p = new Player(
-          { key: params[`P${index}k`] },
-          game.constructor.CLASSES);
-        p.unpack(params, index, edition);
+      while (packed[`P${index}`]) {
+        const p = new Player({}, game.constructor.CLASSES);
+        p.unpack(packed[`P${index}`], edition);
         game.addPlayer(p, false);
         p.rack.forEachTiledSquare(sq => {
           game.letterBag.removeTile(sq.tile);
@@ -1022,9 +993,9 @@ class Game {
 
       index = 0;
       game.turns = [];
-      while (params[`T${index}t`]) {
+      while (packed[`T${index}`]) {
         const t = new Turn();
-        t.unpack(params, `T${index}`, edition);
+        t.unpack(packed[`T${index}`], edition);
         game.turns.push(t);
         index++;
       }
@@ -1045,28 +1016,13 @@ class Game {
     // if this onLoad follows a load from serialisation, which
     // does not invoke the constructor.
 
-    const toEnum = (n, compat) => {
-      // assume undefined=>0, which should be the case for all enums
-      if (typeof n === "undefined") return 0;
-      if (typeof n === "number") return n;
-      let nn = Number(n);
-      if (Number.isNaN(nn)) {
-        // Map to enum through string->enum mapping
-        nn = compat[n];
-        if (nn < 0) debugger;
-        assert(nn >= 0, n);
-        return nn;
-      }
-      return nn;
-    };
-
     // Compatibility: Remap enums from text strings to numbers. Previously
     // we stored the whole string, now just a number.
     this.state = toEnum(this.state, Game.StateCompat);
     this.timerType = toEnum(this.timerType, Game.TimerCompat);
     this.challengePenalty = toEnum(this.challengePenalty, Game.PenaltyCompat);
     this.wordCheck = toEnum(this.wordCheck, Game.WordCheckCompat);
-    
+
     /**
      * Database containing this game. Only available server-side,
      * and not serialised.
@@ -1089,6 +1045,10 @@ class Game {
     this.players.forEach(p => p._debug = this._debug);
     if (!this.turns)
       this.turns = [];
+    else
+      this.turns.forEach(t => {
+        t.type = toEnum(t.type, Turn.TypeCompat);
+      });
 
     return Promise.resolve(this);
   }
@@ -1481,16 +1441,10 @@ class Game {
       return this.findBestPlay(
         player.rack.tiles(),
         data => {
-          if (typeof data === "string") {
-            /* c8 ignore next 2 */
-            if (this._debug)
-              this._debug(data);
-          } else {
-            bestPlay = data;
-            /* c8 ignore next 2 */
-            if (this._debug)
-              this._debug("Best", bestPlay.stringify());
-          }
+          bestPlay = data;
+          /* c8 ignore next 2 */
+          if (this._debug)
+            this._debug("Best", bestPlay.stringify());
         }, player.dictionary || this.dictionary)
       .then(() => {
         if (bestPlay)
@@ -1727,9 +1681,7 @@ class Game {
    * so it can be invoked either directly or asynchronously.
    * @param {Game} game the Game
    * @param {Tile[]} rack rack in the form of a simple list of Tile
-   * @param {Platform~bestMoveCallback} cb accepts a best play
-   * whenever a new one is found, or a string containing a
-   * message
+   * @param {function} cb passed a best play whenever a new one is found.
    * @param {string?} dictionary name of (or path to) dictionary to
    * override the game dictionary
    * @return {Promise} Promise that resolves when all best moves
@@ -1737,7 +1689,7 @@ class Game {
    * @abstract
    */
   findBestPlay(rack, cb, dictionary) {
-    return (Platform.USE_WORKERS
+    return (Game.USE_WORKERS
             ? import(
               /* webpackMode: "lazy" */
               /* webpackChunkName: "findBestPlayController" */

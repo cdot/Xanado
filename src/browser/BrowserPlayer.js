@@ -23,7 +23,7 @@ class BrowserPlayer extends Player {
    * @param {Player?} uiPlayer the current player in the UI
    * @return {jQuery} jQuery object for the score table
    */
-  $tableRow(uiPlayer) {
+  $TR(uiPlayer) {
     const $tr = $(`<tr id="player${this.key}"></tr>`)
           .addClass("player-row");
 

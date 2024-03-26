@@ -2,7 +2,7 @@
   License MIT. See README.md at the root of this distribution for full copyright
   and license information. Author Crawford Currie http://c-dot.co.uk*/
 
-/* global Platform */
+/* global Platform, document */
 
 /* eslint-disable */
 // eslint (or more likely the import plugin) complains:
@@ -29,7 +29,7 @@ function findBestPlay(game, letters, listener, dictionary) {
 
   if (Platform.name === "ServerPlatform") {
     // node.js
-    workerPath = "./findBestPlayWorker.js";;
+    workerPath = "./findBestPlayWorker.js";
     initialise = import( // node.js
       /* webpackMode: "lazy" */
       /* webpackChunkName: "findBestPlayController" */
@@ -108,7 +108,7 @@ function findBestPlay(game, letters, listener, dictionary) {
       console.error("findBestPlayController: messageerror from worker");
       console.error(e);
     });
-    
+
     worker.addEventListener("error", (e, f, l) => {
       console.error("findBestPlayController: error from worker");
       console.error(e, f, l);

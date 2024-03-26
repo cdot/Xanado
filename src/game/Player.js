@@ -1,4 +1,4 @@
-/*Copyright (C) 2019-2022 The Xanado Project https://github.com/cdot/Xanado
+/*Copyright (C) 2019-2024 The Xanado Project https://github.com/cdot/Xanado
   License MIT. See README.md at the root of this distribution for full copyright
   and license information. Author Crawford Currie http://c-dot.co.uk*/
 
@@ -20,10 +20,10 @@ class Player {
    * an empty rack (no squares).
    * @param {object.<string,class>} factory maps class name to a class
    */
-  constructor(spec, factory) {
+  constructor(spec = {}, factory) {
 
     /**
-     * Factory object used to create this object (not serialiable)
+     * Factory object used to create this object (not serialisable)
      * @private
      */
     this._factory = factory;
@@ -170,36 +170,48 @@ class Player {
   }
 
   /**
-   * Encode the player in a URI parameter block
+   * Encode the player in a URI parameter block.
+   * Keys:
+   * `d` - (optional) dictionary
+   * `k` - player key
+   * `m` - (optional) miss next turn?
+   * `n` - name
+   * `p` - (if > 0) pass count
+   * `r` - (if robot) robot?
+   * `R` - rack
+   * `s` - score
    * @return {object} packed parameter object
    */
   pack() {
-    const params = {};
-    if (this.dictionary) params.d = this.dictionary;
-    params.k = this.key;
-    if (this.missNextTurn) params.m = true;
-    params.n = this.name;
-    if (this.isRobot) params.r = true;
-    params.R = this.rack.pack();
-    params.s = this.score;
-    return params;
+    const packed = {};
+    if (this.dictionary) packed.d = this.dictionary;
+    packed.k = this.key;
+    if (this.missNextTurn) packed.m = true;
+    packed.n = this.name;
+    if (this.passes > 0) packed.p = this.passes;
+    if (this.isRobot) packed.r = true;
+    packed.R = this.rack.pack();
+    packed.s = this.score;
+    return packed;
   }
 
   /**
    * Unpack a parameter block created by pack().
-   * @param {Object} params parameter block
-   * @param {number} index index of this player in the parameter block
+   * @param {Object} packed parameter block
    * @param {Edition} edition edition, used to get letter scores for
    * tiles.
+   * @return {Player} this
    */
-  unpack(params, index, edition) {
-    if (params[`P${index}d`]) this.dictionary = params[`P${index}d`];
-    this.key = params[`P${index}k`];
-    if (params[`P${index}m`]) this.missNextTurn = true;
-    this.name = params[`P${index}n`];
-    if (params[`P${index}r`]) this.isRobot = true;
-    this.score = Number(params[`P${index}s`]);
-    this.rack.unpack(params[`P${index}R`], edition);
+  unpack(packed, edition) {
+    if (packed.d) this.dictionary = packed.d;
+    this.key = packed.k;
+    if (packed.m) this.missNextTurn = true;
+    this.name = packed.n;
+    if (packed.p) this.passes = Number(packed.p);
+    if (packed.r) this.isRobot = true;
+    this.rack.unpack(packed.R, edition);
+    this.score = Number(packed.s);
+    return this;
   }
 
   /**

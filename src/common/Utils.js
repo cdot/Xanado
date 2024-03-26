@@ -1,6 +1,7 @@
 /*Copyright (C) 2019-2024 The Xanado Project https://github.com/cdot/Xanado
   License MIT. See README.md at the root of this distribution for full copyright
   and license information. Author Crawford Currie http://c-dot.co.uk*/
+/* global assert */
 
 /** @module */
 
@@ -85,75 +86,130 @@ function stringify(value) {
  * `_URL`. Arguments that have no value are set to boolean
  * `true`. Repeated arguments are not supported (the last value will
  * be the one taken). Values recognised as floating-point numbers are
- * converted to numbers.
+ * converted to numbers. A `(` immediately following a `=` is interpreted
+ * as wrapping a sub-object, thus:
+ * ```
+ * example?colours=(red=F00,green=0F0,blue=00F)
+ * ```
+ * will be parsed as:
+ * ```
+ * { _URL: "example", colours: { red: "F00", green: "0F0", blue: "00F" }}
+ * ```
+ * `;` and `(` in values must be be escaped by url encoding.
  * @return {Object<string,string>} key-value map
  */
 function parseURLArguments(url) {
   let args = "", match;
-  const urlArgs = { _URL: url };
   if ((match = /^(.*?)\?(.*)?$/.exec(url))) {
-    urlArgs._URL = match[1];
+    url = match[1];
     args = match[2] || "";
   }
-  const arglist = args.split(/[;&]/);
-  for (const assignment of arglist) {
-    if (assignment === "") continue;
-    match = /^(.*?)=(.*)$/.exec(assignment);
-    if (match) {
-      const key = decodeURIComponent(match[1]);
-      const svalue = match[2];
-      if (svalue.length === 0)
-        urlArgs[key] = "";
-      else {
-        const nvalue = Number(svalue);
-        if (isNaN(nvalue))
-          urlArgs[key] = decodeURIComponent(svalue);
-        else
-          urlArgs[key] = nvalue;
-      }
-    } else
-      urlArgs[decodeURIComponent(assignment)] = true;
+
+  // Replace nested blocks with placeholders
+  const placeholders = [];
+  let changed = true;
+  while (changed) {
+    //console.log("Scan", args);
+    changed = false;
+    args = args.replace(/([^;&(=]+)=\(([^()]*)\)/g, (match, k, v) => {
+      placeholders.push(v);
+      changed = true;
+      const res = `${k}=?${placeholders.length - 1}?`;
+      //console.debug(`Hoisted ${v} => ${res}`);
+      return res;
+    });
   }
-  return urlArgs;
+
+  function parseArgs(args) {
+    const obj = {};
+    args = args.replace(/([;&]|^)([^;&(=]+)=\?(\d+)\?/g, (match, i, k, v) => {
+      //console.debug("Expand", v);
+      v = placeholders[v];
+      //console.debug(`Object ${match}, ${k} = ${v}`);
+      obj[decodeURIComponent(k)] = parseArgs(v, {});
+      return "";
+    })
+    .replace(/([;&]|^)([^;&=]*)=([^;&]*)/g, (match, i, k, v) => {
+      //console.debug(`Value ${match}, ${k} = ${v}`);
+      const key = decodeURIComponent(k);
+      if (v.length === 0)
+        obj[key] = "";
+      else {
+        const nvalue = Number(v);
+        if (isNaN(nvalue))
+          obj[key] = decodeURIComponent(v);
+        else
+          obj[key] = nvalue;
+      }
+      return "";
+    })
+    .replace(/[^;&=]+/g, match => {
+      //console.debug(`Boolean ${match}`);
+      obj[decodeURIComponent(match)] = true;
+      return "";
+    });
+
+    if (/[^;&]/.test(args))
+      throw new Error(`Unparseable ${args}`);
+
+    return obj;
+  }
+
+  const obj = parseArgs(args);
+  obj._URL = url;
+  return obj;
 }
 
 /**
- * Reassemble a URL that has been parsed into parts by
- * parseURLArguments. Key names and values are url-encoded.  The
- * special key `_URL`, if it is present, is put in front of the
- * "?". Arguments are added to the URL in alphabetical order. Note
- * that only keys that have the value types `booolean`, `number` and
- * `string` are included. All other key-value pairs are ignored. Keys
- * that have a boolean value are only included if that value is
- * `true`.
- * @param {object} args broken down URL in the form created by
+ * Encode an object in a URL that can be parsed by
+ * (#parseURLArguments).
+ * The special key `_URL`, if it is present, is put in front of the
+ * "?".  Arguments are added to the URL in alphabetical order. Note
+ * that only keys that have the value types `boolean`, `number`,
+ * `string` and `object` are included. All other keys in the object
+ * are ignored. Keys that have a boolean value are only included if
+ * that value is `true`. Sub-objects are supported using the bracket
+ * syntax described in (#parseURLArguments)
+ * @param {object} params broken down URL in the form created by
  * parseURLArguments
  * @return {string} a URL string
  */
-function makeURL(parts) {
-  const args = Object.keys(parts)
-        .filter(f => f && !/^_/.test(f))
-        .sort()
-        .map(k => {
-          switch (typeof parts[k]) {
-          case "boolean":
-            if (parts[k])
-              return encodeURIComponent(k);
-            // fall-through deliberate
-          default:
-            return undefined;
-          case "number":
-            if (isNaN(parts[k]))
-              return undefined;
-            // fall-through deliberate
-          case "string":
-            return `${encodeURIComponent(k)}=${encodeURIComponent(parts[k])}`
-            // node.js encodeURIComponent does not follow the standard!
-            .replace(/;/g, "%3B");
-          }
-        });
-  const s = args.filter(f => f).join(";");
-  return `${parts._URL || ""}?${s}`;
+function makeURL(params) {
+
+  // Enhanced encodeURIComponent to encode ();&=?
+  function enc(s) {
+    return encodeURIComponent(s)
+    .replace(/[();&?]/g, m => `%${m.charCodeAt(0).toString(16)}`);
+  }
+
+  function makeArgs(obj) {
+    const args = [];
+    for (const k of Object.keys(obj).sort()) {
+      if (k === "_URL")
+        continue;
+      if (!k || k[0] === "_")
+        throw new Error(`${k}: makeURL does not support keys starting with _`);
+      let v = obj[k];
+      switch (typeof v) {
+      case "boolean":
+        if (v)
+          args.push(enc(k));
+        break;
+      case "object":
+        if (v !== null)
+          args.push(`${enc(k)}=(${makeArgs(v)})`);
+        break;
+      case "number":
+        if (!isNaN(v))
+          args.push(`${enc(k)}=${v}`);
+        break;
+      case "string":
+        args.push(`${enc(k)}=${enc(v)}`);
+      }
+    }
+    return args.join(";");
+  }
+  return `${params._URL || ""}?${makeArgs(params)}`;
 }
 
 /**
@@ -176,4 +232,118 @@ function formatTimeInterval(t) {
   return `${neg}${t}:${h}:${m}:${s}`;
 }
 
-export { genKey, stringify, parseURLArguments, makeURL, formatTimeInterval }
+/**
+ * Compatibility: Map from a string value to an integer. Enumerations
+ * used to use strings, now they use integers, and we have to map based
+ * on the type encountered in data.
+ */
+function toEnum(n, compat) {
+  // assume undefined=>0, which should be the case for all enums
+  if (typeof n === "undefined") return 0;
+  if (typeof n === "number") return n;
+  let nn = Number(n);
+  if (Number.isNaN(nn)) {
+    // Map to enum through string->enum mapping
+    nn = compat[n];
+    if (nn < 0) debugger;
+    assert(nn >= 0, n);
+    return nn;
+  }
+  return nn;
+}
+
+/**
+ * Convert an Uint8Array containing arbitrary byte data into a Base64
+ * encoded string, suitable for use in a Data-URI
+ * @param {Uint8Array} a8 the Uint8Array to convert
+ * @return {string} Base64 bytes (using MIME encoding)
+ * @private
+ */
+function Uint8ArrayToBase64(a8) {
+  let nMod3 = 2;
+  let sB64Enc = "";
+  const nLen = a8.length;
+
+  // Convert a base 64 number to the charcode of the character used to
+  // represent it
+  function uint6ToB64(nUInt6) {
+    return nUInt6 < 26 ?
+    nUInt6 + 65 :
+    nUInt6 < 52 ?
+    nUInt6 + 71 :
+    nUInt6 < 62 ?
+    nUInt6 - 4 :
+    nUInt6 === 62 ?
+    43 :
+    nUInt6 === 63 ?
+    47 :
+    65;
+  }
+
+  // For each byte in the buffer
+  for (let nUInt24 = 0, nIdx = 0; nIdx < nLen; nIdx++) {
+    nMod3 = nIdx % 3;
+    nUInt24 |= a8[nIdx] << (16 >>> nMod3 & 24);
+    if (nMod3 === 2 || nLen - nIdx === 1) {
+      sB64Enc += String.fromCharCode(
+        uint6ToB64(nUInt24 >>> 18 & 63),
+        uint6ToB64(nUInt24 >>> 12 & 63),
+        uint6ToB64(nUInt24 >>> 6 & 63),
+        uint6ToB64(nUInt24 & 63));
+      nUInt24 = 0;
+    }
+  }
+
+  return sB64Enc.substr(0, sB64Enc.length - 2 + nMod3) +
+  (nMod3 === 2 ? "" : nMod3 === 1 ? "=" : "==");
+}
+
+/**
+ * Convert a MIME-Base64 string into an array of arbitrary
+ * 8-bit data
+ * @param {string} sB64Enc the String to convert
+ * @return {Uint8Array}
+ * @private
+ */
+function Base64ToUint8Array(sB64) {
+  const sB64Enc = sB64.replace(/[^A-Za-z0-9+/]/g, ""); // == and =
+  const nInLen = sB64Enc.length;
+  const nOutLen = nInLen * 3 + 1 >> 2;
+  const ta8 = new Uint8Array(nOutLen);
+  // Convert Base64 char (as char code) to the number represented
+  function b64ToUInt6(nChr) {
+    return nChr > 64 && nChr < 91 ?
+    nChr - 65 :
+    nChr > 96 && nChr < 123 ?
+    nChr - 71 :
+    nChr > 47 && nChr < 58 ?
+    nChr + 4 :
+    nChr === 43 ?
+    62 :
+    nChr === 47 ?
+    63 :
+    0;
+  }
+
+  for (let nMod3, nMod4, nUInt24 = 0, nOutIdx = 0, nInIdx = 0; nInIdx < nInLen; nInIdx++) {
+    nMod4 = nInIdx & 3;
+    nUInt24 |= b64ToUInt6(sB64Enc.charCodeAt(nInIdx)) <<
+    6 * (3 - nMod4);
+    if (nMod4 === 3 || nInLen - nInIdx === 1) {
+      for (nMod3 = 0; nMod3 < 3 &&
+           nOutIdx < nOutLen; nMod3++, nOutIdx++) {
+        ta8[nOutIdx] = nUInt24 >>> (16 >>> nMod3 & 24) & 255;
+      }
+      nUInt24 = 0;
+    }
+  }
+  return ta8;
+}
+
+export {
+  genKey, stringify,
+  parseURLArguments, makeURL,
+  formatTimeInterval,
+  toEnum,
+  Uint8ArrayToBase64, Base64ToUint8Array
+}

@@ -1,4 +1,4 @@
-/*Copyright (C) 2019-2022 The Xanado Project https://github.com/cdot/Xanado
+/*Copyright (C) 2019-2024 The Xanado Project https://github.com/cdot/Xanado
   License MIT. See README.md at the root of this distribution for full copyright
   and license information. Author Crawford Currie http://c-dot.co.uk*/
 /* eslint-env browser */
@@ -88,21 +88,26 @@ class BrowserPlatform /*extends Platform*/ {
   /**
    * @implements Platform
    */
-  static readFile(p) {
-    return $.get(p);
+  static readTextFile(p) {
+    return fetch(p)
+    .then(response => response.text());
+  }
+
+  /**
+   * @implements Platform
+   */
+  static readJSONFile(path) {
+    return fetch(path)
+    .then(response => response.text())
+    .then(json => JSON.parse(json));
   }
 
   /**
    * @implements Platform
    */
   static readBinaryFile(path) {
-    return $.ajax({
-      type: "GET",
-      url: path,
-      dataType: "binary",
-      processData: "false"
-    })
-    .then(blob => new Response(blob).arrayBuffer())
+    return fetch(path)
+    .then(response => response.arrayBuffer())
     .then(ab => new Uint8Array(ab));
   }
 

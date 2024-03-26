@@ -1,4 +1,4 @@
-/*Copyright (C) 2021-2022 The Xanado Project https://github.com/cdot/Xanado
+/*Copyright (C) 2021-2024 The Xanado Project https://github.com/cdot/Xanado
   License MIT. See README.md at the root of this distribution for full copyright
   and license information. Author Crawford Currie http://c-dot.co.uk*/
 /* eslint-env browser */
@@ -55,7 +55,7 @@ class BrowserGame extends Undo(CommandsMixin(Game)) {
   }
 
   /**
-   * Headline is the text shown in the game table and the head
+   * Format game information shown in the game table and the head
    * of the game dialog.
    * @param {boolean?} inTable true if this is being prepared for the
    * table, false for the dialog.
@@ -69,7 +69,7 @@ class BrowserGame extends Undo(CommandsMixin(Game)) {
    * * %s - final game state e.g. "Game over"
    * @return {string} html string
    */
-  tableRow(format) {
+  formatGameInfo(format) {
     const repl = (m, p1) => {
       switch (p1) {
       case "c":
@@ -109,7 +109,7 @@ class BrowserGame extends Undo(CommandsMixin(Game)) {
   $playerTable(thisPlayer) {
     const $tab = $(document.createElement("table")).addClass("player-table");
     this.players.forEach(
-      p => $tab.append(p.$tableRow(thisPlayer)));
+      p => $tab.append(p.$TR(thisPlayer)));
     return $tab;
   }
 
@@ -242,7 +242,7 @@ class BrowserGame extends Undo(CommandsMixin(Game)) {
       $action.append(this.$formatScore(turn, false));
       // Check if the play emptied the rack of the playing player
       if (isLastTurn
-          && turn.replacements.length === 0
+          && (!turn.replacements || turn.replacements.length === 0)
           && player.rack.isEmpty()
           && !this.hasEnded()) {
 
@@ -346,18 +346,13 @@ class BrowserGame extends Undo(CommandsMixin(Game)) {
 
     const $narrative = $(document.createElement("div"))
           .addClass("game-end-adjustments");
-    this.getPlayers().forEach(player => {
+    this.getPlayers().forEach((player, index) => {
       const wasMe = player === uiPlayer;
       const name = wasMe ? $.i18n("You") : player.name;
 
       // Adjustments made to scores due to remaining letters on racks and
-      // time penalties
-      // key: {string} the player to whom this applies
-      // tiles: {number} if positive, points gained from the tiles of other
-      // players. If negative, points lost to remaining tiles on rack.
-      // tilesRemaining: {string} if tiles < 0, the letters that caused it
-      // time: <number} points lost due to time penalties
-      const endState = turn.endStates.filter(s => s.key === player.key)[0];
+      // time penalties. See EndState in Turn.js
+      const endState = turn.endStates[index];
 
       if (player.score === winningScore)
         winners.push(name);

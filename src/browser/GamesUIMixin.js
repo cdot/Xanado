@@ -156,7 +156,7 @@ const GamesUIMixin = superclass => class extends superclass {
    */
   $player(game, player, isActive) {
     assert(player instanceof Player, "Not a player");
-    const $tr = player.$tableRow();
+    const $tr = player.$TR();
 
     if (isActive) {
       const info = [];
@@ -211,9 +211,9 @@ const GamesUIMixin = superclass => class extends superclass {
    * @param {Game|object} game a Game or Game.simple
    * @private
    */
-  $gameTableRow(game) {
+  $TR(game) {
     assert(game instanceof Game, "Not a game");
-    return $(game.tableRow(this.constructor.GAME_TABLE_ROW))
+    return $(game.formatGameInfo(this.constructor.GAME_TABLE_ROW))
     .on("click", () => {
       import(
         /* webpackMode: "lazy" */
@@ -238,7 +238,7 @@ const GamesUIMixin = superclass => class extends superclass {
   showGame(game) {
     // Update the games list and dialog headlines as appropriate
     $(`#${game.key}`).replaceWith(
-      game.tableRow(this.constructor.GAME_TABLE_ROW));
+      game.formatGameInfo(this.constructor.GAME_TABLE_ROW));
     // Update the open game dialog if appropriate
     const dlg = $(`#GameDialog[name=${game.key}]`).data("this");
     if (dlg)
@@ -267,7 +267,7 @@ const GamesUIMixin = superclass => class extends superclass {
                 a.creationTimestamp > b.creationTimestamp ? 1 : 0);
 
     games.forEach(game => {
-      const $row = this.$gameTableRow(game);
+      const $row = this.$TR(game);
       $gt.append($row);
     });
 

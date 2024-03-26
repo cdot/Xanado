@@ -1,13 +1,8 @@
 /*Copyright (C) 2019-2024 The Xanado Project https://github.com/cdot/Xanado
   License MIT. See README.md at the root of this distribution for full copyright
   and license information. Author Crawford Currie http://c-dot.co.uk*/
-
-/* global onmessage */
-/* global postMessage */
-/* global addEventListener */
-/* global close */
-/* global Platform */
-/* global global */
+/* eslint-env worker */
+/* global window */
 
 import { BackendGame } from "./BackendGame.js";
 import { CBOR } from "../game/CBOR.js";

@@ -231,7 +231,7 @@ class Turn extends Move {
       for (const es of params.score)
         this.endStates.push(new EndState(es));
       delete params.score;
-    }   
+    }
 
     if (params.passes && params.passes > 0)
       /**
