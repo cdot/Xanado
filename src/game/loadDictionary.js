@@ -19,7 +19,7 @@ const cache = {};
  * @param {string} name name of the dictionary to load. This can
  * be a be a full path to a .dict file, or it can be a simple
  * dictionary name, in which case the dictionary will be loaded from
- * `Platform.getFilePath("dictionaries")`.
+ * `Platform.absolutePath("dictionaries")`.
  * @return {Promise} Promise that resolves to a new {@linkcode Dictionary}
  * or undefined if a dictionary of that name could not be loaded.
  */
@@ -29,7 +29,7 @@ function loadDictionary(name) {
   if (path.root === "" && path.dir === "" && path.ext === "") {
     // Simple name, load from the dictionaries path. /ignore is a
     // placeholder
-    path = Platform.parsePath(Platform.getFilePath("dictionaries/ignore"));
+    path = Platform.parsePath(Platform.absolutePath("dictionaries/ignore"));
     path.name = name;
     path.ext = ".dict";
   } else if (path.ext === "") {
@@ -45,7 +45,7 @@ function loadDictionary(name) {
 
   let dict;
   const fp = Platform.formatPath(path);
-  return Platform.readBinaryFile(fp)
+  return Platform.getBinary(fp)
   .then(buffer => {
     dict = new Dictionary(name);
     dict.loadDAWG(buffer.buffer);
@@ -57,7 +57,7 @@ function loadDictionary(name) {
   .then(() => {
     path.ext = ".white";
     const wp = Platform.formatPath(path);
-    return Platform.readTextFile(wp)
+    return Platform.getText(wp)
     .then(text => {
       if (!dict)
         dict = new Dictionary(name);

@@ -34,7 +34,7 @@ describe("client/ClientUIMixin", () => {
     .then(() => setup$(
       // Could equally be client_game
       `${import.meta.url}/../../html/client_games.html?arg=1`,
-      Platform.getFilePath("/html/client_games.html")))
+      Platform.absolutePath("/html/client_games.html")))
     .then(() => setupI18n())
     .then(() => Promise.all([
       import("../../src/browser/UI.js"),
@@ -88,21 +88,21 @@ describe("client/ClientUIMixin", () => {
     const server = new StubServer({
       "/session": Promise.resolve(undefined),
 
-      "/css": Platform.readJSONFile(Platform.getFilePath("/css/index.json")),
+      "/css": Platform.getJSON(Platform.absolutePath("/css/index.json")),
 
       "/editions":
-      Platform.readJSONFile(Platform.getFilePath("/editions/index.json")),
+      Platform.getJSON(Platform.absolutePath("/editions/index.json")),
 
       "/dictionaries":
-      Platform.readJSONFile(Platform.getFilePath("/dictionaries/index.json")),
+      Platform.getJSON(Platform.absolutePath("/dictionaries/index.json")),
 
       "/locales": {
-        promise: Platform.readJSONFile(Platform.getFilePath("/i18n/index.json")),
+        promise: Platform.getJSON(Platform.absolutePath("/i18n/index.json")),
         count: 2
       },
 
       "/edition/English_Scrabble":
-      Platform.readJSONFile(Platform.getFilePath("/editions/English_Scrabble.json")),
+      Platform.getJSON(Platform.absolutePath("/editions/English_Scrabble.json")),
 
       "/defaults/game": Promise.resolve(GAME_DEFAULTS),
 

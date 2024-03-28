@@ -136,7 +136,7 @@ class Edition {
     if (editions[name])
       return Promise.resolve(editions[name]);
 
-    return Platform.readJSONFile(Platform.getFilePath(`/editions/${name}.json`))
+    return Platform.getJSON(Platform.absolutePath(`/editions/${name}.json`))
     .then(spec => {
       spec.name = name;
       editions[name] = new Edition(spec);

@@ -17,7 +17,7 @@ describe("standalone/StandaloneGamesUI", () => {
     () => setupPlatform()
     .then(() => setup$(
       `${import.meta.url}/../../html/standalone_games.html`,
-      Platform.getFilePath("/html/standalone_games.html")))
+      Platform.absolutePath("/html/standalone_games.html")))
     .then(() => setupI18n())
     // UI imports jquery.i18n which requires jquery, so have
     // to delay the import

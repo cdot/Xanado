@@ -80,9 +80,9 @@
 		"webpack-cli": "^5.0.1"
 	},
 	"scripts": {
-		"build": "webpack --node-env production -c build/wp_sa_games.js && webpack --node-env production -c build/wp_sa_game.js && webpack --node-env production -c build/wp_cl_games.js && webpack --node-env production -c build/wp_cl_game.js",
+		"build": "webpack --node-env production -c build/webpack_config.js",
 		"coverage": "NODE_ENV=test c8 --reporter=html --reporter text npm run test",
-		"debug_build": "node bin/update-indexes.js & webpack -c build/wp_sa_games.js & webpack -c build/wp_sa_game.js & webpack -c build/wp_cl_games.js & webpack -c build/wp_cl_game.js",
+		"debug_build": "webpack -c build/webpack_config.js --stats-modules-space 999",
 		"debug_server": "node bin/server.js --config config.json --html html --debug all",
 		"doc": "jsdoc -c build/jsdoc_config.json src",
 		"docker": "npm run build && docker build . --tag xanado --file build/Dockerfile",

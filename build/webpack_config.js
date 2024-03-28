@@ -1,7 +1,7 @@
 // Base webpack config, shared by all packed modules
-import path from "path";
+import Path from "path";
 import { fileURLToPath } from 'url';
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const __dirname = Path.dirname(fileURLToPath(import.meta.url));
 import TerserPlugin from "terser-webpack-plugin";
 import webpack from "webpack";
 import { promises as fs } from "fs";
@@ -14,8 +14,8 @@ import { promises as fs } from "fs";
  * @param {string} to where to copy to
  */
 function copyFile(from, to) {
-  const a_from = path.normalize(path.join(__dirname, from));
-  const a_to = path.normalize(path.join(__dirname, to));
+  const a_from = Path.normalize(Path.join(__dirname, from));
+  const a_to = Path.normalize(Path.join(__dirname, to));
   fs.cp(a_from, a_to, {
     recursive: true,
     force: true,
@@ -44,20 +44,16 @@ function relink(from, to, content) {
 }
 
 /**
- * Copy files not handled by webpack (assets) and construct a
- * webpack configuration.
- * @param {string} html name of html source, assumed to be in the `html` dir
- * @param {string} js name of JS module, path relative to `src`
- * @return {object} webpack configuration
+ * Process one of the top level HTML files. There are a number of edits
+ * required for webpacking, fixing up links etc.
+ * @param {string} entry root name of the html file e.g. "standlone_game"
+ * @return {Promise} a promise that resolves when the output has been written
  */
-function makeConfig(html, js) {
-
-  fs.mkdir(`${__dirname}/../dist`, { recursive: true })
-  .then(() => fs.readFile(`${__dirname}/../html/${html}`))
+function processHTML(entry) {
+  return fs.readFile(`${__dirname}/../html/${entry}.html`)
   .then(content => {
     content = content.toString()
-    // Strip out the importmap, not needed any more
-    .replace(/<script [^>]*?es-module-shims.*?<\/script>/s, "")
+    .replace(/<script [^>]*?es-module-shims.*?<\/script>/s, "")  
     .replace(/<script type="importmap".*?<\/script>/s, "")
     // Reroute the code import to dist
     .replace(/(<script type="module"[^>]* src=").*?([^/]+\/_[^/]+.js")/,
@@ -68,84 +64,205 @@ function makeConfig(html, js) {
     copyFile("../node_modules/normalize.css/normalize.css",
              "../dist/css/normalize.css");
     content = relink("../node_modules/normalize.css/normalize.css",
-             "../dist/css/normalize.css",
-            content);
+                     "../dist/css/normalize.css",
+                     content);
 
     copyFile("../node_modules/jquery-ui/dist/themes",
              "../dist/css/themes");
     content = relink("../node_modules/jquery-ui/dist/themes",
-            "../dist/css/themes",
-            content);
+                     "../dist/css/themes",
+                     content);
 
-    return fs.writeFile(`${__dirname}/../dist/${html}`, content);
+    return fs.writeFile(`${__dirname}/../dist/${entry}.html`, content);
   });
-
-  // Webpacked code always has DISTRIBUTION
-  const defines = {
-    DISTRIBUTION: true
-  };
-  let mode;
-
-  // --production or NODE_ENV=production  will create a minimised
-  // production build.
-	if (process.env.NODE_ENV === "production") {
-    console.log(`Production build ${__dirname}/../src/${js}`);
-    mode = "production";
-		defines.PRODUCTION = true;
-	}
-
-  // otherwise this is a development build.
-	else
-    mode = "development";
-
-  return {
-    mode: mode,
-    entry: {
-      app: `${__dirname}/../src/${js}`
-    },
-    output: {
-      filename: js,
-      path: path.resolve(__dirname, "../dist"),
-      globalObject: "window"
-    },
-    resolve: {
-      extensions: [ '.js' ],
-      alias: {
-        // socket.io is normally the node.js version; we need the browser
-        // version here.
-        "socket.io": path.resolve(
-          __dirname, "../node_modules/socket.io/client-dist/socket.io.js"),
-        // Need to override the default node module with the dist
-        jquery: path.resolve(
-          __dirname, "../node_modules/jquery/dist/jquery.js"),
-        "jquery-ui": path.resolve(
-          __dirname, "../node_modules/jquery-ui/dist/jquery-ui.js")
-      }
-    },
-    externals: {
-      // Imported from findBestPlayWorker, but never actually imported
-      // in the browser version
-      "../server/ServerPlatform.js": "undefined"
-    },
-    optimization: {
-      minimizer: [
-        new TerserPlugin({
-          terserOptions: {
-            // We have to keep class names because CBOR TypeMapHandler
-            // uses them
-            keep_classnames: true
-          },
-        }),
-      ]
-    },
-    plugins: [
-      new webpack.ProvidePlugin({
-        $: 'jquery',
-        jQuery: 'jquery'
-      }),
-      new webpack.DefinePlugin(defines)
-    ]
-  };
 }
 
-export { makeConfig }
+fs.mkdir(`${__dirname}/../dist`, { recursive: true })
+.then(() => Promise.all([
+  processHTML("standalone_game"),
+  processHTML("standalone_games"),
+  processHTML("client_game"),
+  processHTML("client_games")
+]));
+
+// Webpacked code always has DISTRIBUTION
+const defines = {
+  DISTRIBUTION: true
+};
+
+let mode = "development"; // or "production"
+
+// --production or NODE_ENV=production  will create a minimised
+// production build.
+if (process.env.NODE_ENV === "production") {
+  console.log("Production build");
+  mode = "production";
+	defines.PRODUCTION = true;
+}
+
+/* Experimenting with plugins
+class ImportShimPlugin {
+  constructor(options) {
+    this.options = options;
+  }
+
+  static extras = [];
+  static file = "";
+
+  apply(compiler) {
+
+    const PLUGIN = 'ImportShimPlugin';
+      
+    compiler.hooks.compilation
+    .tap(PLUGIN, (compilation, params) => {
+
+      compilation.hooks.moduleAsset
+      .tap(PLUGIN, (module, filename) => {
+        // Never invoked
+        //console.debug("moduleASSET", filename);
+      });
+
+      compilation.hooks.chunkAsset
+      .tap(PLUGIN, (chunk, filename) => {
+        //console.debug("chunkASSET", filename);
+      });
+
+      compilation.hooks.assetPath
+      .tap(PLUGIN, (path, options) => {
+        if (/\[name\]/.test(path)) {
+          path = path.replace(/\[name\]/, options.chunk.name);
+          //console.debug("ASSETpath[name]", path);
+        } else
+          //console.debug("ASSETpath", path);
+      });
+
+      compilation.hooks.processAssets
+      .tap({
+        name: PLUGIN,
+        stage: compilation.PROCESS_ASSETS_STAGE_ADDITIONAL,
+        //additionalAssets: true // consider?
+      }, (assets) => {
+        //console.log('List of assets and their sizes:');
+        Object.entries(assets).forEach(([pathname, source]) => {
+          if (/findBestPlayWorkerLoader/.test(pathname))
+            //console.log(`SOURCE ${pathname}`);
+        });
+      });
+    });
+
+    compiler.hooks.normalModuleFactory
+    .tap(PLUGIN, factory => {
+
+      factory.hooks.parser
+      .for('javascript/esm')
+      .tap(PLUGIN, (parser, options) => {
+        parser.hooks.call
+        .for("importShim")
+        .tap(PLUGIN, expression => {
+          let path =  expression.arguments[0].value;
+          path = Path.resolve(parser.state.module.resource, "..", path);
+          //console.debug("SHIM", path, "in", parser.state.module.resource);
+          ImportShimPlugin.extras.push(path);
+          return true;
+        });
+
+        parser.hooks.call
+        .for("importScripts")
+        .tap(PLUGIN, expression => {
+          let path =  expression.arguments[0].value;
+          if (!/^https?:/.test(path))
+            path = Path.resolve(parser.state.module.resource, path);
+          //console.debug("importScripts", path, "in",
+                        parser.state.module.resource);
+          return true;
+        });
+      });
+
+      factory.hooks.resolve
+      .tap(PLUGIN, (module) => {
+        if (/findBestPlay/.test(module.request))
+          //console.debug("RESOLVE",
+                      module.request, "in", module.context, 
+                      "issuer", module.contextInfo.issuer);
+      });
+    });
+  }
+}
+*/
+
+export default {
+  mode: mode, // production or development
+  entry: {
+    // Entry points - one per top level HTML file
+
+    // TODO: every entry chunk stores all the modules that it uses.
+    // We could be more efficient to share modules between chunks.
+    // TODO: how does findBestPlay end up getting included in _*Games?
+    standalone_game: {
+      import: `${__dirname}/../src/standalone/_StandaloneGameUI.js`,
+      filename: "standalone/_StandaloneGameUI.js"
+    },
+    standalone_games: {
+      import: `${__dirname}/../src/standalone/_StandaloneGamesUI.js`,
+      filename: "standalone/_StandaloneGamesUI.js"
+    },
+    client_game: {
+      import: `${__dirname}/../src/client/_ClientGameUI.js`,
+      filename: "client/_ClientGameUI.js"
+    },
+    client_games: {
+      import: `${__dirname}/../src/client/_ClientGamesUI.js`,
+      filename: "client/_ClientGamesUI.js"
+    }
+  },
+  output: {
+    path: Path.resolve(__dirname, "../dist"),
+    // Need a different globalObject in worker
+    globalObject: "self"
+  },
+  resolve: {
+    extensions: [ '.js' ],
+    alias: {
+      // socket.io is normally the node.js version; we need the browser
+      // version here.
+      "socket.io": Path.resolve(
+        __dirname, "../node_modules/socket.io/client-dist/socket.io.js"),
+      // Need to override the default node module with the dist
+      jquery: Path.resolve(
+        __dirname, "../node_modules/jquery/dist/jquery.js"),
+      "jquery-ui": Path.resolve(
+        __dirname, "../node_modules/jquery-ui/dist/jquery-ui.js")
+    }
+  },
+  externals: {
+    // Exclude ServerPlatform, otherwise it banjaxes findBestPlayWorker
+    "../server/ServerPlatform.js": "undefined",
+    // Exclude the worker shim, not used
+    "../browser/findBestPlayWorkerShim.js": "undefined"
+  },
+  optimization: {
+    // Split chunks for module reuse. Would like to use this, but it breaks.
+    //splitChunks: {
+    //  chunks: "all"
+    //},
+    minimize: (mode === "production"),
+    minimizer: [
+      new TerserPlugin({
+        terserOptions: {
+          // We have to keep class names because CBOR TypeMapHandler
+          // uses them
+          keep_classnames: true
+        },
+      }),
+    ]
+  },
+  plugins: [
+    new webpack.ProvidePlugin({
+      $: 'jquery',
+      jQuery: 'jquery'
+    }),
+    new webpack.DefinePlugin(defines),
+//    new ImportShimPlugin({}) // experimentation
+  ]
+};
+

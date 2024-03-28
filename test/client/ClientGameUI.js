@@ -56,7 +56,7 @@ describe("client/ClientGameUI", () => {
     () => setupPlatform()
     .then(() => setup$(
       `${import.meta.url}/../../html/client_game.html?game=unfinished_game`,
-      Platform.getFilePath("/html/client_game.html")))
+      Platform.absolutePath("/html/client_game.html")))
     .then(() => setupI18n())
     // UI imports jquery.i18n which requires jquery, so have
     // to delay the import
@@ -88,7 +88,7 @@ describe("client/ClientGameUI", () => {
         //"/defaults/user": Promise.resolve(USER_DEFAULTS),
         //"/defaults/game": Promise.resolve(GAME_DEFAULTS),
         //"/locales": {
-        //  promise: Platform.readJSONFile(Platform.getFilePath("/i18n/index.json")),
+        //  promise: Platform.getJSON(Platform.absolutePath("/i18n/index.json")),
         //  count: 1
         //},
         //"/game/unfinished_game": CBOR.encode(game, Game.CLASSES)

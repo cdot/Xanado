@@ -102,7 +102,7 @@ class ClientGameUI extends ClientUIMixin(GameUIMixin(UI)) {
       this.undoStack = [];
       $("#redo-button").hide();
     }
-    console.debug(`POST /command/${command}`);
+    //console.debug(`POST /command/${command}`);
     this.cancelNotification();
     this.lockBoard(true);
     this.enableTurnButton(false);

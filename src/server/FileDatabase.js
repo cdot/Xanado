@@ -20,7 +20,7 @@ class FileDatabase /* extends Database */ {
   /**
    * @param {object} options implementation-specific options
    * @param {string} options.dir name of a pre-existing
-   * directory to store games in, relative to ServerPlatform.getFilePath
+   * directory to store games in, relative to ServerPlatform.absolutePath
    * @param {string} options.ext will be used as the extension on file names
    * (without the leading .)
    */

@@ -13,6 +13,11 @@ self.assert = (cond, mess) => {
 
 assert.fail = mess => self.assert(false, mess);
 
+// A webpacked worker has import.meta.url as a file:// URL, which is handy because
+// packed workers have the URL root at "..", while unpacked (debug) workers have
+// it at "../.."
+const ROOT_REL = (/^file:/.test(import.meta.url)) ? ".." : "../..";
+
 /**
  * Web Worker implementation of {@linkcode Platform}.
  * @implements Platform
@@ -22,16 +27,14 @@ class WorkerPlatform /*extends Platform*/ {
   /**
    * @implements Platform
    */
-  static getFilePath(p) {
-    // Workers run with the current sire set to src/browser, so need to
-    // back up twice to get to the root
-    return `../../${p}`;
+  static absolutePath(p) {
+    return `${ROOT_REL}/${p}`.replace(/\/\/+/g, "/");
   }
 
   /**
    * @implements Platform
    */
-  static readTextFile(path) {
+  static getText(path) {
     return fetch(path)
     .then(response => response.text());
   }
@@ -39,7 +42,7 @@ class WorkerPlatform /*extends Platform*/ {
   /**
    * @implements Platform
    */
-  static readJSONFile(path) {
+  static getJSON(path) {
     return fetch(path)
     .then(response => response.text())
     .then(json => JSON.parse(json));
@@ -48,7 +51,7 @@ class WorkerPlatform /*extends Platform*/ {
   /**
    * @implements Platform
    */
-  static readBinaryFile(path) {
+  static getBinary(path) {
     return fetch(path)
     .then(response => response.arrayBuffer())
     .then(ab => new Uint8Array(ab));

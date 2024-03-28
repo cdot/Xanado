@@ -52,7 +52,7 @@ describe("client/ClientGamesUI", () => {
     () => setupPlatform()
     .then(() => setup$(
       `${import.meta.url}/../../html/client_games.html`,
-      Platform.getFilePath("/html/client_games.html")))
+      Platform.absolutePath("/html/client_games.html")))
     .then(() => setupI18n())
     // UI imports jquery.i18n which requires jquery, so have
     // to delay the import
@@ -89,7 +89,7 @@ describe("client/ClientGamesUI", () => {
       "/sendReminder/*": Promise.resolve([ "anon", "anon@anon.gov.us" ]),
       "/signout": Promise.resolve(),
       "/locales": {
-        promise: Platform.readJSONFile(Platform.getFilePath("/i18n/index.json")),
+        promise: Platform.getJSON(Platform.absolutePath("/i18n/index.json")),
         count: 2
       },
       "/games/active": {
@@ -97,12 +97,12 @@ describe("client/ClientGamesUI", () => {
         count: 2
       },
       "/history": Promise.resolve([]),
-      "/css": Platform.readJSONFile(Platform.getFilePath("/css/index.json")),
+      "/css": Platform.getJSON(Platform.absolutePath("/css/index.json")),
       "/oauth2-providers": Promise.resolve([{name: "A"}, {name:"B"}]),
       "/editions": 
-      Platform.readJSONFile(Platform.getFilePath("/editions/index.json")),
+      Platform.getJSON(Platform.absolutePath("/editions/index.json")),
       "/dictionaries":
-      Platform.readJSONFile(Platform.getFilePath("/dictionaries/index.json"))
+      Platform.getJSON(Platform.absolutePath("/dictionaries/index.json"))
     });
 
     const ui = new ClientGamesUI();
@@ -148,10 +148,10 @@ describe("client/ClientGamesUI", () => {
       "/defaults/game": Promise.resolve(GAME_DEFAULTS),
       "/games/active": Promise.resolve([]),
       "/dictionaries":
-      Platform.readJSONFile(Platform.getFilePath("/dictionaries/index.json")),
+      Platform.getJSON(Platform.absolutePath("/dictionaries/index.json")),
       "/editions": 
-      Platform.readJSONFile(Platform.getFilePath("/editions/index.json")),
-      "/locales": Platform.readJSONFile(Platform.getFilePath("/i18n/index.json"))
+      Platform.getJSON(Platform.absolutePath("/editions/index.json")),
+      "/locales": Platform.getJSON(Platform.absolutePath("/i18n/index.json"))
     });
     const ui = new ClientGamesUI();
     ui.channel = new TestSocket("client");
@@ -175,7 +175,7 @@ describe("client/ClientGamesUI", () => {
         promise: Promise.resolve({}),
         count: 1
       },
-      "/locales": Platform.readJSONFile(Platform.getFilePath("/i18n/index.json"))
+      "/locales": Platform.getJSON(Platform.absolutePath("/i18n/index.json"))
     }
                                   //, console.debug
                                  );
@@ -199,9 +199,9 @@ describe("client/ClientGamesUI", () => {
       "/defaults/user": Promise.resolve(USER_DEFAULTS),
       "/defaults/game": Promise.resolve(GAME_DEFAULTS),
       "/games/active": Promise.resolve([]),
-      "/locales": Platform.readJSONFile(Platform.getFilePath("/i18n/index.json")),
+      "/locales": Platform.getJSON(Platform.absolutePath("/i18n/index.json")),
       "/dictionaries":
-      Platform.readJSONFile(Platform.getFilePath("/dictionaries/index.json"))
+      Platform.getJSON(Platform.absolutePath("/dictionaries/index.json"))
     });
     const ui = new ClientGamesUI();
     ui.channel = new TestSocket("client");
@@ -222,7 +222,7 @@ describe("client/ClientGamesUI", () => {
       "/defaults/game": Promise.resolve(GAME_DEFAULTS),
       "/games/active": Promise.resolve([]),
       "/users": Promise.resolve(["id", "iot"]),
-      "/locales": Platform.readJSONFile(Platform.getFilePath("/i18n/index.json"))
+      "/locales": Platform.getJSON(Platform.absolutePath("/i18n/index.json"))
     });
     const ui = new ClientGamesUI();
     ui.channel = new TestSocket("client");
@@ -246,7 +246,7 @@ describe("client/ClientGamesUI", () => {
         count: 2
       },
       "/anotherGame/unfinished_game": Promise.resolve(),
-      "/locales": Platform.readJSONFile(Platform.getFilePath("/i18n/index.json"))
+      "/locales": Platform.getJSON(Platform.absolutePath("/i18n/index.json"))
     });
     const ui = new ClientGamesUI();
     ui.channel = new TestSocket("client");
@@ -270,7 +270,7 @@ describe("client/ClientGamesUI", () => {
         count: 2
       },
       "/deleteGame/unfinished_game": Promise.resolve(),
-      "/locales": Platform.readJSONFile(Platform.getFilePath("/i18n/index.json"))
+      "/locales": Platform.getJSON(Platform.absolutePath("/i18n/index.json"))
     });
     const ui = new ClientGamesUI();
     ui.channel = new TestSocket("client");
@@ -290,7 +290,7 @@ describe("client/ClientGamesUI", () => {
       "/defaults/user": Promise.resolve(USER_DEFAULTS),
       "/defaults/game": Promise.resolve(GAME_DEFAULTS),
       "/games/active": Promise.resolve([]),
-      "/locales": Platform.readJSONFile(Platform.getFilePath("/i18n/index.json"))
+      "/locales": Platform.getJSON(Platform.absolutePath("/i18n/index.json"))
     });
     const ui = new ClientGamesUI();
     ui.channel = new TestSocket("client");
@@ -309,7 +309,7 @@ describe("client/ClientGamesUI", () => {
       },
       "/defaults/user": Promise.resolve(USER_DEFAULTS),
       "/defaults/game": Promise.resolve(GAME_DEFAULTS),
-      "/locales": Platform.readJSONFile(Platform.getFilePath("/i18n/index.json")),
+      "/locales": Platform.getJSON(Platform.absolutePath("/i18n/index.json")),
       "/history": Promise.resolve([]),
 
       "/games/active": {

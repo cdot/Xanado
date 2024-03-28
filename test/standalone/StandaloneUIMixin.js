@@ -70,24 +70,24 @@ describe("standalone/StandaloneUIMixin", () => {
     const ui = new Test();
     return Promise.all([
       ui.promiseLayouts(),
-      Platform.readJSONFile(Platform.getFilePath(`css/index.json`))])
+      Platform.getJSON(Platform.absolutePath(`css/index.json`))])
     .then(data => assert.deepEqual(data[0], data[1]))
 
     .then(() => Promise.all([
       ui.promiseLocales(),
-      Platform.readJSONFile(Platform.getFilePath(`i18n/index.json`))
+      Platform.getJSON(Platform.absolutePath(`i18n/index.json`))
     ]))
     .then(data => assert.deepEqual(data[0], data[1]))
 
     .then(() => Promise.all([
       ui.promiseEditions(),
-      Platform.readJSONFile(Platform.getFilePath(`editions/index.json`))
+      Platform.getJSON(Platform.absolutePath(`editions/index.json`))
     ]))
     .then(data => assert.deepEqual(data[0], data[1]))
 
     .then(() => Promise.all([
       ui.promiseDictionaries(),
-      Platform.readJSONFile(Platform.getFilePath(`dictionaries/index.json`))
+      Platform.getJSON(Platform.absolutePath(`dictionaries/index.json`))
     ]))
     .then(data => assert.deepEqual(data[0], data[1]))
 

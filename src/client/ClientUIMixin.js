@@ -84,7 +84,7 @@ const ClientUIMixin = superclass => class extends superclass {
    * @memberof CientUIMixin
    */
   automaticPlay() {
-    console.debug("Automaton playing");
+    //console.debug("Automaton playing");
 
     const prob = Math.random();
 
@@ -156,7 +156,7 @@ const ClientUIMixin = superclass => class extends superclass {
     .then(() => {
       this.args = parseURLArguments(document.URL);
       if (this.args.debug) {
-        console.debug("Enable debug");
+        //console.debug("Enable debug");
         this.debug = console.debug;
       }
     })
@@ -243,7 +243,7 @@ const ClientUIMixin = superclass => class extends superclass {
     .on("connect", () => {
       // Note: "connect" is synonymous with "connection"
       // Socket has connected to the server
-      console.debug("b>f connect");
+      //console.debug("b>f connect");
       if ($reconnectDialog) {
         $reconnectDialog.dialog("close");
         $reconnectDialog = null;
@@ -254,14 +254,14 @@ const ClientUIMixin = superclass => class extends superclass {
     .on("disconnect", () => {
       // Socket has disconnected for some reason
       // (server died, maybe?) Back off and try to reconnect.
-      console.debug(`--> disconnect`);
+      //console.debug(`--> disconnect`);
       const mess = $.i18n("txt-server-disconn");
       $reconnectDialog = this.alert(mess, $.i18n("err-server-disconn"));
       setTimeout(() => {
         // Try and rejoin after a 3s timeout
         this.readyToListen()
         .catch(e => {
-          console.debug(e);
+          //console.debug(e);
           if (!$reconnectDialog)
             this.alert(e, $.i18n("err-reconnect"));
         });

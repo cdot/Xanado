@@ -80,7 +80,7 @@ class Dialog {
     let promise;
     if (this.$dlg.length === 0) {
       // HTML is not already present; load it asynchronously.
-      const path = Platform.getFilePath(
+      const path = Platform.absolutePath(
         `html/${this.options.html || id}.html`);
       promise = $.get(path)
       .then(html_code => {

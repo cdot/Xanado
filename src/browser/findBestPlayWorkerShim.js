@@ -11,8 +11,10 @@
 /* global importScripts, importShim */
 /* global addEventListener, removeEventListener, postMessage */
 
+// shim to support importmap
 // See https://www.npmjs.com/package/es-module-shims
-importScripts("https://ga.jspm.io/npm:es-module-shims@1.8.3/dist/es-module-shims.wasm.js");
+importScripts(
+  "https://ga.jspm.io/npm:es-module-shims@1.8.3/dist/es-module-shims.wasm.js");
 
 // We start the load by installing this handler which loads the import
 // map into the shim before importing the "real" findBestPlayWorker. When
@@ -20,15 +22,17 @@ importScripts("https://ga.jspm.io/npm:es-module-shims@1.8.3/dist/es-module-shims
 // controller posts.
 function messageHandler(e) {
   let importmap = e.data;
-  //console.debug(`findBestPlayWorkerLoader.onmessage ${importmap}`);
+  console.debug(`findBestPlayWorkerShim.onmessage ${importmap}`);
   importmap = JSON.parse(importmap);
   for (const imp of Object.keys(importmap.imports)) {
-    // The worker is in a subdirectory so have to rewrite the importmap
+    // The importmap is written relative to /html, but the worker is
+    // in /src/backend so we have to rewrite the paths in the
+    // importmap.
     importmap.imports[imp] = importmap.imports[imp]
     .replace(/^\.\.\//, "../../");
   }
-  //console.debug("findBestPlayWorkerLoader importmap=", importmap);
   importShim.addImportMap(importmap);
+  console.debug("findBestPlayWorkerShim importing findBestPlayWorker with", importmap);
   importShim("../backend/findBestPlayWorker.js")
   .then(() => {
     // findBestPlayWorker will have installed it's own handler
@@ -39,4 +43,3 @@ function messageHandler(e) {
 }
 
 addEventListener("message", messageHandler);
-

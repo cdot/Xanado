@@ -297,7 +297,7 @@ class UI {
     .then(locales => {
       const ulang = this.getSetting("language") || "en";
       this.debug("User language", ulang);
-      return $.i18n.init(ulang, Platform.getFilePath("i18n"), this.debug)
+      return $.i18n.init(ulang, Platform.absolutePath("i18n"), this.debug)
       .then(() => locales);
     })
     .then(locales => {

@@ -81,14 +81,15 @@ class BrowserPlatform /*extends Platform*/ {
   /**
    * @implements Platform
    */
-  static getFilePath(p) {
+  static absolutePath(p) {
+    // relative to HTML
     return `../${p}`;
   }
 
   /**
    * @implements Platform
    */
-  static readTextFile(p) {
+  static getText(p) {
     return fetch(p)
     .then(response => response.text());
   }
@@ -96,7 +97,7 @@ class BrowserPlatform /*extends Platform*/ {
   /**
    * @implements Platform
    */
-  static readJSONFile(path) {
+  static getJSON(path) {
     return fetch(path)
     .then(response => response.text())
     .then(json => JSON.parse(json));
@@ -105,7 +106,7 @@ class BrowserPlatform /*extends Platform*/ {
   /**
    * @implements Platform
    */
-  static readBinaryFile(path) {
+  static getBinary(path) {
     return fetch(path)
     .then(response => response.arrayBuffer())
     .then(ab => new Uint8Array(ab));

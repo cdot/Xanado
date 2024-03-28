@@ -52,7 +52,7 @@ class Solver extends StandaloneUIMixin(UI) {
   create() {
     super.create();
     this.initLocale()
-    .then(() => Platform.readJSONFile(Platform.getFilePath("dictionaries/index.json")))
+    .then(() => Platform.getJSON(Platform.absolutePath("dictionaries/index.json")))
     .then(dictionaries => {
       const $dics = $("#dictionary");
       dictionaries

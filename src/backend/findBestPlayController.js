@@ -2,12 +2,12 @@
   License MIT. See README.md at the root of this distribution for full copyright
   and license information. Author Crawford Currie http://c-dot.co.uk*/
 
-/* global Platform, document */
+/* global Platform, document, URL */
 
 /* eslint-disable */
 // eslint (or more likely the import plugin) complains:
 /* eslint-enable */
-/* global Worker */
+/* global Worker, assert */
 
 import { BackendGame } from "./BackendGame.js";
 import { CBOR } from "../game/CBOR.js";
@@ -22,32 +22,53 @@ import { CBOR } from "../game/CBOR.js";
  */
 function findBestPlay(game, letters, listener, dictionary) {
 
-  let initialise, // promise that must resolve to "Worker"
-      workerPath,
-      isWebWorker = false,
-      workerOptions = {}; // path to worker js module
+  let initialise; // promise that must resolve to "Worker" if node.js
+  let importmap;
+
+  if (typeof document !== "undefined")
+    importmap = document.querySelector('script[type="importmap"]');
 
   if (Platform.name === "ServerPlatform") {
     // node.js
-    workerPath = "./findBestPlayWorker.js";
-    initialise = import( // node.js
+    initialise = import(
       /* webpackMode: "lazy" */
-      /* webpackChunkName: "findBestPlayController" */
+      /* webpackChunkName: "web-worker" */
       "web-worker")
     .then(mod => mod.default);
-    workerOptions.type = "module";
+    
   } else {
-    // browser
-    //console.debug("Using findBestPlayWorkerLoader");
-    // To support importmap in the browser, we have to use a shim.
-    workerPath = "../browser/findBestPlayWorkerLoader.js";
-    initialise = Promise.resolve(Worker);
-    isWebWorker = true;
+    // browser, NodeWorker not required
+    initialise = Promise.resolve(undefined);
   }
 
-  return initialise.then(Robot => new Promise((resolve, reject) => {
-    const mod_url = new URL(workerPath, import.meta.url);
-    const worker = new Robot(mod_url, workerOptions);
+  return initialise.then(NodeWorker => new Promise((resolve, reject) => {
+    let worker, usingShim = false;
+
+    if (typeof NodeWorker !== "undefined") {
+      //console.debug("NODE.JS, NO SHIM");
+      // This is node.js, we can invoke the worker directly
+      worker = new NodeWorker(
+        new URL("./findBestPlayWorker.js", import.meta.url),
+        { type: "module" });
+    }
+    else {
+      // This is a browser
+      if (importmap) {
+        //console.debug("BROWSER, USING SHIM");
+        // This is an un-webpacked browser, we have to indirect via
+        // findBestPlayWorkerShim, which will shim the importmap
+        worker = new Worker(new URL(
+          "../browser/findBestPlayWorkerShim.js", import.meta.url));
+        usingShim = true;
+      } else {
+        //console.debug("WEBPACKED BROWSER, NO SHIM");
+        // This is a webpacked browser, we can invoke the worker directly
+        worker = new Worker(new URL(
+          /* webpackMode: "lazy" */
+          /* webpackChunkName: "findBestPlayWorker" */
+          "./findBestPlayWorker.js", import.meta.url));
+      }
+    }
 
     let timeLimit = 5000; // 5 seconds default
     if (game.timerType === BackendGame.Timer.TURN)
@@ -67,13 +88,13 @@ function findBestPlay(game, letters, listener, dictionary) {
     };
 
     if (Platform.name === "ServerPlatform")
-      // Note: ServerPlatform.js is excluded from webpacking
-      // in webpack_config.js
-      info.Platform = { data: "../server", name: "ServerPlatform" };
+      info.Platform = "ServerPlatform";
     else
-      info.Platform = { data: "../browser", name: "WorkerPlatform" };
+      info.Platform = "WorkerPlatform";
 
-    const sendGame = () => worker.postMessage(CBOR.encode(info, BackendGame.CLASSES));
+    function sendGame() {
+      worker.postMessage(CBOR.encode(info, BackendGame.CLASSES));
+    }
 
     // Pass worker messages on to listener
     worker.addEventListener("message", e => {
@@ -118,10 +139,11 @@ function findBestPlay(game, letters, listener, dictionary) {
     });
     /* c8 ignore stop */
 
-    if (isWebWorker)
-      // Web workers need the importmap set up before the game is sent
-      worker.postMessage(document.querySelector(
-        'script[type="importmap"]').textContent);
+    if (usingShim)
+      // The shim requires the importmap to be sent before it loads
+      // findBestPlayWorker. It will then respond with "R" which will
+      // be handler in the messageHandler
+      worker.postMessage(importmap.textContent);
     else
       sendGame();
   }));

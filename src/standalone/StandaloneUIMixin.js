@@ -152,7 +152,7 @@ const StandaloneUIMixin = superclass => class extends superclass {
    * @override
    */
   promiseLayouts() {
-    return Platform.readJSONFile(Platform.getFilePath("css/index.json"));
+    return Platform.getJSON(Platform.absolutePath("css/index.json"));
   }
 
   /**
@@ -162,7 +162,7 @@ const StandaloneUIMixin = superclass => class extends superclass {
    * @override
    */
   promiseLocales() {
-    return Platform.readJSONFile(Platform.getFilePath("i18n/index.json"));
+    return Platform.getJSON(Platform.absolutePath("i18n/index.json"));
   }
 
   /**
@@ -172,7 +172,7 @@ const StandaloneUIMixin = superclass => class extends superclass {
    * @override
    */
   promiseEditions() {
-    return Platform.readJSONFile(Platform.getFilePath("editions/index.json"));
+    return Platform.getJSON(Platform.absolutePath("editions/index.json"));
   }
 
   /**
@@ -182,7 +182,7 @@ const StandaloneUIMixin = superclass => class extends superclass {
    * @override
    */
   promiseDictionaries() {
-    return Platform.readJSONFile(Platform.getFilePath("dictionaries/index.json"));
+    return Platform.getJSON(Platform.absolutePath("dictionaries/index.json"));
   }
 
   /**
