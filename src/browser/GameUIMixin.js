@@ -440,7 +440,7 @@ const GameUIMixin = superclass => class extends superclass {
       this.notify($.i18n("nfy-game-overH"),
                   $.i18n("nfy-game-overB"));
 
-      if (this.player === this.game.getWinner()) {
+      if (this.game.isWinner(player)) {
         if (this.getSetting("cheers"))
           this.playAudio("endCheer");
       } else if (this.getSetting("cheers"))

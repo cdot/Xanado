@@ -42,10 +42,13 @@ class BrowserGame extends Undo(CommandsMixin(Game)) {
   /**
    * Construct a test string giving a friendly description of a list
    * of "things" e.g. `andList(["A","B","C"])` will return `A, B and C`
+   * @param {string[]} list list of things
+   * @return {string} list of things as a string
    */
   static andList(list) {
     if (list.length == 0)
       return "";
+
     if (list.length == 1)
       return list[0];
 
@@ -66,7 +69,7 @@ class BrowserGame extends Undo(CommandsMixin(Game)) {
    * * %k - the key of the game
    * * %l - date the game was last played (or was created if not played yet)
    * * %p - list of players in the game e.g "Player 1 and Player 2"
-   * * %s - final game state e.g. "Game over"
+   * * %s - final game state e.g. "Player 2 won"
    * @return {string} html string
    */
   formatGameInfo(format) {
@@ -87,11 +90,14 @@ class BrowserGame extends Undo(CommandsMixin(Game)) {
       case "p":
         return BrowserGame.andList(this.getPlayers().map(p => p.name));
       case "s":
-        return this.hasEnded()
-        ? (this.getWinner() ? $.i18n("h-won", this.getWinner().name) : "?")
-        : (this.state === Game.State.WAITING
-           ? $.i18n("txt-state-waiting")
-           : $.i18n("txt-state-playing"));
+        if (this.hasEnded()) {
+          const winners = this.getWinners();
+          const who = BrowserGame.andList(winners.map(p => p.name));
+          return $.i18n("h-won", who.length === 0 ? "?" : who);
+        } else if (this.state === Game.State.WAITING)
+          return $.i18n("txt-state-waiting");
+        else
+          return $.i18n("txt-state-playing");
       default:
         assert.fail(`Bad ${p1}`);
       }
@@ -387,7 +393,7 @@ class BrowserGame extends Undo(CommandsMixin(Game)) {
     const $whoWon = $(document.createElement("div")).addClass("game-winner");
     let who;
     let nWinners = 0;
-    if (this.getWinner() === uiPlayer && winners.length === 1)
+    if (this.isWinner(uiPlayer) && winners.length === 1)
       who = $.i18n("You");
     else {
       who = BrowserGame.andList(winners);

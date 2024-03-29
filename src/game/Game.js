@@ -696,13 +696,24 @@ class Game {
   }
 
   /**
-   * Get the current winning player
-   * @return {Player} player in the lead
+   * Determine if the player is a winning player
+   * @param {Player} player the player to check
+   * @return {boolean} true if the player is currently winning (they
+   * may be one of several with the same score!)
    */
-  getWinner() {
-    return this.players.reduce(
-      (best, player) => (player.score > best.score ? player : best),
-      this.players[0]);
+  isWinner(player) {
+    const topScore = this.winningScore();
+    return player.score === topScore;
+  }
+
+  /**
+   * Get a list of the winning players in this game. These are the
+   * players who currently share the high score.
+   * @return {Player[]} list of winning players
+   */
+  getWinners() {
+    const topScore = this.winningScore();
+    return this.players.filter(p => p.score === topScore);
   }
 
   /**
@@ -981,7 +992,7 @@ class Game {
       game.players = [];
       let index = 0;
       while (packed[`P${index}`]) {
-        const p = new Player({}, game.constructor.CLASSES);
+        const p = new this.CLASSES.Player({}, this.CLASSES);
         p.unpack(packed[`P${index}`], edition);
         game.addPlayer(p, false);
         p.rack.forEachTiledSquare(sq => {
@@ -994,7 +1005,7 @@ class Game {
       index = 0;
       game.turns = [];
       while (packed[`T${index}`]) {
-        const t = new Turn();
+        const t = new this.CLASSES.Turn();
         t.unpack(packed[`T${index}`], edition);
         game.turns.push(t);
         index++;

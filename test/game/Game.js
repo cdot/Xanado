@@ -181,7 +181,21 @@ describe("game/Game", () => {
       assert.equal(game.calculateBonus(5), 0);
       assert.equal(game.calculateBonus(6), 0);
       assert.equal(game.calculateBonus(7), 50);
-      assert.equal(game.getWinner(), human4);
+      assert(!game.isWinner(robot1));
+      assert(!game.isWinner(human2));
+      assert(!game.isWinner(human3));
+      assert(game.isWinner(human4));
+
+      human3.score = human4.score;
+      assert(!game.isWinner(robot1));
+      assert(!game.isWinner(human2));
+      assert(game.isWinner(human3));
+      assert(game.isWinner(human4));
+      const whiners = game.getWinners();
+      assert.equal(whiners.length, 2);
+      assert.equal(whiners.find(p => p == human3), human3);
+      assert.equal(whiners.find(p => p == human4), human4);
+
       return game.sendable(um);
     })
     .then(s => {
