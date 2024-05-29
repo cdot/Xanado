@@ -655,7 +655,7 @@ body.games-ui {
 .Surface {
   font-family: helvetica, arial, sans-serif;
   border-collapse: separate;
-  border-spacing: 0;
+  border-spacing: 1px;
 
   border-width: 2px;
   border-style: solid;
