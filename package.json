@@ -48,7 +48,7 @@
 		"jquery": "^3.6.3",
 		"jquery-ui": "^1.13.2",
 		"jquery.cookie": "^1.4.1",
-		"nodemailer": "^6.9.9",
+		"nodemailer": "^7.0.7",
 		"normalize.css": "^8.0.1",
 		"passport": "^0.6.0",
 		"passport-facebook": "^3.0.0",
