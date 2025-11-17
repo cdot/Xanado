@@ -392,7 +392,7 @@ class Server {
   }
 
   /**
-   * Handle game monitor (games interface) ann9ouncing on
+   * Handle game monitor (games interface) announcing on
    * a socket.
    * @param {socket.io} socket the socket
    * @private
@@ -496,7 +496,6 @@ class Server {
   /**
    * Attach the handlers for incoming socket messages from the UI.
    * @param {socket.io} socket the socket to listen to
-   * @private
    */
   attachSocketHandlers(socket) {
     socket
