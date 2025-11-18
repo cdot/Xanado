@@ -45,22 +45,30 @@ class ServerPlatform /* extends Platform */ {
   /**
    * @implements Platform
    */
-  static getFilePath(p) {
+  static absolutePath(p) {
     return path.normalize(`${__dirname}/../../${p || ""}`);
   }
 
   /**
    * @implements Platform
    */
-  static readFile(p) {
+  static getText(p) {
     return Fs.readFile(p)
-    .then(d => /\.json$/.test(p) ? JSON.parse(d.toString()) : d);
+    .then(d => d.toString());
   }
 
   /**
    * @implements Platform
    */
-  static readBinaryFile(p) {
+  static getJSON(p) {
+    return Fs.readFile(p)
+    .then(d => JSON.parse(d.toString()));
+  }
+
+  /**
+   * @implements Platform
+   */
+  static getBinary(p) {
     return Fs.readFile(p);
   }
 }

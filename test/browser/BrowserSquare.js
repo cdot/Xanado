@@ -65,8 +65,8 @@ describe("browser/BrowserSquare", () => {
     sq.$populate($td);
     sq.select(false);
 
-    const $letter = $('<span class="letter">S</span>');
-    const $score = $('<span class="score">0</span>');
+    const $letter = $('<span class="letter letter-scale-1">S</span>');
+    const $score = $('<span class="score score-scale-1">0</span>');
     const $glyph = $('<div class="glyph"></div>');
     $glyph.append($letter).append($score);
     const $tile = $('<div class="Tile ui-draggable ui-draggable-handle unlocked-tile"></div>');
@@ -93,8 +93,8 @@ describe("browser/BrowserSquare", () => {
     sq.$populate($td);
     sq.select(true);
 
-    const $letter = $('<span class="letter">S</span>');
-    const $score = $('<span class="score">0</span>');
+    const $letter = $('<span class="letter letter-scale-1">S</span>');
+    const $score = $('<span class="score score-scale-1">0</span>');
     const $glyph = $('<div class="glyph"></div>');
     $glyph.append($letter).append($score);
     const $tile = $('<div class="Tile ui-draggable ui-draggable-handle unlocked-tile selected"></div>');
@@ -119,8 +119,8 @@ describe("browser/BrowserSquare", () => {
     sq.placeTile(tile, true);
     sq.$populate($td);
 
-    const $letter = $('<span class="letter">W</span>');
-    const $score = $('<span class="score">0</span>');
+    const $letter = $('<span class="letter letter-scale-1">W</span>');
+    const $score = $('<span class="score score-scale-1">0</span>');
     const $glyph = $('<div class="glyph"></div>')
           .append($letter).append($score);
     const $tile = $('<div class="Tile locked-tile"></div>')
@@ -147,8 +147,8 @@ describe("browser/BrowserSquare", () => {
     let tile = new BrowserTile({ letter:'W', isBlank:false });
     sq.placeTile(tile); // should $placeTile
 
-    const $letter = $('<span class="letter">W</span>');
-    const $score = $('<span class="score">0</span>');
+    const $letter = $('<span class="letter letter-scale-1">W</span>');
+    const $score = $('<span class="score score-scale-1">0</span>');
     const $glyph = $('<div class="glyph"></div>')
           .append($letter).append($score);
     const $tile = $('<div class="Tile ui-draggable ui-draggable-handle unlocked-tile"></div>')

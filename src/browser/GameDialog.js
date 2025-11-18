@@ -1,11 +1,13 @@
 /*Copyright (C) 2022 The Xanado Project https://github.com/cdot/Xanado
   License MIT. See README.md at the root of this distribution for full copyright
   and license information. Author Crawford Currie http://c-dot.co.uk*/
+/* eslint-env browser */
 
 /**
  * Dialog for game display. Demand loads the HTML.
  */
 import { Dialog } from "./Dialog.js";
+import { UIEvents } from "./UIEvents.js";
 
 /**
  * Dialog for opening / editing a game
@@ -42,7 +44,7 @@ class GameDialog extends Dialog {
       .on("click", () => {
         this.$dlg.dialog("close");
         const dlg = this.$dlg.data("this");
-        dlg.options.ui.joinGame(dlg.options.game);
+        $(document).trigger(UIEvents.JOIN_GAME, [ dlg.options.game.key ]);
       });
 
       this.$dlg.find("button[name=robot]")
@@ -93,9 +95,9 @@ class GameDialog extends Dialog {
 
     this.$dlg.find("div[name=headline]")
     .empty()
-    .append($.i18n("text-edition", game.edition))
+    .append($.i18n("txt-edition", game.edition))
     .append(game.dictionary
-            ? ("<br>" + $.i18n("text-dictionary", game.dictionary))
+            ? ("<br>" + $.i18n("txt-dictionary", game.dictionary))
             : "");
 
     const $table = this.$dlg.find(".player-table")
@@ -122,7 +124,7 @@ class GameDialog extends Dialog {
         if (!game.getPlayerWithKey(this.options.ui.session.key)
             && ((game.maxPlayers || 0) === 0
                 || game.getPlayers().length < game.maxPlayers))
-          $join.show().button("option", { label: $.i18n("Join game") });
+          $join.show().button("option", { label: $.i18n("btn-join") });
         if (this.options.ui.getSetting("canEmail"))
           $invite.show();
         if (!game.getPlayers().find(p => p.isRobot))

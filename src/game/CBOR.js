@@ -35,8 +35,9 @@ const CBOR_tagHandler = new (KeyDictionaryHandler(
       "isRobot", "canChallenge", "delayBeforePlay",
       // Turn
       "gameKey", "playerKey", "nextToGoKey", "timestamp",
-      "placements", "replacements", "challengerKey", "endState",
-      "tilesRemaining", "time",
+      "placements", "replacements", "challengerKey", "endState", "endStates",
+      // EndState
+      /*key, tiles, */"tilesRemaining", "time",
       // Move
       "words", "word",
       // findBestPlayController

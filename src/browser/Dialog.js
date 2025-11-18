@@ -80,7 +80,7 @@ class Dialog {
     let promise;
     if (this.$dlg.length === 0) {
       // HTML is not already present; load it asynchronously.
-      const path = Platform.getFilePath(
+      const path = Platform.absolutePath(
         `html/${this.options.html || id}.html`);
       promise = $.get(path)
       .then(html_code => {
@@ -169,6 +169,7 @@ class Dialog {
 
     const $selects = this.$dlg.find("select");
     if ($selects.length > 0) {
+
       $selects
       .selectmenu()
       .on("selectmenuchange",
@@ -214,16 +215,16 @@ class Dialog {
         }, 100);
       */
 
-      this.$dlg.find("[data-i18n-tooltip]")
-      .tooltip({
-        items: "[data-i18n-tooltip]",
-        content: function() {
-          return $.i18n($(this).data("i18n-tooltip"));
-        }
-        /* c8 ignore stop */
-      });
-
     }
+
+    this.$dlg.find("[data-i18n-tooltip]")
+    .tooltip({
+      items: "[data-i18n-tooltip]",
+      content: function() {
+        return $.i18n($(this).data("i18n-tooltip"));
+      }
+      /* c8 ignore stop */
+    });
 
     $(".submit", this.$dlg)
     .on("click", () => this.submit());

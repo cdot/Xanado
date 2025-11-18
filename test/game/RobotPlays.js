@@ -10,9 +10,9 @@ import { stringify } from "../../src/common/Utils.js";
 import { TestSocket } from '../TestSocket.js';
 import { Game as _Game } from "../../src/game/Game.js";
 import { Turn as _Turn } from "../../src/game/Turn.js";
-import { Commands } from "../../src/game/Commands.js";
+import { CommandsMixin } from "../../src/game/CommandsMixin.js";
 _Game.USE_WORKERS = false;
-const Game = Commands(_Game);
+const Game = CommandsMixin(_Game);
 const Player = Game.CLASSES.Player;
 const Tile = Game.CLASSES.Tile;
 const Turn = Game.CLASSES.Turn;
@@ -120,7 +120,7 @@ describe("game/RobotPlays", () => {
     socket.on(Game.Notify.TURN, (data, event, seqNo) => {
       assert.equal(seqNo, 1);
       assert.equal(event, Game.Notify.TURN);
-      assert(data.type, Turn.Type.PLAYED);
+      assert.equal(data.type, Turn.Type.PLAYED);
       assert.deepEqual(data.words, [ { word: "AGO", score: 6 } ]);
       assert.equal(data.placements.length, 3);
       assert.equal(data.placements[0].letter, "A");
@@ -285,7 +285,7 @@ describe("game/RobotPlays", () => {
           { key: human.key, tiles: 4 },
           { key: robot.key, tiles: -4, tilesRemaining: "Q" }
         ];
-        assert.deepEqual(turn.score, exp);
+        assert.deepEqual(turn.endStates, exp);
         assert.equal(turn.playerKey, robot.key);
         assert(!turn.nextToGoKey);
         assert.equal(human.score, 103);

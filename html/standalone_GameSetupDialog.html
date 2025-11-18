@@ -4,55 +4,55 @@ and license information. Author Crawford Currie http://c-dot.co.uk-->
 
 <!-- Subset of GameSetupDialog -->
 <div class="dialog-row noturns">
-  <label for="edition" data-i18n-tooltip="tt-edition" data-i18n="Game"></label>
+  <label for="edition" data-i18n-tooltip="tt-edition" data-i18n="lbl-edition"></label>
   <select id="edition" name="edition"></select>
 </div>
 
 <div class="dialog-row">
-  <label for="dictionary" data-i18n-tooltip="tt-dictionary" data-i18n="Dictionary"></label>
+  <label for="dictionary" data-i18n-tooltip="tt-dictionary" data-i18n="lbl-dict"></label>
   <select id="dictionary" name="dictionary">
-    <option value="none" data-i18n="None"></option>
+    <option value="none" data-i18n="e-none"></option>
   </select>
 </div>
 
 <div>
   <fieldset>
-  <legend data-i18n="Challenges"></legend>
+  <legend data-i18n="leg-challenges"></legend>
   <div class="dialog-row">
-    <label for="penalty" data-i18n-tooltip="tt-chall-type" data-i18n="desc-chall-penalty"></label>
+    <label for="penalty" data-i18n-tooltip="tt-chall-type" data-i18n="lbl-chall-type"></label>
     <select id="penalty" name="challengePenalty"></select>
   </div>
   <div class="dialog-row" >
-    <label for="penaltyPoints" data-i18n-tooltip="tt-points-lost" data-i18n="Penalty points"></label>
+    <label for="penaltyPoints" data-i18n-tooltip="tt-points-lost" data-i18n="lbl-points-lost"></label>
     <input type="number" id="penaltyPoints" step="1" placeholder="5" name="penaltyPoints"/>
   </div>
 </div>
 
 <div class="dialog-row">
   <fieldset>
-  <legend data-i18n="label-feedback"></legend>
+  <legend data-i18n="txt-feedback"></legend>
   <div class="dialog-row" >
-    <label for="predictScore" data-i18n-tooltip="tt-predict" data-i18n="Predict score"></label>
+    <label for="predictScore" data-i18n-tooltip="tt-predict" data-i18n="lbl-predict"></label>
     <input type="checkbox" id="predictScore" name="predictScore"/>
   </div>
   <div class="dialog-row">
-    <label for="wordCheck" data-i18n-tooltip="tt-check-type" data-i18n="Word checking"></label>
+    <label for="wordCheck" data-i18n-tooltip="tt-check-type" data-i18n="lbl-check-type"></label>
     <select id="wordCheck" name="wordCheck"></select>
   </div>
   </fieldset>
 </div>
 
-<div class="dialog-row">
-  <label for="allowTakeBack" data-i18n-tooltip="tt-allow-takeback" data-i18n="label-allow-takeback"></label>
+<!-- div class="dialog-row">
+  <label for="allowTakeBack" data-i18n-tooltip="tt-takeback" data-i18n="lbl-takeback"></label>
   <input type="checkbox" id="allowTakeBack"name="allowTakeBack"/>
-</div>
+</div -->
 
 <div class="dialog-row">
-  <label for="allowUndo" data-i18n-tooltip="tt-allow-undo" data-i18n="label-allow-undo"></label>
+  <label for="allowUndo" data-i18n-tooltip="tt-allow-undo" data-i18n="lbl-undo"></label>
   <input type="checkbox" id="allowUndo"name="allowUndo"/>
 </div>
 
 <div class="dialog_row">
-  <button class="submit" data-i18n="Save" autofocus></button>
+  <button class="submit" data-i18n="btn-save" autofocus></button>
 </div>
 

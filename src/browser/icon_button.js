@@ -2,19 +2,21 @@
 
 /**
  * Mini-widget that extends the jquery button widget to simplify using
- * buttons with images for icons. The "icon" option is extended to detect
- * if the icon-name starts with "ui-icon-" and if not, assumes the icon
- * is defined by a CSS class. It also supports specifying the icon name via
- * a data-icon= attribute in HTML. Example CSS:
+ * buttons with images for icons, and no text. The "icon" option is extended
+ * to detect if the icon-name starts with "ui-icon-" and if not, assumes the
+ * icon is styled by the "icon_button" CSS class.
  * ```
- * .icon-search {
- *     background-image: url('../images/search.svg')!important;
- * }
+ * $button.icon_button({ icon: "my-icon" });
  * ```
- * Example HTML:
+ * CSS
  * ```
- * <button class="icon_button" data-icon="icon-search">
- * Search</button>
+ * .my_icon {background-image: url("../images/my_icon.svg")!important; }
+ * ```
+ * The `!important` is required to override jQuery.
+ * ```
+ * It also supports specifying an icon using a `data-icon` attribute in HTML
+ * ```
+ * &lt;button data-icon="my-icon">&lt;/button>
  * ```
  */
 import "jquery";
@@ -23,27 +25,9 @@ import "jquery-ui";
 $.widget("jquery.icon_button", $.ui.button, {
   _create: function () {
     this.options.icon = this.options.icon || this.element.data("icon");
-    if (this.options.icon && !/^ui-icon-/.test(this.options.icon)) {
-      this.options.icons = {
-        primary: this.options.icon
-      };
-      this.options.classes = {
-        "ui-button-icon": "icon_button"
-      };
-      delete this.options.icon;
-    }
-    this.options.text = false;
+    if (typeof this.options.showLabel === "undefined")
+      this.options.showLabel = false;
     this._super();
-  },
-
-  _setOption: function (option, value) {
-    if (option === "icon" && !/^ui-icon-/.test(value)) {
-      option = "icons";
-      value = {
-        primary: value
-      };
-    }
-    this._super(option, value);
   }
 });
 

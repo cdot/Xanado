@@ -43,7 +43,6 @@ describe("browser/GameDialog", () => {
     };
     const meths = {
       observe: "observe",
-      join: "joinGame",
       robot: "addRobot",
       invite: "invitePlayers",
       another: "anotherGame",

@@ -396,19 +396,19 @@ class UserManager {
           if (typeof uo.pass === "undefined") {
             if (desc.pass === uo.pass)
               return uo;
-            throw new Error(/*i18n*/"wrong-pass");
+            throw new Error(/*i18n*/"err-wrong-pass");
           }
           return pw_compare(desc.pass, uo.pass)
           .then(ok => {
             if (ok)
               return uo;
-            throw new Error(/*i18n*/"wrong-pass");
+            throw new Error(/*i18n*/"err-wrong-pass");
           })
           .catch(e => {
             /* c8 ignore next 2 */
             if (this.debug)
               this.debug("UserManager: getUser", desc, "failed; bad pass", e);
-            throw new Error(/*i18n*/"wrong-pass");
+            throw new Error(/*i18n*/"err-wrong-pass");
           });
         }
 
@@ -420,7 +420,7 @@ class UserManager {
       if (this.debug)
         this.debug("UserManager: getUser", desc, "failed; no such user in",
                    db.map(uo=>uo.key).join(";"));
-      throw new Error(/*i18n*/"player-unknown");
+      throw new Error(/*i18n*/"err-player-unknown");
     });
   }
 
@@ -676,7 +676,7 @@ class UserManager {
     return this.getUser({name: username }, true)
     .then(() => {
       this.sendResult(
-        res, 403, [ /*i18n*/"already-registered", username ]);
+        res, 403, [ /*i18n*/"txt-already-reg", username ]);
     })
     .catch(() => {
       // New user
@@ -709,7 +709,7 @@ class UserManager {
         /*i18n*/"signed-out", departed ]));
     }
     return this.sendResult(
-      res, 401, [ "Not signed in" ]);
+      res, 401, [ "txt-nosign" ]);
   }
 
   /**
@@ -729,7 +729,7 @@ class UserManager {
       })));
 
     return this.sendResult(
-      res, 401, [ "Not signed in" ]);
+      res, 401, [ "txt-nosign" ]);
   }
 
   /**
@@ -777,7 +777,7 @@ class UserManager {
         req.session.passport.user.name ]));
     }
     return this.sendResult(
-      res, 401, [ "Not signed in" ]);
+      res, 401, [ "txt-nosign" ]);
   }
 
   /**
@@ -806,20 +806,18 @@ class UserManager {
         return this.config.mail.transport.sendMail({
           from: this.config.mail.sender,
           to:  user.email,
-          subject: Platform.i18n("Password reset"),
-          text: Platform.i18n(
-            "email-reset-plain", url),
-          html: Platform.i18n(
-            "email-reset-body", url)
+          subject: Platform.i18n("eml-respw-subject"),
+          text: Platform.i18n("eml-respw-text", url),
+          html: Platform.i18n("eml-respw-html", url)
         })
         .then(() => this.sendResult(
-          res, 200, [ /*i18n*/"text-reset-sent", user.name ]))
+          res, 200, [ /*i18n*/"txt-respw-sent", user.name ]))
         /* c8 ignore start */
         .catch(
           e => {
             console.error("WARNING: Mail misconfiguration?", e);
             return this.sendResult(
-              res, 500, [  /*i18n*/"text-no-email" ]);
+              res, 500, [  /*i18n*/"txt-no-email" ]);
           });
         /* c8 ignore stop */
       });
@@ -849,7 +847,7 @@ class UserManager {
         key: req.user.key,
         settings: req.user.settings
       });
-    return this.sendResult(res, 401, [ "Not signed in" ]);
+    return this.sendResult(res, 401, [ "txt-nosign" ]);
   }
 
   /**
@@ -871,7 +869,7 @@ class UserManager {
         .then(() => this.sendResult(res, 200, req.user.settings));
       });
     }
-    return this.sendResult(res, 401, [ "Not signed in" ]);
+    return this.sendResult(res, 401, [ "txt-nosign" ]);
   }
 
   /**
@@ -884,7 +882,7 @@ class UserManager {
   checkLoggedIn(req, res, next) {
     if (req.isAuthenticated())
       return next();
-    return this.sendResult(res, 401, [ "Not signed in" ]);
+    return this.sendResult(res, 401, [ "txt-nosign" ]);
   }
 }
 

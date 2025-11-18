@@ -133,17 +133,14 @@ body {
  */
 .icon-robot {
   background-image: url('../images/robot-face.svg') !important;
-  background-size: 16px 16px;
 }
 
 .icon-person {
   background-image: url('../images/person.svg') !important;
-  background-size: 16px 16px;
 }
 
 .icon-winner {
   background-image: url('../images/winner.svg') !important;
-  background-size: 16px 16px;
   color: #f3c716ff;
 }
 
@@ -221,6 +218,8 @@ body.games-ui {
 
 /* wrap around the sign out button */
 .signed-in {
+  display: flex;
+  
 }
 
 #gamesCumulative {
@@ -288,7 +287,7 @@ body.games-ui {
 
 @media screen and (max-aspect-ratio: 1/1) {
   body {
-    margin: 10px;
+/*    margin: 10px;*/
   }
 
   #signinState {
@@ -343,11 +342,11 @@ body.games-ui {
 /*------------ LOGIN BLOCK ------------*/
 
 /* Settings and signout div */
-#undoButton {
+#undo-button {
   display: none;
 }
 
-#redoButton {
+#redo-button {
   display: none;
 }
 
@@ -394,11 +393,6 @@ body.games-ui {
 /* #yourPlayBlock > div showing the proposed move */
 #playBlock .your-move {
   margin-bottom: 0.2vw;
-}
-
-/* Button for making a play */
-#playBlock .action-button {
-  font-size: 130%;
 }
 
 /*------------ CHAT BLOCK ------------*/
@@ -547,7 +541,7 @@ body.games-ui {
   align-items: center;
 }
 
-#distributionButton {
+#distribution-button {
   font-weight: bold;
 }
 
@@ -556,16 +550,6 @@ body.games-ui {
 
 #playRack .controls {
   display: flex;
-}
-
-/* rack control buttons - shuffle, unplace */
-#playRack .shuffle-button {
-  font-size: 1.2em;
-}
-
-#playRack .unplace-button {
-  font-size: 1.2em;
-  visibility: hidden;
 }
 
 /*------------ SWAP RACK ------------*/
@@ -604,12 +588,15 @@ body.games-ui {
 
 /*------------ LANDSCAPE SCREEN ------------*/
 @media screen and (min-aspect-ratio: 1/1) {
-  #playBlock .action-button {
-    display: inline-block;
-  }
-
+  /* hide the rack action button */
   #playRack .action-button {
     display: none!important;
+  }
+
+  /* show the block action button instead */
+  #playBlock .action-button {
+    font-size: 130%;
+    display: inline-block;
   }
 
   /* Wraps UI components in game */
@@ -626,12 +613,10 @@ body.games-ui {
 
   /* Override Surface - Board is full width */
   #board {
-    margin-top: 30px;
-    margin-left: 0;
+    margin-top: 16px;
     width: 100vw;
     aspect-ratio: 1/1;
     height: auto;
-    padding: 2px;
   }
 
   /* Blocks are full width. flex layout deals with it. */
@@ -640,10 +625,12 @@ body.games-ui {
     margin: 0;
   }
 
+  /* hide the block action button */
   #playBlock .action-button {
     display: none;
   }
 
+  /* show the rack action button instead */
   #playRack .action-button {
     display: inline-block;
   }
@@ -668,7 +655,7 @@ body.games-ui {
 .Surface {
   font-family: helvetica, arial, sans-serif;
   border-collapse: separate;
-  border-spacing: 0;
+  border-spacing: 1px;
 
   border-width: 2px;
   border-style: solid;
@@ -734,14 +721,14 @@ body.games-ui {
 }
 
 .Surface td {
-  width: 2.3em;      /* Edited in code */
-  height: 2.3em;     /* Edited in code */
-  font-size: 2em;    /* Edited in code */
-  line-height: 1em;  /* Edited in code */
+  width: 6.25vh;      /* Edited in GameUIMixin.handle_resize() */
+  height: 6.25vh;     /* Edited in GameUIMixin.handle_resize() */
+  font-size: 5vh;    /* Edited in GameUIMixin.handle_resize() */
+  line-height: 2.5vh;  /* Edited in GameUIMixin.handle_resize() */
 
   background-color: #BEB9A6;
   border-style: solid;
-  border-width: 2px;
+  border-width: 0.002vh;
   border-color: #AAA38E;
   white-space: normal;
   overflow: hidden;
@@ -849,21 +836,32 @@ body.games-ui {
 .Tile .glyph {
 }
 
-/* 2 or more letters in a glyph shrink it proportionally.
- * Add glyph-length-4 etc as needed.
+/* Used to scale the letters and score in a tile to fit. See
+ * src/browser/BrowserTile.js
  * TODO: this would be better done as part of the
  * edition, as unicode characters may vary in width. */
-.glyph-length-2 {
+.letter-scale-1 {
+  font-size: 120%;
+}
+
+.letter-scale-2 {
+  font-size: 75%;
+}
+
+.letter-scale-3 {
+  font-size: 60%;
+}
+
+.score-scale-1 {
   font-size: 80%;
 }
 
-.glyph.length-3 {
-  font-size: 60%;
+.score-scale-2 {
+  font-size: 55%;
 }
 
 /* The letter represented by a tile */
 .Tile .glyph .letter {
-  font-size: 120%;
   font-weight: normal;
   line-height: 160%;
   padding-left: 2px;
@@ -871,7 +869,6 @@ body.games-ui {
 
 /* The score for a tile */
 .Tile .glyph .score {
-  font-size: 80%;
   vertical-align: sub;
   padding-left: 2px;
 }
@@ -972,32 +969,37 @@ body.games-ui {
 }
 
 /* Override jquery-ui for shuffle and take-back buttons */
-.fat-button {
-  width: 2em;
-  height: 2em;
-}
-
-/* Shuffle and unplace fat icon buttons */
-
-.fat-icon {
-  margin: 2px;
+.fat-button span.ui-icon {
   background-size: 100% 100%;
   background-position: center;
-  margin-top: -15px !important;
-  margin-left: -15px !important;
+  margin-top: 2px;
   width: 32px !important;
   height: 32px !important;
 }
 
 /* shuffle fat button icon */
 .shuffle-icon {
-  background-image: url('../images/shuffle.png') !important;
+  background-image: url('../images/shuffle.svg') !important;
 }
 
 /* unplace button icon */
 .unplace-icon {
-  background-image: url('../images/take-back.png') !important;
+  background-image: url('../images/take-back.svg') !important;
 }
+
+.icon_button {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+/* These have to be !important to override .ui-icon */
+.library-icon {background-image: url("../images/library.svg") !important;}
+.pause-icon {background-image: url("../images/pause.svg") !important;}
+.personalise-icon {background-image: url("../images/personalise.svg") !important;}
+.setup-icon {background-image: url("../images/setup.svg") !important; }
+.share-icon {background-image: url("../images/share.svg") !important; }
+.redo-icon {background-image: url("../images/redo.svg") !important;}
+.undo-icon {background-image: url("../images/undo.svg") !important;}
 
 .rack {
   border-width: 0.2em;
@@ -1007,16 +1009,21 @@ body.games-ui {
 /*
  * Styling specific to standalone interfaces
  */
-#standalone_topBlock {
+#standalone_topBlock, .signed-in {
   display: flex;
   justify-content: space-between;
+}
+
+.signed-in div {
+  display: inline;
+  margin-right: 1em;
 }
 
 /*
  * Styling specific to client interfaces
  */
 #client_toolbox {
-  float: right;
+  display: inline;
 }
 
 /* This took a lot of faffing around to get right! */

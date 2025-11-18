@@ -7,7 +7,7 @@ and license information. Author Crawford Currie http://c-dot.co.uk-->
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta charset="utf-8" />
     <!-- base href=".." This breaks $.tabs(), hard, so don't do it /-->
-    <link rel="icon" href="../images/favicon.ico" type="image/x-icon" />
+    <link rel="icon" href="../images/xanado_favicon.png" type="image/x-icon" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
 
     <title>Create/Join Game</title>
@@ -44,30 +44,30 @@ and license information. Author Crawford Currie http://c-dot.co.uk-->
     </div>
     <div class="waiting ui-widget">
       <img src="../images/logo.svg" class="xanado-logo" />
-      <div id="personaliseButton" style="float:right" data-i18n-tooltip="tt-personalise">&#9881;</div>
+      <button id="personalise-button" style="float:right" data-i18n-tooltip="tt-personalise"></button>
       <div id="gamesCumulative">
-        <h2 data-i18n="Leader Board"></h2>
+        <h2 data-i18n="h-leader-board"></h2>
         <div id="playerList">
         </div>
       </div>
 
       <div id="gamesCumulative">
-        <h2 data-i18n="Leader Board"></h2>
+        <h2 data-i18n="h-leader-board"></h2>
         <div id="playerList">
         </div>
       </div>
 
       <div id="gamesKnown">
         <h2 data-i18n="Games"></h2>
-        <label for="showAllGames" data-i18n="Show finished games"></label>
+        <label for="showAllGames" data-i18n="lbl-showall"></label>
         <input type="checkbox" id="showAllGames" />
         <table id="gamesList">
           <thead>
             <tr>
-              <th data-i18n="ID"></th>
-              <th data-i18n="Edition"></th>
-              <th data-i18n="Last play"></th>
-              <th data-i18n="State"></th>
+              <th data-i18n="th-key"></th>
+              <th data-i18n="th-edition"></th>
+              <th data-i18n="th-lastplay"></th>
+              <th data-i18n="th-state"></th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -75,11 +75,18 @@ and license information. Author Crawford Currie http://c-dot.co.uk-->
       </div>
 
       <div class="dialog-row">
-        <button id="create-game" data-i18n="label-create-game"></button>
+        <button id="create-game" data-i18n="btn-create-new-game"></button>
       </div>
     </div>
 
     <div id="alertDialog" class="dialog">
+    </div>
+
+    <div id="enjoyDialog" class="dialog">
+      <div class="dialog-row" data-i18n="txt-enjoy"></div>
+      <div class="dialog-row">
+        <button name="join" data-i18n="btn-join" data-i18n-tooltip="tt-join"></button>
+      </div>
     </div>
   </body>
 </html>

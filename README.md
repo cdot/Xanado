@@ -195,7 +195,7 @@ dictionaries. Included with the installation are a number of pre-built dictionar
 
 See [DEVELOPING](DEVELOPING.md) for help on creating your own dictionary.
 
-To help in dictionary development there is a simple user interface that lets you explore anagrams and hangmen arrangements of letters in the various dictionaries. You can find it [here](https://cdot.github.io/Xanado/dist/solver.html).
+To help in dictionary development there is a simple user interface that lets you explore anagrams and hangmen arrangements of letters in the various dictionaries. You can find it [here](https://cdot.github.io/Xanado/html/solver.html).
 
 ## Whitelists
 Regenerating a dictionary can be time consuming, so dictionaries can

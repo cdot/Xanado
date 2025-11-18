@@ -41,9 +41,11 @@ class BrowserTile extends Tile {
       .append($glyph);
     }
 
-    // Vary the font to accommodate longer strings
-    if (this.letter.length > 1)
-      this._$tile.find(".glyph").addClass(`length-${this.letter.length}`);
+    // Vary the fonts to accommodate longer strings
+    let len = this.letter.length;
+    this._$tile.find(".letter").addClass(`letter-scale-${len}`);
+    len = String(this.score).length;
+    this._$tile.find(".score").addClass(`score-scale-${len}`);
 
     // Associate the square passed with the tile UI. This is only
     // used when dragging the tile away from the square, so we know

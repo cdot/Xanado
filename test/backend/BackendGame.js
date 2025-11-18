@@ -6,7 +6,7 @@ import { assert } from "chai";
 import { TestSocket } from '../TestSocket.js';
 import { MemoryDatabase } from "../MemoryDatabase.js";
 import sparseEqual from "../sparseEqual.js";
-import { setupPlatform, getTestGame } from "../TestPlatform.js";
+import { setupPlatform, getTestGame, UNit } from "../TestPlatform.js";
 
 import { CBOR } from "../../src/game/CBOR.js";
 import { Game } from "../../src/game/Game.js";
@@ -215,11 +215,7 @@ describe("backend/BackendGame", () => {
 		let game, newgame, reload;
 		const db = new MemoryDatabase();
     // Load from the test dir, but save to memory
-		return new FileDatabase({
-      dir: "test/data", ext: "game"
-    })
-    .get("unfinished_game")
-    .then(d => CBOR.decode(d, BackendGame.CLASSES))
+		return getTestGame("unfinished_game", BackendGame)
 		.then(g => game = g)
 		.then(() => game.onLoad(db))
     .then(() => {
@@ -290,12 +286,12 @@ describe("backend/BackendGame", () => {
       reload._debug = game._debug;
       delete(game.nextGameKey);
 
-      return Promise.all([reload.jsonable(), game.jsonable()])
+      return Promise.all([reload.sendable(), game.sendable()])
       .then(s => assert.deepEqual(s[0], s[1]));
     })
     .then(() => reload.playIfReady()) // should start the clock
     .then(() => assert(reload.stopTheClock()))
-    .then(() => Promise.all([reload.jsonable(), game.jsonable()]))
+    .then(() => Promise.all([reload.sendable(), game.sendable()]))
     .then(s => assert.deepEqual(s[0], s[1]));
 	});
 
@@ -304,27 +300,24 @@ describe("backend/BackendGame", () => {
 		const socket1 = new TestSocket("one");
 		const socket2 = new TestSocket("two");
 		socket1.on(BackendGame.Notify.MESSAGE, mess => {
-      if (mess.text === "hinted")
+      if (mess.text === "txt-hinted")
         return;
-      assert.equal(mess.args[0], "TRAWL", mess);
+      assert.equal(mess.args[0], "LO,TRAIL", mess);
+      assert.equal(mess.args[1], 4, mess); // col
+      assert.equal(mess.args[2], 1, mess); // row
+      assert.equal(mess.args[3], 14, mess); // points
       socket1.done();
 		})
     .on("*", () => {});
 		socket2.on(BackendGame.Notify.MESSAGE, mess => {
-      if (mess.text === "hinted")
+      if (mess.text === "txt-hinted")
         return;
       assert.equal(mess.text, "log-no-play");
       socket2.done();
 		})
     .on("*", () => {});
-		const db = new FileDatabase({
-      dir: "test/data", ext: "game"
-    });
-		return db.get("unfinished_game")
-    .then(d => CBOR.decode(d, BackendGame.CLASSES))
+		return getTestGame("unfinished_game", BackendGame)
 		.then(g => game = g)
-    //.then(() => game._debug = console.debug)
-		.then(() => game.onLoad(db))
 		.then(() => game.connect(socket1, game.getPlayer().key))
 		.then(() => game.hint(game.getPlayer()))
     .then(() => socket1.wait())
@@ -342,13 +335,8 @@ describe("backend/BackendGame", () => {
 
 	it("advise", () => {
 		let game;
-		const db = new FileDatabase({
-      dir: "test/data", ext: "game"
-    });
-		return db.get("unfinished_game")
-    .then(d => CBOR.decode(d, BackendGame.CLASSES))
+		return getTestGame("unfinished_game", BackendGame)
 		.then(g => game = g)
-    .then(() => game.onLoad(new MemoryDatabase()))
 		.then(() => game.anotherGame("human"))
 		.then(() => game.toggleAdvice(game.getPlayer()))
 		.then(() => game.advise(game.getPlayer(), 1));
@@ -359,11 +347,8 @@ describe("backend/BackendGame", () => {
     const players = [];
     for (let i = 0; i < 8; i++)
       players.push(new Player( {key: i}, BackendGame.CLASSES));
-		const db = new FileDatabase({dir: "test/data", ext: "game" });
-		return db.get("unfinished_game")
-    .then(d => CBOR.decode(d, BackendGame.CLASSES))
+		return getTestGame("unfinished_game", BackendGame)
 		.then(g => game = g)
-    .then(() => game.onLoad(new MemoryDatabase()))
     .then(() => {
       game.turns = [];
       //game._debug = console.debug;

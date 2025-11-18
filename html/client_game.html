@@ -7,7 +7,7 @@ and license information. Author Crawford Currie http://c-dot.co.uk-->
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta charset="utf-8" />
     <!-- base href="/" This breaks $.tabs(), hard, so don't do it /-->
-    <link rel="icon" href="../images/favicon.ico" type="image/x-icon" />
+    <link rel="icon" href="../images/xanado_favicon.png" type="image/x-icon" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
 
     <title>Xanado</title>
@@ -50,54 +50,55 @@ and license information. Author Crawford Currie http://c-dot.co.uk-->
             <!-- board will be created here in code -->
           </table>
           <div id="playRack">
-            <button id="distributionButton" data-i18n-tooltip="tt-distribution">{...}</button>
+            <button id="distribution-button" data-i18n-tooltip="tt-distribution">{...}</button>
             <table class="Surface rack">
               <!-- rack will be created here in code -->
             </table>
             <div class="controls">
-              <button class="shuffle-button fat-button"></button>
-              <button class="unplace-button fat-button"></button>
-              <button class="action-button" data-action="pass" data-i18n="Pass">
+              <button id="shuffle-button"></button>
+              <button id="unplace-button"></button>
+              <!-- identified by class because there are several -->
+              <button class="action-button" data-action="pass" data-i18n="btn-pass">
             </div>
           </div>
         </div>
         <div id="blocks" class="ui-widget">
           <div id="signinBlock" class="block">
-            <div class="signed-in block-title">
-              <span id="whoami"></span>
+            <div class="signed-in block-title client-game">
+              <div id="id"></div>
               <div id="client_toolbox">
-                <span id="personaliseButton" data-i18n-tooltip="tt-personalise">&#9881;</span>
-                <span id="pauseButton" data-i18n-tooltip="tt-pause">&#128336;</span>
-                <span id="redoButton" data-i18n-tooltip="tt-redo">&#11023;</span>
-                <span id="undoButton" data-i18n-tooltip="Undo the last play">&#11024;</span>
+                <button id="personalise-button" data-i18n-tooltip="tt-personalise"></button>
+                <button id="pause-button" data-i18n-tooltip="tt-pause"></button>
+                <button id="redo-button" data-i18n-tooltip="tt-redo"></button>
+                <button id="undo-button" data-i18n-tooltip="tt-undo"></button>
               </div>
             </div>
             <div class="bad-user">
-              <button data-i18n="Sign out"></button>
+              <button data-i18n="btn-signout"></button>
             </div>
-            <div class="not-playing" data-i18n="text-not-playing"></div>
+            <div class="not-playing" data-i18n="txt-observer"></div>
             <div class="not-signed-in">
               <span class="observer"></span>
-              <button id="signin-button" data-i18n="Sign in" style="display:inline"></button>
+              <button id="signin-button" data-i18n="btn-signin" style="display:inline"></button>
             </div>
           </div>
+          <div id="playBlock" class="block">
+            <div class="block-title" data-i18n="Play"></div>
+            <div class="your-move"></div>
+            <table id="swapRack" class="Surface rack bottom-shade">
+              <!-- swap rack will be created here in code -->
+            </table>
+            <button class="action-button" data-action="pass" data-i18n="btn-pass">
+            </button>
+          </div>          
           <div id="scoresBlock" class="block">
             <div class="block-title" data-i18n="Scores"></div>
             <div class="playerList"></div>
             <div class="observerCount"></div>
             <div class="letterbag"></div>
           </div>
-          <div id="playBlock" class="block signed-in">
-            <div class="block-title" data-i18n="Play"></div>
-            <div class="your-move"></div>
-            <table id="swapRack" class="Surface rack bottom-shade">
-              <!-- swap rack will be created here in code -->
-            </table>
-            <button class="action-button" data-action="pass" data-i18n="Pass">
-            </button>
-          </div>          
           <div id="chatBlock" class="block">
-            <div class="block-title" data-i18n="Chat"></div>
+            <div class="block-title" data-i18n="txt-chat"></div>
             <div><input id="chatInput" tabindex="1" /></div>
           </div>
           <div id="logBlock" class="block">
@@ -107,7 +108,7 @@ and license information. Author Crawford Currie http://c-dot.co.uk-->
         </div>
 
         <div id="blankDialog" class="dialog">
-          <span data-i18n="label-blank-dlg"></span>
+          <span data-i18n="txt-blank-dlg"></span>
           <table class="letterTable"></table>
         </div>
 
@@ -118,9 +119,6 @@ and license information. Author Crawford Currie http://c-dot.co.uk-->
         <div id="alertDialog" class="dialog">
         </div>
 
-        <div id="pauseDialog" class="dialog">
-          <span class="banner"></span>
-        </div>
       </div>
     </div>
   </body>

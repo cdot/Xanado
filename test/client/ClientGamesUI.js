@@ -1,9 +1,8 @@
 /* See README.md at the root of this distribution for copyright and
    license information */
 /* eslint-env mocha, node */
-
-/* global Platform */
-/* global server */
+/* global before, it, describe, after, beforeEach */
+/* global Platform, server */
 
 import { promises as Fs } from "fs";
 
@@ -13,6 +12,7 @@ import { setupPlatform, setup$, setupI18n,
          getTestGame, StubServer, UNit } from "../TestPlatform.js";
 import { TestSocket } from "../TestSocket.js";
 import { Game } from "../../src/game/Game.js";
+import { UIEvents } from "../../src/browser/UIEvents.js";
 
 describe("client/ClientGamesUI", () => {
 
@@ -52,7 +52,7 @@ describe("client/ClientGamesUI", () => {
     () => setupPlatform()
     .then(() => setup$(
       `${import.meta.url}/../../html/client_games.html`,
-      Platform.getFilePath("/html/client_games.html")))
+      Platform.absolutePath("/html/client_games.html")))
     .then(() => setupI18n())
     // UI imports jquery.i18n which requires jquery, so have
     // to delay the import
@@ -63,11 +63,19 @@ describe("client/ClientGamesUI", () => {
       window.open = () => {};
       keep.location = global.location;
       global.location = { href: "here", hash: "" };
+      for (const key of Object.keys(UIEvents))
+        $(document).off(key);
     }));
 
   after(() => {
     window.open = keep.open;
     global.location = keep.location;
+  });
+
+  beforeEach(() => {
+    for (const key of Object.values(UIEvents)) {
+      $(document).off(key);
+    }
   });
 
   it("handlers", () => {
@@ -81,7 +89,7 @@ describe("client/ClientGamesUI", () => {
       "/sendReminder/*": Promise.resolve([ "anon", "anon@anon.gov.us" ]),
       "/signout": Promise.resolve(),
       "/locales": {
-        promise: Platform.readFile(Platform.getFilePath("/i18n/index.json")),
+        promise: Platform.getJSON(Platform.absolutePath("/i18n/index.json")),
         count: 2
       },
       "/games/active": {
@@ -89,12 +97,12 @@ describe("client/ClientGamesUI", () => {
         count: 2
       },
       "/history": Promise.resolve([]),
-      "/css": Platform.readFile(Platform.getFilePath("/css/index.json")),
+      "/css": Platform.getJSON(Platform.absolutePath("/css/index.json")),
       "/oauth2-providers": Promise.resolve([{name: "A"}, {name:"B"}]),
       "/editions": 
-      Platform.readFile(Platform.getFilePath("/editions/index.json")),
+      Platform.getJSON(Platform.absolutePath("/editions/index.json")),
       "/dictionaries":
-      Platform.readFile(Platform.getFilePath("/dictionaries/index.json"))
+      Platform.getJSON(Platform.absolutePath("/dictionaries/index.json"))
     });
 
     const ui = new ClientGamesUI();
@@ -106,26 +114,28 @@ describe("client/ClientGamesUI", () => {
       () => {
         assert($("#signin-button").length === 1);
         $("#signin-button").trigger("click");
-      }, {
-        //debug: console.debug
-      }))
+      }
+      //,{ debug: console.debug }
+    ))
     .then(() => {
-      //console.debug("Logged in");
+      console.debug("Logged in");
       $("#signout-button").trigger("click");
     })
     .then(() => expectDialog(
       "UserSettingsDialog",
-      () => $("#personaliseButton").trigger("click")))
-    .then(() => {
-      return expectDialog(
-        "GameSetupDialog",
-        () => $("#create-game").trigger("click"));
-    })
+      () => $("#personalise-button").trigger("click")
+      //,{ debug: console.debug }
+    ))
+    .then(() => expectDialog(
+      "GameSetupDialog",
+      () => $("#create-game").trigger("click")
+      //,{ debug: console.debug }
+    ))
     .then(() => {
       $("#reminders-button").trigger("click");
       $("#chpw-button").trigger("click");
     })
-    .then(() => server.wait());
+    .then(() => server.wait(true));
   });
 
   it("gameOptions", () => {
@@ -138,10 +148,10 @@ describe("client/ClientGamesUI", () => {
       "/defaults/game": Promise.resolve(GAME_DEFAULTS),
       "/games/active": Promise.resolve([]),
       "/dictionaries":
-      Platform.readFile(Platform.getFilePath("/dictionaries/index.json")),
+      Platform.getJSON(Platform.absolutePath("/dictionaries/index.json")),
       "/editions": 
-      Platform.readFile(Platform.getFilePath("/editions/index.json")),
-      "/locales": Platform.readFile(Platform.getFilePath("/i18n/index.json"))
+      Platform.getJSON(Platform.absolutePath("/editions/index.json")),
+      "/locales": Platform.getJSON(Platform.absolutePath("/i18n/index.json"))
     });
     const ui = new ClientGamesUI();
     ui.channel = new TestSocket("client");
@@ -161,17 +171,22 @@ describe("client/ClientGamesUI", () => {
       "/defaults/user": Promise.resolve(USER_DEFAULTS),
       "/defaults/game": Promise.resolve(GAME_DEFAULTS),
       "/games/active": Promise.resolve([]),
-      "/games/unfinished_game": getTestGame("unfinished_game", Game)
-      .then(game => Promise.resolve([game])),
-      "/join/unfinished_game": Promise.resolve({}),
-      "/locales": Platform.readFile(Platform.getFilePath("/i18n/index.json"))
-    });
+      "/join/unfinished_game": {
+        promise: Promise.resolve({}),
+        count: 1
+      },
+      "/locales": Platform.getJSON(Platform.absolutePath("/i18n/index.json"))
+    }
+                                  //, console.debug
+                                 );
     const ui = new ClientGamesUI();
     ui.channel = new TestSocket("client");
     ui.session = session;
     return ui.create()
     .then(() => getTestGame("unfinished_game", Game))
-    .then(game => ui.joinGame(game))
+    .then(game => {
+      $(document).trigger(UIEvents.JOIN_GAME, [ game.key ]);
+    })
     .then(() => server.wait());
   });
 
@@ -184,9 +199,9 @@ describe("client/ClientGamesUI", () => {
       "/defaults/user": Promise.resolve(USER_DEFAULTS),
       "/defaults/game": Promise.resolve(GAME_DEFAULTS),
       "/games/active": Promise.resolve([]),
-      "/locales": Platform.readFile(Platform.getFilePath("/i18n/index.json")),
+      "/locales": Platform.getJSON(Platform.absolutePath("/i18n/index.json")),
       "/dictionaries":
-      Platform.readFile(Platform.getFilePath("/dictionaries/index.json"))
+      Platform.getJSON(Platform.absolutePath("/dictionaries/index.json"))
     });
     const ui = new ClientGamesUI();
     ui.channel = new TestSocket("client");
@@ -207,7 +222,7 @@ describe("client/ClientGamesUI", () => {
       "/defaults/game": Promise.resolve(GAME_DEFAULTS),
       "/games/active": Promise.resolve([]),
       "/users": Promise.resolve(["id", "iot"]),
-      "/locales": Platform.readFile(Platform.getFilePath("/i18n/index.json"))
+      "/locales": Platform.getJSON(Platform.absolutePath("/i18n/index.json"))
     });
     const ui = new ClientGamesUI();
     ui.channel = new TestSocket("client");
@@ -231,7 +246,7 @@ describe("client/ClientGamesUI", () => {
         count: 2
       },
       "/anotherGame/unfinished_game": Promise.resolve(),
-      "/locales": Platform.readFile(Platform.getFilePath("/i18n/index.json"))
+      "/locales": Platform.getJSON(Platform.absolutePath("/i18n/index.json"))
     });
     const ui = new ClientGamesUI();
     ui.channel = new TestSocket("client");
@@ -255,7 +270,7 @@ describe("client/ClientGamesUI", () => {
         count: 2
       },
       "/deleteGame/unfinished_game": Promise.resolve(),
-      "/locales": Platform.readFile(Platform.getFilePath("/i18n/index.json"))
+      "/locales": Platform.getJSON(Platform.absolutePath("/i18n/index.json"))
     });
     const ui = new ClientGamesUI();
     ui.channel = new TestSocket("client");
@@ -275,7 +290,7 @@ describe("client/ClientGamesUI", () => {
       "/defaults/user": Promise.resolve(USER_DEFAULTS),
       "/defaults/game": Promise.resolve(GAME_DEFAULTS),
       "/games/active": Promise.resolve([]),
-      "/locales": Platform.readFile(Platform.getFilePath("/i18n/index.json"))
+      "/locales": Platform.getJSON(Platform.absolutePath("/i18n/index.json"))
     });
     const ui = new ClientGamesUI();
     ui.channel = new TestSocket("client");
@@ -294,7 +309,7 @@ describe("client/ClientGamesUI", () => {
       },
       "/defaults/user": Promise.resolve(USER_DEFAULTS),
       "/defaults/game": Promise.resolve(GAME_DEFAULTS),
-      "/locales": Platform.readFile(Platform.getFilePath("/i18n/index.json")),
+      "/locales": Platform.getJSON(Platform.absolutePath("/i18n/index.json")),
       "/history": Promise.resolve([]),
 
       "/games/active": {
@@ -302,7 +317,7 @@ describe("client/ClientGamesUI", () => {
           getTestGame("unfinished_game", Game),
           getTestGame("good_game", Game)
         ])
-        .then(games => Promise.all(games.map(game => game.jsonable()))),
+        .then(games => Promise.all(games.map(game => game.sendable()))),
         count: 2
       }
     });
@@ -316,7 +331,7 @@ describe("client/ClientGamesUI", () => {
     return ui.create()
     .then(() => ui.readyToListen())
     .then(() => {
-      // Clicking on a gameTableRow should invoke GameDialog, which
+      // Clicking on a TR should invoke GameDialog, which
       // will invoke $player.
       assert.equal($("#unfinished_game").length, 1);
       $("#unfinished_game").trigger("click");

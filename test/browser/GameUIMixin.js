@@ -54,7 +54,7 @@ describe("browser/GameUIMixin", () => {
     $("head").empty();
     $("body").html(`
 <div id="blankDialog" class="dialog">
- <span data-i18n="label-blank-dlg"></span>
+ <span data-i18n="txt-blank-dlg"></span>
  <table class="letterTable"></table>
 </div>
 
@@ -62,7 +62,7 @@ describe("browser/GameUIMixin", () => {
  <div class="distribution"></div>
 </div>
 
-<button id="distributionButton">
+<button id="distribution-button">
 
 <div id="logBlock">
  <div class="messages">
@@ -104,7 +104,7 @@ describe("browser/GameUIMixin", () => {
   });
 
   it("distribution", () => {
-    $("#distributionButton").trigger("click");
+    $("#distribution-button").trigger("click");
   });
 
   it("letters", () => {

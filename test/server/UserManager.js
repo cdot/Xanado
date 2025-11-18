@@ -61,7 +61,7 @@ describe("server/UserManager", () => {
     .get("/session")
     .then(res => {
       assert.equal(res.status, 401);
-      assert.deepEqual(res.body, ["Not signed in"]);
+      assert.deepEqual(res.body, ["txt-nosign"]);
     });
   });
 
@@ -104,8 +104,7 @@ describe("server/UserManager", () => {
           .send(details))
     .then(res => {
       assert.equal(res.status, 403);
-      assert.deepEqual(res.body, [
-        "already-registered", "test_user"]);
+      assert.deepEqual(res.body, ["txt-already-reg", "test_user"]);
     });
   });
 
@@ -172,7 +171,7 @@ describe("server/UserManager", () => {
           }))
     .then(res => {
       assert.equal(res.status, 401);
-      // NO! assert.deepEqual(res.body, ["Not signed in"]);
+      // NO! assert.deepEqual(res.body, ["txt-nosign"]);
     })
     // Right password
     .then(() => signin(server, {
@@ -193,7 +192,7 @@ describe("server/UserManager", () => {
     })
     .then(res => {
       assert.equal(res.status, 401);
-      assert.deepEqual(res.body, ["Not signed in"]);
+      assert.deepEqual(res.body, ["txt-nosign"]);
 
       // User with null password
       return register(server, {
@@ -209,7 +208,7 @@ describe("server/UserManager", () => {
           }))
     .then(res => {
       assert.equal(res.status, 401);
-      // NO! assert.deepEqual(res.body, ["Not signed in"]);
+      // NO! assert.deepEqual(res.body, ["txt-nosign"]);
       return signin(server, { signin_username: "test2_user" });
     });
   });
@@ -277,7 +276,7 @@ describe("server/UserManager", () => {
     .then(res => {
       //console.log(res.body);
       assert.equal(res.status, 401);
-      sparseEqual(res.body, [ 'Not signed in']);
+      sparseEqual(res.body, [ 'txt-nosign']);
 
       return signin(server, {
         signin_username: "test_user", signin_password: "test_pass"
@@ -332,7 +331,7 @@ describe("server/UserManager", () => {
       //console.log(res.body);
       assert.equal(res.status, 403);
       sparseEqual(res.body, [
-        "player-unknown",
+        "err-player-unknown",
         "unknown@email.com"
       ]);
 
@@ -344,7 +343,7 @@ describe("server/UserManager", () => {
       //console.log(res.text, token);
       assert.equal(res.status, 200);
       sparseEqual(res.body, [
-        "text-reset-sent",
+        "txt-respw-sent",
         "test_user"
       ]);
       assert(token);
@@ -375,7 +374,7 @@ describe("server/UserManager", () => {
           .send({password: "wtf"}))
     .then(res => {
       assert.equal(res.status, 401);
-      sparseEqual(res.body, ["Not signed in"]);
+      sparseEqual(res.body, ["txt-nosign"]);
 
       return signin(server, {
         signin_username: "test_user",
@@ -419,7 +418,7 @@ describe("server/UserManager", () => {
     })
     .then(res => {
       assert.equal(res.status, 401);
-      // NO! assert.deepEqual(res.body, ["Not signed in"]);
+      // NO! assert.deepEqual(res.body, ["txt-nosign"]);
     });
   });
 });

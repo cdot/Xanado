@@ -24,7 +24,7 @@ describe("backend/findBestPlay", () => {
     rack.addTile(new Tile({letter:"R", isBlank:false, score:1}));
     return new BackendGame({
       edition:"English_WWF",
-      dictionary:"SOWPODS_English"
+      dictionary:"CSW2021_English"
     })
     .create()
     .then(game => {
@@ -51,8 +51,8 @@ describe("backend/findBestPlay", () => {
       game, rack.tiles(),
       move => {
         //console.log(move);
-        if (move instanceof Move)
-          bestMoves.push(move);
+        assert(move instanceof Move);
+        bestMoves.push(move);
       },
       game.dictionary))
 

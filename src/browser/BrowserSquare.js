@@ -41,6 +41,7 @@ class BrowserSquare extends Square {
   /**
    * Create the jquery representation of the square.
    * @param {jQuery} $td TD to make into a square
+   * @return {jQuery} $td
    */
   $populate($td) {
     $td
@@ -54,7 +55,8 @@ class BrowserSquare extends Square {
       drop: (event, jui) => {
         // jui.draggable is a $tile, which has had data("Square")
         // set in Tile.$ui
-        const from = $(jui.draggable).data("Square");
+        const $tile = $(jui.draggable);
+        const from = $tile.data("Square");
         // Tell the main UI about it
         Platform.trigger(UIEvents.DROP_TILE, [ from, this ]);
       }

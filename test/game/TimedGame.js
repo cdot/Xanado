@@ -10,8 +10,8 @@ import { TestSocket } from '../TestSocket.js';
 import { stringify } from "../../src/common/Utils.js";
 import { Game as _Game } from "../../src/game/Game.js";
 import { Turn as _Turn } from "../../src/game/Turn.js";
-import { Commands } from "../../src/game/Commands.js";
-const Game = Commands(_Game);
+import { CommandsMixin } from "../../src/game/CommandsMixin.js";
+const Game = CommandsMixin(_Game);
 const Player = Game.CLASSES.Player;
 const Turn = Game.CLASSES.Turn;
 
@@ -43,36 +43,32 @@ describe("game/TimedGame", function() {
     const handle = (turn, event, seqNo) => {
       switch (seqNo) {
       case 2:
-        assert.equal(turn.score, 0);
         assert.equal(turn.type, Turn.Type.TIMED_OUT);
         assert.equal(turn.playerKey, human1.key);
         assert.equal(turn.nextToGoKey, human2.key);
         break;
       case 4:
-        assert.equal(turn.score, 0);
         assert.equal(turn.type, Turn.Type.TIMED_OUT);
         assert.equal(turn.playerKey, human2.key);
         assert.equal(turn.nextToGoKey, human1.key);
         break;
       case 6:
-        assert.equal(turn.score, 0);
         assert.equal(turn.type, Turn.Type.TIMED_OUT);
         assert.equal(turn.playerKey, human1.key);
         assert.equal(turn.nextToGoKey, human2.key);
         break;
       case 8:
-        assert.equal(turn.score, 0);
         assert.equal(turn.type, Turn.Type.TIMED_OUT);
         assert.equal(turn.playerKey, human2.key);
         assert.equal(turn.nextToGoKey, human1.key);
         break;
       case 9:
-        assert.deepEqual(turn.score, [
+        assert.equal(turn.type, Turn.Type.GAME_ENDED);
+        assert.equal(turn.endState, Game.State.TWO_PASSES);
+        assert.deepEqual(turn.endStates, [
           { key: "human1", tiles: -1, tilesRemaining: "A" },
           { key: "human2", tiles: -1, tilesRemaining: "A" }
         ]);
-        assert.equal(turn.type, Turn.Type.GAME_ENDED);
-        assert.equal(turn.endState, Game.State.TWO_PASSES);
         assert(!turn.nextToGoKey);
         socket.done();
         break;
@@ -124,25 +120,21 @@ describe("game/TimedGame", function() {
     const handle = (turn, event, seqNo) => {
       switch (seqNo) {
       case 2:
-        assert.equal(turn.score, 0);
         assert.equal(turn.type, Turn.Type.PASSED);
         assert.equal(turn.playerKey, human1.key);
         assert.equal(turn.nextToGoKey, human2.key);
         break;
       case 3:
-        assert.equal(turn.score, 0);
         assert.equal(turn.type, Turn.Type.PASSED);
         assert.equal(turn.playerKey, human2.key);
         assert.equal(turn.nextToGoKey, human1.key);
         break;
       case 5:
-        assert.equal(turn.score, 0);
         assert.equal(turn.type, Turn.Type.PASSED);
         assert.equal(turn.playerKey, human1.key);
         assert.equal(turn.nextToGoKey, human2.key);
         break;
       case 6:
-        assert.equal(turn.score, 0);
         assert.equal(turn.type, Turn.Type.PASSED);
         assert.equal(turn.playerKey, human2.key);
         assert.equal(turn.nextToGoKey, human1.key);
@@ -150,13 +142,15 @@ describe("game/TimedGame", function() {
       case 7:
         assert.equal(turn.type, Turn.Type.GAME_ENDED);
         assert.equal(turn.endState, Game.State.TWO_PASSES);
-        assert.equal(turn.score[0].tiles, -1);
-        assert.equal(turn.score[1].tiles, -1);
+        assert.equal(turn.endStates[0].key, human1.key);
+        assert.equal(turn.endStates[0].tiles, -1);
+        assert.equal(turn.endStates[1].key, human2.key);
+        assert.equal(turn.endStates[1].tiles, -1);
         // Human 1 should be over-time by one clock tick, which
         // is 1/60th of a minute.
-        assert.equal(turn.score[0].time, -1);
+        assert.equal(turn.endStates[0].time, -1);
         // human2 has no time penalty
-        assert(!turn.score[1].time);
+        assert(!turn.endStates[1].time);
         assert(!turn.nextToGoKey);
         socket.done();
         break;

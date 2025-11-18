@@ -2,7 +2,7 @@
   License MIT. See README.md at the root of this distribution for full copyright
   and license information. Author Crawford Currie http://c-dot.co.uk*/
 
-/* global Platform */
+/* global Platform, assert */
 
 // Static DB of loaded Editions, indexed by name
 const editions = {};
@@ -115,9 +115,10 @@ class Edition {
 
     const alph = [];
     for (let tile of this.bag) {
-      if (tile.letter)
+      if (tile.letter) {
+        assert(tile.letter.indexOf("_") < 0); // _ not supported!
         alph.push(tile.letter);
-      else {
+      } else {
         tile.letter = " "; // blank
         tile.isBlank = true;
       }
@@ -135,13 +136,11 @@ class Edition {
     if (editions[name])
       return Promise.resolve(editions[name]);
 
-    // Use requirejs to support dependencies in the edition
-    // files
-    return Platform.readFile(Platform.getFilePath(`editions/${name}.json`))
+    return Platform.getJSON(Platform.absolutePath(`/editions/${name}.json`))
     .then(spec => {
       spec.name = name;
       editions[name] = new Edition(spec);
-      //console.log(`Loaded edition ${name}`);
+      //console.debug(`Loaded edition ${name}`);
       return editions[name];
     });
   }

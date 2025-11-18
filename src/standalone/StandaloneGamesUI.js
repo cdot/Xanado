@@ -17,6 +17,7 @@ import { Game } from "../game/Game.js";
 import { UI } from "../browser/UI.js";
 import { GamesUIMixin } from "../browser/GamesUIMixin.js";
 import { StandaloneUIMixin } from "./StandaloneUIMixin.js";
+import { UIEvents } from "../browser/UIEvents.js";
 
 /**
  * Management interface for a database of games stored in localStorage.
@@ -27,7 +28,7 @@ import { StandaloneUIMixin } from "./StandaloneUIMixin.js";
 class StandaloneGamesUI extends StandaloneUIMixin(GamesUIMixin(UI)) {
 
   /**
-   * @implements browser/GamesUIMixin#attachUIEventHandlers
+   * @implements standalone/StandaloneUIMixin#attachUIEventHandlers
    * @override
    */
   attachUIEventHandlers() {
@@ -42,13 +43,24 @@ class StandaloneGamesUI extends StandaloneUIMixin(GamesUIMixin(UI)) {
           "../browser/GameSetupDialog.js")
         .then(mod => new mod.GameSetupDialog({
           html: "standalone_GameSetupDialog",
-          title: $.i18n("Create game"),
+          title: $.i18n("btn-create-game"),
           ui: this,
           onSubmit(dialog, vals) {
             this.ui.createGame(vals)
             .then(game => game.save())
-            .then(game => this.ui.alert($.i18n("Enjoy your game!"),
-                                        $.i18n("Created", game.key)))
+            .then(game => {
+              const $dlg = $("#enjoyDialog");
+              $dlg.data("this", this)
+              .find("button[name=join]")
+              .on("click", () => {
+                $dlg.dialog("close");
+                $(document).trigger(UIEvents.JOIN_GAME, [ game.key ]);
+              });
+              $dlg.dialog({
+                title: $.i18n("txt-created", game.key),
+                modal: true
+              });
+            })
             .then(() => this.ui.refreshGames());
           },
           error: e => this.alert(e, "Create game failed")
@@ -66,7 +78,7 @@ class StandaloneGamesUI extends StandaloneUIMixin(GamesUIMixin(UI)) {
       "../browser/GameSetupDialog.js")
     .then(mod => new mod.GameSetupDialog({
       html: "standalone_GameSetupDialog",
-      title: $.i18n("Game setup"),
+      title: $.i18n("btn-game-setup"),
       game: game,
       onSubmit: (dialog, desc) => {
         for (const key of Object.keys(desc))
@@ -75,16 +87,8 @@ class StandaloneGamesUI extends StandaloneUIMixin(GamesUIMixin(UI)) {
         this.refreshGame(game.key, true);
       },
       ui: this,
-      error: e => this.alert(e, $.i18n("failed", $.i18n("Game setup")))
+      error: e => this.alert(e, $.i18n("failed", $.i18n("btn-game-setup")))
     }));
-  }
-
-  /**
-   * @implements browser/GamesUIMixin#joinGame
-   * @override
-   */
-  joinGame(game) {
-    return this.redirectToGame(game.key);
   }
 
   /**
@@ -108,15 +112,16 @@ class StandaloneGamesUI extends StandaloneUIMixin(GamesUIMixin(UI)) {
       keys.map(key => this.db.get(key)
                .then(d => CBOR.decode(d, Game.CLASSES))
                .catch(e => {
-                 console.error(e.message);
+                 console.error(`${key} loading failed: ${e.message}`);
                  return undefined;
                }))))
-    .then(games => games.filter(
-      g => g && !(send === "active" && g.hasEnded())))
+    .then(games => games.filter(g => g))
     .then(games => Promise.all(games.map(game => game.onLoad(this.db))))
+    .then(games => games.filter(g => !(send === "active" && g.hasEnded())))
     .then(games => Promise.all(
+      // use sendable() to strip the rack
       games
-      .map(game => game.jsonable(this.userManager))))
+      .map(game => game.sendable(this.userManager))))
     // Sort the resulting list by last activity, so the most
     // recently active game bubbles to the top
     .catch(e => this.alert(e))
@@ -153,8 +158,8 @@ class StandaloneGamesUI extends StandaloneUIMixin(GamesUIMixin(UI)) {
       keys.map(key => this.db.get(key)
                .then(d => CBOR.decode(d, Game.CLASSES))
                .catch(() => undefined))))
-    .then(games => games.filter(g => g && g.hasEnded()))
     .then(games => Promise.all(games.map(game => game.onLoad(this.db))))
+    .then(games => games.filter(g => g && g.hasEnded()))
     .then(games => {
       const results = {};
       games

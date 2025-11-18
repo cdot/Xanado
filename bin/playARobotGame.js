@@ -23,7 +23,7 @@ let db = new MemoryDatabase();
 let game = new Game({
   //_debug: console.debug,
   edition: "Test",
-  dictionary: "CSW2019_English"
+  dictionary: "CSW2021_English"
 });
 let gameKey = game.key;
 let player = 0;
@@ -44,6 +44,7 @@ game.create()
   let finished = false;
   while (!finished) {
     await db.get(gameKey)
+    // TODO: decode the packed game
     .then(d => CBOR.decode(d, Game.CLASSES))
     .then(game => game.onLoad(db))
     .then(game => {

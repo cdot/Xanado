@@ -13,7 +13,7 @@ class InvitePlayersDialog extends Dialog {
 
   constructor(options) {
     super("InvitePlayersDialog", $.extend({
-      title: $.i18n("Invite players")
+      title: $.i18n("btn-send-invite")
     }, options));
 
     // Known users, got afresh from /users each time the

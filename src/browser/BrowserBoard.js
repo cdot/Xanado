@@ -21,7 +21,7 @@ class BrowserBoard extends SurfaceMixin(Board) {
    * and difficult to analyse.
    * @function
    * @instance
-   * @memberof browser/BoardMixin
+   * @memberof browser/BrowserBoard
    * @param {Move.wordSpec[]} words list to update
    * @return {number} the total score
    * @private
@@ -87,7 +87,7 @@ class BrowserBoard extends SurfaceMixin(Board) {
    * nor `scorePlay` calculate bonuses for number of tiles played.
    * @function
    * @instance
-   * @memberof browser/BoardMixin
+   * @memberof browser/BrowserBoard
    * @return {(Move|string)} Move, or a string if there is a problem
    */
   analysePlay() {

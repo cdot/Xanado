@@ -3,19 +3,19 @@
 /* eslint-env mocha,node */
 
 import { assert } from "chai";
-import { setupPlatform } from "../TestPlatform.js";
+import { setupPlatform, UNit } from "../TestPlatform.js";
 import { MemoryDatabase } from "../MemoryDatabase.js";
 import { TestSocket } from "../TestSocket.js";
 import sparseEqual from "../sparseEqual.js";
 
 import { stringify } from "../../src/common/Utils.js";
-import { Commands } from "../../src/game/Commands.js";
+import { CommandsMixin } from "../../src/game/CommandsMixin.js";
 import { Game as _Game } from "../../src/game/Game.js";
 import { Turn as _Turn } from "../../src/game/Turn.js";
 // disable worker threads
 _Game.USE_WORKERS = false;
 
-const Game = Commands(_Game);
+const Game = CommandsMixin(_Game);
 Game.CLASSES.Game = Game;
 const Turn = Game.CLASSES.Turn;
 const Tile = Game.CLASSES.Tile;
@@ -26,7 +26,7 @@ const Player = Game.CLASSES.Player;
  * Unit tests for Game commands that are issued during gameplay.
  */
 
-describe("game/Commands.js", () => {
+describe("game/Commands", () => {
 
   before(setupPlatform);
 
@@ -52,7 +52,6 @@ describe("game/Commands.js", () => {
                          ["A","C","E"]);// tiles that were replaced
         assert.deepEqual(turn.replacements.map(t=>t.letter).sort(),
                          ["P","Q","R"]);
-        assert.equal(turn.score, 0);
         assert.equal(turn.playerKey, human1.key);
         assert.equal(turn.nextToGoKey, human2.key);
         socket1.done();
@@ -75,7 +74,6 @@ describe("game/Commands.js", () => {
                        ["A","C","E"]);// tiles that were replaced
       assert.deepEqual(turn.replacements.map(t=>t.letter).sort(),
                        ["#","#","#"]);
-      assert.equal(turn.score, 0);
       assert.equal(turn.playerKey, human1.key);
       assert.equal(turn.nextToGoKey, human2.key);
       socket2.done();
@@ -195,7 +193,6 @@ describe("game/Commands.js", () => {
         assert(!turn.words);
         assert(!turn.placements);
         assert(!turn.replacements);
-        assert.equal(turn.score, 0);
         assert.equal(turn.playerKey, human1.key);
         assert.equal(turn.nextToGoKey, human2.key);
         // Player1 rack should be unchanged
@@ -272,16 +269,16 @@ describe("game/Commands.js", () => {
       switch (seqNo) {
       case 1:
         assert.equal(m.sender, 'Advisor');
-        assert.equal(m.text, 'Enabled');
+        assert.equal(m.text, 'txt-enabled');
         break;
       case 2:
         assert.equal(m.sender, 'Advisor');
-        assert.equal(m.text, "advised");
+        assert.equal(m.text, "txt-advised");
         assert.equal(m.args[0], human1.name);
         break;
       case 4:
         assert.equal(m.sender, 'Advisor');
-        assert.equal(m.text, "possible-score");
+        assert.equal(m.text, "txt-possible-score");
         break;
       default:
         socket1.done();
@@ -320,12 +317,12 @@ describe("game/Commands.js", () => {
       switch (seqNo) {
       case 0:
         assert.equal(m.sender, 'Advisor');
-        assert.equal(m.text, "advised");
+        assert.equal(m.text, "txt-advised");
         assert.equal(m.args[0], human1.name);
         break;
       case 2:
         assert.equal(m.sender, 'Advisor');
-        assert.equal(m.text, "was-advised");
+        assert.equal(m.text, "txt-was-advised");
         assert.equal(m.args[0], human1.name);
         break;
       default:
@@ -406,7 +403,7 @@ describe("game/Commands.js", () => {
       case 2:
       case 3:
         assert.equal(m.sender, 'Advisor');
-        assert.equal(m.text, "word-not-found");
+        assert.equal(m.text, "txt-word-not-found");
         assert.equal(m.args[0], "XYZ");
         if (seqNo === 3)
           socket1.done();
@@ -522,7 +519,6 @@ describe("game/Commands.js", () => {
     })
     .then(() => game.connect(socket, human1.key))
     .then(() => game.play(human1, move))
-    .then(g => assert.strictEqual(g, game))
     .then(() => socket.wait());
   });
 
@@ -543,7 +539,7 @@ describe("game/Commands.js", () => {
       assert.equal(event, Game.Notify.TURN);
       assert.equal(turn.type, Turn.Type.GAME_ENDED);
       assert.deepEqual(
-        turn.score,
+        turn.endStates,
         [
           { key: "human1", tiles: -remains, tilesRemaining: "X,Y,Z" },
           { key: "human2", tiles: remains }

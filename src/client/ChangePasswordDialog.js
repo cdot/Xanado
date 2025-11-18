@@ -9,7 +9,7 @@ class ChangePasswordDialog extends PasswordMixin(Dialog) {
 
   constructor(options) {
     super("ChangePasswordDialog", $.extend({
-      title: $.i18n("Change password")
+      title: $.i18n("btn-chpw")
     }, options));
   }
 

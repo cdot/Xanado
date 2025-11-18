@@ -53,32 +53,41 @@ class Platform {
   }
 
   /**
-   * Get the absolute path to a file or directory within the
-   * installation. This can be a file path or a URL path, depending
-   * on the context.
+   * Get the absolute path to a file or directory relative to the root
+   * of the installation. This can be a file path or a URL path,
+   * depending on the context.
    * @param {string} p a path relative to the root of the installation
    * @abstract
    */
-  static getFilePath(p) {
-    throw Error(`Platform.getFilePath ${p}`);
+  static absolutePath(p) {
+    throw Error(`Platform.absolutePath ${p}`);
   }
 
   /**
-   * Read a file. This automatically parses .json files.
-   * @return {Promise} resolves to the file contents.
+   * Read a text resource.
+   * @return {Promise} resolves to the {string} contents.
    * @abstract
    */
-  static readFile(path) {
-    throw Error(`Platform.readFile ${path}`);
+  static getText(path) {
+    throw Error(`Platform.getText ${path}`);
   }
 
   /**
-   * Read a binary file
-   * @return {Promise} resolves to the file contents (a Buffer)
+   * Read JSON from a resource, and parse it.
+   * @return {Promise} resolves to the (parsed) contents.
    * @abstract
    */
-  static readBinaryFile(path) {
-    throw Error(`Platform.readBinaryFile ${path}`);
+  static getJSON(path) {
+    throw Error(`Platform.getJSON ${path}`);
+  }
+
+  /**
+   * Read binary data from a resource.
+   * @return {Promise} resolves to the {Buffer} contents.
+   * @abstract
+   */
+  static getBinary(path) {
+    throw Error(`Platform.getBinary ${path}`);
   }
 
   /* c8 ignore stop */

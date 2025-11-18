@@ -5,41 +5,52 @@
  * Copyright and license as described at https://github.com/jmlewis/valett
  */
 
+/**
+ * Normalise a vector so values are in the range 0..1. If the vector
+ * sum is 0, the entire output vector will be zeros.
+ * @param {number[]} vector vector to normalise
+ * @return {number[]} the normalised vector
+ */
 function norm(vector) {
   let sum = 0;
-  const normedVector = [];
-
   for (let num of vector)
     sum += num;
 
-  for (let i = 0; i < vector.length; i++) {
-    if (sum > 0)
-      normedVector[i] = vector[i] / sum;
-    else
-      normedVector[i] = 0; // Ignore zero vectors
-  }
+  const normedVector = [];
+  for (let i = 0; i < vector.length; i++)
+    normedVector[i] = sum > 0 ? vector[i] / sum : 0;
 
   return normedVector;
 }
 
-function normMatrix(matrix) {
+/**
+ * Normalise each row in a RxC matrix.
+ * @param {number[][]} matrix the matrix
+ * @return {number[][]} the normalised matrix
+ */
+function normaliseRows(matrix) {
   const normedMatrix = [];
-  for (let i = 0; i < matrix.length; i++)
-    normedMatrix[i] = [];
   for (let i = 0; i < matrix.length; i++)
     normedMatrix[i] = norm(matrix[i]);
   return normedMatrix;
 }
 
-
+/**
+ * Transpose a NxM matrix to generate a MxN matrix.
+ * @param {number[][]} matrix the NxM matrix
+ * @return {number[][]} the normalised MxN matrix
+ */
 function transposeMatrix(matrix) {
   const transposedMatrix = [];
-  for (let i = 0; i < matrix.length; i++)
+  const N = matrix[0].length;
+  for (let i = 0; i < N; i++)
     transposedMatrix[i] = [];
 
-  for (let i = 0; i < matrix.length; i++)
-    for (let j = 0; j < matrix.length; j++)
-      transposedMatrix[i][j] = matrix[j][i];
+  for (let i = 0; i < matrix.length; i++) {
+    for (let j = 0; j < N; j++) {
+      transposedMatrix[j][i] = matrix[i][j];
+    }
+  }
 
   return transposedMatrix;
 }
@@ -51,18 +62,36 @@ class Valett {
    * @param {string[]} letters list of single-character strings
    */
   constructor(words, letters) {
+    /**
+     * @member string[] word list
+     */
     this.words = words;
+
+    /**
+     * @member string[] set of letters
+     */
     this.letters = letters;
+
+    /**
+     * Map from a letter to an index
+     * @member int[string]
+     */
     this.hash = [];
     for (let i = 0; i < letters.length; i++)
       this.hash[letters[i]] = i;
 
-    // maxLength
+    /**
+     * Length of the longest word in the corpus
+     * @member number
+     */
     this.maxLength = 0;
     for (let word of this.words)
       this.maxLength = Math.max(this.maxLength, word.length);
 
-    // frequency
+    /**
+     * Map from letters to their total count
+     * @member int[string]
+     */
     this.frequency = [];
     for (let i = 0; i < this.letters.length; i++)
       this.frequency[i] = 0;
@@ -70,19 +99,22 @@ class Valett {
       for (let letter of word.split(""))
         this.frequency[this.hash[letter]]++;
 
-    // frequencyByLength
+    /**
+     * Matrix where there is a row for each letter index, and
+     * a column for each possible word length.
+     * @member int[int][int]
+     */
     this.frequencyByLength = [];
-    this.totalFrequencyByLength = [];
     for (let i = 0; i < this.letters.length; i++) {
       this.frequencyByLength[i] = [];
       for (let j = 0; j < this.maxLength; j++)
         this.frequencyByLength[i][j] = 0;
     }
+    const totalFrequencyByLength = [];
     for (let i = 0; i < this.maxLength; i++)
-      this.totalFrequencyByLength[i] = 0;
-
+      totalFrequencyByLength[i] = 0;
     for (let word of words) {
-      this.totalFrequencyByLength[word.length - 1] += word.length;
+      totalFrequencyByLength[word.length - 1] += word.length;
       for (let letter of word.split("")) {
         this.frequencyByLength[this.hash[letter]][word.length - 1]++;
       }
@@ -90,8 +122,8 @@ class Valett {
 
     for (let i = 0; i < this.letters.length; i++) {
       for (let j = 0; j < this.maxLength; j++)
-        if (this.totalFrequencyByLength[j] !== 0)
-          this.frequencyByLength[i][j] /= this.totalFrequencyByLength[j];
+        if (totalFrequencyByLength[j] !== 0)
+          this.frequencyByLength[i][j] /= totalFrequencyByLength[j];
     }
 
     this._transitionFrequency();
@@ -108,7 +140,7 @@ class Valett {
     const entropyValues = [];
 
     const frequencyValues = norm(this.frequency);
-    const frequencyByLengthValues = transposeMatrix(normMatrix(transposeMatrix(this.frequencyByLength)));
+    const frequencyByLengthValues = transposeMatrix(normaliseRows(transposeMatrix(this.frequencyByLength)));
     entropyValues[0] = norm(this.entropy[0]);
     entropyValues[1] = norm(this.entropy[1]);
 
@@ -117,12 +149,13 @@ class Valett {
     for (let i = 0; i < this.letters.length; i++)
       utility[i] = { score: 0, count: frequencyValues[i] };
 
-    for (let i = 0; i < this.letters.length; i++)
+    for (let i = 0; i < this.letters.length; i++) {
       utility[i].score += frequencyValues[i] * weights.frequency;
-
+    }
     for (let i = 0; i < this.maxLength; i++)
-      for (let j = 0; j < this.letters.length; j++)
+      for (let j = 0; j < this.letters.length; j++) {
         utility[j].score += frequencyByLengthValues[j][i] * normedFrequencyByLengthWeights[i] * weights.frequencyByLength;
+    }
 
     for (let j = 0; j < this.letters.length; j++) {
       utility[j].score += entropyValues[0][j] * normedEntropyWeights[0] * weights.entropy;
@@ -185,8 +218,8 @@ class Valett {
 
   _entropy() {
     const inOut = [];
-    inOut[0] = normMatrix(transposeMatrix(this.transitionFrequency));
-    inOut[1] = normMatrix(this.transitionFrequency);
+    inOut[0] = normaliseRows(transposeMatrix(this.transitionFrequency));
+    inOut[1] = normaliseRows(this.transitionFrequency);
 
     // Prevent zero probability
     for (let i = 0; i <= 1; i++) {

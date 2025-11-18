@@ -180,6 +180,7 @@ function getTestGame(name, Class) {
       dir: `${__dirname}/data`, ext: "game"
     });
     return db.get(name)
+    // TODO: decode the packed game
     .then(data => CBOR.decode(data, Class.CLASSES))
     .then(game => game.onLoad(new MemoryDatabase()));
   });
@@ -198,8 +199,9 @@ class StubServer {
   /**
    * @param {object.<string,Promise} expects map from URL string to
    * a promise that must be fulfilled with the result of the query.
+   * @param {function} debug debug function
    */
-  constructor(expects) {
+  constructor(expects, debug) {
     if (!expects) expects = {};
     // Convert simple promises to { promise: count: }
     for (const q in expects) {
@@ -214,6 +216,7 @@ class StubServer {
     this.jQueryAjax = jQuery.ajax;
     this.expected = expects || {};
     this.received = {};
+    this.debug = debug || (() => {});
 
     assert($.ajax);
     assert.equal(jQuery.ajax, $.ajax);
@@ -222,12 +225,14 @@ class StubServer {
         args.url = args.url.replace("file://", "");
       } else if (this.expected[args.url]) {
         if (this.expected[args.url].count-- <= 0) {
-          console.error("Unexpected: ", args);
+          console.error("Server didn't expect request: ", args);
           assert.fail(`Unexpected ${args.url}, count is ${this.expected[args.url].count + 1}`);
         }
-        //console.debug("Expected", args.url);
-        //if (this.expected[args.url].count > 0)
-        //  console.debug("\t", this.expected[args.url].count, "remain");
+        this.debug("Server received", args.url);
+        if (this.expected[args.url].count === 0)
+          this.debug("\tall requests received");
+        else
+          this.debug("\t", this.expected[args.url].count, "requests remain");
         this.received[args.url] = true;
         return this.expected[args.url].promise;
       }
@@ -239,7 +244,7 @@ class StubServer {
       //console.debug("Fallback", args.url);
       assert(args.url && args.url.length > 0, args.url);
       return $.when(
-        Platform.readFile(args.url)
+        Fs.readFile(args.url)
         .then(d => d.toString()));
     };
     assert($.ajax);
@@ -267,13 +272,13 @@ class StubServer {
         for (const f in self.expected) {
           if (!self.received[f]) {
             unsaw = true;
-            //console.debug(`Awaiting "${f}"`);
+            self.debug(`Server is awaiting "${f}"`);
           }
         }
         if (unsaw) {
           setTimeout(wait, 100);
         } else {
-          //console.debug("waits resolved");
+          self.debug("Server has seen all expected requests");
           $.ajax = self.$ajax;
           assert($.ajax);
           assert.equal(jQuery.ajax, $.ajax);

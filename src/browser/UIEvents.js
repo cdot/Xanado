@@ -3,7 +3,7 @@
   and license information. Author Crawford Currie http://c-dot.co.uk*/
 
 /**
- * Events issued by the game code to update the UI - ignored on server side
+ * Events issued by the game code to update the UI - ignored on server side:
  * * SELECT_SQUARE - the square passed has been selected. This will
  *   either delegate to the tile placed on the square, or enable the
  *   typing cursor on an empty square.
@@ -11,12 +11,15 @@
  *   and/or disable the typing cursor)
  * * DROP_TILE - a tile has been drag/dropped on the square passed. The
  *   source and destination squares are passed.
+ * Events issued by the UI code for it's own purposes:
+ * * JOIN_GAME - handled by the UI to redirect the browser to a game
  * @typedef {SELECT_SQUARE|CLEAR_SELECT|DROP_TILE} UIEvents
  */
 const UIEvents = {
   CLEAR_SELECT:  "ClearSelect",
   DROP_TILE:     "DropTile",
-  SELECT_SQUARE: "SelectSquare"
+  SELECT_SQUARE: "SelectSquare",
+  JOIN_GAME:     "JoinGame"
 };
 
 export { UIEvents }

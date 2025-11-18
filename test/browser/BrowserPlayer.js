@@ -39,7 +39,7 @@ describe("browser/BrowserPlayer", () => {
 
     player.online(false);
 
-    const $act = player.$tableRow();
+    const $act = player.$TR();
     assert($act[0].isEqualNode($tr[0]),
            `expected: ${$tr.html()}\n actual: ${$act.html()}`);
     player.score = 666;
@@ -75,7 +75,7 @@ describe("browser/BrowserPlayer", () => {
     $tr.append("<td class='player-clock'></td>");
 
     // passing player will make it this player's turn
-    const $act = player.$tableRow(player);
+    const $act = player.$TR(player);
 
     $div.append($tr);
     $div.append($act);

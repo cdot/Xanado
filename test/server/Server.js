@@ -212,8 +212,8 @@ describe("server/Server.js", () => {
     return chai.request(s.express)
     .get("/dictionaries")
     .then(res => {
-      assert(res.body.indexOf('SOWPODS_English') >= 0);
-      assert(res.body.indexOf('CSW2019_English') >= 0);
+      assert(res.body.indexOf('British_English') >= 0);
+      assert(res.body.indexOf('CSW2021_English') >= 0);
       assert.equal(res.status, 200);
     });
   });
@@ -294,7 +294,7 @@ describe("server/Server.js", () => {
             "test_user", "FROBNOZZ", "Oxford_5000" ]);
           return;
 
-        case "word-there":
+        case "nfy-already-there":
           assert.deepEqual(data.args, [ "ABSTRACT", "Oxford_5000" ]);
           return;
 
@@ -442,7 +442,7 @@ describe("server/Server.js", () => {
       .set('Cookie', cookie)
       .send({
         edition: "English_Scrabble",
-        dictionary:"CSW2019_English"
+        dictionary:"CSW2021_English"
       });
     })
     .then(res => {
@@ -494,7 +494,7 @@ describe("server/Server.js", () => {
       .set('Cookie', cookie)
       .send({
         edition: "English_Scrabble",
-        dictionary:"CSW2019_English"
+        dictionary:"CSW2021_English"
       });
     })
     .then(res => {
@@ -517,7 +517,7 @@ describe("server/Server.js", () => {
       //console.log(res.text);
       assert.equal(res.status, 200, res.text);
       return chai.request(server.express)
-      .post(`/command/confirmGameOver/${gamekey}`)
+      .post(`/command/1/${gamekey}`)
       .set('Cookie', cookie);
     })
     .then(res => {
@@ -586,7 +586,7 @@ describe("server/Server.js", () => {
           .set('Cookie', cookie)
           .send({
             edition: "English_Scrabble",
-            dictionary:"CSW2019_English"
+            dictionary:"CSW2021_English"
           }))
     .then(res => {
       assert.equal(res.status, 200);
@@ -602,7 +602,7 @@ describe("server/Server.js", () => {
             assert.equal(email.from, "test_user<test@email.com>");
             assert(email.to === "test@email.com"
                    || email.to === "user@email.com");
-            assert.equal(email.subject, Platform.i18n("email-invited"));
+            assert.equal(email.subject, Platform.i18n("eml-invited"));
             assert(email.text);
             assert(email.text.indexOf("Hollow Wurld") >= 0);
             assert(email.text.indexOf(`/html/client_games.html?untwist=${gamekey}`) >= 0);
@@ -652,7 +652,7 @@ describe("server/Server.js", () => {
       .set('Cookie', cookie)
       .send({
         edition: "English_Scrabble",
-        dictionary:"CSW2019_English"
+        dictionary:"CSW2021_English"
       });
     })
     .then(res => {
@@ -681,7 +681,7 @@ describe("server/Server.js", () => {
           sendMail: function(email) {
             assert.equal(email.from, "test_user<test@email.com>");
             assert.equal(email.to, "test@email.com");
-            assert.equal(email.subject, Platform.i18n("email-remind"));
+            assert.equal(email.subject, Platform.i18n("eml-remind"));
             assert(email.text);
             return Promise.resolve();
           }

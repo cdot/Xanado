@@ -8,9 +8,8 @@
 import { BrowserPlatform } from "../browser/BrowserPlatform.js";
 window.Platform = BrowserPlatform;
 
-import "../browser/icon_button.js";
-
 import { CBOR } from "../game/CBOR.js";
+import { Commands } from "../game/Commands.js";
 import { BrowserGame } from "../browser/BrowserGame.js";
 import { UI } from "../browser/UI.js";
 import { GameUIMixin } from "../browser/GameUIMixin.js";
@@ -84,6 +83,7 @@ class ClientGameUI extends ClientUIMixin(GameUIMixin(UI)) {
       .then(data => {
         this.debug(`--> Game ${gameKey}`);
         data = new Uint8Array(data);
+        // TODO: decode the packed game
         return CBOR.decode(data, BrowserGame.CLASSES);
       })
       .then(game => {
@@ -98,11 +98,11 @@ class ClientGameUI extends ClientUIMixin(GameUIMixin(UI)) {
    * @override
    */
   sendCommand(command, args) {
-    if (command !== BrowserGame.Command.REDO) {
+    if (command !== Commands.REDO) {
       this.undoStack = [];
-      $("#redoButton").hide();
+      $("#redo-button").hide();
     }
-    console.debug(`POST /command/${command}`);
+    //console.debug(`POST /command/${command}`);
     this.cancelNotification();
     this.lockBoard(true);
     this.enableTurnButton(false);

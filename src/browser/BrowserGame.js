@@ -1,4 +1,4 @@
-/*Copyright (C) 2021-2022 The Xanado Project https://github.com/cdot/Xanado
+/*Copyright (C) 2021-2024 The Xanado Project https://github.com/cdot/Xanado
   License MIT. See README.md at the root of this distribution for full copyright
   and license information. Author Crawford Currie http://c-dot.co.uk*/
 /* eslint-env browser */
@@ -6,7 +6,7 @@
 /* global assert */
 
 import { Undo } from "../game/Undo.js";
-import { Commands } from "../game/Commands.js";
+import { CommandsMixin } from "../game/CommandsMixin.js";
 import { Game } from "../game/Game.js";
 import { Turn } from "../game/Turn.js";
 import { BrowserSquare } from "./BrowserSquare.js";
@@ -21,7 +21,7 @@ import { BrowserRack } from "./BrowserRack.js";
  * @mixes game/Commands
  * @mixes game/Undo
  */
-class BrowserGame extends Undo(Commands(Game)) {
+class BrowserGame extends Undo(CommandsMixin(Game)) {
 
   /**
    * Override factory classes from Game
@@ -42,20 +42,23 @@ class BrowserGame extends Undo(Commands(Game)) {
   /**
    * Construct a test string giving a friendly description of a list
    * of "things" e.g. `andList(["A","B","C"])` will return `A, B and C`
+   * @param {string[]} list list of things
+   * @return {string} list of things as a string
    */
   static andList(list) {
     if (list.length == 0)
       return "";
+
     if (list.length == 1)
       return list[0];
 
-    return $.i18n("players-tail",
+    return $.i18n("txt-players-tail",
                   list.slice(0, list.length - 1).join(", "),
                   list[list.length - 1]);
   }
 
   /**
-   * Headline is the text shown in the game table and the head
+   * Format game information shown in the game table and the head
    * of the game dialog.
    * @param {boolean?} inTable true if this is being prepared for the
    * table, false for the dialog.
@@ -66,10 +69,10 @@ class BrowserGame extends Undo(Commands(Game)) {
    * * %k - the key of the game
    * * %l - date the game was last played (or was created if not played yet)
    * * %p - list of players in the game e.g "Player 1 and Player 2"
-   * * %s - final game state e.g. "Game over"
+   * * %s - final game state e.g. "Player 2 won"
    * @return {string} html string
    */
-  tableRow(format) {
+  formatGameInfo(format) {
     const repl = (m, p1) => {
       switch (p1) {
       case "c":
@@ -87,11 +90,14 @@ class BrowserGame extends Undo(Commands(Game)) {
       case "p":
         return BrowserGame.andList(this.getPlayers().map(p => p.name));
       case "s":
-        return this.hasEnded()
-        ? (this.getWinner() ? $.i18n("h-won", this.getWinner().name) : "?")
-        : (this.state === Game.State.WAITING
-           ? $.i18n("state-waiting")
-           : $.i18n("state-playing"));
+        if (this.hasEnded()) {
+          const winners = this.getWinners();
+          const who = BrowserGame.andList(winners.map(p => p.name));
+          return $.i18n("h-won", who.length === 0 ? "?" : who);
+        } else if (this.state === Game.State.WAITING)
+          return $.i18n("txt-state-waiting");
+        else
+          return $.i18n("txt-state-playing");
       default:
         assert.fail(`Bad ${p1}`);
       }
@@ -109,7 +115,7 @@ class BrowserGame extends Undo(Commands(Game)) {
   $playerTable(thisPlayer) {
     const $tab = $(document.createElement("table")).addClass("player-table");
     this.players.forEach(
-      p => $tab.append(p.$tableRow(thisPlayer)));
+      p => $tab.append(p.$TR(thisPlayer)));
     return $tab;
   }
 
@@ -126,7 +132,7 @@ class BrowserGame extends Undo(Commands(Game)) {
       let player = this.getPlayerWithKey(watcher.key);
       if (!player) {
         // New player in game
-        player = BrowserPlayer.fromJsonable(watcher, BrowserGame.CLASSES);
+        player = BrowserPlayer.fromSendable(watcher, BrowserGame.CLASSES);
         this.addPlayer(player, true);
         player._debug = this._debug;
       }
@@ -165,7 +171,7 @@ class BrowserGame extends Undo(Commands(Game)) {
     if (!hideScore && move.words.length > 1 || move.score > sum) {
       $span
       .append($(`<span class="turn-total"></span>`)
-              .append($.i18n("play-score", move.score)));
+              .append($.i18n("txt-play-score", move.score)));
     }
     return $span;
   }
@@ -242,7 +248,7 @@ class BrowserGame extends Undo(Commands(Game)) {
       $action.append(this.$formatScore(turn, false));
       // Check if the play emptied the rack of the playing player
       if (isLastTurn
-          && turn.replacements.length === 0
+          && (!turn.replacements || turn.replacements.length === 0)
           && player.rack.isEmpty()
           && !this.hasEnded()) {
 
@@ -253,7 +259,7 @@ class BrowserGame extends Undo(Commands(Game)) {
             "log-no-tiles"));
         else
           $narrative.append($.i18n(
-            "log-no-more-tiles",
+            "log-no-more",
             playerIndicative));
         $description.append($narrative);
       }
@@ -279,11 +285,11 @@ class BrowserGame extends Undo(Commands(Game)) {
 
     case Turn.Type.CHALLENGE_WON:
       $action.append($.i18n(
-        "log-challenge-won",
+        "log-challwon",
         challengerIndicative, playerPossessive)
                      + " "
                      + $.i18n(
-                       "log-lost-to-chall",
+                       "log-challloss",
                        playerIndicative, turn.score));
       break;
 
@@ -295,7 +301,7 @@ class BrowserGame extends Undo(Commands(Game)) {
       case Game.Penalty.PER_WORD:
       case Game.Penalty.PER_TURN:
         $action.append(" " + $.i18n(
-          "log-lost-to-chall",
+          "log-challloss",
           challengerIndicative, -turn.score));
         break;
       case Game.Penalty.MISS:
@@ -336,7 +342,7 @@ class BrowserGame extends Undo(Commands(Game)) {
     case Game.State.TIMED_OUT:
       $state.text($.i18n("log-timed-out")); break;
     case Game.State.FAILED_CHALLENGE:
-      $state.text($.i18n("log-challenge-failed")); break;
+      $state.text($.i18n("log-challfail")); break;
     case Game.State.GAME_OVER:
     default:
       $state.text($.i18n("log-game-over")); break;
@@ -346,30 +352,25 @@ class BrowserGame extends Undo(Commands(Game)) {
 
     const $narrative = $(document.createElement("div"))
           .addClass("game-end-adjustments");
-    this.getPlayers().forEach(player => {
+    this.getPlayers().forEach((player, index) => {
       const wasMe = player === uiPlayer;
       const name = wasMe ? $.i18n("You") : player.name;
 
       // Adjustments made to scores due to remaining letters on racks and
-      // time penalties
-      // key: {string} the player to whom this applies
-      // tiles: {number} if positive, points gained from the tiles of other
-      // players. If negative, points lost to remaining tiles on rack.
-      // tilesRemaining: {string} if tiles < 0, the letters that caused it
-      // time: <number} points lost due to time penalties
-      const delta = turn.score.filter(s => s.key === player.key)[0];
+      // time penalties. See EndState in Turn.js
+      const endState = turn.endStates[index];
 
       if (player.score === winningScore)
         winners.push(name);
 
       let rackAdjust;
-      if (delta.tiles > 0) {
+      if (endState.tiles > 0) {
         rackAdjust = $.i18n(
-          "log-got-from-racks", name, delta.tiles);
-      } else if (delta.tiles < 0) {
+          "log-fromracks", name, endState.tiles);
+      } else if (endState.tiles < 0) {
         // Lost sum of unplayed letters
         rackAdjust = $.i18n(
-          "log-lost-from-rack", name, -delta.tiles, delta.tilesRemaining);
+          "log-rackloss", name, -endState.tiles, endState.tilesRemaining);
       }
 
       if (rackAdjust)
@@ -377,7 +378,7 @@ class BrowserGame extends Undo(Commands(Game)) {
           $(document.createElement("div"))
           .addClass("rack-adjust").text(rackAdjust));
 
-      const timePenalty = delta.time;
+      const timePenalty = endState.time;
       if (typeof timePenalty === "number" && timePenalty !== 0) {
         const $timeAdjust = $(document.createElement("div"))
               .addClass("time-adjust");
@@ -392,7 +393,7 @@ class BrowserGame extends Undo(Commands(Game)) {
     const $whoWon = $(document.createElement("div")).addClass("game-winner");
     let who;
     let nWinners = 0;
-    if (this.getWinner() === uiPlayer && winners.length === 1)
+    if (this.isWinner(uiPlayer) && winners.length === 1)
       who = $.i18n("You");
     else {
       who = BrowserGame.andList(winners);

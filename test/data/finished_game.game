@@ -477,7 +477,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "49dabe7iua",
      "nextToGoKey": "2v5oyt5qpi",
@@ -573,7 +573,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "2v5oyt5qpi",
      "nextToGoKey": "3uwb1r2jqs",
@@ -662,7 +662,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "3uwb1r2jqs",
      "nextToGoKey": "49dabe7iua",
@@ -768,7 +768,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "49dabe7iua",
      "nextToGoKey": "2v5oyt5qpi",
@@ -873,7 +873,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "2v5oyt5qpi",
      "nextToGoKey": "3uwb1r2jqs",
@@ -952,7 +952,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "3uwb1r2jqs",
      "nextToGoKey": "49dabe7iua",
@@ -1052,7 +1052,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "49dabe7iua",
      "nextToGoKey": "2v5oyt5qpi",
@@ -1159,7 +1159,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "2v5oyt5qpi",
      "nextToGoKey": "3uwb1r2jqs",
@@ -1241,7 +1241,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "3uwb1r2jqs",
      "nextToGoKey": "49dabe7iua",
@@ -1340,7 +1340,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "49dabe7iua",
      "nextToGoKey": "2v5oyt5qpi",
@@ -1436,7 +1436,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "2v5oyt5qpi",
      "nextToGoKey": "3uwb1r2jqs",
@@ -1516,7 +1516,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "3uwb1r2jqs",
      "nextToGoKey": "49dabe7iua",
@@ -1588,7 +1588,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "49dabe7iua",
      "nextToGoKey": "2v5oyt5qpi",
@@ -1665,7 +1665,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "2v5oyt5qpi",
      "nextToGoKey": "3uwb1r2jqs",
@@ -1742,7 +1742,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "3uwb1r2jqs",
      "nextToGoKey": "49dabe7iua",
@@ -1800,7 +1800,7 @@
        }
       }
      ],
-     "type": "swap",
+     "type": 1,
      "gameKey": "finished_game",
      "playerKey": "49dabe7iua",
      "nextToGoKey": "2v5oyt5qpi",
@@ -1886,7 +1886,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "2v5oyt5qpi",
      "nextToGoKey": "3uwb1r2jqs",
@@ -1966,7 +1966,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "3uwb1r2jqs",
      "nextToGoKey": "49dabe7iua",
@@ -2045,7 +2045,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "49dabe7iua",
      "nextToGoKey": "2v5oyt5qpi",
@@ -2115,7 +2115,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "2v5oyt5qpi",
      "nextToGoKey": "3uwb1r2jqs",
@@ -2185,7 +2185,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "3uwb1r2jqs",
      "nextToGoKey": "49dabe7iua",
@@ -2255,7 +2255,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "49dabe7iua",
      "nextToGoKey": "2v5oyt5qpi",
@@ -2318,7 +2318,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "2v5oyt5qpi",
      "nextToGoKey": "3uwb1r2jqs",
@@ -2371,7 +2371,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "3uwb1r2jqs",
      "nextToGoKey": "49dabe7iua",
@@ -2425,7 +2425,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "49dabe7iua",
      "nextToGoKey": "2v5oyt5qpi",
@@ -2479,7 +2479,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "2v5oyt5qpi",
      "nextToGoKey": "3uwb1r2jqs",
@@ -2530,7 +2530,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "3uwb1r2jqs",
      "nextToGoKey": "49dabe7iua",
@@ -2598,7 +2598,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "49dabe7iua",
      "nextToGoKey": "2v5oyt5qpi",
@@ -2656,7 +2656,7 @@
        }
       }
      ],
-     "type": "swap",
+     "type": 1,
      "gameKey": "finished_game",
      "playerKey": "2v5oyt5qpi",
      "nextToGoKey": "3uwb1r2jqs",
@@ -2725,7 +2725,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "3uwb1r2jqs",
      "nextToGoKey": "49dabe7iua",
@@ -2748,7 +2748,7 @@
     "_Ć": "Turn",
     "_Ð": {
      "score": 0,
-     "type": "passed",
+     "type": 6,
      "gameKey": "finished_game",
      "playerKey": "49dabe7iua",
      "nextToGoKey": "2v5oyt5qpi",
@@ -2781,7 +2781,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "2v5oyt5qpi",
      "nextToGoKey": "3uwb1r2jqs",
@@ -2862,7 +2862,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "3uwb1r2jqs",
      "nextToGoKey": "49dabe7iua",
@@ -2950,7 +2950,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "49dabe7iua",
      "nextToGoKey": "2v5oyt5qpi",
@@ -3013,7 +3013,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "2v5oyt5qpi",
      "nextToGoKey": "3uwb1r2jqs",
@@ -3076,7 +3076,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "3uwb1r2jqs",
      "nextToGoKey": "49dabe7iua",
@@ -3154,7 +3154,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "49dabe7iua",
      "nextToGoKey": "2v5oyt5qpi",
@@ -3225,7 +3225,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "2v5oyt5qpi",
      "nextToGoKey": "3uwb1r2jqs",
@@ -3279,7 +3279,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "3uwb1r2jqs",
      "nextToGoKey": "49dabe7iua",
@@ -3323,7 +3323,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "49dabe7iua",
      "nextToGoKey": "2v5oyt5qpi",
@@ -3374,7 +3374,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "2v5oyt5qpi",
      "nextToGoKey": "3uwb1r2jqs",
@@ -3415,7 +3415,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "3uwb1r2jqs",
      "nextToGoKey": "49dabe7iua",
@@ -3487,7 +3487,7 @@
        }
       }
      ],
-     "type": "play",
+     "type": 0,
      "gameKey": "finished_game",
      "playerKey": "49dabe7iua",
      "nextToGoKey": "2v5oyt5qpi",
@@ -3500,7 +3500,7 @@
     "_Ć": "Turn",
     "_Ð": {
      "score": 0,
-     "type": "challenge-lost",
+     "type": 3,
      "gameKey": "finished_game",
      "playerKey": "49dabe7iua",
      "nextToGoKey": "2v5oyt5qpi",
@@ -3535,7 +3535,7 @@
         }
        }
      ],
-     "type": "game-over",
+     "type": 2,
      "gameKey": "finished_game",
      "playerKey": "2v5oyt5qpi",
      "timestamp": 1656479179654

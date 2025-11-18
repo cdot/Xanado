@@ -9,13 +9,16 @@ import { BrowserPlatform } from "../browser/BrowserPlatform.js";
 window.Platform = BrowserPlatform;
 
 import { Channel } from "../common/Channel.js";
+import { parseURLArguments, makeURL } from "../common/Utils.js";
 import { Game } from "../game/Game.js";
 import { BackendGame } from "../backend/BackendGame.js";
 import { BrowserGame } from "../browser/BrowserGame.js";
 import { UI } from "../browser/UI.js";
+import "../browser/icon_button.js";
 import { GameUIMixin } from "../browser/GameUIMixin.js";
 import { StandaloneUIMixin } from "./StandaloneUIMixin.js";
 import { CBOR } from "../game/CBOR.js";
+import { UIEvents } from "../browser/UIEvents.js";
 
 /**
  * Game that runs solely in the browser (no server).
@@ -59,7 +62,7 @@ class StandaloneGameUI extends StandaloneUIMixin(GameUIMixin(UI)) {
     .then(nextGame => {
       this.backendGame.nextGameKey =
       this.frontendGame.nextGameKey = nextGame.key;
-      this.setAction("action_nextGame", $.i18n("Next game"));
+      this.setAction("action_nextGame", /*i18n*/"btn-next");
       this.enableTurnButton(true);
     })
     .catch(assert.fail);
@@ -69,7 +72,7 @@ class StandaloneGameUI extends StandaloneUIMixin(GameUIMixin(UI)) {
    * @implements browser/GameUIMixin#action_nextGame
    */
   action_nextGame() {
-    this.redirectToGame(this.backendGame.nextGameKey);
+    $(document).trigger(UIEvents.JOIN_GAME, [ this.backendGame.nextGameKey ]);
   }
 
   /**
@@ -133,7 +136,7 @@ class StandaloneGameUI extends StandaloneUIMixin(GameUIMixin(UI)) {
           return game.onLoad(this.db);
         });
 
-      } else if (this.args.uri) {
+      } else if (this.args.b && this.args.d && this.args.e) {
         this.debug("Loading game from URI");
         return BackendGame.unpack(this.args)
         .then(game => {
@@ -166,7 +169,8 @@ class StandaloneGameUI extends StandaloneUIMixin(GameUIMixin(UI)) {
     })
     .then(() => this.createUI(this.frontendGame))
     .then(() => {
-      $("#gameSetupButton")
+      $("#setup-button")
+      .icon_button({ icon: "setup-icon" })
       .on("click", () => {
         import(
           /* webpackChunkName: "GameSetupDialog" */
@@ -174,24 +178,45 @@ class StandaloneGameUI extends StandaloneUIMixin(GameUIMixin(UI)) {
           "../browser/GameSetupDialog.js")
         .then(mod => new mod.GameSetupDialog({
           html: "standalone_GameSetupDialog",
-          title: $.i18n("Game setup"),
+          title: $.i18n("btn-game-setup"),
           ui: this,
           game: this.backendGame,
           onSubmit: (dlg, vals) => {
             for (const key of Object.keys(vals))
               this.backendGame[key] = vals[key];
             this.backendGame.save();
-            this.redirectToGame(this.backendGame.key);
+            $(document).trigger(UIEvents.JOIN_GAME, [ this.backendGame.key ]);
           },
-          error: e => this.alert(e, $.i18n("failed", $.i18n("Game setup")))
+          error: e => this.alert(e, $.i18n("failed", $.i18n("btn-game-setup")))
         }));
       });
-      $("#libraryButton")
+      $("#library-button")
+      .icon_button({ icon: "library-icon" })
       .on("click", () => {
-        const parts = UI.parseURLArguments(window.location.toString());
+        const parts = parseURLArguments(window.location.href);
         parts._URL = parts._URL.replace(
           /standalone_game\./, "standalone_games.");
-        window.location = UI.makeURL(parts);
+        window.location = makeURL(parts);
+      });
+      $("#share-button")
+      .icon_button({ icon: "share-icon" })
+      .on("click", async () => {
+        const parts = parseURLArguments(window.location.href);
+        delete parts.game;
+        const pg = this.backendGame.pack();
+        for (const k in pg)
+          parts[k] = pg[k];
+        const url = makeURL(parts);
+        await this.copyToClipboard(url)
+        .then(() => this.alert(url, $.i18n("txt-clipped")))
+        .catch(() => {
+          $("#alertDialog")
+          .dialog({
+            modal: true,
+            title: $.i18n("hey-share-link-title")
+          })
+          .html(`<a href="${url}">${url}</a>`);
+        });
       });
     })
     .then(() => this.attachUIEventHandlers())

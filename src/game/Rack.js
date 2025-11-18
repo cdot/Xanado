@@ -214,9 +214,12 @@ class Rack extends Surface {
     // super.unpack locks tiles, so we have to reset to unlock them and
     // clear blanks
     this.forEachTiledSquare(s => {
-      s.tile.reset();
+      delete s.tile.isLocked;
+      if (s.tile.isBlank)
+        s.letter = " ";
       return false;
     });
+    return this;
   }
 }
 

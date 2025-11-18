@@ -72,12 +72,12 @@ describe("browser/BrowserRack", () => {
     r.$populate($table);
 
     r.addTile(new Tile({letter:'S'}));
-    r.addTile(new Tile({letter:'Q'}));
+    r.addTile(new Tile({letter:'QW', score:10}));
 
     let $dexp = $("<div></div>");
     $("body").append($dexp);
 
-    let $exp = $('<table><tbody><tr><td class="square-_ ui-droppable" id="base_0"><div class="Tile ui-draggable ui-draggable-handle unlocked-tile"><div class="glyph"><span class="letter">S</span><span class="score">0</span></div></div></td><td class="square-_ ui-droppable" id="base_1"><div class="Tile ui-draggable ui-draggable-handle unlocked-tile"><div class="glyph"><span class="letter">Q</span><span class="score">0</span></div></div></td></tr></tbody></table>');
+    let $exp = $('<table><tbody><tr><td class="square-_ ui-droppable" id="base_0"><div class="Tile ui-draggable ui-draggable-handle unlocked-tile"><div class="glyph"><span class="letter letter-scale-1">S</span><span class="score score-scale-1">0</span></div></div></td><td class="square-_ ui-droppable" id="base_1"><div class="Tile ui-draggable ui-draggable-handle unlocked-tile"><div class="glyph"><span class="letter letter-scale-2">QW</span><span class="score score-scale-2">10</span></div></div></td></tr></tbody></table>');
     $dexp.append($exp);
 
     assert($dact[0].isEqualNode($dexp[0]),

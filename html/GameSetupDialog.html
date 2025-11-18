@@ -2,24 +2,23 @@
 License MIT. See README.md at the root of this distribution for full copyright
 and license information. Author Crawford Currie http://c-dot.co.uk-->
 <div class="dialog-row noturns">
-  <label for="edition" data-i18n-tooltip="tt-edition" data-i18n="Game"></label>
+  <label for="edition" data-i18n-tooltip="tt-edition" data-i18n="lbl-edition"></label>
   <select id="edition" name="edition"></select>
 </div>
 
 <div class="dialog-row">
-  <label for="dictionary" data-i18n-tooltip="tt-dictionary" data-i18n="Dictionary"></label>
+  <label for="dictionary" data-i18n-tooltip="tt-dictionary" data-i18n="lbl-dict"></label>
   <select id="dictionary" name="dictionary">
-    <option value="none" data-i18n="None"></option>
   </select>
 </div>
 
 <div class="dialog-row noturns">
-  <label for="minPlayers" data-i18n-tooltip="tt-min-players" data-i18n="Minimum players"></label>
+  <label for="minPlayers" data-i18n-tooltip="tt-min-players" data-i18n="lbl-minplay"></label>
   <input type="number" id="minPlayers" min="2" step="1" placeholder="2" name="minPlayers"/>
 </div>
 
 <div class="dialog-row noturns">
-  <label for="maxPlayers" data-i18n-tooltip="tt-max-players" data-i18n="Maximum players"></label>
+  <label for="maxPlayers" data-i18n-tooltip="tt-max-players" data-i18n="lbl-maxplay"></label>
   <input type="number" id="maxPlayers" min="2" step="1" placeholder="&infin;" name="maxPlayers"/>
 </div>
 
@@ -27,58 +26,58 @@ and license information. Author Crawford Currie http://c-dot.co.uk-->
   <fieldset>
   <legend data-i18n="Timer"></legend>
   <div class="dialog-row">
-    <label for="timerType" data-i18n-tooltip="tt-turn-timer" data-i18n="Type"></label>
+    <label for="timerType" data-i18n-tooltip="tt-turn-timer" data-i18n="lbl-timeType"></label>
     <select id="timerType" name="timerType">
     </select>
   </div>
   <div class="dialog-row">
-    <label for="timeAllowed" data-i18n-tooltip="tt-max-time" data-i18n="Time allowed"></label>
-    <input type="number" id="timeAllowed" min="1" max="86400" step="1" name="timeAllowed" data-i18n-placeholder="minutes"/>
+    <label for="timeAllowed" data-i18n-tooltip="tt-max-time" data-i18n="lbl-max-time"></label>
+    <input type="number" id="timeAllowed" min="1" max="86400" step="1" name="timeAllowed" data-i18n-placeholder="ph-minutes"/>
   </div>
   <div class="dialog-row">
-    <label for="timePenalty" data-i18n-tooltip="tt-time-penalty" data-i18n="Time penalty"></label>
-    <input type="number" id="timePenalty" step="1" data-i18n-placeholder="points per minute" name="timePenalty"/>
+    <label for="timePenalty" data-i18n-tooltip="tt-time-pen" data-i18n="lbl-time-pen"></label>
+    <input type="number" id="timePenalty" step="1" data-i18n-placeholder="ph-time-pen" name="timePenalty"/>
   </div>
 </div>
 
 <div>
   <fieldset>
-  <legend data-i18n="Challenges"></legend>
+  <legend data-i18n="leg-challenges"></legend>
   <div class="dialog-row">
-    <label for="penalty" data-i18n-tooltip="tt-chall-type" data-i18n="desc-chall-penalty"></label>
+    <label for="penalty" data-i18n-tooltip="tt-chall-type" data-i18n="lbl-chall-type"></label>
     <select id="penalty" name="challengePenalty"></select>
   </div>
   <div class="dialog-row">
-    <label for="penaltyPoints" data-i18n-tooltip="tt-points-lost" data-i18n="Penalty points"></label>
+    <label for="penaltyPoints" data-i18n-tooltip="tt-points-lost" data-i18n="lbl-points-lost"></label>
     <input type="number" id="penaltyPoints" step="1" placeholder="5" name="penaltyPoints"/>
   </div>
 </div>
 
 <div class="dialog-row">
   <fieldset>
-  <legend data-i18n="label-feedback"></legend>
+  <legend data-i18n="txt-feedback"></legend>
   <div class="dialog-row">
-    <label for="predictScore" data-i18n-tooltip="tt-predict" data-i18n="Predict score"></label>
+    <label for="predictScore" data-i18n-tooltip="tt-predict" data-i18n="lbl-predict"></label>
     <input type="checkbox" id="predictScore" name="predictScore"/>
   </div>
   <div class="dialog-row">
-    <label for="wordCheck" data-i18n-tooltip="tt-check-type" data-i18n="Word checking"></label>
+    <label for="wordCheck" data-i18n-tooltip="tt-check-type" data-i18n="lbl-check-type"></label>
     <select id="wordCheck" name="wordCheck"></select>
   </div>
   </fieldset>
 </div>
 
 <div class="dialog-row">
-  <label for="allowTakeBack" data-i18n-tooltip="tt-allow-takeback" data-i18n="label-allow-takeback"></label>
+  <label for="allowTakeBack" data-i18n-tooltip="tt-takeback" data-i18n="lbl-takeback"></label>
   <input type="checkbox" id="allowTakeBack"name="allowTakeBack"/>
 </div>
 
 <div class="dialog-row">
-  <label for="allowUndo" data-i18n-tooltip="tt-allow-undo" data-i18n="label-allow-undo"></label>
+  <label for="allowUndo" data-i18n-tooltip="tt-allow-undo" data-i18n="lbl-undo"></label>
   <input type="checkbox" id="allowUndo"name="allowUndo"/>
 </div>
 
 <div class="dialog_row">
-  <button class="submit" data-i18n="Save" autofocus></button>
+  <button class="submit" data-i18n="btn-save" autofocus></button>
 </div>
 

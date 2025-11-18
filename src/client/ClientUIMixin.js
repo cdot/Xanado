@@ -19,10 +19,12 @@ if (typeof io === "undefined")
 import "jquery";
 import "jquery-ui";
 
+import { parseURLArguments } from "../common/Utils.js";
 import { Game } from "../game/Game.js";
+import { Commands } from "../game/Commands.js";
 import { Turn } from "../game/Turn.js";
 import { Tile } from "../game/Tile.js";
-import { UI } from "../browser/UI.js";
+import { UIEvents } from "../browser/UIEvents.js";
 
 /**
  * Mixin with common code shared between client game and games interfaces
@@ -82,7 +84,7 @@ const ClientUIMixin = superclass => class extends superclass {
    * @memberof CientUIMixin
    */
   automaticPlay() {
-    console.debug("Automaton playing");
+    //console.debug("Automaton playing");
 
     const prob = Math.random();
 
@@ -96,7 +98,7 @@ const ClientUIMixin = superclass => class extends superclass {
         if (nTiles > 0) {
           while (tiles.length > nTiles)
             tiles.shift();
-          this.sendCommand(Game.Command.SWAP, tiles.map(t => new Tile(t)));
+          this.sendCommand(Commands.SWAP, tiles.map(t => new Tile(t)));
           return;
         }
       }
@@ -107,7 +109,7 @@ const ClientUIMixin = superclass => class extends superclass {
       // Can we challenge the last turn?
       let challengeable = this.game.turns[this.game.turns.length - 1];
       if (challengeable.type === Turn.Type.PLAYED) {
-        this.sendCommand(Game.Command.CHALLENGE, {
+        this.sendCommand(Commands.CHALLENGE, {
           challengedKey: challengeable.playerKey
         });
         return;
@@ -117,7 +119,7 @@ const ClientUIMixin = superclass => class extends superclass {
 
     // If not swapped and not challenged, try to pass 1 turn in 10
     if (prob < 0.1) {
-      this.sendCommand(Game.Command.PASS);
+      this.sendCommand(Commands.PASS);
       return;
     }
 
@@ -152,9 +154,9 @@ const ClientUIMixin = superclass => class extends superclass {
       this.promiseDefaults("game")
     ])
     .then(() => {
-      this.args = UI.parseURLArguments(document.URL);
+      this.args = parseURLArguments(document.URL);
       if (this.args.debug) {
-        console.debug("Enable debug");
+        //console.debug("Enable debug");
         this.debug = console.debug;
       }
     })
@@ -181,7 +183,7 @@ const ClientUIMixin = superclass => class extends superclass {
           .then(mod => new mod.LoginDialog({
             // postAction is set in code
             postResult: () => window.location.reload(),
-            error: e => this.alert(e, $.i18n("failed", $.i18n("Sign in")))
+            error: e => this.alert(e, $.i18n("failed", $.i18n("btn-signin")))
           })));
 
       $("#signout-button")
@@ -190,7 +192,7 @@ const ClientUIMixin = superclass => class extends superclass {
         .then(() => {
           if (this.debug) this.debug("Logged out");
         })
-        .catch(e => this.alert(e, $.i18n("failed", $.i18n("Sign out"))))
+        .catch(e => this.alert(e, $.i18n("failed", $.i18n("btn-signout"))))
         .then(() => {
           this.session = undefined;
           this.refresh();
@@ -205,6 +207,22 @@ const ClientUIMixin = superclass => class extends superclass {
       // plays will be automated. See `automaticPlay` for details.
       if (this.args.autoplay)
         $(document).on("MY_TURN", () => this.automaticPlay());
+    });
+  }
+
+  attachUIEventHandlers() {
+    super.attachUIEventHandlers();
+
+    // Custom UI event for joining a game
+    $(document).on(UIEvents.JOIN_GAME, (event, key) => {
+      $.post(`/join/${key}`)
+      .then(url => {
+        if (this.getSetting("one_window"))
+          location.replace(url);
+        else
+          window.open(url, "_blank");
+      })
+      .catch(e => this.alert(e, $.i18n("failed", $.i18n("btn-open-game"))));
     });
   }
 
@@ -225,7 +243,7 @@ const ClientUIMixin = superclass => class extends superclass {
     .on("connect", () => {
       // Note: "connect" is synonymous with "connection"
       // Socket has connected to the server
-      console.debug("b>f connect");
+      //console.debug("b>f connect");
       if ($reconnectDialog) {
         $reconnectDialog.dialog("close");
         $reconnectDialog = null;
@@ -236,16 +254,16 @@ const ClientUIMixin = superclass => class extends superclass {
     .on("disconnect", () => {
       // Socket has disconnected for some reason
       // (server died, maybe?) Back off and try to reconnect.
-      console.debug(`--> disconnect`);
-      const mess = $.i18n("text-disconnected");
-      $reconnectDialog = this.alert(mess, $.i18n("Server disconnected"));
+      //console.debug(`--> disconnect`);
+      const mess = $.i18n("txt-server-disconn");
+      $reconnectDialog = this.alert(mess, $.i18n("err-server-disconn"));
       setTimeout(() => {
         // Try and rejoin after a 3s timeout
         this.readyToListen()
         .catch(e => {
-          console.debug(e);
+          //console.debug(e);
           if (!$reconnectDialog)
-            this.alert(e, $.i18n("Reconnect failed"));
+            this.alert(e, $.i18n("err-reconnect"));
         });
       }, 3000);
     });
@@ -302,8 +320,7 @@ const ClientUIMixin = superclass => class extends superclass {
       $(".not-signed-in").hide();
       $(".signed-in")
       .show()
-      .find("span")
-      .first()
+      .find("#id")
       .text(session.name);
       this.session = session;
       return session;
@@ -314,7 +331,7 @@ const ClientUIMixin = superclass => class extends superclass {
       if (typeof this.observer === "string")
         $(".observer").show().text($.i18n(
           "observer", this.observer));
-      throw Error($.i18n("Not signed in"));
+      throw new Error($.i18n("txt-nosign"));
     });
   }
 
@@ -325,7 +342,7 @@ const ClientUIMixin = superclass => class extends superclass {
     $.post(`/anotherGame/${this.game.key}`)
     .then(nextGameKey => {
       this.game.nextGameKey = nextGameKey;
-      this.setAction("action_nextGame", /*i18n*/"Next game");
+      this.setAction("action_nextGame", /*i18n*/"btn-next");
       this.enableTurnButton(true);
     })
     .catch(console.error);
@@ -335,13 +352,7 @@ const ClientUIMixin = superclass => class extends superclass {
    * @implements browser/GameUIMixin#action_nextGame
    */
   action_nextGame() {
-    const key = this.game.nextGameKey;
-    $.post(`/join/${key}`)
-    .then(() => {
-      const s = location.href;
-      location.replace(s.replace(/game=[^;&]*/, `game=${key}`));
-    })
-    .catch(console.error);
+    $(document).trigger(UIEvents.JOIN_GAME, [ this.game.nextGameKey ]);
   }
 
   /**

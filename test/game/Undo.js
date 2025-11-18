@@ -7,11 +7,11 @@ import { setupPlatform, getTestGame } from "../TestPlatform.js";
 import { stringify } from "../../src/common/Utils.js";
 import { MemoryDatabase } from "../MemoryDatabase.js";
 import { TestSocket } from "../TestSocket.js";
-import { Commands } from "../../src/game/Commands.js";
+import { CommandsMixin } from "../../src/game/CommandsMixin.js";
 import { Undo } from "../../src/game/Undo.js";
 import { CBOR } from "../../src/game/CBOR.js";
 import { Game as _Game } from "../../src/game/Game.js";
-const Game = Undo(Commands(_Game));
+const Game = Undo(CommandsMixin(_Game));
 Game.CLASSES.Game = Game;
 const Tile = Game.CLASSES.Tile;
 const Player = Game.CLASSES.Player;
@@ -79,7 +79,7 @@ describe("game/Undo", () => {
       name: "Human 2", key: "human2", isRobot: false}, Game.CLASSES);
     const frontend = new TestSocket("front end");
     frontend.on(Game.Notify.TURN, (turn) => {
-      assert.equal(turn.type, "swap");
+      assert.equal(turn.type, Turn.Type.SWAPPED);
       frontend.done();
     })
     .on("*", () => {});
@@ -99,17 +99,20 @@ describe("game/Undo", () => {
     .then(() => game.connect(frontend, human1.key))
     .then(() => {
       assert(game instanceof Game);
+      // TODO: decode the packed game
       preswap = CBOR.decode(CBOR.encode(game, Game.CLASSES), Game.CLASSES);
       assert(preswap instanceof Game);
     })
     .then(() => game.swap(human1, [ A, C, E ]))
     .then(() => frontend.wait())
     .then(() => {
+      // TODO: decode the packed game
       const postswap = CBOR.decode(CBOR.encode(game, Game.CLASSES), Game.CLASSES);
       assert.deepEqual(postswap.board, preswap.board);
     })
     .then(() => game.undo(game.popTurn(), true))
     .then(() => {
+      // TODO: decode the packed game
       const postundo = CBOR.decode(CBOR.encode(game, Game.CLASSES), Game.CLASSES);
       assert.deepEqual(postundo.board, preswap.board);
       assertGameEqual(postundo, preswap);
@@ -132,14 +135,14 @@ describe("game/Undo", () => {
     const socket = new TestSocket("front end");
     socket.on(Game.Notify.TURN, (data, event, seqNo) => {
       assert(data instanceof Turn);
-      assert.equal(data.type, "passed");
+      assert.equal(data.type, Turn.Type.PASSED);
       assert.equal(seqNo, 1);
     })
     .on(Game.Notify.CONNECTIONS, () => {})
     .on(Game.Notify.UNDONE, (data, event, seqNo) => {
       assert.equal(seqNo, 2);
       assert(data instanceof Turn);
-      assert.equal(data.type, "passed");
+      assert.equal(data.type, Turn.Type.PASSED);
       socket.done();
     })
     .on("*", (data, event, seqNo) => {
@@ -160,11 +163,13 @@ describe("game/Undo", () => {
       game.whosTurnKey = human1.key;
     })
     .then(() => game.connect(socket, human1.key))
+    // TODO: decode the packed game
     .then(() => prepass = CBOR.decode(CBOR.encode(game, Game.CLASSES), Game.CLASSES))
     .then(() => game.pass(human1, Turn.Type.PASSED))
     .then(() => game.undo(game.popTurn()))
     .then(() => socket.wait())
     .then(() => {
+      // TODO: decode the packed game
       const postundo = CBOR.decode(CBOR.encode(game, Game.CLASSES), Game.CLASSES);
       assertGameEqual(postundo, prepass);
     });
@@ -195,12 +200,12 @@ describe("game/Undo", () => {
     });
     const socket = new TestSocket("unplay");
     socket.on(Game.Notify.TURN, (turn) => {
-      assert.equal(turn.type, "play");
+      assert.equal(turn.type, Turn.Type.PLAYED);
     })
     .on(Game.Notify.UNDONE, (data, event, seqNo) => {
       assert.equal(seqNo, 2);
       assert(data instanceof Turn);
-      assert.equal(data.type, "play");
+      assert.equal(data.type, Turn.Type.PLAYED);
       socket.done();
     })
     .on(Game.Notify.CONNECTIONS, () => {})
@@ -227,6 +232,7 @@ describe("game/Undo", () => {
     .then(() => game.undo(game.popTurn()))
     .then(() => socket.wait())
     .then(() => {
+      // TODO: decode the packed game
       const postundo = CBOR.decode(CBOR.encode(game, Game.CLASSES), Game.CLASSES);
       assertGameEqual(postundo, preplay);
     });
@@ -270,7 +276,7 @@ describe("game/Undo", () => {
     .on(Game.Notify.UNDONE, (data, event, seqNo) => {
       assert.equal(seqNo, 3);
       assert(data instanceof Turn);
-      assert.equal(data.type, "took-back");
+      assert.equal(data.type, Turn.Type.TOOK_BACK);
       socket.done();
     });
     socket.on("*", () => {});
@@ -286,6 +292,7 @@ describe("game/Undo", () => {
       game.addPlayer(human2, true);
     })
     .then(() => game.connect(socket, human1.key))
+    // TODO: decode the packed game
     .then(() => preplay = CBOR.decode(CBOR.encode(game, Game.CLASSES), Game.CLASSES))
     .then(() => game.play(human1, move))
     .then(() => pretakeback = CBOR.decode(CBOR.encode(game, Game.CLASSES), Game.CLASSES))

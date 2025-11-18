@@ -86,20 +86,23 @@ describe("game/Rack", () => {
     return Edition.load("Test")
     .then(edition => {
       let r = new Rack(Game.CLASSES, { id: "base", size: 8 });
-      const t = new Tile({letter: "A", isBlank: true});
+      const t = new Tile({letter: " ", isBlank: true});
       r.addTile(t);
-      t.letter = "A";
       r.addTile(new Tile({letter: "B"}));
       r.addTile(new Tile({letter: "C"}));
       r.addTile(new Tile({letter: "D"}));
 
       const uri = r.pack();
-      assert.equal(uri, "aBCD----");
+      assert.equal(uri, "!BCD----");
 
       r = new Rack(Game.CLASSES, { id: "base", size: 8 });
       r.unpack(uri, edition);
-      assert.equal(r.stringify(), "[[ ],[B],[C],[D]]");
-      assert(r.squares[0][0].tile.isBlank);
+      
+      assert.equal(r.at(0).tile.letter, " ");
+      assert.equal(r.at(0).tile.isBlank, true);
+      assert.equal(r.at(1).tile.letter, "B");
+      assert.equal(r.at(2).tile.letter, "C");
+      assert.equal(r.at(3).tile.letter, "D");
     });
   });
 });

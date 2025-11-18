@@ -9,6 +9,7 @@ import "jquery";
 import "jquery-ui";
 
 import "./i18n.js";
+import "./icon_button.js";
 
 import { stringify } from "../common/Utils.js";
 
@@ -79,7 +80,7 @@ class UI {
     return $("#alertDialog")
     .dialog({
       modal: true,
-      title: title || $.i18n("XANADO problem")
+      title: title || $.i18n("hey-problem")
     })
     .html(`<p class="alert">${message}</p>`);
   }
@@ -145,6 +146,66 @@ class UI {
           });
         });
     });
+  }
+
+  /**
+   * Copies the specified text to the clipboard, using fallback methods
+   * for older browsers.
+   * @param {String} text The text to copy.
+   * @return {Promise} a promise that resolves when the text is copied,
+   * or rejects if the copy fails.
+   */
+  copyToClipboard(text) {
+    // Modern versions of Chromium browsers, Firefox, etc. in
+    // a secure (https) context
+    function navi() {
+      if (navigator.clipboard)
+        return navigator.clipboard.writeText(text)
+      .then(() => "Clipboard");
+      return Promise.reject("navigator.clipboard not available");
+    }
+
+    // Venerable IE
+    function ie() {
+      if (window.clipboardData)
+        return new Promise((resolve, reject) => {
+          if (window.clipboardData.setData("Text", text))
+            resolve("clipboardData");
+          else
+            reject("window.clipboardData.setData failed");
+        });
+      return Promise.reject("window.clipboardData not available");
+    }
+
+    function execCmd() {
+      return new Promise((resolve, reject) => {
+        // execCommand, which is deprecated but is still available
+        // in most browsers
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.top = "-999999px";
+        textArea.style.left = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        let e = undefined;
+        try {
+          if (!document.execCommand("copy"))
+            e = "execCommand failed";
+        } catch (error) {
+          e = error;
+        }
+        document.body.removeChild(textArea);
+        if (e)
+          reject(e);
+        else
+          resolve("execCommand");
+      });
+    }
+    return navi()
+    .catch(() => ie())
+    .catch(() => execCmd());
   }
 
   /* c8 ignore stop */
@@ -236,7 +297,7 @@ class UI {
     .then(locales => {
       const ulang = this.getSetting("language") || "en";
       this.debug("User language", ulang);
-      return $.i18n.init(ulang, Platform.getFilePath("i18n"), this.debug)
+      return $.i18n.init(ulang, Platform.absolutePath("i18n"), this.debug)
       .then(() => locales);
     })
     .then(locales => {
@@ -251,7 +312,6 @@ class UI {
       });
     })
     .then(() => {
-      $("button").button();
       $("[data-i18n-tooltip]")
       .tooltip({
         items: "[data-i18n-tooltip]",
@@ -375,7 +435,8 @@ class UI {
    * class, calling super in the overriding method.
    */
   attachUIEventHandlers() {
-    $("#personaliseButton")
+    $("#personalise-button")
+    .icon_button({ icon: "personalise-icon" })
     .on("click", () => {
       import(
         /* webpackMode: "lazy" */
@@ -390,63 +451,6 @@ class UI {
         error: console.error
       }));
     });
-  }
-
-  /**
-   * Parse the URL to extract parameters. Arguments are returned
-   * as keys in a map. Argument names are not decoded, but values
-   * are. The portion of the URL before `?` is returned in the
-   * argument map using the key `_URL`. Arguments in the URL that
-   * have no value are set to boolean `true`. Repeated arguments are
-   * not supported (the last value will be the one taken).
-   * @return {Object<string,string>} key-value map
-   */
-  static parseURLArguments(url) {
-    const bits = url.split("?");
-    const urlArgs = { _URL: bits.shift() };
-    const sargs = bits.join("?").split(/[;&]/);
-    for (const sarg of sargs) {
-      const kv = sarg.split("=");
-      const key = kv.shift();
-      urlArgs[decodeURIComponent(key)] =
-      (kv.length === 0) ? true : decodeURIComponent(kv.join("="));
-    }
-    return urlArgs;
-  }
-
-  /**
-   * Reassemble a URL that has been parsed into parts by parseURLArguments.
-   * Argument are output sorted alphabetically.
-   * @param {object} args broken down URL in the form created by
-   * parseURLArguments
-   * @return {string} a URL string
-   */
-  static makeURL(parts) {
-    const args = Object.keys(parts)
-          .filter(f => !/^_/.test(f)).sort()
-          .map(k => parts[k] && typeof parts[k] === "boolean" ?
-               k : `${k}=${encodeURIComponent(parts[k])}`);
-    return `${parts._URL}?${args.join(";")}`;
-  }
-
-  /**
-   * Format a time interval in seconds for display in a string e.g
-   * `formatTimeInterval(601)` -> `"10:01"`
-   * Maximum ordinal is days.
-   * @param {number} t time period in seconds
-   */
-  static formatTimeInterval(t) {
-    const neg = (t < 0) ? "-" : "";
-    t = Math.abs(t);
-    const s = `0${t % 60}`.slice(-2);
-    t = Math.floor(t / 60);
-    const m = `0${t % 60}`.slice(-2);
-    t = Math.floor(t / 60);
-    if (t === 0) return `${neg}${m}:${s}`;
-    const h = `0${t % 24}`.slice(-2);
-    t = Math.floor(t / 24);
-    if (t === 0) return `${neg}${h}:${m}:${s}`;
-    return `${neg}${t}:${h}:${m}:${s}`;
   }
 }
 

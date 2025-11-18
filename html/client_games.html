@@ -7,7 +7,7 @@ and license information. Author Crawford Currie http://c-dot.co.uk-->
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta charset="utf-8" />
     <!-- base href=".." This breaks $.tabs(), hard, so don't do it /-->
-    <link rel="icon" href="../images/favicon.ico" type="image/x-icon" />
+    <link rel="icon" href="../images/xanado_favicon.png" type="image/x-icon" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
 
     <title>Create/Join Game</title>
@@ -46,35 +46,35 @@ and license information. Author Crawford Currie http://c-dot.co.uk-->
       <img src="../images/logo.svg" class="xanado-logo" />
       <div id="signinState">
         <span class="not-signed-in">
-          <div data-i18n="text-sign-in"></div>
-          <button id="signin-button" data-i18n="Sign in"></button>
+          <div data-i18n="txt-signin"></div>
+          <button id="signin-button" data-i18n="btn-signin"></button>
         </span>
-        <span class="signed-in">
-          <span id="id"></span>
-          <button id="signout-button" data-i18n="Sign out"></button>
-          <button id="chpw_button" data-i18n="Change password"></button>
-          <span id="personaliseButton" data-i18n-tooltip="tt-personalise">&#9881;</span>
-        </span>
+        <div class="signed-in">
+          <div id="id"></div>
+          <button id="signout-button" data-i18n="btn-signout"></button>
+          <button id="chpw_button" data-i18n="btn-chpw"></button>
+          <button id="personalise-button" data-i18n-tooltip="tt-personalise"></span>
+        </div>
       </div>
 
       <div id="gamesCumulative">
-        <h2 data-i18n="Leader Board"></h2>
+        <h2 data-i18n="h-leader-board"></h2>
         <div id="playerList">
         </div>
       </div>
 
       <div id="gamesKnown">
         <h2 data-i18n="Games"></h2>
-        <label for="showAllGames" data-i18n="Show finished games"></label>
+        <label for="showAllGames" data-i18n="lbl-showall"></label>
         <input type="checkbox" id="showAllGames" />
         <table id="gamesList">
           <thead>
             <tr>
-              <th data-i18n="ID"></th>
-              <th data-i18n="Edition"></th>
-              <th data-i18n="Players"></th>
-              <th data-i18n="Last play"></th>
-              <th data-i18n="State"></th>
+              <th data-i18n="th-key"></th>
+              <th data-i18n="th-edition"></th>
+              <th data-i18n="th-players"></th>
+              <th data-i18n="th-lastplay"></th>
+              <th data-i18n="th-state"></th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -82,8 +82,8 @@ and license information. Author Crawford Currie http://c-dot.co.uk-->
       </div>
 
       <div class="dialog-row">
-        <button id="create-game" data-i18n="label-create-game"></button>
-        <button id="reminders-button" data-i18n="Send turn reminders" data-i18n-tooltip="tt-send-rems"></button>
+        <button id="create-game" data-i18n="btn-create-new-game"></button>
+        <button id="reminders-button" data-i18n="btn-send-reminders" data-i18n-tooltip="tt-sendrems"></button>
       </div>
 
       <div id="alertDialog" class="dialog">
@@ -91,11 +91,11 @@ and license information. Author Crawford Currie http://c-dot.co.uk-->
 
       <div id="observeDialog" class="dialog">
         <div class="dialog-row">
-          <label for="observerName" data-i18n="Your name"></label>
-          <input id="observerName" type="text" data-i18n-tooltip="tt-observer-name">
+          <label for="observerName" data-i18n="lbl-obsname"></label>
+          <input id="observerName" type="text" data-i18n-tooltip="tt-obsname">
         </div>
         <div class="dialog-row">
-          <button type="submit" id="observerClose" data-i18n="Observe game">
+          <button type="submit" id="observerClose" data-i18n="btn-observe">
         </div>
       </div>
     </div>

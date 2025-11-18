@@ -32,33 +32,6 @@ describe("browser/UI", () => {
     $("body").empty();
   });
 
-  it("parseURLArguments", () => {
-    const a = UI.parseURLArguments("http://a.b/c?a=1&b=2;c=3");
-    assert.deepEqual(a, { _URL: "http://a.b/c", a: "1", b: "2", c : "3" });
-
-    const b = UI.parseURLArguments("https://q:9?x&a=&b=c=3;c=?");
-    assert.deepEqual(b, { _URL: "https://q:9", x: true, a: "", b: "c=3", c: "?" });
-
-    const c = UI.parseURLArguments("ftp://q?a=a%20b&b");
-    assert.deepEqual(c, { _URL: "ftp://q", a: "a b", b: true });
-  });
-
-  it("makeURL", () => {
-    const args = { _URL: "x", a: "b", b: true, c: "a b" };
-    assert.deepEqual(UI.parseURLArguments(UI.makeURL(args)), args);
-  });
-
-  it("formatTimeInterval", () => {
-    assert.equal(UI.formatTimeInterval(0), "00:00");
-    assert.equal(UI.formatTimeInterval(1 * 60 + 1), "01:01");
-    assert.equal(UI.formatTimeInterval(10 * 60 + 1), "10:01");
-    assert.equal(UI.formatTimeInterval(60 * 60 + 1), "01:00:01");
-    assert.equal(UI.formatTimeInterval(24 * 60 * 60 + 1), "1:00:00:01");
-    assert.equal(UI.formatTimeInterval(2 * 24 * 60 * 60 + 1), "2:00:00:01");
-    assert.equal(UI.formatTimeInterval(365 * 24 * 60 * 60 + 1), "365:00:00:01");
-    assert.equal(UI.formatTimeInterval(-(60 * 60 + 1)), "-01:00:01");
-  });
-
   it("themes", () => {
     $("head")
     .append(`<link id="xanadoCSS" href="../css/default.css" rel="stylesheet" type="text/css">`)
@@ -106,7 +79,7 @@ describe("browser/UI", () => {
   */
 
   it("initLocale(fr)", () => {
-    $("body").append(`<div id="test" data-i18n="label-pick-player" data-i18n-tooltip="label-placed"></div>`);
+    $("body").append(`<div id="test" data-i18n="lbl-pickplayer" data-i18n-tooltip="lbl-place-snd"></div>`);
     class NUI extends UI {
       getSetting(t) {
         switch (t) {
@@ -119,13 +92,13 @@ describe("browser/UI", () => {
     return ui.initLocale()
     .then(() => {
       assert.equal($.i18n("not a valid string"), "not a valid string");
-      assert.equal($.i18n("h-won", "Nobody"), "Nobody gagne");
-      assert.equal($("#test").text(), $.i18n("label-pick-player"));
+      assert.equal($.i18n("h-won", "Nobody"), "Nobody gagné");
+      assert.equal($("#test").text(), $.i18n("lbl-pickplayer"));
     });
   });
 
   it("initLocale(en)", () => {
-    $("body").append(`<div id="test" data-i18n="label-pick-player" data-i18n-tooltip="label-placed"></div>`);
+    $("body").append(`<div id="test" data-i18n="lbl-pickplayer" data-i18n-tooltip="lbl-place-snd"></div>`);
     class NUI extends UI {
       getSetting(t) {
         switch (t) {
@@ -141,12 +114,12 @@ describe("browser/UI", () => {
     .then(() => {
       assert.equal($.i18n("not a valid string"), "not a valid string");
       assert.equal($.i18n("h-won", "Nobody"), "Nobody won");
-      assert.equal($("#test").text(), $.i18n("label-pick-player"));
+      assert.equal($("#test").text(), $.i18n("lbl-pickplayer"));
 
       const it = $("#test");
       it.tooltip("open");
       assert.equal((it.tooltip("option", "content")).call(it[0]),
-                   $.i18n("label-placed"));
+                   $.i18n("lbl-place-snd"));
     });
   });
 
@@ -179,26 +152,26 @@ describe("browser/UI", () => {
     let $dlg = $("#alertDialog").parent();
     assert.equal($dlg.find(".ui-dialog-title").text(), "Alert");
     assert.equal($dlg.find(".alert").text(), "simple string");
-    assert.equal(caught, "ALERT simple string");
+    assert.equal(caught, "ALERT Alert simple string");
 
     dlg = ui.alert(new Error("Oops!"), "Apocalypse", catcher);
     $dlg = $("#alertDialog").parent();
     assert.equal($dlg.find(".ui-dialog-title").text(), "Apocalypse");
     assert.equal($dlg.find(".alert").text(), "Oops!");
-    assert(/^ALERT Oops!/.test(caught));
+    assert(/^ALERT Apocalypse Oops!/.test(caught), caught);
     assert(/browser\/UI.js:/.test(caught));
 
     dlg = ui.alert([ "h-won", "The winner"], "Podium", catcher);
     $dlg = $("#alertDialog").parent();
     assert.equal($dlg.find(".ui-dialog-title").text(), "Podium");
     assert.equal($dlg.find(".alert").text(), "The winner won");
-    assert.equal(caught, "ALERT The winner won");
+    assert.equal(caught, "ALERT Podium The winner won");
 
     dlg = ui.alert({ won: "The winner" }, "Medal", catcher);
     $dlg = $("#alertDialog").parent();
     assert.equal($dlg.find(".ui-dialog-title").text(), "Medal");
     assert.equal($dlg.find(".alert").text(), `{won:"The winner"}`);
-    assert.equal(caught, `ALERT {won:"The winner"}`);
+    assert.equal(caught, `ALERT Medal {won:"The winner"}`);
   });
 
   it("plays audio", () => {

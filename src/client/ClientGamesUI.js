@@ -37,18 +37,18 @@ class ClientGamesUI extends ClientUIMixin(GamesUIMixin(UI)) {
           /* webpackChunkName: "GameSetupDialog" */
           "../browser/GameSetupDialog.js")
         .then(mod => new mod.GameSetupDialog({
-          title: $.i18n("Create game"),
+          title: $.i18n("btn-create-game"),
           ui: this,
           postAction: "/createGame",
           postResult: () => this.refreshGames(),
-          error: e => this.alert(e, $.i18n("failed", $.i18n("Create game")))
+          error: e => this.alert(e, $.i18n("failed", $.i18n("btn-create-game")))
         })));
 
     $("#reminders-button")
     .on("click", () => {
       $.post("/sendReminder/*")
-      .then(info => this.alert(info.join(", "), $.i18n("label-send-rems")))
-      .catch(e => this.alert(e, $.i18n("failed", $.i18n("tt-send-rems"))));
+      .then(info => this.alert(info.join(", "), $.i18n("btn-send-reminders")))
+      .catch(e => this.alert(e, $.i18n("failed", $.i18n("btn-send-reminders"))));
     });
 
     $("#chpw_button")
@@ -60,7 +60,7 @@ class ClientGamesUI extends ClientUIMixin(GamesUIMixin(UI)) {
         .then(mod => new mod.ChangePasswordDialog({
           postAction: "/change-password",
           postResult: () => this.refresh(),
-          error: e => this.alert(e, $.i18n("failed", $.i18n("Change password")))
+          error: e => this.alert(e, $.i18n("failed", $.i18n("btn-chpw")))
         })));
   }
 
@@ -119,34 +119,18 @@ class ClientGamesUI extends ClientUIMixin(GamesUIMixin(UI)) {
       "../browser/GameSetupDialog.js")
     .then(mod => new mod.GameSetupDialog({
       // use the generic html
-      title: $.i18n("Game setup"),
+      title: $.i18n("btn-game-setup"),
       game: game,
       onSubmit: (dialog, desc) => {
         for (const key of Object.keys(desc))
           game[key] = desc[key];
         $.post("/gameSetup/${game.key}", desc)
-        .catch(e => this.alert(e, $.i18n("failed", $.i18n("Game setup"))));
+        .catch(e => this.alert(e, $.i18n("failed", $.i18n("btn-game-setup"))));
         this.refreshGame(game.key);
       },
       ui: this,
-      error: e => this.alert(e, $.i18n("failed", $.i18n("Game setup")))
+      error: e => this.alert(e, $.i18n("failed", $.i18n("btn-game-setup")))
     }));
-  }
-
-  /**
-   * @implements browser/GamesUIMixin#joinGame
-   */
-  joinGame(game) {
-    $.post(`/join/${game.key}`)
-    .then(url => {
-      if (this.getSetting("one_window"))
-        location.replace(url);
-      else {
-        window.open(url, "_blank");
-        this.refreshGame(game.key);
-      }
-    })
-    .catch(e => this.alert(e, $.i18n("failed", $.i18n("Open game"))));
   }
 
   /**
@@ -162,7 +146,7 @@ class ClientGamesUI extends ClientUIMixin(GamesUIMixin(UI)) {
       ui: this,
       postAction: `/addRobot/${game.key}`,
       postResult: () => this.refreshGame(game.key),
-      error: e => this.alert(e, $.i18n("failed", $.i18n("Add robot")))
+      error: e => this.alert(e, $.i18n("failed", $.i18n("btn-add-robot")))
     }));
   }
 
@@ -180,7 +164,7 @@ class ClientGamesUI extends ClientUIMixin(GamesUIMixin(UI)) {
         $.i18n("sent-invite", names.join(", ")),
         $.i18n("Invitations")
       ),
-      error: e => this.alert(e, $.i18n("failed", $.i18n("Invite players")))
+      error: e => this.alert(e, $.i18n("failed", $.i18n("btn-send-invite")))
     }));
   }
 
@@ -190,7 +174,7 @@ class ClientGamesUI extends ClientUIMixin(GamesUIMixin(UI)) {
   anotherGame(game) {
     $.post(`/anotherGame/${game.key}`)
     .then(() => this.refreshGames())
-    .catch(e => this.alert(e, $.i18n("failed", $.i18n("Another game?"))));
+    .catch(e => this.alert(e, $.i18n("failed", $.i18n("btn-another"))));
   }
 
   /**
@@ -199,14 +183,14 @@ class ClientGamesUI extends ClientUIMixin(GamesUIMixin(UI)) {
   deleteGame(game) {
     $.post(`/deleteGame/${game.key}`)
     .then(() => this.refreshGames())
-    .catch(e => this.alert(e, $.i18n("failed", $.i18n("Delete"))));
+    .catch(e => this.alert(e, $.i18n("failed", $.i18n("btn-delete"))));
   }
 
   /**
    * @implements browser/GamesUIMixin#observe
    */
   observe(game) {
-    const obs = $.i18n("Observe game");
+    const obs = $.i18n("btn-observe");
     const ui = this;
     $("#observeDialog")
     .dialog({
@@ -220,7 +204,7 @@ class ClientGamesUI extends ClientUIMixin(GamesUIMixin(UI)) {
       close: function() {
         const name = encodeURIComponent(
           $(this).find("#observerName").val());
-        console.debug("Observe game", game.key, "as", name);
+        //console.debug("Observe game", game.key, "as", name);
         $.get(`/join/${game.key}?observer=${encodeURI(name)}`)
         .then(url => {
           if (ui.getSetting("one_window"))
@@ -230,7 +214,7 @@ class ClientGamesUI extends ClientUIMixin(GamesUIMixin(UI)) {
             ui.refreshGame(game.key);
           }
         })
-        .catch(e => ui.alert(e, $.i18n("failed", $.i18n("Open game"))));
+        .catch(e => ui.alert(e, $.i18n("failed", $.i18n("btn-observe"))));
       }
     });
   }
@@ -253,15 +237,15 @@ class ClientGamesUI extends ClientUIMixin(GamesUIMixin(UI)) {
         $(document.createElement("button"))
         .addClass("risky")
         .attr("name", `leave${game.key}`)
-        .button({ label: $.i18n("Leave game") })
+        .button({ label: $.i18n("btn-leave-game") })
         .tooltip({
           content: $.i18n("tt-leave")
         })
         .on("click", () => {
-          console.debug(`Leave game ${game.key}`);
+          //console.debug(`Leave game ${game.key}`);
           $.post(`/leave/${game.key}`)
           .then(() => this.refreshGame(game.key))
-          .catch(e => this.alert(e, $.i18n("failed", $.i18n("Leave game"))));
+          .catch(e => this.alert(e, $.i18n("failed", $.i18n("btn-leave-game"))));
         }));
 
       return $tr;
@@ -270,39 +254,40 @@ class ClientGamesUI extends ClientUIMixin(GamesUIMixin(UI)) {
       $box.append(
         $(document.createElement("button"))
         .attr("name", "removeRobot")
-        .button({ label: $.i18n("Remove robot") })
+        .button({ label: $.i18n("btn-remove-robot") })
         .tooltip({
           content: $.i18n("tt-remove-robot")
         })
         .on("click", () => {
-          console.debug(`Remove robot from ${game.key}`);
+          //console.debug(`Remove robot from ${game.key}`);
           $.post(`/removeRobot/${game.key}`)
           .then(() => this.refreshGame(game.key))
-          .catch(e => this.alert(e, $.i18n("failed", $.i18n("Remove robot"))));
+          .catch(e => this.alert(e, $.i18n("failed", $.i18n("btn-remove-robot"))));
         }));
     }
 
-    // Not the signed in player
+    // Don't remind the signed in player
     if (this.getSetting("canEmail")
         && !player.isRobot
         && game.whosTurnKey === player.key) {
       $box.append(
         $(document.createElement("button"))
         .attr("name", "email")
-        .button({ label: $.i18n("Send reminder") })
+        .button({ label: $.i18n("btn-send-reminder") })
         .tooltip({
-          content: $.i18n("tt-send-rem")
+          content: $.i18n("tt-send-reminder")
         })
         .on("click", () => {
-          console.debug("Send reminder");
+          //console.debug("Send reminder");
           $.post(`/sendReminder/${game.key}`)
-          .then(names => $("#alertDialog")
-                .text($.i18n("player-reminded", names.join(", ")))
+          .then(names =>
+                $("#alertDialog")
                 .dialog({
-                  title: $.i18n("player-reminded", player.name),
+                  title: $.i18n("hey-reminded-title", player.name),
                   modal: true
-                }))
-          .catch(e => this.alert(e, $.i18n("failed", $.i18n("Send reminder"))));
+                })
+                .html($.i18n("hey-reminded-body", names.join(", "))))
+          .catch(e => this.alert(e, $.i18n("failed", $.i18n("btn-send-reminder"))));
         }));
     }
 
@@ -320,7 +305,7 @@ class ClientGamesUI extends ClientUIMixin(GamesUIMixin(UI)) {
 
     if (this.session && this.getSetting("canEmail") && simples.length > 0) {
       const games = simples.map(simple =>
-                                Game.fromJsonable(simple, Game.CLASSES));
+                                Game.fromSendable(simple, Game.CLASSES));
       if (games.reduce((em, game) => {
         // game is Game.simple, not a Game object
         // Can't remind a game that hasn't started or has ended.

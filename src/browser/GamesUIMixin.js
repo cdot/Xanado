@@ -7,6 +7,8 @@
 
 import { Game } from "../game/Game.js";
 import { BrowserGame } from "./BrowserGame.js";
+import { UIEvents } from "./UIEvents.js";
+
 const Player = BrowserGame.CLASSES.Player;
 
 /**
@@ -36,15 +38,6 @@ const GamesUIMixin = superclass => class extends superclass {
    */
   gameOptions(game) {
     assert.fail(`GamesUIMixin.gameOptions ${game}`);
-  }
-
-  /**
-   * Used by GameDialog
-   * @instance
-   * @memberof browser/GamesUIMixin
-   */
-  joinGame(game) {
-    assert.fail(`GamesUIMixin.joinGame ${game}`);
   }
 
   /**
@@ -163,16 +156,16 @@ const GamesUIMixin = superclass => class extends superclass {
    */
   $player(game, player, isActive) {
     assert(player instanceof Player, "Not a player");
-    const $tr = player.$tableRow();
+    const $tr = player.$TR();
 
     if (isActive) {
       const info = [];
       if (player.dictionary && player.dictionary !== game.dictionary) {
-        const dic = $.i18n("using-dic", player.dictionary);
+        const dic = $.i18n("txt-using-dic", player.dictionary);
         info.push(dic);
       }
-      if (game.timerType && player.clock) {
-        const left = $.i18n("left-to-play", player.clock);
+      if (game.timerType !== Game.Timer.NONE && player.clock) {
+        const left = $.i18n("txt-left-to-play", player.clock);
         info.push(left);
       }
       if (info.length > 0)
@@ -199,13 +192,13 @@ const GamesUIMixin = superclass => class extends superclass {
       $box.append(
         $(document.createElement("button"))
         .attr("name", `join${game.key}`)
-        .button({ label: $.i18n("Open game") })
+        .button({ label: $.i18n("btn-open-game") })
         .tooltip({
           content: $.i18n("tt-open")
         })
         .on("click", () => {
-          console.debug(`Open game ${game.key}/${this.session.key}`);
-          this.joinGame(game);
+          //console.debug(`Open game ${game.key}/${this.session.key}`);
+          $(document).trigger(UIEvents.JOIN_GAME, [ game.key ]);
         }));
     }
     return $tr;
@@ -218,9 +211,9 @@ const GamesUIMixin = superclass => class extends superclass {
    * @param {Game|object} game a Game or Game.simple
    * @private
    */
-  $gameTableRow(game) {
+  $TR(game) {
     assert(game instanceof Game, "Not a game");
-    return $(game.tableRow(this.constructor.GAME_TABLE_ROW))
+    return $(game.formatGameInfo(this.constructor.GAME_TABLE_ROW))
     .on("click", () => {
       import(
         /* webpackMode: "lazy" */
@@ -245,7 +238,7 @@ const GamesUIMixin = superclass => class extends superclass {
   showGame(game) {
     // Update the games list and dialog headlines as appropriate
     $(`#${game.key}`).replaceWith(
-      game.tableRow(this.constructor.GAME_TABLE_ROW));
+      game.formatGameInfo(this.constructor.GAME_TABLE_ROW));
     // Update the open game dialog if appropriate
     const dlg = $(`#GameDialog[name=${game.key}]`).data("this");
     if (dlg)
@@ -269,12 +262,12 @@ const GamesUIMixin = superclass => class extends superclass {
     $gt.empty();
 
     const games = simples.map(
-      simple => BrowserGame.fromJsonable(simple, BrowserGame.CLASSES))
+      simple => BrowserGame.fromSendable(simple, BrowserGame.CLASSES))
           .sort((a, b) => a.creationTimestamp < b.creationTimestamp ? -1 :
                 a.creationTimestamp > b.creationTimestamp ? 1 : 0);
 
     games.forEach(game => {
-      const $row = this.$gameTableRow(game);
+      const $row = this.$TR(game);
       $gt.append($row);
     });
 
@@ -307,7 +300,7 @@ const GamesUIMixin = superclass => class extends superclass {
     .then(g => {
       return (g instanceof BrowserGame)
       ? g
-      : BrowserGame.fromJsonable(g, BrowserGame.CLASSES);
+      : BrowserGame.fromSendable(g, BrowserGame.CLASSES);
     })
     .then(game => this.showGame(game))
     .catch(e => this.alert(e));
@@ -334,8 +327,7 @@ const GamesUIMixin = superclass => class extends superclass {
         const $gt = $("#playerList");
         $gt.empty();
         data.forEach(player => {
-          const s = $.i18n(
-            "leader-board-row", n++, player.name, player.score,
+          const s = $.i18n("txt-leader", n++, player.name, player.score,
             player.games, player.wins);
           $gt.append(`<div class="player-cumulative">${s}</div>`);
         });

@@ -18,12 +18,12 @@ describe("browser/Dialog", () => {
   beforeEach(() => {
     $("head").empty();
     $("body").html(`<div class="dialog" id="test_dialog">
-<div id="i18n" data-i18n="label-go"></div>
-<input name="1" data-i18n-placeholder="label-pause" value="1">
-<label for="two" data-i18n="label-not-enable"></label>
+<div id="i18n" data-i18n="lbl-turn-snd"></div>
+<input name="1" data-i18n-placeholder="lbl-pause" value="1">
+<label for="two" data-i18n="lbl-not-enable"></label>
 <input id="two" name="2" type="checkbox" />
-<button data-i18n-tooltip="label-warns">
-<select name="3" data-i18n-tooltip="label-feedback">
+<button data-i18n-tooltip="tt-warn-snd">
+<select name="3" data-i18n-tooltip="txt-feedback">
 <option>only</option>
 <select>
 <button id="submit" class="submit"></button>

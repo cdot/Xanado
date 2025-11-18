@@ -1,4 +1,4 @@
-/*Copyright (C) 2019-2022 The Xanado Project https://github.com/cdot/Xanado
+/*Copyright (C) 2019-2024 The Xanado Project https://github.com/cdot/Xanado
   License MIT. See README.md at the root of this distribution for full copyright
   and license information. Author Crawford Currie http://c-dot.co.uk*/
 
@@ -57,7 +57,7 @@ let board;
  * and still report back via the main event loop.
  * @private
  */
-let report;
+let sendMove;
 
 /**
  * Best score found so far when searching for a move.
@@ -70,6 +70,8 @@ let bestScore = 0;
  * we anchor plays on a square with a tile that has an adjacent
  * (horizontal or vertical) non-empty square. This significantly
  * reduces the number of anchors that have to be evaluated.
+ * However it does mean we have to do some #Gymnastics to find
+ * cross words at the start and end of existing words.
  * @param {number} col the square to inspect
  * @param {number} row the square to inspect
  * @return {boolean} true if this square is a valid anchor
@@ -90,7 +92,7 @@ function isAnchor(col, row) {
  * chars and another of valid horizontal chars. The [0] lists give
  * the letters that are valid for forming a vertical cross word,
  * and the [1] lists give the letters valid for creating a
- * horizontal cross word.  The indices are chosen such that the
+ * horizontal cross word. The indices are chosen such that the
  * cells can be indexed using the dcol parameter in the other
  * functions.
  * @param {string[]} available the set of available letters
@@ -204,7 +206,7 @@ function forward(col, row,
   const ecol = col + dcol;
   const erow = row + drow;
 
-  //console.log(`forward '${wordSoFar}' ${col}:${dcol} ${row}:${drow} [${dNode.postLetters.join('')}]`);
+  //console.debug(`forward ${dcol==0?"down":"across"} '${wordSoFar.map(t=>t.letter).join("")}'+[${dNode.isEndOfWord?"_":""}${dNode.postLetters.join('')}] at ${col},${row}`);
 
   // Tail recurse; report words as soon as we find them
   // Are we sitting at the end of a scoring word?
@@ -213,21 +215,39 @@ function forward(col, row,
       && tilesPlayed > 0
       && (ecol == board.cols || erow == board.rows
           || !board.at(ecol, erow).tile)) {
+
     const words = [];
-    const score =
-          board.scorePlay(col, row, dcol, drow,
-                               wordSoFar, words)
+    const score = board.scorePlay(col, row, dcol, drow, wordSoFar, words)
           + edition.calculateBonus(tilesPlayed);
+    const placements = wordSoFar.filter(t => !board.at(t.col, t.row).tile);
 
     if (score > bestScore) {
       bestScore = score;
-      //console.log(drow > 0 ? "vertical" : "horizontal")
-      report(new Move({
-        placements: wordSoFar.filter(
-          t => !board.at(t.col, t.row).tile),
+      //console.debug(drow > 0 ? "vertical" : "horizontal");
+      sendMove(new Move({
+        placements: placements,
         words: words,
         score: score
       }));
+    }
+
+    // #Gymnastics
+    // If we have just extended a word by a single tile
+    // to generate a single new word, we treat that
+    // as a pseudo-anchor and search at right angles.
+    if (placements.length === 1) {
+      const pseudoAnchorTile = placements[0];
+      const roots = dictionary.getSequenceRoots(pseudoAnchorTile.letter);
+      //console.debug(`CROSS ${dcol==0?"across":"up/down"} AT ${pseudoAnchorTile.col},${pseudoAnchorTile.row} with "${pseudoAnchorTile.letter}" and ${roots.length} roots`);
+      for (let anchorNode of roots) {
+        //noisy = makeNoisy && anchorNode.preLetters.join('') === "A";
+        back(
+          pseudoAnchorTile.col, pseudoAnchorTile.row,
+          (dcol === 0 ? 1 : 0), (drow === 0 ? 1 : 0), // right angles,
+          rackTiles, 0,
+          anchorNode, anchorNode,
+          [ pseudoAnchorTile ]);
+      }
     }
   }
 
@@ -271,10 +291,10 @@ function forward(col, row,
     for (let post of dNode.postNodes) {
       if (post.letter === letter) {
         forward(ecol, erow,
-                     dcol, drow,
-                     shrunkRack, tilesPlayed + playedTile,
-                     post,
-                     wordSoFar);
+                dcol, drow,
+                shrunkRack, tilesPlayed + playedTile,
+                post,
+                wordSoFar);
       }
     }
 
@@ -283,9 +303,9 @@ function forward(col, row,
 }
 
 /**
- * Given a position that may be part of a word, and the letters of
- * the word it may be part of, try to back up/left before extending
- * down/right.
+ * Given a position that may be part of a word, and the letters of the
+ * word it may be part of, try to extend back up/left before extending
+ * forward down/right.
  *
  * @param {number} col index of the current position on the board. This
  * is the posiiton of the last character of the word constructed so far.
@@ -313,7 +333,7 @@ function back(col, row,
   let available; // the set of possible candidate letters
   let playedTile = 0;
 
-  //console.log(`back '${wordSoFar}' ${col}:${dcol} ${row}:${drow} [${dNode.preLetters.join('')}]`);
+  //console.debug(`back ${dcol==0?"up":"down"} [${dNode.preLetters.join('')}]+'${wordSoFar.map(t=>t.letter).join("")}' at ${col},${row}`);
 
   // Do we have an adjacent empty cell we can back up into?
   if (ecol >= 0 && erow >= 0) {
@@ -375,15 +395,15 @@ function back(col, row,
   // empty, then we have a valid word start.
   if (dNode.preNodes.length == 0
       && (erow < 0 || ecol < 0 || board.at(ecol, erow).isEmpty())) {
-    //console.log(`back word start ${ecol}:${dcol},${erow}:${drow}`);
+    //console.debug(`back: ${dcol==0?"down":"across"} word starts at ${col},${row}`);
     // try extending down beyond the anchor, with the letters
     // that we have determined comprise a valid rooted sequence.
     forward(col + dcol * (wordSoFar.length - 1),
-                 row + drow * (wordSoFar.length - 1),
-                 dcol, drow,
-                 rackTiles, tilesPlayed,
-                 anchorNode,
-                 wordSoFar);
+            row + drow * (wordSoFar.length - 1),
+            dcol, drow,
+            rackTiles, tilesPlayed,
+            anchorNode,
+            wordSoFar);
   }
 }
 
@@ -396,7 +416,7 @@ function back(col, row,
 function bestOpeningPlay(rackTiles) {
   const ruck = rackTiles.map(l => l.letter ? l.letter : " ").join("");
   const choices = dictionary.findAnagrams(ruck);
-  //console.debug("Choices", choices);
+
   // Random whether it is played across or down
   const drow = Math.round(Math.random());
   const dcol = (drow + 1) % 2;
@@ -443,8 +463,8 @@ function bestOpeningPlay(rackTiles) {
           placements[i].col = dcol == 0 ? board.midcol : pos * dcol;
           placements[i].row = drow == 0 ? board.midrow : pos * drow;
         }
-        //console.log(drow > 0 ? "vertical" : "horizontal")
-        report(new Move({
+        //console.debug(drow > 0 ? "vertical" : "horizontal")
+        sendMove(new Move({
           placements: placements,
           words: [{ word: choice, score: score }],
           score: score
@@ -459,6 +479,11 @@ function bestOpeningPlay(rackTiles) {
 /**
  * Find the best play for the given rack. The results are reported
  * using the listener.
+ *
+ * The algorithm works by finding all squares that have a tile in them
+ * and an adjacent empty square blank that can be extended into to
+ * form a word. These starting squares are termed "anchors".
+ *
  * @param {Tile[]} rack rack of tiles to pick from
  * @private
  */
@@ -471,37 +496,35 @@ function find(rack) {
     return a.letter < b.letter ? -1  : a.score > b.score ? 1 : 0;
   }).reverse();
 
-  report("Finding best play for rack "
-              + rack.map(t => t.stringify()).join(","));
-
-  report(`with dictionary ${dictionary.name}`);
-  report(`in edition ${edition.name}`);
-  report("on\n" + board.stringify());
+  //console.debug(`Finding best play with dictionary ${dictionary.name} in edition ${edition.name}`);
 
   //assert(dictionary instanceof Dictionary, "Setup failure");
   assert(edition instanceof Edition, "Setup failure");
 
-  report("Starting findBestPlay computation for "
-              + rackTiles.map(t => t.stringify()).join(",")
-              + " on " + board.stringify());
+  //console.debug(`Rack ${rackTiles.map(t => t.stringify()).join(",")} on\n${board.stringify()}`);
   bestScore = 0;
 
+  // What letters can be used to form a valid cross
+  // word? The whole alphabet if the rack contains a
+  // blank, the rack otherwise.
+  const available = rackTiles.find(l => l.isBlank)
+        ? edition.alphabet
+        : (rackTiles.filter(t => !t.isBlank)
+           .map(t => t.letter));
+
   // Has at least one anchor been explored? If there are
-  // no anchors, we need to compute an opening play
+  // no anchors, we will need to compute an opening play
   let anchored = false;
+
+  // Scan each anchor. An anchor is any square that has a tile
+  // and has an adjacent blank that can be extended into to form a word
   for (let col = 0; col < board.cols; col++) {
     for (let row = 0; row < board.rows; row++) {
-      // An anchor is any square that has a tile and has an
-      // adjacent blank that can be extended into to form a word
       if (isAnchor(col, row)) {
         if (!anchored) {
-          // What letters can be used to form a valid cross
-          // word? The whole alphabet if the rack contains a
-          // blank, the rack otherwise.
-          const available = rackTiles.find(l => l.isBlank)
-                ? edition.alphabet
-                : (rackTiles.filter(t => !t.isBlank)
-                   .map(t => t.letter));
+          // This is the first anchor found.
+          // Determine which letters can fit in each square and form a valid
+          // horizontal or vertical cross word.
           computeCrossChecks(available);
           anchored = true;
         }
@@ -510,6 +533,7 @@ function find(rack) {
         for (let anchorNode of roots) {
           // Try and back up then forward through
           // the dictionary to find longer sequences
+
           // across
           back(
             col, row,
@@ -549,15 +573,14 @@ function find(rack) {
  * @param {BackendGame} game the Game
  * @param {Tile[]} rack rack in the form of a simple list of Tile
  * @param {function} listener Function that is called with a Move each time
- * a new best play is found, or a string containing a progress or error
- * message.
+ * a new best play is found.
  * @param {string?} dictionary name of (or path to) dictionary to use,
  * defaults to game dictionary
  * @return {Promise} Promise that resolves when all best moves have been
  * identified
  */
 function findBestPlay(game, rack, listener, dict) {
-  report = listener;
+  sendMove = listener;
   board = game.board;
   return Promise.all([
     loadDictionary(dict)
