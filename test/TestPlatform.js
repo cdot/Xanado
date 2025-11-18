@@ -147,7 +147,6 @@ function setup$(url, html) {
       global.DOM = dom;
       global.window = DOM.window;
       global.document = DOM.window.document;
-      global.navigator = { userAgent: "node.js" };
       global.$ = global.jQuery = jquery(window);
       assert($.ajax);
       assert.equal(jQuery.ajax, $.ajax);
