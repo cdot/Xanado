@@ -41,7 +41,7 @@
 		"@rwap/jquery-ui-touch-punch": "^1.0.11",
 		"async-lock": "^1.4.0",
 		"banana-i18n": "^2.3.3",
-		"bcrypt": "^5.1.0",
+		"bcrypt": "^6.0.0",
 		"es-module-shims": "^1.6.3",
 		"express": "^4.18.2",
 		"express-session": "^1.17.3",
