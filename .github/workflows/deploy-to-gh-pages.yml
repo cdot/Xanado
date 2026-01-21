@@ -1,8 +1,8 @@
-# Simple workflow for deploying static content to GitHub Pages
-name: Deploy static content to Pages
+# Deploy to GitHub Pages. This is automatically run on a push to "master". Note that this means that
+# github pages can be ahead of "release".
+name: Deploy the "master" branch to Github Pages
 
 on:
-  # Runs on pushes targeting the default branch
   push:
     branches: ["master"]
 
