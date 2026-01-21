@@ -154,7 +154,7 @@ translations are consistent using `npm run tx`. Then run `npm run build`.
 
 ## Docker
 `build/Dockerfile` is used for building local docker images (assuming you have
-a docker server running).
+a docker server running, and it allows non-root builds).
 ```
 npm run docker
 ```

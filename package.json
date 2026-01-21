@@ -61,6 +61,7 @@
 	},
 	"devDependencies": {
 		"@fast-csv/format": "^4.3.5",
+		"baseline-browser-mapping": "^2.9.16",
 		"c8": "^7.12.0",
 		"chai": "^4.3.7",
 		"chai-http": "^4.3.0",
