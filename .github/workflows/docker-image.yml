@@ -34,6 +34,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
+      - name: Build
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - run: npm install
+      - run: npm run build
+
       # Log in to the Container registry registry using the account
       # and password that will publish the packages. Once published,
       # the packages are scoped to the account defined here.
